@@ -56,6 +56,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> ALLOW_CUSTOM_CHANGE;
     public static final ConfigurationDefinition<Boolean> ALLOW_EXECUTE_COMMAND;
     public static final ConfigurationDefinition<Boolean> ALLOW_EXTERNAL_CHANGELOG_PATHS;
+    public static final ConfigurationDefinition<Boolean> ALLOW_INCLUDE_ALL_CLASSES;
     public static final ConfigurationDefinition<Boolean> ALLOW_PARENT_DIRECTORY_REFERENCES;
     public static final ConfigurationDefinition<Boolean> ALLOW_SQL_PRECONDITION;
     public static final ConfigurationDefinition<String> SEARCH_PATH;
@@ -273,6 +274,23 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                         "includeAll / sqlFile that uses relativeToChangelogFile=true (the path is " +
                         "resolved relative to the parent changelog and cannot escape its directory) " +
                         "(CWE-22).")
+                .setDefaultValue(true)
+                .build();
+
+        ALLOW_INCLUDE_ALL_CLASSES = builder.define("allowIncludeAllClasses", Boolean.class)
+                .setDescription("If false, the includeAll changelog directive's resourceFilter and " +
+                        "resourceComparator attributes are rejected when they reference a class name. " +
+                        "Defaults to true to preserve the documented includeAll feature for the standard " +
+                        "trust model (team-authored, team-reviewed changelogs). Set to false in environments " +
+                        "that execute changelogs from less-trusted sources (multi-tenant SaaS running customer " +
+                        "changelogs, downloaded change-packs, contributor PRs prior to review): both " +
+                        "attributes load an arbitrary JVM class by FQCN via Class.forName(initialize=true), " +
+                        "which fires the class's static <clinit> initializer at load time — before any cast " +
+                        "or marker-interface check could reject the load. Any class on the JVM classpath is " +
+                        "reachable this way (CWE-470). This flag governs the same unsafe-reflection surface " +
+                        "as liquibase.allowCustomChange (which gates the <customChange> and " +
+                        "<customPrecondition> changelog elements); operators wanting to fully lock down " +
+                        "changelog-controlled class loading must set both flags to false.")
                 .setDefaultValue(true)
                 .build();
 

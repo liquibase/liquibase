@@ -1376,4 +1376,144 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         rootChangeLog.changeSets.size() > 0
     }
 
+    // CWE-470 opt-in restricted mode for includeAll's resourceFilter and resourceComparator
+    // class loading. See GlobalConfiguration.ALLOW_INCLUDE_ALL_CLASSES. Sibling-shape to
+    // ALLOW_CUSTOM_CHANGE (which gates <customChange> and <customPrecondition>).
+
+    def "determineResourceComparator returns the standard comparator when allowIncludeAllClasses=true (default) and resourceComparatorDef is null"() {
+        given:
+        def changelog = new DatabaseChangeLog()
+        Comparator<String> comparator = null
+
+        when:
+        Scope.child(["liquibase.allowIncludeAllClasses": "true"] as Map, {
+            comparator = changelog.determineResourceComparator(null)
+        } as Scope.ScopedRunner)
+
+        then:
+        comparator != null
+        // Standard comparator behaviour: alphabetical with the "WEB-INF/classes/" prefix
+        // stripped. getStandardChangeLogComparator() returns a fresh Comparator.comparing
+        // lambda each call, so reference-equality would always fail — pin behaviour instead.
+        comparator.compare("a", "b") < 0
+        comparator.compare("b", "a") > 0
+        comparator.compare("WEB-INF/classes/foo", "foo") == 0
+    }
+
+    def "determineResourceComparator falls back to standard comparator at default flag when resourceComparator class fails to load (preserves pre-fix catch behaviour)"() {
+        given:
+        def changelog = new DatabaseChangeLog()
+        Comparator<String> comparator = null
+
+        when:
+        Scope.child(["liquibase.allowIncludeAllClasses": "true"] as Map, {
+            // Non-existent class. Existing pre-fix catch swallows the ReflectiveOperationException
+            // and falls back to the standard comparator. This spec pins that we do NOT regress
+            // that behaviour when the flag is at its default (true) — only the flag=false case
+            // hard-fails.
+            comparator = changelog.determineResourceComparator("com.example.definitely.not.a.real.Comparator")
+        } as Scope.ScopedRunner)
+
+        then:
+        comparator != null
+        // Standard comparator behaviour: alphabetical with the "WEB-INF/classes/" prefix
+        // stripped. getStandardChangeLogComparator() returns a fresh Comparator.comparing
+        // lambda each call, so reference-equality would always fail — pin behaviour instead.
+        comparator.compare("a", "b") < 0
+        comparator.compare("b", "a") > 0
+        comparator.compare("WEB-INF/classes/foo", "foo") == 0
+    }
+
+    def "determineResourceComparator throws UnexpectedLiquibaseException BEFORE Class.forName when allowIncludeAllClasses=false"() {
+        // The strongest assertion in this section: the gate must fire BEFORE Class.forName,
+        // and the existing ReflectiveOperationException-catches-fall-back-to-standard logic
+        // must NOT swallow the configured-off intent. If the gate fired AFTER Class.forName
+        // (or worse, if the catch had swallowed the configured-off exception), the call
+        // would return the standard comparator and look identical to the default path.
+        given:
+        def changelog = new DatabaseChangeLog()
+        UnexpectedLiquibaseException caught = null
+
+        when:
+        Scope.child(["liquibase.allowIncludeAllClasses": "false"] as Map, {
+            try {
+                // Class name is irrelevant — gate fires regardless of whether the named class
+                // exists. Using an obviously-fake name makes the test independent of any class
+                // present on the test classpath.
+                changelog.determineResourceComparator("com.example.definitely.not.a.real.Comparator")
+            } catch (UnexpectedLiquibaseException e) {
+                caught = e
+            }
+        } as Scope.ScopedRunner)
+
+        then:
+        caught != null
+        // Message names the flag in both directions and identifies what was NOT loaded.
+        // A wrapped exception from a downstream code path would not match this shape.
+        def message = caught.getMessage()
+        message.contains("liquibase.allowIncludeAllClasses=false")
+        message.contains("liquibase.allowIncludeAllClasses=true")
+        message.contains("NOT loaded")
+        message.contains("resourceComparator")
+    }
+
+    def "determineResourceComparator with null resourceComparatorDef returns standard comparator even when allowIncludeAllClasses=false"() {
+        // The gate is gated on the presence of a class name. A null resourceComparator
+        // means there is nothing to gate — the call returns the standard comparator
+        // without any flag check. This spec pins that the gate does NOT over-reach into
+        // the default-comparator path.
+        given:
+        def changelog = new DatabaseChangeLog()
+        Comparator<String> comparator = null
+
+        when:
+        Scope.child(["liquibase.allowIncludeAllClasses": "false"] as Map, {
+            comparator = changelog.determineResourceComparator(null)
+        } as Scope.ScopedRunner)
+
+        then:
+        comparator != null
+        // Standard comparator behaviour: alphabetical with the "WEB-INF/classes/" prefix
+        // stripped. getStandardChangeLogComparator() returns a fresh Comparator.comparing
+        // lambda each call, so reference-equality would always fail — pin behaviour instead.
+        comparator.compare("a", "b") < 0
+        comparator.compare("b", "a") > 0
+        comparator.compare("WEB-INF/classes/foo", "foo") == 0
+    }
+
+    def "handleIncludeAll throws SetupException BEFORE Class.forName when allowIncludeAllClasses=false and resourceFilter is specified"() {
+        // Parser-path test for the inline gate in handleIncludeAll. The previous spec
+        // covers determineResourceComparator (public method) directly; this one exercises
+        // the second Class.forName call site via the standard load() entry point.
+        given:
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml])
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+        rootChangeLog.getChangeLogParameters().set("loginUser", "testUser")
+        Throwable caught = null
+
+        when:
+        Scope.child(["liquibase.allowIncludeAllClasses": "false"] as Map, {
+            try {
+                rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                        .addChildren([includeAll: [path: "com/example",
+                                                   resourceFilter: "com.example.definitely.not.a.real.IncludeAllFilter"]]),
+                        resourceAccessor)
+            } catch (Throwable t) {
+                caught = t
+            }
+        } as Scope.ScopedRunner)
+
+        then:
+        caught != null
+        // Load() wraps SetupException in some upstream exception types depending on the
+        // path; the message-shape match is the load-bearing assertion. If the gate had
+        // NOT fired, the failure would be a ReflectiveOperationException for the
+        // non-existent class — not our configured-off text.
+        def message = (caught.getCause() != null ? caught.getCause().getMessage() : caught.getMessage()) ?: caught.toString()
+        message.contains("liquibase.allowIncludeAllClasses=false")
+        message.contains("resourceFilter")
+        message.contains("NOT loaded")
+    }
+
 }
