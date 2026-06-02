@@ -5,6 +5,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.exception.SetupException;
@@ -14,7 +15,6 @@ import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.FileUtil;
-import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
@@ -108,8 +108,17 @@ public class SQLFileChange extends AbstractSQLChange {
     }
 
     private Resource getResource() throws IOException {
+        boolean relative = Boolean.TRUE.equals(isRelativeToChangelogFile());
+        // CWE-22 defence-in-depth: even if validate() did not run (or its error was somehow
+        // bypassed), reject classpath: / absolute paths here at the actual load site when
+        // the embedder has opted out via liquibase.allowExternalChangelogPaths=false.
+        try {
+            DatabaseChangeLog.requireRelativeChangelogPathOrThrow(path, relative, "sqlFile");
+        } catch (SetupException e) {
+            throw new IOException(e.getMessage(), e);
+        }
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        if (ObjectUtil.defaultIfNull(isRelativeToChangelogFile(), false)) {
+        if (relative) {
             return resourceAccessor.get(getChangeSet().getChangeLog().getPhysicalFilePath()).resolveSibling(path);
         } else {
             return resourceAccessor.getExisting(path);
@@ -125,6 +134,24 @@ public class SQLFileChange extends AbstractSQLChange {
         if (StringUtil.trimToNull(getPath()) == null) {
             validationErrors.addError("'path' is required");
         } else {
+            // CWE-22 validate-time gate: surface the configured-off rejection as a clean
+            // ValidationError BEFORE the existing getResource()-and-check-exists pass, so the
+            // operator sees the security-relevant message directly rather than a generic
+            // "sqlFile not found" warning produced by the IOException catch below. Runtime
+            // defence-in-depth lives in getResource() itself.
+            boolean relative = Boolean.TRUE.equals(isRelativeToChangelogFile());
+            String externalForm = DatabaseChangeLog.detectExternalChangelogPathForm(path);
+            if (externalForm != null && !relative
+                    && !Boolean.TRUE.equals(GlobalConfiguration.ALLOW_EXTERNAL_CHANGELOG_PATHS.getCurrentValue())) {
+                validationErrors.addError("<sqlFile path='" + path + "'> uses " + externalForm +
+                        ", but liquibase.allowExternalChangelogPaths=false. The path was NOT " +
+                        "resolved. Either restructure the changelog to use a relative path under " +
+                        "the configured ResourceAccessor search path, set " +
+                        "relativeToChangelogFile=true on the sqlFile to anchor the path to the " +
+                        "parent changelog file, or set liquibase.allowExternalChangelogPaths=true " +
+                        "to allow this path form again.");
+                return validationErrors;
+            }
             try {
                 Resource resource = getResource();
                 if (!resource.exists()) {

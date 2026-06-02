@@ -1,5 +1,6 @@
 package liquibase.precondition.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -39,12 +40,34 @@ public class SqlPrecondition extends AbstractPrecondition {
 
     @Override
     public ValidationErrors validate(Database database) {
-        return new ValidationErrors();
+        ValidationErrors errors = new ValidationErrors();
+        if (!Boolean.TRUE.equals(GlobalConfiguration.ALLOW_SQL_PRECONDITION.getCurrentValue())) {
+            errors.addError("sqlCheck preconditions are disabled because " +
+                    "liquibase.allowSqlPrecondition=false. Either remove the sqlCheck " +
+                    "precondition from the changelog, or set " +
+                    "liquibase.allowSqlPrecondition=true to enable it.");
+        }
+        return errors;
     }
 
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
             throws PreconditionFailedException, PreconditionErrorException {
+        // Defense-in-depth gate, ahead of the JDBC executor lookup and queryForObject below.
+        // Throws PreconditionErrorException (NOT PreconditionFailedException) deliberately:
+        // PreconditionErrorException bypasses onFail handling (MARK_RAN / CONTINUE / WARN),
+        // so a crafted onFail=MARK_RAN sqlCheck cannot silently swallow the embedder's
+        // configured-off intent — the SQL body must never reach the executor when the flag
+        // is false, regardless of the precondition author's onFail choice (CWE-89).
+        if (!Boolean.TRUE.equals(GlobalConfiguration.ALLOW_SQL_PRECONDITION.getCurrentValue())) {
+            throw new PreconditionErrorException(
+                    new RuntimeException("sqlCheck preconditions are disabled because " +
+                            "liquibase.allowSqlPrecondition=false. The SQL body in this " +
+                            "sqlCheck was NOT executed. Set liquibase.allowSqlPrecondition=true " +
+                            "to enable sqlCheck, or remove the sqlCheck precondition from the " +
+                            "changelog."),
+                    changeLog, this);
+        }
         try {
             Object oResult = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForObject(new RawParameterizedSqlStatement(getSql().replaceFirst(";$","")), String.class);
             if (oResult == null) {
