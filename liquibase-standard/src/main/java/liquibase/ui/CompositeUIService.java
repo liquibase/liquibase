@@ -35,6 +35,11 @@ public class CompositeUIService extends AbstractExtensibleObject implements UISe
     }
 
     @Override
+    public void sendMessage(String message, MessageType type) {
+        outputServices.forEach(service -> service.sendMessage(message, type));
+    }
+
+    @Override
     public void sendErrorMessage(String message) {
         outputServices.forEach(service -> service.sendErrorMessage(message));
     }
