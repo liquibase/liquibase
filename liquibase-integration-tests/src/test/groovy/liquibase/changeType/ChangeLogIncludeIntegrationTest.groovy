@@ -19,7 +19,7 @@ import spock.lang.Specification
 import java.util.logging.Level
 
 @LiquibaseIntegrationTest
-class ChangeLogIncludeTest extends Specification {
+class ChangeLogIncludeIntegrationTest extends Specification {
 
     @Shared
     private DatabaseTestSystem db = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("h2")
