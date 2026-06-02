@@ -36,11 +36,11 @@ class XMLChangeLogSAXParserTest extends Specification {
 </databaseChangeLog>
 """
 
+    // INVALID_XML exercises the XSD-validation path. Intentionally has no DOCTYPE
+    // declaration: under SECURE_PARSING=true (the default), DOCTYPE is rejected by
+    // the parser before XSD validation runs, which would mask the
+    // iDontKnowWhatImDoing assertion below.
     def INVALID_XML = """
-<!DOCTYPE databaseChangeLog [
-        <!ENTITY insecure SYSTEM "file:///invalid.txt">
-        ]>
-
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
@@ -113,8 +113,34 @@ class XMLChangeLogSAXParserTest extends Specification {
         new XMLChangeLogSAXParser().parse("com/example/insecure.xml", new ChangeLogParameters(), resourceAccessor)
 
         then:
+        // Under SECURE_PARSING=true the parser now rejects DOCTYPE declarations outright
+        // (defense in depth on top of the LiquibaseEntityResolver's remote-lookup block).
+        // JAXP wording is stable across recent JDKs but assertion is intentionally
+        // loose against the keywords to survive future parser-version changes.
         def e = thrown(ChangeLogParseException)
-        e.message.contains("Unable to resolve xml entity file:///invalid.txt. liquibase.secureParsing is set to 'true'")
+        e.message.contains("DOCTYPE")
+        e.message.contains("disallow")
+    }
+
+    def "DOCTYPE with path-traversal entity SYSTEM URI is rejected"() {
+        given:
+        def xxePathTraversal = '''<!DOCTYPE x [<!ENTITY xxe SYSTEM "../../../etc/passwd">]>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog">
+  <changeSet id="1" author="x"><sql>&xxe;</sql></changeSet>
+</databaseChangeLog>'''
+        def resourceAccessor = new MockResourceAccessor(["com/example/xxe.xml": xxePathTraversal])
+
+        when:
+        new XMLChangeLogSAXParser().parse("com/example/xxe.xml", new ChangeLogParameters(), resourceAccessor)
+
+        then:
+        // DOCTYPE rejection fires before entity expansion, so the path-traversal
+        // entity URI never reaches the (now-confined) AbstractPathResourceAccessor.
+        // Both defences are exercised: this test for DOCTYPE rejection,
+        // DirectoryResourceAccessorTest for accessor containment.
+        def e = thrown(ChangeLogParseException)
+        e.message.contains("DOCTYPE")
+        e.message.contains("disallow")
     }
 
     def "allows liquibase.secureParsing=false to disable secure parsing"() {

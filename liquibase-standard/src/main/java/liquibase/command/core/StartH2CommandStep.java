@@ -85,6 +85,14 @@ public class StartH2CommandStep extends AbstractCommandStep {
 
         final String username = commandScope.getConfiguredValue(USERNAME_ARG).getValue();
         final String password = commandScope.getConfiguredValue(PASSWORD_ARG).getValue();
+        // CWE-532 (Insertion of Sensitive Information into Log File): never echo the
+        // raw password to stdout — captures into terminal loggers, CI output, and
+        // shoulder-surfing. PASSWORD_ARG is already registered with
+        // ConfigurationValueObfuscator.STANDARD for log/MDC redaction (see line 49);
+        // apply the same obfuscator here so stdout matches the rest of the platform's
+        // redaction surface. The raw `password` value is still used below for the
+        // actual JDBC connection — only the stdout-bound string is obfuscated.
+        final String obfuscatedPassword = ConfigurationValueObfuscator.STANDARD.obfuscate(password);
         final Integer dbPort = commandScope.getConfiguredValue(DB_PORT_ARG).getValue();
         final Integer webPort = commandScope.getConfiguredValue(WEB_PORT_ARG).getValue();
         final Boolean detached = commandScope.getConfiguredValue(DETACHED).getValue();
@@ -99,19 +107,7 @@ public class StartH2CommandStep extends AbstractCommandStep {
                 String devUrl = createWebSession(devConnection, webServer, commandScope.getConfiguredValue(LAUNCH_BROWSER_ARG).getValue());
                 String intUrl = createWebSession(intConnection, webServer, false);
 
-                System.out.println("Connection Information:" + System.lineSeparator() +
-                        "  Dev database: " + System.lineSeparator() +
-                        "    JDBC URL: jdbc:h2:tcp://localhost:" + dbPort + "/mem:dev" + System.lineSeparator() +
-                        "    Username: " + username + System.lineSeparator() +
-                        "    Password: " + password + System.lineSeparator() +
-                        "  Integration database: " + System.lineSeparator() +
-                        "    JDBC URL: jdbc:h2:tcp://localhost:" + dbPort + "/mem:integration" + System.lineSeparator() +
-                        "    Username: " + username + System.lineSeparator() +
-                        "    Password: " + password + System.lineSeparator() +
-                        "" + System.lineSeparator() +
-                        "Opening Database Console in Browser..." + System.lineSeparator() +
-                        "  Dev Web URL: " + devUrl + System.lineSeparator() +
-                        "  Integration Web URL: " + intUrl + System.lineSeparator());
+                System.out.println(buildConnectionInfoMessage(username, obfuscatedPassword, dbPort, devUrl, intUrl));
 
 
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -148,6 +144,42 @@ public class StartH2CommandStep extends AbstractCommandStep {
         commandDefinition.setShortDescription(
                 "Launches H2, an included open source in-memory database. This Java application is shipped with Liquibase, and is useful in the Getting Started experience and for testing out Liquibase commands.");
         commandDefinition.setGroupShortDescription(new String[]{"init"}, "Init commands");
+    }
+
+    /**
+     * Builds the connection-info banner that {@link #run} prints to {@code System.out}
+     * after the embedded H2 instances are up. Extracted as a package-private static
+     * helper so the CWE-532 contract (raw password never appears in stdout) can be
+     * locked in by a unit test without standing up an actual H2 server.
+     * <p>
+     * <b>Contract:</b> the caller MUST pass the password in already-obfuscated form
+     * (e.g. via {@link ConfigurationValueObfuscator#STANDARD}). This helper has no
+     * idea what the raw password is and must not be given it.
+     *
+     * @param username             cleartext H2 username (not sensitive)
+     * @param obfuscatedPassword   the password value after passing through
+     *                             {@link ConfigurationValueObfuscator#STANDARD};
+     *                             typically the literal string {@code "*****"}
+     * @param dbPort               TCP port the H2 server is bound to
+     * @param devUrl               browser URL for the dev H2 web session
+     * @param intUrl               browser URL for the integration H2 web session
+     * @return the multi-line connection-info string
+     */
+    static String buildConnectionInfoMessage(String username, String obfuscatedPassword, Integer dbPort,
+                                             String devUrl, String intUrl) {
+        return "Connection Information:" + System.lineSeparator() +
+                "  Dev database: " + System.lineSeparator() +
+                "    JDBC URL: jdbc:h2:tcp://localhost:" + dbPort + "/mem:dev" + System.lineSeparator() +
+                "    Username: " + username + System.lineSeparator() +
+                "    Password: " + obfuscatedPassword + System.lineSeparator() +
+                "  Integration database: " + System.lineSeparator() +
+                "    JDBC URL: jdbc:h2:tcp://localhost:" + dbPort + "/mem:integration" + System.lineSeparator() +
+                "    Username: " + username + System.lineSeparator() +
+                "    Password: " + obfuscatedPassword + System.lineSeparator() +
+                "" + System.lineSeparator() +
+                "Opening Database Console in Browser..." + System.lineSeparator() +
+                "  Dev Web URL: " + devUrl + System.lineSeparator() +
+                "  Integration Web URL: " + intUrl + System.lineSeparator();
     }
 
     protected static void startTcpServer(Integer dbPort) throws Exception {

@@ -631,12 +631,29 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private void handleIncludeAll(ParsedNode node, ResourceAccessor resourceAccessor, Map<String, Object> nodeScratch)
             throws ParsedNodeException, SetupException {
         String path = node.getChildValue(null, PATH, String.class);
+        boolean relativeToChangelogFile = node.getChildValue(null, RELATIVE_TO_CHANGELOG_FILE, false);
+        // CWE-22 gate: reject classpath: / absolute paths when the embedder has opted out.
+        // <includeAll>'s relativeToChangelogFile defaults to false, so the gate is especially
+        // relevant for this directive.
+        requireRelativeChangelogPathOrThrow(path, relativeToChangelogFile, "includeAll");
         String resourceFilterDef = node.getChildValue(null, FILTER, String.class);
         if (resourceFilterDef == null) {
             resourceFilterDef = node.getChildValue(null, RESOURCE_FILTER, String.class);
         }
         IncludeAllFilter resourceFilter = null;
         if (resourceFilterDef != null) {
+            // CWE-470 gate: reject changelog-controlled FQCN loading when the embedder has
+            // explicitly opted out. The Class.forName(initialize=true) below would fire the
+            // named class's static <clinit> at load time, before the cast to IncludeAllFilter
+            // could reject it — same unsafe-reflection surface as <customChange> and
+            // <customPrecondition>, gated by liquibase.allowCustomChange.
+            if (!Boolean.TRUE.equals(GlobalConfiguration.ALLOW_INCLUDE_ALL_CLASSES.getCurrentValue())) {
+                throw new SetupException("includeAll with a resourceFilter class is disabled " +
+                        "because liquibase.allowIncludeAllClasses=false. The named class was " +
+                        "NOT loaded. Either remove the resourceFilter / filter attribute from " +
+                        "the includeAll directive, or set liquibase.allowIncludeAllClasses=true " +
+                        "to enable changelog-controlled class loading by includeAll.");
+            }
             try {
                 resourceFilter = (IncludeAllFilter) Class.forName(resourceFilterDef, true, Thread.currentThread().getContextClassLoader()).getConstructor().newInstance();
             } catch (ReflectiveOperationException e) {
@@ -654,7 +671,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             ignore = false;
         }
         includeAll(path,
-                node.getChildValue(null, RELATIVE_TO_CHANGELOG_FILE, false), resourceFilter,
+                relativeToChangelogFile, resourceFilter,
                 node.getChildValue(null, ERROR_IF_MISSING_OR_EMPTY, true),
                 resourceComparator,
                 resourceAccessor,
@@ -679,9 +696,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         ContextExpression includeNodeContextFilter = determineContextExpression(node);
         Labels labels = new Labels(node.getChildValue(null, LABELS, String.class));
         Boolean ignore = node.getChildValue(null, IGNORE, Boolean.class);
+        boolean relativeToChangelogFile = node.getChildValue(null, RELATIVE_TO_CHANGELOG_FILE, false);
+        // CWE-22 gate: reject classpath: / absolute paths when the embedder has opted out.
+        // Fires here at the parse-time entry point so the configured-off rejection happens
+        // BEFORE the path reaches the ResourceAccessor and produces a real load attempt.
+        requireRelativeChangelogPathOrThrow(path, relativeToChangelogFile, "include");
         try {
             include(path,
-                    node.getChildValue(null, RELATIVE_TO_CHANGELOG_FILE, false),
+                    relativeToChangelogFile,
                     node.getChildValue(null, ERROR_IF_MISSING, true),
                     resourceAccessor,
                     includeNodeContextFilter,
@@ -727,6 +749,19 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (resourceComparatorDef == null) {
             resourceComparator = getStandardChangeLogComparator();
         } else {
+            // CWE-470 gate: must throw BEFORE the try/catch below so the existing
+            // ReflectiveOperationException-catches-and-falls-back-to-standard logic
+            // cannot silently degrade the configured-off intent into the default
+            // comparator (which would mask the rejection from the operator and look
+            // identical to the success path in logs).
+            if (!Boolean.TRUE.equals(GlobalConfiguration.ALLOW_INCLUDE_ALL_CLASSES.getCurrentValue())) {
+                throw new UnexpectedLiquibaseException("includeAll with a resourceComparator " +
+                        "class is disabled because liquibase.allowIncludeAllClasses=false. " +
+                        "The named class was NOT loaded. Either remove the resourceComparator " +
+                        "attribute from the includeAll directive, or set " +
+                        "liquibase.allowIncludeAllClasses=true to enable changelog-controlled " +
+                        "class loading by includeAll.");
+            }
             try {
                 resourceComparator = (Comparator<String>) Class.forName(resourceComparatorDef, true, Thread.currentThread().getContextClassLoader()).getConstructor().newInstance();
             } catch (ReflectiveOperationException e) {
@@ -1298,6 +1333,72 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     protected Comparator<String> getStandardChangeLogComparator() {
         return Comparator.comparing(o -> o.replace("WEB-INF/classes/", ""));
+    }
+
+    /**
+     * Defence-in-depth gate for {@code <include>}, {@code <includeAll>}, and {@code <sqlFile>}
+     * path resolution when {@link GlobalConfiguration#ALLOW_EXTERNAL_CHANGELOG_PATHS} has been
+     * set to {@code false}. Rejects two path forms that escape the configured ResourceAccessor
+     * search-path scope:
+     * <ul>
+     *   <li>The {@code classpath:} URI prefix — reaches JAR resources or other classpath
+     *       locations outside the search path.</li>
+     *   <li>Absolute filesystem paths (Unix {@code /...}, UNC {@code \\...}, Windows drive-letter
+     *       {@code C:...}) — reach arbitrary filesystem locations.</li>
+     * </ul>
+     * Bypassed when {@code relativeToChangelogFile=true} because the path is then resolved
+     * relative to the parent changelog file and cannot escape its directory. Bypassed when the
+     * flag is {@code true} (the default — preserves Spring Boot {@code classpath:db/changelog/...}
+     * patterns and other documented usage). See CWE-22.
+     *
+     * @throws SetupException with a message that names the flag in both directions and the
+     *         specific pattern detected, so the operator can either remove the offending prefix,
+     *         set {@code relativeToChangelogFile=true}, or re-enable external paths.
+     */
+    public static void requireRelativeChangelogPathOrThrow(String path, boolean relativeToChangelogFile, String elementName) throws SetupException {
+        if (path == null) {
+            return; // nothing to gate
+        }
+        if (Boolean.TRUE.equals(GlobalConfiguration.ALLOW_EXTERNAL_CHANGELOG_PATHS.getCurrentValue())) {
+            return; // gate disabled (default)
+        }
+        if (relativeToChangelogFile) {
+            return; // anchored to parent changelog — safe
+        }
+        String pattern = detectExternalChangelogPathForm(path);
+        if (pattern != null) {
+            throw new SetupException("<" + elementName + " path='" + path + "'> uses " + pattern +
+                    ", but liquibase.allowExternalChangelogPaths=false. The path was NOT resolved. " +
+                    "Either restructure the changelog to use a relative path under the configured " +
+                    "ResourceAccessor search path, set relativeToChangelogFile=true on the " +
+                    elementName + " to anchor the path to the parent changelog file, or set " +
+                    "liquibase.allowExternalChangelogPaths=true to allow this path form again.");
+        }
+    }
+
+    /**
+     * Returns a human-readable description of the external-path form detected in {@code path},
+     * or {@code null} if the path does not match any external pattern that
+     * {@link #requireRelativeChangelogPathOrThrow(String, boolean, String)} would reject. Public
+     * so callers (e.g. SQLFileChange.validate) can build context-appropriate error messages
+     * without re-implementing the detection.
+     */
+    public static String detectExternalChangelogPathForm(String path) {
+        if (path == null) {
+            return null;
+        }
+        if (path.startsWith(CLASSPATH_PROTOCOL)) {
+            return "the 'classpath:' URI prefix";
+        }
+        if (path.startsWith("/") || path.startsWith("\\\\")) {
+            return "an absolute filesystem path";
+        }
+        if (path.length() >= 2
+                && ((path.charAt(0) >= 'A' && path.charAt(0) <= 'Z') || (path.charAt(0) >= 'a' && path.charAt(0) <= 'z'))
+                && path.charAt(1) == ':') {
+            return "a Windows-style absolute path (drive letter)";
+        }
+        return null;
     }
 
     public static String normalizePath(String filePath) {

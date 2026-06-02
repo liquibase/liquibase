@@ -1,0 +1,9 @@
+FROM liquibase/liquibase:alpine
+
+# Install PSQL
+USER root
+
+RUN apk --no-cache add postgresql-client
+
+# Return to liquibase user space
+USER liquibase
