@@ -205,4 +205,26 @@ public class ContextChangeSetFilterTest {
 
         assertEquals(1, changeSet.getSqlVisitors().size());
     }
+
+    @Test
+    public void nocontextsPseudoContext() {
+        ContextChangeSetFilter empty = new ContextChangeSetFilter(new Contexts());
+        ContextChangeSetFilter withMyContext = new ContextChangeSetFilter(new Contexts("mycontext"));
+
+        // Empty runtime + `!nocontexts AND mycontext` -> author opted into strict matching, so the
+        // changeset must be skipped instead of matching by the legacy "empty matches everything" rule.
+        assertFalse(empty.accepts(new ChangeSet(null, null, false, false, null, "!nocontexts AND mycontext", null, null)).isAccepted());
+
+        // Empty runtime + `nocontexts OR fallback` -> nocontexts evaluates to true, applies.
+        assertTrue(empty.accepts(new ChangeSet(null, null, false, false, null, "nocontexts OR fallback", null, null)).isAccepted());
+
+        // Empty runtime + bare `nocontexts` -> applies.
+        assertTrue(empty.accepts(new ChangeSet(null, null, false, false, null, "nocontexts", null, null)).isAccepted());
+
+        // Runtime contexts provided + `!nocontexts AND mycontext` -> applies when mycontext is active.
+        assertTrue(withMyContext.accepts(new ChangeSet(null, null, false, false, null, "!nocontexts AND mycontext", null, null)).isAccepted());
+
+        // Legacy behaviour preserved: empty runtime + ordinary context still applies.
+        assertTrue(empty.accepts(new ChangeSet(null, null, false, false, null, "mycontext", null, null)).isAccepted());
+    }
 }
