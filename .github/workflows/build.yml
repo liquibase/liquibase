@@ -67,7 +67,7 @@ jobs:
           echo "Original Branch Name thisBranchName:" $branch_name
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59 # v6.1.3
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -82,7 +82,7 @@ jobs:
 
       - name: Get GitHub App token
         id: get-token
-        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
@@ -112,7 +112,7 @@ jobs:
           path: ~/.install4j8/**
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59 # v6.1.3
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -168,7 +168,7 @@ jobs:
           ## save install4j code signing keys
           mkdir -p liquibase-dist/target/keys
         
-          ./mvnw -B -pl liquibase-dist source:jar clean package failsafe:integration-test failsafe:verify \
+          ./mvnw -B -pl liquibase-dist,liquibase-maven-plugin,liquibase-extension-testing -am source:jar clean package failsafe:integration-test failsafe:verify \
           "-Dbuild.repository.owner=liquibase" \
           "-Dbuild.repository.name=liquibase" \
           "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" \
@@ -192,19 +192,19 @@ jobs:
 
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip artifacts
-          cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
+          cp liquibase-core/target/liquibase-core-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
           #cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/internal/lib/liquibase-core.jar artifacts/liquibase-core-0-SNAPSHOT.jar
 
-          cp liquibase-core/target/liquibase-core-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
-          cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
+          cp liquibase-core/target/liquibase-core-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
+          cp target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
 
           ##create installer - disabled here but run as nightly job and as part of release workflow
           #cp liquibase-dist/target/liquibase-*-installer-* artifacts
 
           for i in 'liquibase-maven-plugin' 'liquibase-cli'; do
-            cp $i/target/$i-0-SNAPSHOT.jar artifacts
-            cp $i/target/$i-0-SNAPSHOT-sources.jar artifacts
-            cp $i/target/$i-0-SNAPSHOT-javadoc.jar artifacts
+            cp $i/target/$i-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.jar artifacts/$i-0-SNAPSHOT.jar
+            cp $i/target/$i-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-sources.jar artifacts/$i-0-SNAPSHOT-sources.jar
+            cp $i/target/$i-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-javadoc.jar artifacts/$i-0-SNAPSHOT-javadoc.jar
           done
 
           .github/util/sign-artifacts.sh artifacts
@@ -213,10 +213,10 @@ jobs:
           mkdir artifacts-named
 
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.tar.gz
-          cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-deps.jar
+          cp liquibase-extension-testing/target/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-deps.jar
 
           for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-extension-testing'; do
-            cp $i/target/$i-0-SNAPSHOT.jar artifacts-named/$i-${{ needs.setup.outputs.thisBranchName }}.jar
+            cp $i/target/$i-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.jar artifacts-named/$i-${{ needs.setup.outputs.thisBranchName }}.jar
           done
 
       - name: Archive Packages

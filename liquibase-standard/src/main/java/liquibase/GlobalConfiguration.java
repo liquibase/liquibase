@@ -55,7 +55,10 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> SECURE_PARSING;
     public static final ConfigurationDefinition<Boolean> ALLOW_CUSTOM_CHANGE;
     public static final ConfigurationDefinition<Boolean> ALLOW_EXECUTE_COMMAND;
+    public static final ConfigurationDefinition<Boolean> ALLOW_EXTERNAL_CHANGELOG_PATHS;
+    public static final ConfigurationDefinition<Boolean> ALLOW_INCLUDE_ALL_CLASSES;
     public static final ConfigurationDefinition<Boolean> ALLOW_PARENT_DIRECTORY_REFERENCES;
+    public static final ConfigurationDefinition<Boolean> ALLOW_SQL_PRECONDITION;
     public static final ConfigurationDefinition<String> SEARCH_PATH;
 
     public static final ConfigurationDefinition<UIServiceEnum> UI_SERVICE;
@@ -228,13 +231,14 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         ALLOW_CUSTOM_CHANGE = builder.define("allowCustomChange", Boolean.class)
-                .setDescription("If false, the customChange changelog change is rejected before its named " +
-                        "class is loaded. Defaults to true to preserve the documented customChange feature " +
-                        "for the standard trust model (team-authored, team-reviewed changelogs). Set to " +
-                        "false in environments that execute changelogs from less-trusted sources " +
-                        "(multi-tenant SaaS running customer changelogs, downloaded change-packs, " +
-                        "contributor PRs prior to review): customChange loads an arbitrary JVM class by " +
-                        "FQCN via Class.forName(initialize=true), which fires the class's static <clinit> " +
+                .setDescription("If false, the customChange and customPrecondition changelog elements are " +
+                        "rejected before the named class is loaded. Defaults to true to preserve the " +
+                        "documented custom-Java features for the standard trust model (team-authored, " +
+                        "team-reviewed changelogs). Set to false in environments that execute changelogs " +
+                        "from less-trusted sources (multi-tenant SaaS running customer changelogs, " +
+                        "downloaded change-packs, contributor PRs prior to review): both customChange " +
+                        "and customPrecondition load an arbitrary JVM class by FQCN via " +
+                        "Class.forName(initialize=true), which fires the class's static <clinit> " +
                         "initializer at load time — before any cast or marker-interface check could " +
                         "reject the load. Any class on the JVM classpath is reachable this way (CWE-470).")
                 .setDefaultValue(true)
@@ -248,6 +252,45 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                         "that execute changelogs from less-trusted sources (multi-tenant SaaS running customer " +
                         "changelogs, downloaded change-packs, contributor PRs prior to review) where arbitrary " +
                         "OS-shell execution via changelog is not an acceptable risk (CWE-78).")
+                .setDefaultValue(true)
+                .build();
+
+        ALLOW_EXTERNAL_CHANGELOG_PATHS = builder.define("allowExternalChangelogPaths", Boolean.class)
+                .setDescription("If false, the include / includeAll / sqlFile changelog directives reject " +
+                        "paths that point outside the configured ResourceAccessor search-path scope — " +
+                        "specifically: the 'classpath:' URI prefix, and absolute filesystem paths (leading " +
+                        "'/', leading '\\\\' UNC, or Windows drive-letter '<L>:'). Defaults to true to " +
+                        "preserve the documented behaviour for the standard trust model, including " +
+                        "common deployments like Spring Boot apps that load 'classpath:db/changelog/...' " +
+                        "from JAR resources. Set to false in environments that execute changelogs from " +
+                        "less-trusted sources (multi-tenant SaaS, downloaded change-packs, contributor " +
+                        "PRs prior to review): the audit observed that an attacker who can write a file " +
+                        "anywhere on the ResourceAccessor search path (which by default in the CLI " +
+                        "includes the current working directory) can then name it in a changelog " +
+                        "include / sqlFile and get it parsed and executed. Restricting changelog paths " +
+                        "to relative-only-within-search-path (this flag set to false) is a defence-" +
+                        "in-depth mitigation; tightly-controlled search-path configuration alone also " +
+                        "mitigates the issue. The flag's enforcement is bypassed for any include / " +
+                        "includeAll / sqlFile that uses relativeToChangelogFile=true (the path is " +
+                        "resolved relative to the parent changelog and cannot escape its directory) " +
+                        "(CWE-22).")
+                .setDefaultValue(true)
+                .build();
+
+        ALLOW_INCLUDE_ALL_CLASSES = builder.define("allowIncludeAllClasses", Boolean.class)
+                .setDescription("If false, the includeAll changelog directive's resourceFilter and " +
+                        "resourceComparator attributes are rejected when they reference a class name. " +
+                        "Defaults to true to preserve the documented includeAll feature for the standard " +
+                        "trust model (team-authored, team-reviewed changelogs). Set to false in environments " +
+                        "that execute changelogs from less-trusted sources (multi-tenant SaaS running customer " +
+                        "changelogs, downloaded change-packs, contributor PRs prior to review): both " +
+                        "attributes load an arbitrary JVM class by FQCN via Class.forName(initialize=true), " +
+                        "which fires the class's static <clinit> initializer at load time — before any cast " +
+                        "or marker-interface check could reject the load. Any class on the JVM classpath is " +
+                        "reachable this way (CWE-470). This flag governs the same unsafe-reflection surface " +
+                        "as liquibase.allowCustomChange (which gates the <customChange> and " +
+                        "<customPrecondition> changelog elements); operators wanting to fully lock down " +
+                        "changelog-controlled class loading must set both flags to false.")
                 .setDefaultValue(true)
                 .build();
 
@@ -265,6 +308,24 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                         "window; a future major release will flip the default to false, at which point " +
                         "callers depending on parent-directory traversal must either restructure their " +
                         "layout or explicitly opt in via this flag (CWE-22).")
+                .setDefaultValue(true)
+                .build();
+
+        ALLOW_SQL_PRECONDITION = builder.define("allowSqlPrecondition", Boolean.class)
+                .setDescription("If false, the sqlCheck changelog precondition is rejected at validation " +
+                        "and check time without executing its SQL body. Defaults to true to preserve the " +
+                        "documented sqlCheck feature for the standard trust model (team-authored, team-" +
+                        "reviewed changelogs). Set to false in environments that execute changelogs from " +
+                        "less-trusted sources (multi-tenant SaaS running customer changelogs, downloaded " +
+                        "change-packs, contributor PRs prior to review): sqlCheck runs the literal SQL body " +
+                        "from the changelog against the live JDBC connection during precondition " +
+                        "evaluation, before the change body is reached. On drivers permitting multi-" +
+                        "statement execution (e.g. MySQL/MariaDB with allowMultiQueries=true), additional " +
+                        "DDL or DML can be batched into the sqlCheck body and run regardless of the " +
+                        "expectedResult comparison; the SQL also executes through a less-reviewed code " +
+                        "path that bypasses the change-execution audit trail, and an onFail=MARK_RAN " +
+                        "precondition can hide the change body from being applied while the precondition " +
+                        "SQL has already run (CWE-89).")
                 .setDefaultValue(true)
                 .build();
 

@@ -22,17 +22,18 @@ Command-specific help: "liquibase <command-name> --help"
 
 Global Options
       --allow-custom-change=PARAM
-                             If false, the customChange changelog change is
-                               rejected before its named class is loaded.
-                               Defaults to true to preserve the documented
-                               customChange feature for the standard trust
-                               model (team-authored, team-reviewed changelogs).
-                               Set to false in environments that execute
-                               changelogs from less-trusted sources
-                               (multi-tenant SaaS running customer changelogs,
-                               downloaded change-packs, contributor PRs prior
-                               to review): customChange loads an arbitrary JVM
-                               class by FQCN via Class.forName
+                             If false, the customChange and customPrecondition
+                               changelog elements are rejected before the named
+                               class is loaded. Defaults to true to preserve
+                               the documented custom-Java features for the
+                               standard trust model (team-authored,
+                               team-reviewed changelogs). Set to false in
+                               environments that execute changelogs from
+                               less-trusted sources (multi-tenant SaaS running
+                               customer changelogs, downloaded change-packs,
+                               contributor PRs prior to review): both
+                               customChange and customPrecondition load an
+                               arbitrary JVM class by FQCN via Class.forName
                                (initialize=true), which fires the class's
                                static <clinit> initializer at load time —
                                before any cast or marker-interface check could
@@ -71,6 +72,72 @@ Global Options
                              (defaults file: 'liquibase.allowExecuteCommand',
                                environment variable:
                                'LIQUIBASE_ALLOW_EXECUTE_COMMAND')
+
+      --allow-external-changelog-paths=PARAM
+                             If false, the include / includeAll / sqlFile
+                               changelog directives reject paths that point
+                               outside the configured ResourceAccessor
+                               search-path scope — specifically: the
+                               'classpath:' URI prefix, and absolute filesystem
+                               paths (leading '/', leading '\\\\' UNC, or Windows
+                               drive-letter '<L>:'). Defaults to true to
+                               preserve the documented behaviour for the
+                               standard trust model, including common
+                               deployments like Spring Boot apps that load
+                               'classpath:db/changelog/...' from JAR resources.
+                               Set to false in environments that execute
+                               changelogs from less-trusted sources
+                               (multi-tenant SaaS, downloaded change-packs,
+                               contributor PRs prior to review): the audit
+                               observed that an attacker who can write a file
+                               anywhere on the ResourceAccessor search path
+                               (which by default in the CLI includes the
+                               current working directory) can then name it in a
+                               changelog include / sqlFile and get it parsed
+                               and executed. Restricting changelog paths to
+                               relative-only-within-search-path (this flag set
+                               to false) is a defence-in-depth mitigation;
+                               tightly-controlled search-path configuration
+                               alone also mitigates the issue. The flag's
+                               enforcement is bypassed for any include /
+                               includeAll / sqlFile that uses
+                               relativeToChangelogFile=true (the path is
+                               resolved relative to the parent changelog and
+                               cannot escape its directory) (CWE-22).
+                             DEFAULT: true
+                             (defaults file: 'liquibase.
+                               allowExternalChangelogPaths', environment
+                               variable:
+                               'LIQUIBASE_ALLOW_EXTERNAL_CHANGELOG_PATHS')
+
+      --allow-include-all-classes=PARAM
+                             If false, the includeAll changelog directive's
+                               resourceFilter and resourceComparator attributes
+                               are rejected when they reference a class name.
+                               Defaults to true to preserve the documented
+                               includeAll feature for the standard trust model
+                               (team-authored, team-reviewed changelogs). Set
+                               to false in environments that execute changelogs
+                               from less-trusted sources (multi-tenant SaaS
+                               running customer changelogs, downloaded
+                               change-packs, contributor PRs prior to review):
+                               both attributes load an arbitrary JVM class by
+                               FQCN via Class.forName(initialize=true), which
+                               fires the class's static <clinit> initializer at
+                               load time — before any cast or marker-interface
+                               check could reject the load. Any class on the
+                               JVM classpath is reachable this way (CWE-470).
+                               This flag governs the same unsafe-reflection
+                               surface as liquibase.allowCustomChange (which
+                               gates the <customChange> and
+                               <customPrecondition> changelog elements);
+                               operators wanting to fully lock down
+                               changelog-controlled class loading must set both
+                               flags to false.
+                             DEFAULT: true
+                             (defaults file: 'liquibase.
+                               allowIncludeAllClasses', environment variable:
+                               'LIQUIBASE_ALLOW_INCLUDE_ALL_CLASSES')
 
       --allow-inherit-logical-file-path=PARAM
                              If true, included changelogs without an explicit
@@ -119,6 +186,35 @@ Global Options
                                allowParentDirectoryReferences', environment
                                variable:
                                'LIQUIBASE_ALLOW_PARENT_DIRECTORY_REFERENCES')
+
+      --allow-sql-precondition=PARAM
+                             If false, the sqlCheck changelog precondition is
+                               rejected at validation and check time without
+                               executing its SQL body. Defaults to true to
+                               preserve the documented sqlCheck feature for the
+                               standard trust model (team-authored,
+                               team-reviewed changelogs). Set to false in
+                               environments that execute changelogs from
+                               less-trusted sources (multi-tenant SaaS running
+                               customer changelogs, downloaded change-packs,
+                               contributor PRs prior to review): sqlCheck runs
+                               the literal SQL body from the changelog against
+                               the live JDBC connection during precondition
+                               evaluation, before the change body is reached.
+                               On drivers permitting multi-statement execution
+                               (e.g. MySQL/MariaDB with
+                               allowMultiQueries=true), additional DDL or DML
+                               can be batched into the sqlCheck body and run
+                               regardless of the expectedResult comparison; the
+                               SQL also executes through a less-reviewed code
+                               path that bypasses the change-execution audit
+                               trail, and an onFail=MARK_RAN precondition can
+                               hide the change body from being applied while
+                               the precondition SQL has already run (CWE-89).
+                             DEFAULT: true
+                             (defaults file: 'liquibase.allowSqlPrecondition',
+                               environment variable:
+                               'LIQUIBASE_ALLOW_SQL_PRECONDITION')
 
       --always-drop-instead-of-replace=PARAM
                              If true, drop and recreate a view instead of
