@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019e9777-6387-7a02-8bd1-6e927f3694e0",
-  "CreatedAt": "2026-06-05T11:07:24.423657531Z",
+  "ReportID": "019ea706-3707-744f-8146-83ee3fc6b19c",
+  "CreatedAt": "2026-06-08T11:37:42.919283585Z",
   "ArtifactID": "sha256:f3f0403909cca946fa9a23a46a863476a54e13bed63e1ba670bc999bb398297e",
   "ArtifactName": "liquibase/liquibase:5.0.0",
   "ArtifactType": "container_image",
@@ -13733,6 +13733,56 @@
           ],
           "PublishedDate": "2026-05-07T20:16:44.54Z",
           "LastModifiedDate": "2026-05-13T16:59:17.563Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-42504",
+          "VendorIDs": [
+            "GO-2026-5038"
+          ],
+          "PkgID": "stdlib@v1.25.1",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.25.1",
+            "UID": "161816bbdca1bbb8"
+          },
+          "InstalledVersion": "v1.25.1",
+          "FixedVersion": "1.25.11, 1.26.4",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:adaabdfd594d7695016aa82b9c8c1d02071c63d6cf76cd7a2214a00c80cc6166",
+            "DiffID": "sha256:2dd8fc5acd11e7d92d1a7a52bdcae5b33132295e3d85f074a5d38ae771933147"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-42504",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:67b6c404248f91b3ed738f7d9e34e21245642dd6249ffde90a311d02ca9786c7",
+          "Title": "Decoding a maliciously-crafted MIME header containing many invalid enc ...",
+          "Description": "Decoding a maliciously-crafted MIME header containing many invalid encoded-words can consume excessive CPU.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-407"
+          ],
+          "VendorSeverity": {
+            "bitnami": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://go.dev/cl/774481",
+            "https://go.dev/issue/79217",
+            "https://groups.google.com/g/golang-announce/c/tKs3rmcBcKw",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-42504",
+            "https://pkg.go.dev/vuln/GO-2026-5038"
+          ],
+          "PublishedDate": "2026-06-02T23:16:37.927Z",
+          "LastModifiedDate": "2026-06-04T16:15:50.143Z"
         }
       ]
     }
