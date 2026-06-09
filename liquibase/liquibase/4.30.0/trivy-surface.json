@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019ea706-0787-7b54-a418-9caba097b7ca",
-  "CreatedAt": "2026-06-08T11:37:30.759745267Z",
+  "ReportID": "019eac0e-0f14-7dfb-a419-166dca7605fe",
+  "CreatedAt": "2026-06-09T11:04:23.060917716Z",
   "ArtifactID": "sha256:fadf7e34e3a45ff62c9582f9e5173fdb93e0e2440cf246babed77a5b50372e0c",
   "ArtifactName": "liquibase/liquibase:4.30.0",
   "ArtifactType": "container_image",
@@ -14169,60 +14169,6 @@
           ],
           "PublishedDate": "2026-05-07T20:16:43.39Z",
           "LastModifiedDate": "2026-05-13T16:58:56.39Z"
-        },
-        {
-          "VulnerabilityID": "CVE-2026-39826",
-          "VendorIDs": [
-            "GO-2026-4980"
-          ],
-          "PkgID": "stdlib@v1.22.7",
-          "PkgName": "stdlib",
-          "PkgIdentifier": {
-            "PURL": "pkg:golang/stdlib@v1.22.7",
-            "UID": "cf173b2c10d5ac82"
-          },
-          "InstalledVersion": "v1.22.7",
-          "FixedVersion": "1.25.10, 1.26.3",
-          "Status": "fixed",
-          "Layer": {
-            "Digest": "sha256:d4e09011ac9ce2e4747f1117b10602e84683855f35e35422060b49632c19c1f6",
-            "DiffID": "sha256:daf89b137c7fd76f7d94a2d3ed715fe2645d62766d5d6de3523e11ed36761e7b"
-          },
-          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-39826",
-          "DataSource": {
-            "ID": "govulndb",
-            "Name": "The Go Vulnerability Database",
-            "URL": "https://pkg.go.dev/vuln/"
-          },
-          "Fingerprint": "sha256:b932d04468f07af99418012bd525b3143ba576d858f6cba6f243425b5e807052",
-          "Title": "If a trusted template author were to write a \u003cscript\u003e tag containing a ...",
-          "Description": "If a trusted template author were to write a \u003cscript\u003e tag containing an empty 'type' attribute or a 'type' attribute with an ASCII whitespace, the execution of the template would incorrectly escape any data passed into the \u003cscript\u003e block.",
-          "Severity": "HIGH",
-          "CweIDs": [
-            "CWE-116"
-          ],
-          "VendorSeverity": {
-            "amazon": 3,
-            "bitnami": 2,
-            "oracle-oval": 3
-          },
-          "CVSS": {
-            "bitnami": {
-              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
-              "V3Score": 6.1
-            }
-          },
-          "References": [
-            "https://go.dev/cl/771180",
-            "https://go.dev/issue/78981",
-            "https://groups.google.com/g/golang-announce/c/qcCIEXso47M",
-            "https://linux.oracle.com/cve/CVE-2026-39826.html",
-            "https://linux.oracle.com/errata/ELSA-2026-22112.html",
-            "https://nvd.nist.gov/vuln/detail/CVE-2026-39826",
-            "https://pkg.go.dev/vuln/GO-2026-4980"
-          ],
-          "PublishedDate": "2026-05-07T20:16:43.49Z",
-          "LastModifiedDate": "2026-05-13T16:59:07.48Z"
         },
         {
           "VulnerabilityID": "CVE-2026-39836",
