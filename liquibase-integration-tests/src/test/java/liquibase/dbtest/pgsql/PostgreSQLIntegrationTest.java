@@ -488,6 +488,59 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
         Assert.assertTrue("Using index function should be \"" + using + "\"", found);
     }
 
+    /**
+     * Regression test for #6885: diff-changelog and generate-changelog now capture the
+     * PARTITION BY clause for declaratively-partitioned PostgreSQL tables. Pre-fix, this
+     * test would have asserted false (the CreateTableChange would have no partitionBy
+     * attribute and the parent table would have been emitted as a plain heap table).
+     */
+    @Test
+    public void testSnapshotPartitionedTableCapturesPartitionBy() throws Exception {
+        assumeNotNull(this.getDatabase());
+        // Declarative partitioning syntax (PARTITION BY) requires PostgreSQL 10+.
+        // Matches the version-guard pattern used elsewhere in this file. Suggested by CodeRabbit on PR #7759.
+        assumeTrue(getDatabase().getDatabaseMajorVersion() >= 10);
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                .execute(new RawParameterizedSqlStatement(
+                        "CREATE TABLE part_test (id BIGINT, sold_at DATE NOT NULL) PARTITION BY RANGE (sold_at)"));
+        try {
+            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(getDatabase(), null, new CompareControl());
+            DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult,
+                    new DiffOutputControl(false, false, false, null));
+            List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
+
+            String capturedPartitionBy = null;
+            for (ChangeSet changeSet : changeSets) {
+                for (Change change : changeSet.getChanges()) {
+                    if (!(change instanceof CreateTableChange)) {
+                        continue;
+                    }
+                    CreateTableChange ctc = (CreateTableChange) change;
+                    if ("part_test".equalsIgnoreCase(ctc.getTableName())) {
+                        capturedPartitionBy = ctc.getPartitionBy();
+                        break;
+                    }
+                }
+                if (capturedPartitionBy != null) {
+                    break;
+                }
+            }
+
+            Assert.assertNotNull("CreateTableChange for the partitioned table 'part_test' should carry a partitionBy attribute",
+                    capturedPartitionBy);
+            // pg_get_partkeydef typically returns lowercase "range (sold_at)" but exact case is version-dependent.
+            // We assert on the meaningful tokens (RANGE strategy + sold_at column) case-insensitively rather than on the literal string.
+            String normalized = capturedPartitionBy.toUpperCase();
+            Assert.assertTrue("partitionBy should mention the RANGE strategy; got: " + capturedPartitionBy,
+                    normalized.contains("RANGE"));
+            Assert.assertTrue("partitionBy should reference the sold_at key column; got: " + capturedPartitionBy,
+                    normalized.contains("SOLD_AT"));
+        } finally {
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                    .execute(new RawParameterizedSqlStatement("DROP TABLE IF EXISTS part_test"));
+        }
+    }
+
     @Test
     public void rollbackRestoresSearchPathForNumericSchema() throws Exception {
         final String numericSchema = "4b5d63f449304c05a291c4c27136ebb5";
