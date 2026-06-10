@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019e2f02-ec3e-7848-a218-3d6828df1d74",
-  "CreatedAt": "2026-05-16T04:19:41.246544081Z",
+  "ReportID": "019eb05d-3f73-7b6a-8e97-3729feb8ebe2",
+  "CreatedAt": "2026-06-10T07:09:21.651749716Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -408,12 +408,12 @@
           },
           "References": [
             "http://www.openwall.com/lists/oss-security/2024/04/02/6",
-            "https://access.redhat.com/errata/RHSA-2024:1435",
+            "https://access.redhat.com/errata/RHSA-2024:1436",
             "https://access.redhat.com/security/cve/CVE-2024-1597",
             "https://bugzilla.redhat.com/2266523",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2266523",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-1597",
-            "https://errata.almalinux.org/8/ALSA-2024-1435.html",
+            "https://errata.almalinux.org/9/ALSA-2024-1436.html",
             "https://errata.rockylinux.org/RLSA-2024:1436",
             "https://github.com/pgjdbc/pgjdbc",
             "https://github.com/pgjdbc/pgjdbc/commit/06abfb78a627277a580d4df825f210e96a4e14ee",
@@ -465,7 +465,8 @@
           "VendorSeverity": {
             "bitnami": 3,
             "ghsa": 3,
-            "redhat": 3
+            "redhat": 3,
+            "rocky": 3
           },
           "CVSS": {
             "bitnami": {
@@ -483,6 +484,9 @@
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2026-42198",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2463857",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42198",
+            "https://errata.rockylinux.org/RLSA-2026:22304",
             "https://github.com/pgjdbc/pgjdbc",
             "https://github.com/pgjdbc/pgjdbc/releases/tag/REL42.7.11",
             "https://github.com/pgjdbc/pgjdbc/security/advisories/GHSA-98qh-xjc8-98pq",
