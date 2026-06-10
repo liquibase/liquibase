@@ -60,16 +60,29 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
                 .build();
     }
 
+    /**
+     * Returns the classes provided by this command step.
+     * @return list of dependency classes
+     */
     @Override
     public List<Class<?>> providedDependencies() {
         return Arrays.asList(DatabaseChangeLog.class, ChangeLogParameters.class);
     }
 
+    /**
+     * Returns the classes required by this command step.
+     * @return list of required dependency classes
+     */
     @Override
     public List<Class<?>> requiredDependencies() {
         return Arrays.asList(Database.class);
     }
 
+    /**
+     * Executes the changelog command step.
+     * @param resultsBuilder the command results builder
+     * @throws Exception if an error occurs during execution
+     */
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
@@ -92,12 +105,28 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         commandScope.provideDependency(ChangeLogParameters.class, changeLogParameters);
     }
 
+    /**
+     * Retrieves the ChangeLogParameters from the command scope, or creates a new instance if none was provided.
+     * <p>
+     * When a user-provided ChangeLogParameters is passed via CommandScope, the database filter
+     * ({@code filterDatabase}) is set from the actual database's short name to ensure that
+     * dbms-specific properties in changelogs are correctly resolved.
+     *
+     * @param commandScope the command scope containing optional CHANGELOG_PARAMETERS argument
+     * @param database the actual database being used
+     * @return the ChangeLogParameters with database filter set appropriately
+     * @see ChangeLogParameters#setDatabase(String)
+     */
     private ChangeLogParameters getChangeLogParameters(CommandScope commandScope, Database database) {
         ChangeLogParameters changeLogParameters = commandScope.getArgumentValue(CHANGELOG_PARAMETERS);
         if (changeLogParameters == null) {
             changeLogParameters = new ChangeLogParameters(database);
             changeLogParameters.addJavaProperties();
             changeLogParameters.addDefaultFileProperties();
+        } else {
+            // When a user-provided ChangeLogParameters is passed, we still need to set the database
+            // filter so that dbms-specific properties are correctly resolved.
+            changeLogParameters.setDatabase(database.getShortName());
         }
         extractContextAndLabels(commandScope, changeLogParameters);
         return changeLogParameters;
@@ -125,6 +154,11 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         addCommandFiltersMdc(labels, contexts);
     }
 
+    /**
+     * Adds label and context filter values to the MDC for logging purposes.
+     * @param labelExpression the label expression to log
+     * @param contexts the contexts to log
+     */
     public static void addCommandFiltersMdc(LabelExpression labelExpression, Contexts contexts) {
         String labelFilterMdc = labelExpression != null && labelExpression.getOriginalString() != null ? labelExpression.getOriginalString() : "";
         String contextFilterMdc = contexts != null ? contexts.toString() : "";
@@ -132,6 +166,14 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         Scope.getCurrentScope().addMdcValue(MdcKey.COMMAND_CONTEXT_FILTER, contextFilterMdc);
     }
 
+    /**
+     * Parses and returns the database change log from the specified file.
+     * @param changeLogFile the path to the changelog file
+     * @param changeLogParameters the parameters for parsing
+     * @param database the database context
+     * @return the parsed DatabaseChangeLog
+     * @throws Exception if parsing fails
+     */
     public static DatabaseChangeLog getDatabaseChangeLog(String changeLogFile, ChangeLogParameters changeLogParameters, Database database) throws Exception {
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         AtomicReference<DatabaseChangeLog> changelog = new AtomicReference<>();
@@ -150,6 +192,15 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         return changelog.get();
     }
 
+    /**
+     * Checks and initializes the liquibase tables if needed.
+     * @param updateExistingNullChecksums whether to update null checksums
+     * @param databaseChangeLog the database change log
+     * @param contexts the context filter
+     * @param labelExpression the label filter
+     * @param database the database
+     * @throws liquibase.exception.LiquibaseException if an error occurs
+     */
     private void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
                                       Contexts contexts, LabelExpression labelExpression, Database database) throws LiquibaseException {
         ChangeLogHistoryService changeLogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
@@ -165,11 +216,19 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         LockServiceFactory.getInstance().getLockService(database).init();
     }
 
+    /**
+     * Returns the command names defined by this step.
+     * @return array of command name arrays
+     */
     @Override
     public String[][] defineCommandNames() {
         return new String[][]{COMMAND_NAME};
     }
 
+    /**
+     * Cleans up resources held by this command step.
+     * @param resultsBuilder the command results builder
+     */
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
