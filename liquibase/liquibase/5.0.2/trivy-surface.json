@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019eb05c-fdbb-7ced-ac92-56ab2cc7c61d",
-  "CreatedAt": "2026-06-10T07:09:04.827849109Z",
+  "ReportID": "019eb13f-0ed2-7c33-8b43-37117779393f",
+  "CreatedAt": "2026-06-10T11:16:00.338800844Z",
   "ArtifactID": "sha256:ff9ccc0f412885d2f350273b856e29f33d5cbd3a86b57d23715fdffe9f11c356",
   "ArtifactName": "liquibase/liquibase:5.0.2",
   "ArtifactType": "container_image",
@@ -10627,6 +10627,100 @@
           ],
           "AnalyzedBy": "dpkg"
         }
+      ],
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2026-45447",
+          "PkgID": "libssl3t64@3.0.13-0ubuntu3.7",
+          "PkgName": "libssl3t64",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/ubuntu/libssl3t64@3.0.13-0ubuntu3.7?arch=amd64\u0026distro=ubuntu-24.04",
+            "UID": "f0c340d1caf91fd4"
+          },
+          "InstalledVersion": "3.0.13-0ubuntu3.7",
+          "FixedVersion": "3.0.13-0ubuntu3.11",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:01d7766a2e4a62b74e0bebf2cd12c47e675e9221174f6570854203e84ffe68b0",
+            "DiffID": "sha256:efafae78d70c98626c521c246827389128e7d7ea442db31bc433934647f0c791"
+          },
+          "SeveritySource": "ubuntu",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-45447",
+          "DataSource": {
+            "ID": "ubuntu",
+            "Name": "Ubuntu CVE Tracker",
+            "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
+          },
+          "Fingerprint": "sha256:dd0968df46c412d8b8fa1b50afa3002a0027781720512c108b7ea776eb0048ea",
+          "Title": "Issue summary: A specially crafted PKCS#7 or S/MIME signed message cou ...",
+          "Description": "Issue summary: A specially crafted PKCS#7 or S/MIME signed message could\ntrigger a use-after-free during PKCS#7 signature verification.\n\nImpact summary: A use-after-free may result in process crashes, heap\ncorruption, or potentially remote code execution.\n\nWhen processing a PKCS#7 or S/MIME signed message, if the SignedData\ndigestAlgorithms field is present as an empty ASN.1 SET, OpenSSL may\nincorrectly free a caller-owned BIO during PKCS7_verify(). A subsequent\nuse of the BIO by the calling application results in a use-after-free\ncondition.\n\nIn the common case this occurs when the application later calls\nBIO_free() on the BIO originally passed to PKCS7_verify(). Depending\non allocator behavior and application-specific BIO usage patterns, this\nmay result in a crash or other memory corruption. In some application\ncontexts this may potentially be exploitable for remote code execution.\n\nApplications that process PKCS#7 or S/MIME signed messages using OpenSSL\nPKCS#7 APIs may be affected. Applications using the CMS APIs for this\nprocessing are not affected.\n\nThe FIPS modules in 4.0, 3.6, 3.5, 3.4, and 3.0 are not affected by this\nissue, as the affected code is outside the OpenSSL FIPS module boundary.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-416"
+          ],
+          "VendorSeverity": {
+            "ubuntu": 3
+          },
+          "References": [
+            "https://github.com/openssl/security/commit/3aad5eb7af4de4ee0633c30a8541a54d9bbde63c",
+            "https://github.com/openssl/security/commit/7d4a980c62258c5910cc883936e0c8dbab4d75a8",
+            "https://github.com/openssl/security/commit/9dfd688ad2290fc5075cacbc9bf0c9a93eefed54",
+            "https://github.com/openssl/security/commit/a541ae8bfe849a30cc885e8780715c0f488e496c",
+            "https://github.com/openssl/security/commit/c505d7559da5d5f9f2c3913c6883a5562ce7273e",
+            "https://openssl-library.org/news/secadv/20260609.txt",
+            "https://ubuntu.com/security/notices/USN-8414-1",
+            "https://ubuntu.com/security/notices/USN-8414-2",
+            "https://www.cve.org/CVERecord?id=CVE-2026-45447"
+          ],
+          "PublishedDate": "2026-06-09T17:17:19.277Z",
+          "LastModifiedDate": "2026-06-09T20:16:58.537Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-45447",
+          "PkgID": "openssl@3.0.13-0ubuntu3.7",
+          "PkgName": "openssl",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/ubuntu/openssl@3.0.13-0ubuntu3.7?arch=amd64\u0026distro=ubuntu-24.04",
+            "UID": "7be17c26fb75f242"
+          },
+          "InstalledVersion": "3.0.13-0ubuntu3.7",
+          "FixedVersion": "3.0.13-0ubuntu3.11",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:51024d09d55a0dd2db21ee0f8a82228dad25451936f15c7e5cb068e070498470",
+            "DiffID": "sha256:ff4631b9a35b8a796cff02db1d576be42e2387aa7dc429891a3db4b2b0b66bba"
+          },
+          "SeveritySource": "ubuntu",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-45447",
+          "DataSource": {
+            "ID": "ubuntu",
+            "Name": "Ubuntu CVE Tracker",
+            "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
+          },
+          "Fingerprint": "sha256:f1e402b08d0ca26d3c9f6ca87be81e7eb09f5602ccb7a7d327ef912b7eef0e5a",
+          "Title": "Issue summary: A specially crafted PKCS#7 or S/MIME signed message cou ...",
+          "Description": "Issue summary: A specially crafted PKCS#7 or S/MIME signed message could\ntrigger a use-after-free during PKCS#7 signature verification.\n\nImpact summary: A use-after-free may result in process crashes, heap\ncorruption, or potentially remote code execution.\n\nWhen processing a PKCS#7 or S/MIME signed message, if the SignedData\ndigestAlgorithms field is present as an empty ASN.1 SET, OpenSSL may\nincorrectly free a caller-owned BIO during PKCS7_verify(). A subsequent\nuse of the BIO by the calling application results in a use-after-free\ncondition.\n\nIn the common case this occurs when the application later calls\nBIO_free() on the BIO originally passed to PKCS7_verify(). Depending\non allocator behavior and application-specific BIO usage patterns, this\nmay result in a crash or other memory corruption. In some application\ncontexts this may potentially be exploitable for remote code execution.\n\nApplications that process PKCS#7 or S/MIME signed messages using OpenSSL\nPKCS#7 APIs may be affected. Applications using the CMS APIs for this\nprocessing are not affected.\n\nThe FIPS modules in 4.0, 3.6, 3.5, 3.4, and 3.0 are not affected by this\nissue, as the affected code is outside the OpenSSL FIPS module boundary.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-416"
+          ],
+          "VendorSeverity": {
+            "ubuntu": 3
+          },
+          "References": [
+            "https://github.com/openssl/security/commit/3aad5eb7af4de4ee0633c30a8541a54d9bbde63c",
+            "https://github.com/openssl/security/commit/7d4a980c62258c5910cc883936e0c8dbab4d75a8",
+            "https://github.com/openssl/security/commit/9dfd688ad2290fc5075cacbc9bf0c9a93eefed54",
+            "https://github.com/openssl/security/commit/a541ae8bfe849a30cc885e8780715c0f488e496c",
+            "https://github.com/openssl/security/commit/c505d7559da5d5f9f2c3913c6883a5562ce7273e",
+            "https://openssl-library.org/news/secadv/20260609.txt",
+            "https://ubuntu.com/security/notices/USN-8414-1",
+            "https://ubuntu.com/security/notices/USN-8414-2",
+            "https://www.cve.org/CVERecord?id=CVE-2026-45447"
+          ],
+          "PublishedDate": "2026-06-09T17:17:19.277Z",
+          "LastModifiedDate": "2026-06-09T20:16:58.537Z"
+        }
       ]
     },
     {
@@ -10872,7 +10966,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 2,
+            "amazon": 3,
             "azure": 3,
             "bitnami": 3,
             "oracle-oval": 3,
