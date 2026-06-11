@@ -7,7 +7,6 @@ import liquibase.command.CommandFactory;
 import liquibase.command.CommandScope;
 import liquibase.configuration.AbstractMapConfigurationValueProvider;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.resource.InputStreamList;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.StringUtil;
 
@@ -37,18 +36,6 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
 
     protected DefaultsFileValueProvider(Properties properties) throws IOException {
         this(properties, 0);
-    }
-
-    public DefaultsFileValueProvider(Map<String,?> properties, int precedenceOffset) throws IOException {
-        this(propertiesFromMap(properties), precedenceOffset);
-    }
-
-    public DefaultsFileValueProvider(Map<String,?> properties) throws IOException {
-        this(properties, 0);
-    }
-
-    public DefaultsFileValueProvider(InputStreamList streamList, String sourceDescription, int precedenceOffset) throws IOException {
-        this(propertiesFromStreams(streamList), sourceDescription, precedenceOffset);
     }
 
     public DefaultsFileValueProvider(InputStream stream, String sourceDescription, int precedenceOffset) throws IOException {
@@ -82,28 +69,11 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
         return properties;
     }
 
-    private static Properties propertiesFromStreams(InputStreamList streamList) throws IOException {
-
-        Properties properties = new Properties();
-        for(InputStream stream : streamList.getInputStreams()) {
-            properties.putAll(propertiesFromStream(stream));
-        }
-        return properties;
-    }
-
     private static Properties propertiesFromFile(File file) throws IOException {
 
         try (InputStream stream = new FileInputStream(file)) {
             return propertiesFromStream(stream);
         }
-    }
-
-    private static Properties propertiesFromMap(Map<String,?> map) {
-
-        Properties properties = new Properties();
-        properties.putAll(map);
-        trimAllProperties(properties);
-        return properties;
     }
 
     @Override
