@@ -49,7 +49,14 @@ public class PrimaryKeyComparator implements DatabaseObjectComparator {
 
         if ((thisPrimaryKey.getTable() != null) && (thisPrimaryKey.getTable().getName() != null) && (otherPrimaryKey
             .getTable() != null) && (otherPrimaryKey.getTable().getName() != null)) {
-            return DatabaseObjectComparatorFactory.getInstance().isSameObject(thisPrimaryKey.getTable(), otherPrimaryKey.getTable(), chain.getSchemaComparisons(), accordingTo);
+            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisPrimaryKey.getTable(), otherPrimaryKey.getTable(), chain.getSchemaComparisons(), accordingTo)) {
+                return false;
+            }
+            // If both PKs have a name, they must match
+            if (thisPrimaryKey.getName() != null && otherPrimaryKey.getName() != null) {
+                return thisPrimaryKey.getName().equalsIgnoreCase(otherPrimaryKey.getName());
+            }
+            return true;
         } else {
             return StringUtil.trimToEmpty(thisPrimaryKey.getName()).equalsIgnoreCase(otherPrimaryKey.getName());
         }
