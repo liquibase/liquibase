@@ -64,7 +64,11 @@ public class PostgreSQLSessionLockService extends SessionLockService {
             unlockStatement.setInt(2, lockId[1]);
             Boolean released = queryForBoolean(unlockStatement);
             if (!Boolean.TRUE.equals(released)) {
-                throw new LockException("pg_advisory_unlock() returned " + released);
+                // false means this session no longer holds the lock (e.g. the connection was
+                // dropped and PostgreSQL already released it). Nothing to release, and not an
+                // error: let the caller clear hasChangeLogLock so a reused instance does not keep
+                // reporting a lock it does not own.
+                Scope.getCurrentScope().getLog(getClass()).warning("pg_advisory_unlock() returned " + released + "; the session lock was already released");
             }
         } catch (SQLException e) {
             throw new LockException(e);
