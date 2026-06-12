@@ -88,12 +88,11 @@ public abstract class SessionLockService implements LockService {
         if (!hasChangeLogLock) {
             return;
         }
-        try {
-            releaseLock(getConnection());
-            Scope.getCurrentScope().getLog(getClass()).info("Successfully released change log lock");
-        } finally {
-            hasChangeLogLock = false;
-        }
+        // Only clear the flag once the unlock actually succeeds; if it throws, we still hold the
+        // session lock and must not let Liquibase think otherwise.
+        releaseLock(getConnection());
+        hasChangeLogLock = false;
+        Scope.getCurrentScope().getLog(getClass()).info("Successfully released change log lock");
     }
 
     @Override
@@ -112,11 +111,8 @@ public abstract class SessionLockService implements LockService {
 
     @Override
     public void forceReleaseLock() throws LockException {
-        try {
-            releaseLock(getConnection());
-        } finally {
-            hasChangeLogLock = false;
-        }
+        releaseLock(getConnection());
+        hasChangeLogLock = false;
     }
 
     @Override
@@ -159,7 +155,11 @@ public abstract class SessionLockService implements LockService {
             return "UNKNOWN";
         }
         DatabaseChangeLogLock currentLock = locks[0];
-        String grantedAt = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(currentLock.getLockGranted());
+        Date lockGranted = currentLock.getLockGranted();
+        if (lockGranted == null) {
+            return currentLock.getLockedBy();
+        }
+        String grantedAt = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lockGranted);
         return currentLock.getLockedBy() + " since " + grantedAt;
     }
 
