@@ -26,6 +26,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> CONVERT_DATA_TYPES;
     public static final ConfigurationDefinition<Boolean> GENERATE_CHANGESET_CREATED_VALUES;
     public static final ConfigurationDefinition<Boolean> AUTO_REORG;
+    public static final ConfigurationDefinition<Boolean> USE_SESSION_LOCK;
     public static final ConfigurationDefinition<Boolean> DIFF_COLUMN_ORDER;
     public static final ConfigurationDefinition<Boolean> ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA;
     public static final ConfigurationDefinition<Boolean> GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION;
@@ -158,6 +159,15 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         AUTO_REORG = builder.define("autoReorg", Boolean.class)
                 .setDescription("Should Liquibase automatically include REORG TABLE commands when needed?")
                 .setDefaultValue(true)
+                .build();
+
+        USE_SESSION_LOCK = builder.define("useSessionLock", Boolean.class)
+                .setDescription("Use a session-level lock (e.g. a PostgreSQL advisory lock) to guard the changelog " +
+                        "instead of the LOCKED row in DATABASECHANGELOGLOCK. A session lock is released automatically " +
+                        "by the database when the connection drops, so a process killed mid-update (OOM, eviction, " +
+                        "kill -9) does not leave a stale lock behind. Only supported databases honour this; others " +
+                        "fall back to StandardLockService.")
+                .setDefaultValue(false)
                 .build();
 
         DIFF_COLUMN_ORDER = builder.define("diffColumnOrder", Boolean.class)
