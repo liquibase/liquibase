@@ -290,4 +290,40 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
         commandScope.execute()
     }
+
+    def "Treat 'null' / 'NULL' values not as NULLs"() {
+        given:
+        def outputChangelogFile = "test/classes/test-null.postgresql.sql"
+
+        postgres.executeSql("""
+            create table TEST_WITH_NULL_STRINGS (
+                TYPE_ VARCHAR(4)
+            );
+
+            INSERT INTO TEST_WITH_NULL_STRINGS VALUES ('null');
+            INSERT INTO TEST_WITH_NULL_STRINGS VALUES ('NULL');
+            INSERT INTO TEST_WITH_NULL_STRINGS VALUES ('nuLL');
+            INSERT INTO TEST_WITH_NULL_STRINGS VALUES ('NUll');
+            INSERT INTO TEST_WITH_NULL_STRINGS VALUES (null);
+        """)
+
+        when:
+        CommandUtil.runGenerateChangelog(postgres, outputChangelogFile, 'data')
+        def outputFile = new File(outputChangelogFile)
+        def contents = FileUtil.getContents(outputFile)
+
+        then:
+        contents.contains(
+"""
+INSERT INTO "test_with_null_strings" ("type_") VALUES ('null');
+INSERT INTO "test_with_null_strings" ("type_") VALUES ('NULL');
+INSERT INTO "test_with_null_strings" ("type_") VALUES ('nuLL');
+INSERT INTO "test_with_null_strings" ("type_") VALUES ('NUll');
+INSERT INTO "test_with_null_strings" ("type_") VALUES (NULL);""")
+
+        cleanup:
+        outputFile.delete()
+        CommandUtil.runDropAll(postgres)
+        postgres.getConnection().close()
+    }
 }
