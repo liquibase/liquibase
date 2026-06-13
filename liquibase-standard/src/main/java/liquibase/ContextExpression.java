@@ -51,10 +51,34 @@ public class ContextExpression {
         if (contexts == null) {
             return;
         }
-        for (String context : StringUtil.splitAndTrim(contexts, ",")) {
+        for (String context : splitAndTrimContextExpressions(contexts)) {
             this.contexts.add(context.toLowerCase());
         }
 
+    }
+
+    static List<String> splitAndTrimContextExpressions(String contexts) {
+        List<String> splitContexts = new ArrayList<>();
+        int parenthesesDepth = 0;
+        int start = 0;
+
+        for (int i = 0; i < contexts.length(); i++) {
+            char currentChar = contexts.charAt(i);
+            if (currentChar == '(') {
+                parenthesesDepth++;
+            } else if (currentChar == ')' && parenthesesDepth > 0) {
+                parenthesesDepth--;
+            } else if (currentChar == ',' && parenthesesDepth == 0) {
+                splitContexts.add(contexts.substring(start, i).trim());
+                start = i + 1;
+            }
+        }
+
+        splitContexts.add(contexts.substring(start).trim());
+        while (!splitContexts.isEmpty() && splitContexts.get(splitContexts.size() - 1).isEmpty()) {
+            splitContexts.remove(splitContexts.size() - 1);
+        }
+        return splitContexts;
     }
 
     public boolean add(String context) {
@@ -83,7 +107,7 @@ public class ContextExpression {
         // If there are required runtime contexts, we need to evaluate those match as well
         boolean noRequiredRuntime = runtimeContexts.getContexts()
                 .stream()
-                .noneMatch(context -> context.startsWith("@"));
+                .noneMatch(ContextExpression::isRequiredRuntimeContext);
 
         if (this.contexts.isEmpty() && noRequiredRuntime) {
             return true;
@@ -95,6 +119,14 @@ public class ContextExpression {
             }
         }
         return false;
+    }
+
+    private static boolean isRequiredRuntimeContext(String context) {
+        String normalizedContext = context.trim();
+        while (normalizedContext.startsWith("(")) {
+            normalizedContext = normalizedContext.substring(1).trim();
+        }
+        return normalizedContext.startsWith("@");
     }
 
     private boolean matches(String expression, Contexts runtimeContexts) {
