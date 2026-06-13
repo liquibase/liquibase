@@ -1,4 +1,8 @@
-# Official Liquibase Docker Images
+# Official Liquibase Community Docker Images
+
+The Liquibase Community Docker images (`liquibase/liquibase`) are built from the [`docker/`](https://github.com/liquibase/liquibase/tree/main/docker) directory of the [`liquibase/liquibase`](https://github.com/liquibase/liquibase) repository. They were previously maintained in the now-deprecated [`liquibase/docker`](https://github.com/liquibase/docker) repository — please file Docker image issues and PRs in [`liquibase/liquibase`](https://github.com/liquibase/liquibase/issues).
+
+> **Looking for Liquibase Secure?** The commercial `liquibase/liquibase-secure` image is published on [Docker Hub](https://hub.docker.com/r/liquibase/liquibase-secure) and maintained internally by Liquibase. For licensing see [liquibase.com/liquibase-secure](https://www.liquibase.com/liquibase-secure); for issues contact [Liquibase Support](https://support.liquibase.com/).
 
 ## 🚨 Important: Liquibase 5.0 Changes 🚨
 
@@ -48,13 +52,15 @@ RUN lpm add mssql --global
 
 ## 🌍 Available Registries
 
-We publish Liquibase images to multiple registries for flexibility:
+We publish Liquibase Community images to multiple registries for flexibility:
 
-| Registry                      | Community Image                      | Secure Image                                |
-| ----------------------------- | ------------------------------------ | ------------------------------------------- |
-| **Docker Hub (default)**      | `liquibase/liquibase`                | `liquibase/liquibase-secure`                |
-| **GitHub Container Registry** | `ghcr.io/liquibase/liquibase`        | `ghcr.io/liquibase/liquibase-secure`        |
-| **Amazon ECR Public**         | `public.ecr.aws/liquibase/liquibase` | `public.ecr.aws/liquibase/liquibase-secure` |
+| Registry                      | Community Image                      |
+| ----------------------------- | ------------------------------------ |
+| **Docker Hub (default)**      | `liquibase/liquibase`                |
+| **GitHub Container Registry** | `ghcr.io/liquibase/liquibase`        |
+| **Amazon ECR Public**         | `public.ecr.aws/liquibase/liquibase` |
+
+Liquibase Secure images (`liquibase/liquibase-secure`) are also published to all three registries — see the [Docker Hub overview](https://hub.docker.com/r/liquibase/liquibase-secure) for details.
 
 ## 🚀 Quick Start
 
@@ -75,19 +81,7 @@ docker run --rm \
 
 ### For Secure Edition Users
 
-```bash
-# Pull the secure image
-docker pull liquibase/liquibase-secure:5.0.1
-
-# Run with a changelog and license key
-docker run --rm \
-  -v /path/to/changelog:/liquibase/changelog \
-  -e LIQUIBASE_COMMAND_URL="jdbc:postgresql://localhost:5432/mydb" \
-  -e LIQUIBASE_COMMAND_USERNAME="username" \
-  -e LIQUIBASE_COMMAND_PASSWORD="password" \
-  -e LIQUIBASE_LICENSE_KEY="your-license-key" \
-  liquibase/liquibase-secure:5.0.1 update
-```
+If you have a commercial license, use the [`liquibase/liquibase-secure`](https://hub.docker.com/r/liquibase/liquibase-secure) image instead — usage instructions are in its Docker Hub overview.
 
 ### For Liquibase 4 Users
 
@@ -150,15 +144,7 @@ FROM liquibase/liquibase:4.x
 FROM liquibase/liquibase:5.0  # or :latest
 ```
 
-**If using PRO Edition:**
-
-```bash
-# Before (Liquibase 4)
-FROM liquibase/liquibase-pro:4.x
-
-# After (Liquibase 5.0+)
-FROM liquibase/liquibase-secure:5.0  # or :latest
-```
+**If using PRO Edition:** move to the [`liquibase/liquibase-secure`](https://hub.docker.com/r/liquibase/liquibase-secure) image (`liquibase/liquibase-pro:4.x` → `liquibase/liquibase-secure:5.0`).
 
 ### Step 4: Update Driver Installation
 
@@ -216,69 +202,13 @@ Liquibase 4 versions continue to use the [Apache 2.0 license](https://www.apache
 
 ### Commercial License - Liquibase Secure
 
-The [Liquibase Secure edition](https://www.liquibase.com/liquibase-secure) requires a commercial license and provides enterprise-grade database change management with advanced capabilities:
-
-**Developer Productivity:**
-- VS Code Extension for IDE-native operations
-- Liquibase Flows for environment consistency
-- Policy Checks to enforce standards and block risky changes
-- Support for 60+ database types
-
-**Secure Automation:**
-- CI/CD deployment automation with policy enforcement
-- Targeted rollbacks for precise recovery
-- Advanced drift detection and alerting
-- Secrets management and RBAC enforcement
-- Multi-environment deployment capabilities
-
-**Change Insights & Compliance:**
-- Unified change tracking with full audit context
-- Real-time drift detection
-- Audit-ready compliance reporting (SOX, HIPAA, PCI, SOC2, GDPR)
-- Risk scoring for change assessment
-
-For more information and licensing inquiries, visit [liquibase.com/get-liquibase](https://www.liquibase.com/get-liquibase)
-
----
-
-## 🔒 Verifying Secure Images
-
-Liquibase Secure images include supply chain security features for compliance with SLSA Level 3 requirements. These features help verify image authenticity and provide transparency into image contents.
-
-### Verify Image Signature
-
-Liquibase Secure images are signed using [Cosign](https://docs.sigstore.dev/cosign/overview/) with keyless signing via GitHub OIDC. To verify a signature:
-
-```bash
-# Install cosign: https://docs.sigstore.dev/cosign/installation/
-cosign verify liquibase/liquibase-secure:latest \
-  --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
-  --certificate-identity-regexp="https://github.com/liquibase/liquibase/.*"
-```
-
-### View SBOM (Software Bill of Materials)
-
-Each Liquibase Secure image includes an SBOM attestation listing all components:
-
-```bash
-docker buildx imagetools inspect liquibase/liquibase-secure:latest --format '{{ json .SBOM }}'
-```
-
-### View Build Provenance
-
-Build provenance attestations provide details about how the image was built:
-
-```bash
-docker buildx imagetools inspect liquibase/liquibase-secure:latest --format '{{ json .Provenance }}'
-```
-
-> **Note:** These supply chain security features are only available for Liquibase Secure images, not the Community edition.
+The [Liquibase Secure edition](https://www.liquibase.com/liquibase-secure) requires a commercial license and provides enterprise-grade database change management with advanced capabilities such as Policy Checks, Flows, drift detection, audit-ready compliance reporting, and supply chain security features (signed images, SBOM, build provenance). For more information and licensing inquiries, visit [liquibase.com/get-liquibase](https://www.liquibase.com/get-liquibase).
 
 ---
 
 ## 🛡️ Vulnerability Scanning
 
-Published Liquibase Docker images (Community and Secure) are automatically scanned for known vulnerabilities using multiple security scanners. Scans run Monday through Friday at 10 AM UTC and cover the most recent tags of each image (up to 10 per repository by default).
+Published Liquibase Community Docker images are automatically scanned for known vulnerabilities using multiple security scanners. Scans run Monday through Friday at 10 AM UTC and cover the most recent tags of each image (up to 10 per repository by default).
 
 ### What Gets Scanned
 
@@ -297,7 +227,7 @@ Published Liquibase Docker images (Community and Secure) are automatically scann
 - **Version Compare** — Compare two versions side by side to see which CVEs were fixed, which are new, and which are shared
 - **Export** — Download vulnerability data as CSV or print reports as PDF
 
-For a detailed guide on reading vulnerability reports, see [SECURITY.md](SECURITY.md).
+For a detailed guide on reading vulnerability reports, see [SECURITY.md](https://github.com/liquibase/liquibase/blob/main/docker/SECURITY.md).
 
 ---
 
@@ -311,8 +241,6 @@ FROM liquibase/liquibase:latest
 
 ## Scripts
 
-### Community Edition
-
 ```bash
 # Docker Hub (default)
 docker pull liquibase/liquibase
@@ -324,22 +252,7 @@ docker pull ghcr.io/liquibase/liquibase
 docker pull public.ecr.aws/liquibase/liquibase
 ```
 
-### Liquibase Secure Edition
-
-```bash
-# Docker Hub (default)
-docker pull liquibase/liquibase-secure
-
-# GitHub Container Registry
-docker pull ghcr.io/liquibase/liquibase-secure
-
-# Amazon ECR Public
-docker pull public.ecr.aws/liquibase/liquibase-secure
-```
-
 ### Pulling the Latest or Specific Version
-
-#### Community Edition
 
 ```bash
 # Latest
@@ -353,25 +266,9 @@ docker pull ghcr.io/liquibase/liquibase:4.32.0
 docker pull public.ecr.aws/liquibase/liquibase:4.32.0
 ```
 
-#### Liquibase Secure Edition
-
-```bash
-# Latest
-docker pull liquibase/liquibase-secure:latest
-docker pull ghcr.io/liquibase/liquibase-secure:latest
-docker pull public.ecr.aws/liquibase/liquibase-secure:latest
-
-# Specific version (example: 4.32.0)
-docker pull liquibase/liquibase-secure:4.32.0
-docker pull ghcr.io/liquibase/liquibase-secure:4.32.0
-docker pull public.ecr.aws/liquibase/liquibase-secure:4.32.0
-```
-
 For any questions or support, please visit our [Liquibase Community Forum](https://forum.liquibase.org/).
 
 ---
-
-This is the community repository for [Liquibase](https://download.liquibase.org/) images.
 
 ## 🚨 BREAKING CHANGE
 
@@ -391,31 +288,16 @@ Liquibase Docker images use semantic versioning with the following tag strategie
 | `<version>-alpine` | `liquibase/liquibase:5.0.0-alpine`  | Specific Alpine version        |
 | `<major>.<minor>`  | `liquibase/liquibase:5.0`           | Latest patch for major.minor   |
 
-### Community vs Secure Image Tags
-
-The same tag structure applies to both image types:
-
-- **Community**: `liquibase/liquibase:5.0.0`
-- **Secure**: `liquibase/liquibase-secure:5.0.0`
-
-Both are available across all registries (Docker Hub, GHCR, Amazon ECR Public).
-
 ### Supported Tags
 
 The following tags are officially supported and can be found on [Docker Hub](https://hub.docker.com/r/liquibase/liquibase/tags):
-
-**Community Image:**
 
 - `liquibase/liquibase:latest` - Latest 5.0+ release
 - `liquibase/liquibase:5.0` - Latest 5.0.x release
 - `liquibase/liquibase:latest-alpine` - Latest Alpine variant
 - `liquibase/liquibase:4.x` - Liquibase 4 versions (Apache 2.0)
 
-**Secure Image:**
-
-- `liquibase/liquibase-secure:latest` - Latest Secure release
-- `liquibase/liquibase-secure:5.0` - Latest 5.0.x release
-- `liquibase/liquibase-secure:latest-alpine` - Latest Secure Alpine variant
+All tags are available across all registries (Docker Hub, GHCR, Amazon ECR Public).
 
 ### Choosing the Right Tag
 
@@ -430,17 +312,17 @@ The following tags are officially supported and can be found on [Docker Hub](htt
 
 The `liquibase/liquibase:<version>` image is the standard choice. Use it as a disposable container or a foundational building block for other images.
 
-For examples of extending the standard image, see the [standard image examples](https://github.com/liquibase/liquibase/tree/master/docker/examples).
+For examples of extending the standard image, see the [standard image examples](https://github.com/liquibase/liquibase/tree/main/docker/examples).
 
 ### 🏷️ Alpine Image
 
 The `liquibase/liquibase:<version>-alpine` image is a lightweight version designed for environments with limited resources. It is built on Alpine Linux and has a smaller footprint.
 
-For examples of extending the alpine image, see the [alpine image examples](https://github.com/liquibase/liquibase/tree/master/docker/examples).
+For examples of extending the alpine image, see the [alpine image examples](https://github.com/liquibase/liquibase/tree/main/docker/examples).
 
 ### 🐳 Docker Compose Example
 
-For a complete example using Docker Compose with PostgreSQL, see the [docker-compose example](https://github.com/liquibase/liquibase/tree/master/docker/examples/docker-compose).
+For a complete example using Docker Compose with PostgreSQL, see the [docker-compose example](https://github.com/liquibase/liquibase/tree/main/docker/examples/docker-compose).
 
 ### 📄 Using the Changelog File
 
@@ -587,7 +469,7 @@ Due to licensing restrictions, the MySQL driver is not included. Add it either b
 Dockerfile:
 
 ```dockerfile
-FROM liquibase:latest
+FROM liquibase/liquibase:latest
 
 RUN lpm add mysql --global
 ```
@@ -611,7 +493,7 @@ Here is a complete example using environment variables and a properties file:
 ### Environment Variables Example
 
 ```shell
-docker run --env LIQUIBASE_COMMAND_USERNAME --env LIQUIBASE_COMMAND_PASSWORD --env LIQUIBASE_COMMAND_URL --env LIQUIBASE_PRO_LICENSE_KEY --env LIQUIBASE_COMMAND_CHANGELOG_FILE --rm -v /path/to/changelog:/liquibase/changelog liquibase/liquibase --log-level=info update
+docker run --env LIQUIBASE_COMMAND_USERNAME --env LIQUIBASE_COMMAND_PASSWORD --env LIQUIBASE_COMMAND_URL --env LIQUIBASE_COMMAND_CHANGELOG_FILE --rm -v /path/to/changelog:/liquibase/changelog liquibase/liquibase --log-level=info update
 ```
 
 ### Properties File Example
@@ -624,7 +506,6 @@ url: jdbc:postgresql://<IP OR HOSTNAME>:5432/<DATABASE>?currentSchema=<SCHEMA NA
 changeLogFile: changelog.xml
 username: <USERNAME>
 password: <PASSWORD>
-liquibaseSecureLicenseKey=<PASTE LB Secure LICENSE KEY HERE>
 ```
 
 CLI:
