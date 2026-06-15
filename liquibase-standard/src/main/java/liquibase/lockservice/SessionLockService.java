@@ -163,11 +163,14 @@ public abstract class SessionLockService implements LockService {
         return currentLock.getLockedBy() + " since " + grantedAt;
     }
 
-    private void sleepRecheckInterval() {
+    private void sleepRecheckInterval() throws LockException {
         try {
             Thread.sleep(changeLogLockRecheckTimeSeconds * 1000);
         } catch (InterruptedException e) {
+            // Preserve the interrupt and abort the wait loop: otherwise the next sleep would throw
+            // immediately and waitForLock() would hot-spin on lock polls until the full timeout.
             Thread.currentThread().interrupt();
+            throw new LockException("Interrupted while waiting for change log lock", e);
         }
     }
 }

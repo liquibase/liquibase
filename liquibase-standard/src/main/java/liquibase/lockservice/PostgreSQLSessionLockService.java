@@ -34,6 +34,7 @@ public class PostgreSQLSessionLockService extends SessionLockService {
                     + " WHERE l.locktype = 'advisory'"
                     + " AND l.classid = ?"
                     + " AND l.objid = ?"
+                    // objsubid = 2 is the two-int4 advisory key form (objsubid = 1 is the single-int8 form)
                     + " AND l.objsubid = 2"
                     + " AND l.granted";
 
@@ -85,6 +86,8 @@ public class PostgreSQLSessionLockService extends SessionLockService {
                 if (!lockInfoResultSet.next()) {
                     return new DatabaseChangeLogLock[0];
                 }
+                // backend_start (session start) is only an upper bound on when the lock was taken;
+                // PostgreSQL does not record the actual advisory-lock acquisition time.
                 Timestamp lockGranted = lockInfoResultSet.getTimestamp("backend_start");
                 DatabaseChangeLogLock lock = new DatabaseChangeLogLock(1, lockGranted, describeLockHolder(lockInfoResultSet));
                 return new DatabaseChangeLogLock[]{lock};
