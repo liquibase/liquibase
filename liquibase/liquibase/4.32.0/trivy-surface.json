@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019ebb8e-089d-7223-ad5b-6af49628f132",
-  "CreatedAt": "2026-06-12T11:18:28.253141403Z",
+  "ReportID": "019ecb2a-acb1-7a99-a3e4-023d3dd42e53",
+  "CreatedAt": "2026-06-15T12:03:52.113695724Z",
   "ArtifactID": "sha256:e7e081a7e3694fb8b42307622ba7f47f327e178eeb8e4f00ab5da0b12bd0cfb3",
   "ArtifactName": "liquibase/liquibase:4.32.0",
   "ArtifactType": "container_image",
@@ -12513,7 +12513,7 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:25237",
+            "https://access.redhat.com/errata/RHSA-2026:25239",
             "https://access.redhat.com/security/cve/CVE-2026-45447",
             "https://bugzilla.redhat.com/2481879",
             "https://bugzilla.redhat.com/2481880",
@@ -12530,7 +12530,7 @@
             "https://bugzilla.redhat.com/2481896",
             "https://bugzilla.redhat.com/2481897",
             "https://bugzilla.redhat.com/2481898",
-            "https://errata.almalinux.org/10/ALSA-2026-25237.html",
+            "https://errata.almalinux.org/9/ALSA-2026-25239.html",
             "https://github.com/openssl/openssl/commit/3aad5eb7af4de4ee0633c30a8541a54d9bbde63c",
             "https://github.com/openssl/openssl/commit/7d4a980c62258c5910cc883936e0c8dbab4d75a8",
             "https://github.com/openssl/openssl/commit/9dfd688ad2290fc5075cacbc9bf0c9a93eefed54",
@@ -12586,7 +12586,7 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:25237",
+            "https://access.redhat.com/errata/RHSA-2026:25239",
             "https://access.redhat.com/security/cve/CVE-2026-45447",
             "https://bugzilla.redhat.com/2481879",
             "https://bugzilla.redhat.com/2481880",
@@ -12603,7 +12603,7 @@
             "https://bugzilla.redhat.com/2481896",
             "https://bugzilla.redhat.com/2481897",
             "https://bugzilla.redhat.com/2481898",
-            "https://errata.almalinux.org/10/ALSA-2026-25237.html",
+            "https://errata.almalinux.org/9/ALSA-2026-25239.html",
             "https://github.com/openssl/openssl/commit/3aad5eb7af4de4ee0633c30a8541a54d9bbde63c",
             "https://github.com/openssl/openssl/commit/7d4a980c62258c5910cc883936e0c8dbab4d75a8",
             "https://github.com/openssl/openssl/commit/9dfd688ad2290fc5075cacbc9bf0c9a93eefed54",
@@ -13697,6 +13697,7 @@
             "azure": 3,
             "bitnami": 3,
             "oracle-oval": 3,
+            "photon": 3,
             "redhat": 3,
             "rocky": 3
           },
@@ -13766,6 +13767,7 @@
             "amazon": 3,
             "bitnami": 3,
             "oracle-oval": 3,
+            "photon": 3,
             "redhat": 3,
             "rocky": 3,
             "ubuntu": 2
@@ -13858,6 +13860,7 @@
             "amazon": 3,
             "bitnami": 3,
             "nvd": 3,
+            "photon": 3,
             "redhat": 2,
             "rocky": 3
           },
@@ -13952,6 +13955,7 @@
             "bitnami": 3,
             "nvd": 3,
             "oracle-oval": 3,
+            "photon": 3,
             "redhat": 3,
             "rocky": 3
           },
@@ -14047,6 +14051,7 @@
             "bitnami": 3,
             "nvd": 3,
             "oracle-oval": 3,
+            "photon": 3,
             "redhat": 3
           },
           "CVSS": {
@@ -14115,6 +14120,7 @@
             "bitnami": 3,
             "nvd": 3,
             "oracle-oval": 3,
+            "photon": 3,
             "ubuntu": 2
           },
           "CVSS": {
@@ -14180,7 +14186,8 @@
             "amazon": 3,
             "bitnami": 3,
             "nvd": 3,
-            "oracle-oval": 3
+            "oracle-oval": 3,
+            "photon": 3
           },
           "CVSS": {
             "bitnami": {
@@ -14238,7 +14245,8 @@
           "VendorSeverity": {
             "amazon": 3,
             "bitnami": 2,
-            "oracle-oval": 3
+            "oracle-oval": 3,
+            "photon": 2
           },
           "CVSS": {
             "bitnami": {
@@ -14289,7 +14297,8 @@
           "VendorSeverity": {
             "amazon": 3,
             "bitnami": 2,
-            "oracle-oval": 3
+            "oracle-oval": 3,
+            "photon": 2
           },
           "CVSS": {
             "bitnami": {
@@ -14344,7 +14353,8 @@
           "VendorSeverity": {
             "bitnami": 3,
             "nvd": 3,
-            "oracle-oval": 3
+            "oracle-oval": 3,
+            "photon": 3
           },
           "CVSS": {
             "bitnami": {
@@ -14399,7 +14409,8 @@
           "VendorSeverity": {
             "amazon": 3,
             "bitnami": 3,
-            "oracle-oval": 3
+            "oracle-oval": 3,
+            "photon": 3
           },
           "CVSS": {
             "bitnami": {
