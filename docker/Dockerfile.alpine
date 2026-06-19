@@ -1,5 +1,5 @@
 # Use multi-stage build
-FROM alpine:3.23
+FROM alpine:3.24
 
 # Create liquibase user
 RUN addgroup --gid 1001 liquibase && \
