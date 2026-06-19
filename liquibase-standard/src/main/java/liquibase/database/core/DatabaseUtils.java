@@ -10,6 +10,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 public class DatabaseUtils {
     /**
@@ -50,7 +51,7 @@ public class DatabaseUtils {
                         finalSearchPath = defaultSchemaName;
                     }
 
-                    if (StringUtil.isNotEmpty(searchPath)) {
+                    if (StringUtils.isNotEmpty(searchPath)) {
                         //If existing search path entries are not quoted, quote them. Some databases do not show them as quoted even though they need to be (like $user or case sensitive schemas)
                         finalSearchPath += ", " + StringUtil.join(StringUtil.splitAndTrim(searchPath, ","), ",", (StringUtil.StringUtilFormatter<String>) obj -> {
                             if (obj.startsWith("\"")) {
@@ -60,7 +61,8 @@ public class DatabaseUtils {
                         });
                     }
 
-                    executor.execute(new RawParameterizedSqlStatement(String.format("SET LOCAL SEARCH_PATH TO %s", finalSearchPath)));
+                    String setSearchPathSql = isInTransaction(database) ? "SET LOCAL SEARCH_PATH TO %s" : "SET SEARCH_PATH TO %s";
+                    executor.execute(new RawParameterizedSqlStatement(String.format(setSearchPathSql, finalSearchPath)));
                 }
 
             } else if (database instanceof AbstractDb2Database) {
@@ -76,11 +78,19 @@ public class DatabaseUtils {
                 }
                 executor.execute(new RawParameterizedSqlStatement(String.format("USE %s", schema)));
             } else if (database instanceof MSSQLDatabase) {
-                    defaultCatalogName = StringUtil.trimToNull(defaultCatalogName);
-                    if (defaultCatalogName != null) {
-                        executor.execute(new RawParameterizedSqlStatement(String.format("USE %s", defaultCatalogName)));
-                    }
+                defaultCatalogName = StringUtils.trimToNull(defaultCatalogName);
+                if (defaultCatalogName != null) {
+                    executor.execute(new RawParameterizedSqlStatement(String.format("USE %s", defaultCatalogName)));
+                }
             }
+        }
+    }
+
+    private static boolean isInTransaction(Database database) {
+        try {
+            return !database.isAutoCommit();
+        } catch (DatabaseException e) {
+            return true;
         }
     }
 
@@ -90,10 +100,10 @@ public class DatabaseUtils {
      */
     public static String buildCatalogAndSchemaString(String catalog, String schema) {
         String info = "";
-        if (StringUtil.isNotEmpty(catalog)) {
+        if (StringUtils.isNotEmpty(catalog)) {
             info += catalog;
         }
-        if (StringUtil.isNotEmpty(schema)) {
+        if (StringUtils.isNotEmpty(schema)) {
             if (!info.endsWith(".")) {
                 info += ".";
             }
