@@ -120,7 +120,7 @@ class ResourceAccessorTest extends Specification {
         "simple/path.txt"                     | "simple/path.txt"                     | "simple path (no special chars)"
         "path\\with\\backslashes"             | "path/with/backslashes"               | "backslashes"
         "100% cotton"                         | "100% cotton"                         | "bare percent sign"
-        "path/with%20encoded"                 | "path/with%20encoded"                 | "already encoded percent"
+        "path/with%20encoded"                 | "path/with%20encoded"                 | "literal percent sequence"
         "données/café.txt"                    | "données/café.txt"                    | "non-ASCII characters"
     }
 
