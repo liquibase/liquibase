@@ -26,14 +26,30 @@ jobs:
     steps:
       - name: Get run-tests.yml runId
         id: get_run_id
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Fetch the list of workflow runs
-          response=$(curl -s \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/liquibase/liquibase/actions/workflows/run-tests.yml/runs?branch=main&status=success&per_page=1")
-            # Extract the last successful run ID
-          run_id=$(echo "$response" | jq -r '.workflow_runs[0].id')
+          # Find the most recent run-tests.yml run on main that has a valid (non-expired) liquibase-artifacts artifact.
+          # We scan up to 20 recent completed runs, so a single unrelated failing job
+          # (e.g. test-harness dispatch) cannot starve the dry-run of fresh build artifacts.
+          response=$(gh api "repos/${{ github.repository }}/actions/workflows/run-tests.yml/runs?branch=main&status=completed&per_page=20")
+
+          run_id=""
+          while IFS= read -r candidate_id; do
+            valid=$(gh api "repos/${{ github.repository }}/actions/runs/${candidate_id}/artifacts" \
+              --jq 'any(.artifacts[]; .name == "liquibase-artifacts" and (.expired | not))') || continue
+            if [ "$valid" = "true" ]; then
+              run_id="$candidate_id"
+              echo "Found valid liquibase-artifacts in run-tests run $run_id"
+              break
+            fi
+          done < <(echo "$response" | jq -r '.workflow_runs[].id')
+
+          if [ -z "$run_id" ]; then
+            echo "ERROR: No run-tests.yml run found with a valid liquibase-artifacts artifact in the last 20 completed runs on main"
+            exit 1
+          fi
+
           echo "dry_run_id=$run_id" >> $GITHUB_OUTPUT
           echo "dry_run_branch_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
 
@@ -72,7 +88,7 @@ jobs:
 
       - name: Invoke Create Release
         id: trigger-step
-        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@main
+        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@a220b5f9914de6995d944c33587da54d24088d64 # main
         with:
           workflow: create-release.yml
           ref: main
@@ -202,7 +218,7 @@ jobs:
           permission-actions: write
 
       - name: Trigger release-published-orchestrator workflow
-        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@main
+        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@a220b5f9914de6995d944c33587da54d24088d64 # main
         with:
           workflow: release-published-orchestrator.yml
           ref: main

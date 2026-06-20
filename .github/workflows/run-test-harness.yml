@@ -99,7 +99,7 @@ jobs:
         id: return_dispatch
         with:
           token: ${{ steps.get-token.outputs.token }}
-          ref: "develop"
+          ref: "main"
           repo: liquibase-test-harness
           owner: liquibase
           workflow: main.yml
