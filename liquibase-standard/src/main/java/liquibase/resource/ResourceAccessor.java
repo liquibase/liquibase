@@ -309,6 +309,9 @@ public interface ResourceAccessor extends AutoCloseable {
 
         private static URI createSafeUri(String path) {
             try {
+                // The 3-arg URI constructor percent-encodes any illegal characters in the
+                // scheme-specific part, so it does not throw for the inputs seen here. The
+                // catch below is purely defensive and is not expected to be reached.
                 return new URI("resourceaccessor", path.replace('\\', '/'), null);
             } catch (URISyntaxException e) {
                 return URI.create("resourceaccessor:unknown");
