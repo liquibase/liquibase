@@ -424,7 +424,7 @@ public class LiquibaseCommandLine {
                                 }
                                 final List<CommandLine> commandList = commandLine.getParseResult().asCommandLineList();
                                 final String commandName = StringUtil.join(getCommandNames(commandList.get(commandList.size() - 1)), " ");
-                                Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + commandName + "' was executed successfully.");
+                                Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + commandName + "' was executed successfully.", liquibase.ui.UIService.MessageType.SUCCESS);
                             }
                         }
                         return response;
@@ -938,8 +938,12 @@ public class LiquibaseCommandLine {
         for (Handler handler : rootLogger.getHandlers()) {
             if (handler instanceof ConsoleHandler) {
                 handler.setLevel(cliLogLevel);
+                // Apply the console-specific formatter (may include ANSI colour in Pro).
+                // This keeps the file handler on the plain formatter path — ANSI never reaches log files.
+                JavaLogService.setConsoleFormatterOnHandler(logService, handler);
+            } else {
+                JavaLogService.setFormatterOnHandler(logService, handler);
             }
-            JavaLogService.setFormatterOnHandler(logService, handler);
         }
     }
 
