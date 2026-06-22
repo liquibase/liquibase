@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019edfa7-ca47-7c24-8652-d22b28cced96",
-  "CreatedAt": "2026-06-19T11:32:56.00779671Z",
+  "ReportID": "019eef35-fc34-7ceb-b6b4-6987fa91ca09",
+  "CreatedAt": "2026-06-22T12:02:33.140848618Z",
   "ArtifactID": "sha256:ab06f77e82c54ce2f2a004f579c5c6b6c1689d650816b8124569f23747ebbd32",
   "ArtifactName": "liquibase/liquibase:5.0.3",
   "ArtifactType": "container_image",
@@ -10654,6 +10654,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
+            "azure": 3,
             "oracle-oval": 3,
             "photon": 3,
             "redhat": 3,
@@ -10715,7 +10716,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-7383",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-9076",
             "https://errata.almalinux.org/9/ALSA-2026-25239.html",
-            "https://errata.rockylinux.org/RLSA-2026:25239",
+            "https://errata.rockylinux.org/RLSA-2026:25237",
             "https://github.com/openssl/openssl/commit/3aad5eb7af4de4ee0633c30a8541a54d9bbde63c",
             "https://github.com/openssl/openssl/commit/7d4a980c62258c5910cc883936e0c8dbab4d75a8",
             "https://github.com/openssl/openssl/commit/9dfd688ad2290fc5075cacbc9bf0c9a93eefed54",
@@ -10763,6 +10764,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
+            "azure": 3,
             "oracle-oval": 3,
             "photon": 3,
             "redhat": 3,
@@ -10824,7 +10826,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-7383",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-9076",
             "https://errata.almalinux.org/9/ALSA-2026-25239.html",
-            "https://errata.rockylinux.org/RLSA-2026:25239",
+            "https://errata.rockylinux.org/RLSA-2026:25237",
             "https://github.com/openssl/openssl/commit/3aad5eb7af4de4ee0633c30a8541a54d9bbde63c",
             "https://github.com/openssl/openssl/commit/7d4a980c62258c5910cc883936e0c8dbab4d75a8",
             "https://github.com/openssl/openssl/commit/9dfd688ad2290fc5075cacbc9bf0c9a93eefed54",
