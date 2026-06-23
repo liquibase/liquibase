@@ -26,9 +26,9 @@ Together, these options ensure that teams can choose the path that best fits the
 ### Build Access and Release Planning
 
 - **Nightly builds:** The latest Main branch build is available at https://github.com/liquibase/liquibase/releases/tag/nightly — download `liquibase-nightly.tar.gz` (Linux/macOS) or `liquibase-nightly.zip` (Windows). Updated automatically after each successful test run on main.
-- **Latest Release: v5.0.2 — March 5, 2026** \
+- **Latest Release: v5.0.3 — May 15, 2026** \
 https://www.liquibase.com/download-community
-- **Next Planned Release: May 15, 2026** 
+- **Next Planned Release: August 20, 2026** 
 - **Roadmap:** \
 https://github.com/orgs/liquibase/projects/3/views/9?layout=board
 
@@ -54,6 +54,18 @@ Liquibase system requirements can be found on the [Download Liquibase](https://w
 7. Run the `liquibase history` command to see what has executed!
 
 See also how to [get started with Liquibase in minutes](https://docs.liquibase.com/start/home.html) or refer to our [Installing Liquibase](https://docs.liquibase.com/start/install/home.html) documentation page for more details.
+
+## Docker
+
+The official Liquibase Community Docker images are built from the [`docker/`](docker/) directory of this repository and published to [Docker Hub](https://hub.docker.com/r/liquibase/liquibase), GitHub Container Registry, and Amazon ECR Public:
+
+```bash
+docker pull liquibase/liquibase
+```
+
+See the [Docker README](docker/README.md) for tags, usage, and examples, and file Docker image issues in this repository. The images were previously maintained in the now-deprecated [`liquibase/docker`](https://github.com/liquibase/docker) repository.
+
+The commercial [`liquibase/liquibase-secure`](https://hub.docker.com/r/liquibase/liquibase-secure) image is maintained internally by Liquibase — contact [Liquibase Support](https://support.liquibase.com/) for issues.
 
 ## Documentation
 

@@ -211,4 +211,105 @@ class SQLFileChangeTest extends StandardChangeTest {
         ChecksumVersion.V8 | "8:25560f4c442fa581b820d0a6206fd14e" | "8:b934d68e53222bc7b5cbf147ce6746b4"
         ChecksumVersion.latest() | "9:8cfbd3e5970885470db17cd149feb637" | "9:f6302129ace10ca356faa21343dd1aa8"
     }
+
+    // CWE-22 opt-in restricted mode for absolute and classpath: paths.
+    // See GlobalConfiguration.ALLOW_EXTERNAL_CHANGELOG_PATHS.
+
+    @Unroll
+    def "validate returns clean ValidationError when allowExternalChangelogPaths=false and sqlFile path is external (#path)"() {
+        given:
+        def change = new SQLFileChange()
+        change.setPath(path)
+        change.setRelativeToChangelogFile(false)
+        def errors
+
+        when:
+        Scope.child(["liquibase.allowExternalChangelogPaths": "false"] as Map, {
+            errors = change.validate(new MockDatabase())
+        } as Scope.ScopedRunner)
+
+        then:
+        errors != null
+        errors.hasErrors()
+        def message = errors.getErrorMessages().join(" | ")
+        // Message must name the flag in both directions, identify the element, and quote the
+        // offending path. The configured-off rejection must be reported directly (not as a
+        // generic "sqlFile not found" wrapped from the downstream IOException catch).
+        message.contains("liquibase.allowExternalChangelogPaths=false")
+        message.contains("liquibase.allowExternalChangelogPaths=true")
+        message.contains("sqlFile")
+        message.contains(path)
+        message.contains("NOT resolved")
+        message.contains(expectedPatternName)
+
+        where:
+        path                                | expectedPatternName
+        "classpath:/db/payload.sql"         | "'classpath:' URI prefix"
+        "classpath:db/payload.sql"          | "'classpath:' URI prefix"
+        "/etc/passwd.sql"                   | "absolute filesystem path"
+        "/var/lib/attacker/payload.sql"     | "absolute filesystem path"
+        "C:/Users/Attacker/payload.sql"     | "Windows-style absolute path"
+        "d:/payload.sql"                    | "Windows-style absolute path"
+    }
+
+    def "validate does NOT reject classpath: when allowExternalChangelogPaths=true (default — preserves Spring Boot's classpath:db/changelog/... pattern)"() {
+        given:
+        def change = new SQLFileChange()
+        change.setPath("classpath:/db/changelog/changelog-master.sql")
+        change.setRelativeToChangelogFile(false)
+        def errors
+
+        when:
+        Scope.child(["liquibase.allowExternalChangelogPaths": "true"] as Map, {
+            errors = change.validate(new MockDatabase())
+        } as Scope.ScopedRunner)
+
+        then:
+        // The flag-driven configured-off error must NOT appear at default. Whether the
+        // file actually exists in the test classpath is irrelevant here — pin only the
+        // absence of the flag-rejection message.
+        errors != null
+        def message = errors.getErrorMessages().join(" | ")
+        !message.contains("liquibase.allowExternalChangelogPaths=false")
+        !message.contains("NOT resolved")
+    }
+
+    def "validate bypasses the gate when relativeToChangelogFile=true even with allowExternalChangelogPaths=false"() {
+        // The relativeToChangelogFile=true escape valve anchors the path to the parent
+        // changelog directory — it cannot escape the configured scope, so the gate does
+        // not fire even for paths that would otherwise look external.
+        //
+        // Note: this test deliberately doesn't set up a ChangeSet, so validate() will throw
+        // a downstream NPE when getResource() tries to call getChangeSet().getChangeLog().
+        // That's fine — the assertion is *negative*: prove the FLAG GATE didn't fire. A
+        // downstream NPE from the missing ChangeSet is acceptable evidence; a flag-rejection
+        // ValidationError would not be.
+        given:
+        def change = new SQLFileChange()
+        change.setPath("/some/looks-absolute/path.sql")
+        change.setRelativeToChangelogFile(true)
+        def errors = null
+        Throwable thrown = null
+
+        when:
+        Scope.child(["liquibase.allowExternalChangelogPaths": "false"] as Map, {
+            try {
+                errors = change.validate(new MockDatabase())
+            } catch (Throwable t) {
+                thrown = t
+            }
+        } as Scope.ScopedRunner)
+
+        then:
+        // The flag-driven configured-off message must NOT appear anywhere.
+        if (errors != null) {
+            def message = errors.getErrorMessages().join(" | ")
+            assert !message.contains("liquibase.allowExternalChangelogPaths=false")
+        }
+        if (thrown != null) {
+            def causeMessage = (thrown.getCause() != null ? thrown.getCause().getMessage() : "") ?: ""
+            assert !thrown.toString().contains("liquibase.allowExternalChangelogPaths=false")
+            assert !causeMessage.contains("liquibase.allowExternalChangelogPaths=false")
+        }
+    }
 }

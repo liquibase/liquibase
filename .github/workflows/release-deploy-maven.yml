@@ -76,7 +76,7 @@ jobs:
         run: gh release download "$TAG" --repo liquibase/liquibase --dir "."
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59 # v6.1.3
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -129,16 +129,22 @@ jobs:
 
             # Sign POM file
             gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
-            
+
             # Generate checksums for POM file
             md5sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.md5
             sha1sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.sha1
-            
-            # Generate checksums for all JAR files (main, sources, javadoc)
+            sha256sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.sha256
+
+            # Generate checksums for all JAR files (main, sources, javadoc).
+            # .sha256 is regenerated here (not just inherited from
+            # liquibase-additional-*.zip) because the sidecars produced by
+            # sign-artifacts.sh carry a trailing space that Sonatype Central
+            # Portal rejects as "Invalid sha256 checksum".
             for jar_file in $i-${version}.jar $i-${version}-sources.jar $i-${version}-javadoc.jar; do
               if [ -f "$jar_file" ]; then
                 md5sum "$jar_file" | cut -d' ' -f1 > "$jar_file.md5"
                 sha1sum "$jar_file" | cut -d' ' -f1 > "$jar_file.sha1"
+                sha256sum "$jar_file" | cut -d' ' -f1 > "$jar_file.sha256"
               fi
             done
           done
@@ -201,7 +207,7 @@ jobs:
             --dir "."
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59 # v6.1.3
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -254,16 +260,22 @@ jobs:
 
             # Sign POM file
             gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
-            
+
             # Generate checksums for POM file
             md5sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.md5
             sha1sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.sha1
-            
-            # Generate checksums for all JAR files (main, sources, javadoc)
+            sha256sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.sha256
+
+            # Generate checksums for all JAR files (main, sources, javadoc).
+            # .sha256 is regenerated here (not just inherited from
+            # liquibase-additional-*.zip) because the sidecars produced by
+            # sign-artifacts.sh carry a trailing space that Sonatype Central
+            # Portal rejects as "Invalid sha256 checksum".
             for jar_file in $i-${version}.jar $i-${version}-sources.jar $i-${version}-javadoc.jar; do
               if [ -f "$jar_file" ]; then
                 md5sum "$jar_file" | cut -d' ' -f1 > "$jar_file.md5"
                 sha1sum "$jar_file" | cut -d' ' -f1 > "$jar_file.sha1"
+                sha256sum "$jar_file" | cut -d' ' -f1 > "$jar_file.sha256"
               fi
             done
           done
