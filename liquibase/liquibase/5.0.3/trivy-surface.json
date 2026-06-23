@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019eef35-fc34-7ceb-b6b4-6987fa91ca09",
-  "CreatedAt": "2026-06-22T12:02:33.140848618Z",
+  "ReportID": "019ef426-a404-7280-b3e9-3c2b352b77b4",
+  "CreatedAt": "2026-06-23T11:03:53.604164913Z",
   "ArtifactID": "sha256:ab06f77e82c54ce2f2a004f579c5c6b6c1689d650816b8124569f23747ebbd32",
   "ArtifactName": "liquibase/liquibase:5.0.3",
   "ArtifactType": "container_image",
@@ -10654,6 +10654,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
+            "amazon": 3,
             "azure": 3,
             "oracle-oval": 3,
             "photon": 3,
@@ -10716,7 +10717,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-7383",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-9076",
             "https://errata.almalinux.org/9/ALSA-2026-25239.html",
-            "https://errata.rockylinux.org/RLSA-2026:25237",
+            "https://errata.rockylinux.org/RLSA-2026:25239",
             "https://github.com/openssl/openssl/commit/3aad5eb7af4de4ee0633c30a8541a54d9bbde63c",
             "https://github.com/openssl/openssl/commit/7d4a980c62258c5910cc883936e0c8dbab4d75a8",
             "https://github.com/openssl/openssl/commit/9dfd688ad2290fc5075cacbc9bf0c9a93eefed54",
@@ -10731,7 +10732,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-45447"
           ],
           "PublishedDate": "2026-06-09T17:17:19.277Z",
-          "LastModifiedDate": "2026-06-16T02:56:50.707Z"
+          "LastModifiedDate": "2026-06-17T10:52:04.14Z"
         },
         {
           "VulnerabilityID": "CVE-2026-45447",
@@ -10764,6 +10765,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
+            "amazon": 3,
             "azure": 3,
             "oracle-oval": 3,
             "photon": 3,
@@ -10826,7 +10828,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-7383",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-9076",
             "https://errata.almalinux.org/9/ALSA-2026-25239.html",
-            "https://errata.rockylinux.org/RLSA-2026:25237",
+            "https://errata.rockylinux.org/RLSA-2026:25239",
             "https://github.com/openssl/openssl/commit/3aad5eb7af4de4ee0633c30a8541a54d9bbde63c",
             "https://github.com/openssl/openssl/commit/7d4a980c62258c5910cc883936e0c8dbab4d75a8",
             "https://github.com/openssl/openssl/commit/9dfd688ad2290fc5075cacbc9bf0c9a93eefed54",
@@ -10841,7 +10843,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-45447"
           ],
           "PublishedDate": "2026-06-09T17:17:19.277Z",
-          "LastModifiedDate": "2026-06-16T02:56:50.707Z"
+          "LastModifiedDate": "2026-06-17T10:52:04.14Z"
         }
       ]
     },
@@ -11056,6 +11058,54 @@
       ],
       "Vulnerabilities": [
         {
+          "VulnerabilityID": "CVE-2026-27145",
+          "VendorIDs": [
+            "GO-2026-5037"
+          ],
+          "PkgID": "stdlib@v1.26.3",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.26.3",
+            "UID": "911f9adf8a28bc93"
+          },
+          "InstalledVersion": "v1.26.3",
+          "FixedVersion": "1.25.11, 1.26.4",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:993b74dfbdbf95a0ea79b480537ea1749d0b9951f573955f77ddf3ae192d2fb5",
+            "DiffID": "sha256:20670539c81fbc62d2076071c96308113ddbd5c1f451b9e74cdcb4cb08a49502"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-27145",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:87c4889eec327be25b594c629f2b4b322cb74c24918216c643fa22cca4c1e3e2",
+          "Title": "*x509.Certificate).VerifyHostname previously called matchHostnames in ...",
+          "Description": "(*x509.Certificate).VerifyHostname previously called matchHostnames in a loop over all DNS Subject Alternative Name (SAN) entries. This caused strings.Split(host, \".\") to execute repeatedly on the same input hostname. With a large DNS SAN list, verification costs scaled quadratically based on the number of SAN entries multiplied by the hostname's label count. Because x509.Verify validates hostnames before building the certificate chain, this overhead occurred even for untrusted certificates.",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "amazon": 3,
+            "bitnami": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:H",
+              "V3Score": 6.5
+            }
+          },
+          "References": [
+            "https://go.dev/cl/783621",
+            "https://go.dev/issue/79694",
+            "https://groups.google.com/g/golang-announce/c/tKs3rmcBcKw",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-27145",
+            "https://pkg.go.dev/vuln/GO-2026-5037"
+          ],
+          "PublishedDate": "2026-06-02T23:16:35.57Z",
+          "LastModifiedDate": "2026-06-17T10:26:45.23Z"
+        },
+        {
           "VulnerabilityID": "CVE-2026-42504",
           "VendorIDs": [
             "GO-2026-5038"
@@ -11087,6 +11137,7 @@
             "CWE-407"
           ],
           "VendorSeverity": {
+            "amazon": 3,
             "bitnami": 3
           },
           "CVSS": {
@@ -11103,7 +11154,7 @@
             "https://pkg.go.dev/vuln/GO-2026-5038"
           ],
           "PublishedDate": "2026-06-02T23:16:37.927Z",
-          "LastModifiedDate": "2026-06-04T16:15:50.143Z"
+          "LastModifiedDate": "2026-06-17T10:47:56.86Z"
         }
       ]
     }

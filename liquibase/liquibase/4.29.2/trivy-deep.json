@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019eef36-4f2e-73e7-a193-5b8d8c4086d1",
-  "CreatedAt": "2026-06-22T12:02:54.382256842Z",
+  "ReportID": "019ef426-f6b4-749d-9f32-c72f61cc7020",
+  "CreatedAt": "2026-06-23T11:04:14.772304248Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -402,7 +402,7 @@
             "https://nvd.nist.gov/vuln/detail/CVE-2025-59250"
           ],
           "PublishedDate": "2025-10-14T17:16:07.24Z",
-          "LastModifiedDate": "2025-10-30T16:35:42.213Z"
+          "LastModifiedDate": "2026-06-17T09:45:48.78Z"
         },
         {
           "VulnerabilityID": "CVE-2025-59250",
@@ -461,7 +461,7 @@
             "https://nvd.nist.gov/vuln/detail/CVE-2025-59250"
           ],
           "PublishedDate": "2025-10-14T17:16:07.24Z",
-          "LastModifiedDate": "2025-10-30T16:35:42.213Z"
+          "LastModifiedDate": "2026-06-17T09:45:48.78Z"
         },
         {
           "VulnerabilityID": "CVE-2025-24789",
@@ -507,7 +507,7 @@
             "https://nvd.nist.gov/vuln/detail/CVE-2025-24789"
           ],
           "PublishedDate": "2025-01-29T18:15:47.03Z",
-          "LastModifiedDate": "2025-08-20T18:18:54.14Z"
+          "LastModifiedDate": "2026-06-17T08:59:36.757Z"
         },
         {
           "VulnerabilityID": "CVE-2026-42198",
@@ -566,7 +566,7 @@
             "https://bugzilla.redhat.com/show_bug.cgi?id=2463857",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42198",
             "https://errata.almalinux.org/8/ALSA-2026-25030.html",
-            "https://errata.rockylinux.org/RLSA-2026:24348",
+            "https://errata.rockylinux.org/RLSA-2026:22304",
             "https://github.com/pgjdbc/pgjdbc",
             "https://github.com/pgjdbc/pgjdbc/releases/tag/REL42.7.11",
             "https://github.com/pgjdbc/pgjdbc/security/advisories/GHSA-98qh-xjc8-98pq",
@@ -576,7 +576,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-42198"
           ],
           "PublishedDate": "2026-04-29T16:16:25.427Z",
-          "LastModifiedDate": "2026-05-01T12:51:20.853Z"
+          "LastModifiedDate": "2026-06-17T10:47:30.097Z"
         }
       ]
     }

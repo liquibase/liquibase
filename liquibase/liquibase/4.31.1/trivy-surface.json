@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019eef36-5fd0-7eb7-8493-ffcfdfd8c03e",
-  "CreatedAt": "2026-06-22T12:02:58.640966808Z",
+  "ReportID": "019ef426-ed83-7502-bc60-ff46db3fe18e",
+  "CreatedAt": "2026-06-23T11:04:12.419330458Z",
   "ArtifactID": "sha256:6b698a25ab3d5dd7046a91ee26926d4e824175bd97dcb89c075c1b6148f7113d",
   "ArtifactName": "liquibase/liquibase:4.31.1",
   "ArtifactType": "container_image",
@@ -11510,7 +11510,7 @@
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0697",
+            "https://errata.rockylinux.org/RLSA-2026:0719",
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
@@ -11531,7 +11531,7 @@
             "https://www.openwall.com/lists/oss-security/2025/12/28/5"
           ],
           "PublishedDate": "2025-12-28T17:16:01.5Z",
-          "LastModifiedDate": "2026-01-14T19:16:46.857Z"
+          "LastModifiedDate": "2026-06-17T09:59:55.493Z"
         },
         {
           "VulnerabilityID": "CVE-2025-68973",
@@ -11600,7 +11600,7 @@
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0697",
+            "https://errata.rockylinux.org/RLSA-2026:0719",
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
@@ -11621,7 +11621,7 @@
             "https://www.openwall.com/lists/oss-security/2025/12/28/5"
           ],
           "PublishedDate": "2025-12-28T17:16:01.5Z",
-          "LastModifiedDate": "2026-01-14T19:16:46.857Z"
+          "LastModifiedDate": "2026-06-17T09:59:55.493Z"
         },
         {
           "VulnerabilityID": "CVE-2025-68973",
@@ -11690,7 +11690,7 @@
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0697",
+            "https://errata.rockylinux.org/RLSA-2026:0719",
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
@@ -11711,7 +11711,7 @@
             "https://www.openwall.com/lists/oss-security/2025/12/28/5"
           ],
           "PublishedDate": "2025-12-28T17:16:01.5Z",
-          "LastModifiedDate": "2026-01-14T19:16:46.857Z"
+          "LastModifiedDate": "2026-06-17T09:59:55.493Z"
         },
         {
           "VulnerabilityID": "CVE-2025-68973",
@@ -11780,7 +11780,7 @@
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0697",
+            "https://errata.rockylinux.org/RLSA-2026:0719",
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
@@ -11801,7 +11801,7 @@
             "https://www.openwall.com/lists/oss-security/2025/12/28/5"
           ],
           "PublishedDate": "2025-12-28T17:16:01.5Z",
-          "LastModifiedDate": "2026-01-14T19:16:46.857Z"
+          "LastModifiedDate": "2026-06-17T09:59:55.493Z"
         },
         {
           "VulnerabilityID": "CVE-2025-68973",
@@ -11870,7 +11870,7 @@
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0697",
+            "https://errata.rockylinux.org/RLSA-2026:0719",
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
@@ -11891,7 +11891,7 @@
             "https://www.openwall.com/lists/oss-security/2025/12/28/5"
           ],
           "PublishedDate": "2025-12-28T17:16:01.5Z",
-          "LastModifiedDate": "2026-01-14T19:16:46.857Z"
+          "LastModifiedDate": "2026-06-17T09:59:55.493Z"
         },
         {
           "VulnerabilityID": "CVE-2025-68973",
@@ -11960,7 +11960,7 @@
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0697",
+            "https://errata.rockylinux.org/RLSA-2026:0719",
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
@@ -11981,7 +11981,7 @@
             "https://www.openwall.com/lists/oss-security/2025/12/28/5"
           ],
           "PublishedDate": "2025-12-28T17:16:01.5Z",
-          "LastModifiedDate": "2026-01-14T19:16:46.857Z"
+          "LastModifiedDate": "2026-06-17T09:59:55.493Z"
         },
         {
           "VulnerabilityID": "CVE-2025-68973",
@@ -12050,7 +12050,7 @@
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0697",
+            "https://errata.rockylinux.org/RLSA-2026:0719",
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
@@ -12071,7 +12071,7 @@
             "https://www.openwall.com/lists/oss-security/2025/12/28/5"
           ],
           "PublishedDate": "2025-12-28T17:16:01.5Z",
-          "LastModifiedDate": "2026-01-14T19:16:46.857Z"
+          "LastModifiedDate": "2026-06-17T09:59:55.493Z"
         },
         {
           "VulnerabilityID": "CVE-2025-68973",
@@ -12140,7 +12140,7 @@
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0697",
+            "https://errata.rockylinux.org/RLSA-2026:0719",
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
@@ -12161,7 +12161,7 @@
             "https://www.openwall.com/lists/oss-security/2025/12/28/5"
           ],
           "PublishedDate": "2025-12-28T17:16:01.5Z",
-          "LastModifiedDate": "2026-01-14T19:16:46.857Z"
+          "LastModifiedDate": "2026-06-17T09:59:55.493Z"
         },
         {
           "VulnerabilityID": "CVE-2025-68973",
@@ -12230,7 +12230,7 @@
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0697",
+            "https://errata.rockylinux.org/RLSA-2026:0719",
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
@@ -12251,7 +12251,7 @@
             "https://www.openwall.com/lists/oss-security/2025/12/28/5"
           ],
           "PublishedDate": "2025-12-28T17:16:01.5Z",
-          "LastModifiedDate": "2026-01-14T19:16:46.857Z"
+          "LastModifiedDate": "2026-06-17T09:59:55.493Z"
         },
         {
           "VulnerabilityID": "CVE-2025-68973",
@@ -12320,7 +12320,7 @@
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0697",
+            "https://errata.rockylinux.org/RLSA-2026:0719",
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
@@ -12341,7 +12341,7 @@
             "https://www.openwall.com/lists/oss-security/2025/12/28/5"
           ],
           "PublishedDate": "2025-12-28T17:16:01.5Z",
-          "LastModifiedDate": "2026-01-14T19:16:46.857Z"
+          "LastModifiedDate": "2026-06-17T09:59:55.493Z"
         },
         {
           "VulnerabilityID": "CVE-2025-68973",
@@ -12410,7 +12410,7 @@
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0697",
+            "https://errata.rockylinux.org/RLSA-2026:0719",
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
@@ -12431,7 +12431,7 @@
             "https://www.openwall.com/lists/oss-security/2025/12/28/5"
           ],
           "PublishedDate": "2025-12-28T17:16:01.5Z",
-          "LastModifiedDate": "2026-01-14T19:16:46.857Z"
+          "LastModifiedDate": "2026-06-17T09:59:55.493Z"
         },
         {
           "VulnerabilityID": "CVE-2026-45447",
@@ -12464,6 +12464,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
+            "amazon": 3,
             "azure": 3,
             "oracle-oval": 3,
             "photon": 3,
@@ -12526,7 +12527,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-7383",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-9076",
             "https://errata.almalinux.org/9/ALSA-2026-25239.html",
-            "https://errata.rockylinux.org/RLSA-2026:25237",
+            "https://errata.rockylinux.org/RLSA-2026:25239",
             "https://github.com/openssl/openssl/commit/3aad5eb7af4de4ee0633c30a8541a54d9bbde63c",
             "https://github.com/openssl/openssl/commit/7d4a980c62258c5910cc883936e0c8dbab4d75a8",
             "https://github.com/openssl/openssl/commit/9dfd688ad2290fc5075cacbc9bf0c9a93eefed54",
@@ -12541,7 +12542,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-45447"
           ],
           "PublishedDate": "2026-06-09T17:17:19.277Z",
-          "LastModifiedDate": "2026-06-16T02:56:50.707Z"
+          "LastModifiedDate": "2026-06-17T10:52:04.14Z"
         },
         {
           "VulnerabilityID": "CVE-2026-45447",
@@ -12574,6 +12575,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
+            "amazon": 3,
             "azure": 3,
             "oracle-oval": 3,
             "photon": 3,
@@ -12636,7 +12638,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-7383",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-9076",
             "https://errata.almalinux.org/9/ALSA-2026-25239.html",
-            "https://errata.rockylinux.org/RLSA-2026:25237",
+            "https://errata.rockylinux.org/RLSA-2026:25239",
             "https://github.com/openssl/openssl/commit/3aad5eb7af4de4ee0633c30a8541a54d9bbde63c",
             "https://github.com/openssl/openssl/commit/7d4a980c62258c5910cc883936e0c8dbab4d75a8",
             "https://github.com/openssl/openssl/commit/9dfd688ad2290fc5075cacbc9bf0c9a93eefed54",
@@ -12651,7 +12653,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-45447"
           ],
           "PublishedDate": "2026-06-09T17:17:19.277Z",
-          "LastModifiedDate": "2026-06-16T02:56:50.707Z"
+          "LastModifiedDate": "2026-06-17T10:52:04.14Z"
         }
       ]
     },
@@ -13213,7 +13215,7 @@
             "https://nvd.nist.gov/vuln/detail/CVE-2025-59250"
           ],
           "PublishedDate": "2025-10-14T17:16:07.24Z",
-          "LastModifiedDate": "2025-10-30T16:35:42.213Z"
+          "LastModifiedDate": "2026-06-17T09:45:48.78Z"
         },
         {
           "VulnerabilityID": "CVE-2025-59250",
@@ -13276,7 +13278,7 @@
             "https://nvd.nist.gov/vuln/detail/CVE-2025-59250"
           ],
           "PublishedDate": "2025-10-14T17:16:07.24Z",
-          "LastModifiedDate": "2025-10-30T16:35:42.213Z"
+          "LastModifiedDate": "2026-06-17T09:45:48.78Z"
         },
         {
           "VulnerabilityID": "CVE-2025-49146",
@@ -13346,7 +13348,7 @@
             "https://www.postgresql.org/docs/current/sasl-authentication.html#SASL-SCRAM-SHA-256"
           ],
           "PublishedDate": "2025-06-11T15:15:42.85Z",
-          "LastModifiedDate": "2025-10-06T19:29:58.977Z"
+          "LastModifiedDate": "2026-06-17T09:30:49.57Z"
         },
         {
           "VulnerabilityID": "CVE-2026-42198",
@@ -13409,7 +13411,7 @@
             "https://bugzilla.redhat.com/show_bug.cgi?id=2463857",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42198",
             "https://errata.almalinux.org/8/ALSA-2026-25030.html",
-            "https://errata.rockylinux.org/RLSA-2026:24348",
+            "https://errata.rockylinux.org/RLSA-2026:22304",
             "https://github.com/pgjdbc/pgjdbc",
             "https://github.com/pgjdbc/pgjdbc/releases/tag/REL42.7.11",
             "https://github.com/pgjdbc/pgjdbc/security/advisories/GHSA-98qh-xjc8-98pq",
@@ -13419,7 +13421,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-42198"
           ],
           "PublishedDate": "2026-04-29T16:16:25.427Z",
-          "LastModifiedDate": "2026-05-01T12:51:20.853Z"
+          "LastModifiedDate": "2026-06-17T10:47:30.097Z"
         }
       ]
     },
@@ -13564,14 +13566,12 @@
             "https://access.redhat.com/security/cve/CVE-2025-68121",
             "https://bugzilla.redhat.com/2434432",
             "https://bugzilla.redhat.com/2437111",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2418462",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2434432",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2437111",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61726",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61729",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68121",
             "https://errata.almalinux.org/9/ALSA-2026-4177.html",
-            "https://errata.rockylinux.org/RLSA-2026:5146",
+            "https://errata.rockylinux.org/RLSA-2026:4177",
             "https://github.com/golang/go/issues/77113",
             "https://go.dev/cl/737700",
             "https://go.dev/issue/77217",
@@ -13584,7 +13584,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2025-68121"
           ],
           "PublishedDate": "2026-02-05T18:16:10.857Z",
-          "LastModifiedDate": "2026-04-29T14:16:16.17Z"
+          "LastModifiedDate": "2026-06-17T09:58:33.833Z"
         },
         {
           "VulnerabilityID": "CVE-2025-61726",
@@ -13619,7 +13619,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 2,
+            "amazon": 3,
             "azure": 2,
             "bitnami": 3,
             "cbl-mariner": 2,
@@ -13643,14 +13643,12 @@
             "https://access.redhat.com/security/cve/CVE-2025-61726",
             "https://bugzilla.redhat.com/2434432",
             "https://bugzilla.redhat.com/2437111",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2418462",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2434432",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2437111",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61726",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61729",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68121",
             "https://errata.almalinux.org/9/ALSA-2026-4177.html",
-            "https://errata.rockylinux.org/RLSA-2026:5146",
+            "https://errata.rockylinux.org/RLSA-2026:4177",
             "https://go.dev/cl/736712",
             "https://go.dev/issue/77101",
             "https://groups.google.com/g/golang-announce/c/Vd2tYVM8eUc",
@@ -13661,7 +13659,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2025-61726"
           ],
           "PublishedDate": "2026-01-28T20:16:09.713Z",
-          "LastModifiedDate": "2026-02-06T18:47:34.52Z"
+          "LastModifiedDate": "2026-06-17T09:50:48.08Z"
         },
         {
           "VulnerabilityID": "CVE-2025-61729",
@@ -13728,7 +13726,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61729",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68121",
             "https://errata.almalinux.org/9/ALSA-2026-3928.html",
-            "https://errata.rockylinux.org/RLSA-2026:5146",
+            "https://errata.rockylinux.org/RLSA-2026:3928",
             "https://go.dev/cl/725920",
             "https://go.dev/issue/76445",
             "https://groups.google.com/g/golang-announce/c/8FJoBkPddm4",
@@ -13739,7 +13737,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2025-61729"
           ],
           "PublishedDate": "2025-12-02T19:15:51.447Z",
-          "LastModifiedDate": "2025-12-19T18:25:28.283Z"
+          "LastModifiedDate": "2026-06-17T09:50:48.507Z"
         },
         {
           "VulnerabilityID": "CVE-2026-25679",
@@ -13774,7 +13772,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "bitnami": 3,
             "oracle-oval": 3,
@@ -13796,12 +13794,10 @@
             "https://access.redhat.com/errata/RHSA-2026:9044",
             "https://access.redhat.com/security/cve/CVE-2026-25679",
             "https://bugzilla.redhat.com/2445356",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2445345",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2445356",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-25679",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-27137",
             "https://errata.almalinux.org/9/ALSA-2026-9044.html",
-            "https://errata.rockylinux.org/RLSA-2026:8842",
+            "https://errata.rockylinux.org/RLSA-2026:9044",
             "https://go.dev/cl/752180",
             "https://go.dev/issue/77578",
             "https://groups.google.com/g/golang-announce/c/EdhZqrQ98hk",
@@ -13812,7 +13808,55 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-25679"
           ],
           "PublishedDate": "2026-03-06T22:16:00.72Z",
-          "LastModifiedDate": "2026-04-21T14:43:03.8Z"
+          "LastModifiedDate": "2026-06-17T10:25:02.933Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-27145",
+          "VendorIDs": [
+            "GO-2026-5037"
+          ],
+          "PkgID": "stdlib@v1.22.7",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.22.7",
+            "UID": "cf173b2c10d5ac82"
+          },
+          "InstalledVersion": "v1.22.7",
+          "FixedVersion": "1.25.11, 1.26.4",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:fb36ff2a547557fdb3262cfb336911c39123ac5edebaf60bdec5d9976517d1a3",
+            "DiffID": "sha256:66ba65bdc69c20247fdd2a936b2fbb0f9116b94828f20b65cf9c8864c44960fb"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-27145",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:62c2c565d6bb3619348ef5741e7b68e3647dd28e1156ee4c599f78ba4ba8a098",
+          "Title": "*x509.Certificate).VerifyHostname previously called matchHostnames in ...",
+          "Description": "(*x509.Certificate).VerifyHostname previously called matchHostnames in a loop over all DNS Subject Alternative Name (SAN) entries. This caused strings.Split(host, \".\") to execute repeatedly on the same input hostname. With a large DNS SAN list, verification costs scaled quadratically based on the number of SAN entries multiplied by the hostname's label count. Because x509.Verify validates hostnames before building the certificate chain, this overhead occurred even for untrusted certificates.",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "amazon": 3,
+            "bitnami": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:H",
+              "V3Score": 6.5
+            }
+          },
+          "References": [
+            "https://go.dev/cl/783621",
+            "https://go.dev/issue/79694",
+            "https://groups.google.com/g/golang-announce/c/tKs3rmcBcKw",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-27145",
+            "https://pkg.go.dev/vuln/GO-2026-5037"
+          ],
+          "PublishedDate": "2026-06-02T23:16:35.57Z",
+          "LastModifiedDate": "2026-06-17T10:26:45.23Z"
         },
         {
           "VulnerabilityID": "CVE-2026-32280",
@@ -13872,13 +13916,13 @@
             "https://bugzilla.redhat.com/2456338",
             "https://bugzilla.redhat.com/2456339",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456333",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2456336",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2456338",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456339",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32280",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32281",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32282",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32283",
             "https://errata.almalinux.org/9/ALSA-2026-26447.html",
-            "https://errata.rockylinux.org/RLSA-2026:24716",
+            "https://errata.rockylinux.org/RLSA-2026:26447",
             "https://go.dev/cl/758320",
             "https://go.dev/issue/78282",
             "https://groups.google.com/g/golang-announce/c/0uYbvbPZRWU",
@@ -13889,7 +13933,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-32280"
           ],
           "PublishedDate": "2026-04-08T02:16:03.247Z",
-          "LastModifiedDate": "2026-04-16T19:16:42.18Z"
+          "LastModifiedDate": "2026-06-17T10:35:28.84Z"
         },
         {
           "VulnerabilityID": "CVE-2026-32281",
@@ -13953,13 +13997,13 @@
             "https://bugzilla.redhat.com/2456338",
             "https://bugzilla.redhat.com/2456339",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456333",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2456336",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2456338",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456339",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32280",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32281",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32282",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32283",
             "https://errata.almalinux.org/9/ALSA-2026-26447.html",
-            "https://errata.rockylinux.org/RLSA-2026:24716",
+            "https://errata.rockylinux.org/RLSA-2026:26447",
             "https://go.dev/cl/758061",
             "https://go.dev/issue/78281",
             "https://groups.google.com/g/golang-announce/c/0uYbvbPZRWU",
@@ -13968,7 +14012,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-32281"
           ],
           "PublishedDate": "2026-04-08T02:16:03.35Z",
-          "LastModifiedDate": "2026-04-16T19:15:57.75Z"
+          "LastModifiedDate": "2026-06-17T10:35:28.98Z"
         },
         {
           "VulnerabilityID": "CVE-2026-32283",
@@ -14039,7 +14083,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32281",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32283",
             "https://errata.almalinux.org/9/ALSA-2026-26447.html",
-            "https://errata.rockylinux.org/RLSA-2026:24470",
+            "https://errata.rockylinux.org/RLSA-2026:26447",
             "https://go.dev/cl/763767",
             "https://go.dev/issue/78334",
             "https://groups.google.com/g/golang-announce/c/0uYbvbPZRWU",
@@ -14050,7 +14094,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-32283"
           ],
           "PublishedDate": "2026-04-08T02:16:03.58Z",
-          "LastModifiedDate": "2026-04-16T19:12:10.54Z"
+          "LastModifiedDate": "2026-06-17T10:35:29.263Z"
         },
         {
           "VulnerabilityID": "CVE-2026-33811",
@@ -14118,7 +14162,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-33811"
           ],
           "PublishedDate": "2026-05-07T20:16:42.77Z",
-          "LastModifiedDate": "2026-05-12T20:23:02.333Z"
+          "LastModifiedDate": "2026-06-17T10:38:08.167Z"
         },
         {
           "VulnerabilityID": "CVE-2026-33814",
@@ -14187,7 +14231,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-33814"
           ],
           "PublishedDate": "2026-05-07T20:16:42.88Z",
-          "LastModifiedDate": "2026-05-13T14:41:59.52Z"
+          "LastModifiedDate": "2026-06-17T10:38:08.657Z"
         },
         {
           "VulnerabilityID": "CVE-2026-39820",
@@ -14248,7 +14292,7 @@
             "https://pkg.go.dev/vuln/GO-2026-4986"
           ],
           "PublishedDate": "2026-05-07T20:16:43.187Z",
-          "LastModifiedDate": "2026-05-13T15:10:58.65Z"
+          "LastModifiedDate": "2026-06-17T10:42:38.193Z"
         },
         {
           "VulnerabilityID": "CVE-2026-39823",
@@ -14303,7 +14347,7 @@
             "https://pkg.go.dev/vuln/GO-2026-4982"
           ],
           "PublishedDate": "2026-05-07T20:16:43.29Z",
-          "LastModifiedDate": "2026-05-13T16:58:45.697Z"
+          "LastModifiedDate": "2026-06-17T10:42:38.473Z"
         },
         {
           "VulnerabilityID": "CVE-2026-39825",
@@ -14355,7 +14399,7 @@
             "https://pkg.go.dev/vuln/GO-2026-4976"
           ],
           "PublishedDate": "2026-05-07T20:16:43.39Z",
-          "LastModifiedDate": "2026-05-13T16:58:56.39Z"
+          "LastModifiedDate": "2026-06-17T10:42:38.77Z"
         },
         {
           "VulnerabilityID": "CVE-2026-39836",
@@ -14415,7 +14459,7 @@
             "https://pkg.go.dev/vuln/GO-2026-4971"
           ],
           "PublishedDate": "2026-05-07T20:16:43.593Z",
-          "LastModifiedDate": "2026-05-13T15:11:10.31Z"
+          "LastModifiedDate": "2026-06-17T10:42:40.34Z"
         },
         {
           "VulnerabilityID": "CVE-2026-42499",
@@ -14467,7 +14511,7 @@
             "https://pkg.go.dev/vuln/GO-2026-4977"
           ],
           "PublishedDate": "2026-05-07T20:16:44.54Z",
-          "LastModifiedDate": "2026-05-13T16:59:17.563Z"
+          "LastModifiedDate": "2026-06-17T10:47:56.183Z"
         },
         {
           "VulnerabilityID": "CVE-2026-42504",
@@ -14501,6 +14545,7 @@
             "CWE-407"
           ],
           "VendorSeverity": {
+            "amazon": 3,
             "bitnami": 3
           },
           "CVSS": {
@@ -14517,7 +14562,7 @@
             "https://pkg.go.dev/vuln/GO-2026-5038"
           ],
           "PublishedDate": "2026-06-02T23:16:37.927Z",
-          "LastModifiedDate": "2026-06-04T16:15:50.143Z"
+          "LastModifiedDate": "2026-06-17T10:47:56.86Z"
         }
       ]
     }
