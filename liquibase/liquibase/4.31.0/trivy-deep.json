@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019ef427-9c26-726e-8e6f-96cbcd3acf18",
-  "CreatedAt": "2026-06-23T11:04:57.126160386Z",
+  "ReportID": "019ef94c-5841-702e-89c7-b919344645ba",
+  "CreatedAt": "2026-06-24T11:03:10.657013297Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -2950,6 +2950,7 @@
             "CWE-200"
           ],
           "VendorSeverity": {
+            "alma": 3,
             "amazon": 2,
             "azure": 3,
             "ghsa": 3,
@@ -2974,7 +2975,11 @@
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:28000",
             "https://access.redhat.com/security/cve/CVE-2026-44431",
+            "https://bugzilla.redhat.com/2477154",
+            "https://bugzilla.redhat.com/2477167",
+            "https://errata.almalinux.org/10/ALSA-2026-28000.html",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-44431",
@@ -3013,6 +3018,7 @@
             "CWE-200"
           ],
           "VendorSeverity": {
+            "alma": 3,
             "amazon": 2,
             "azure": 3,
             "ghsa": 3,
@@ -3037,7 +3043,11 @@
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:28000",
             "https://access.redhat.com/security/cve/CVE-2026-44431",
+            "https://bugzilla.redhat.com/2477154",
+            "https://bugzilla.redhat.com/2477167",
+            "https://errata.almalinux.org/10/ALSA-2026-28000.html",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-44431",
@@ -3076,6 +3086,7 @@
             "CWE-200"
           ],
           "VendorSeverity": {
+            "alma": 3,
             "amazon": 2,
             "azure": 3,
             "ghsa": 3,
@@ -3100,7 +3111,11 @@
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:28000",
             "https://access.redhat.com/security/cve/CVE-2026-44431",
+            "https://bugzilla.redhat.com/2477154",
+            "https://bugzilla.redhat.com/2477167",
+            "https://errata.almalinux.org/10/ALSA-2026-28000.html",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-44431",

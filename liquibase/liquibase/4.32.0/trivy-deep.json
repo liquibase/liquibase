@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019ef427-c403-74f7-8da5-179ad1dbe79d",
-  "CreatedAt": "2026-06-23T11:05:07.331326638Z",
+  "ReportID": "019ef94c-3523-70b3-82d8-a28aac8496ed",
+  "CreatedAt": "2026-06-24T11:03:01.667047399Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -425,6 +425,102 @@
         }
       ],
       "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2026-54512",
+          "VendorIDs": [
+            "GHSA-j3rv-43j4-c7qm"
+          ],
+          "PkgName": "com.fasterxml.jackson.core:jackson-databind",
+          "PkgPath": "internal-jars/lib/liquibase-commercial.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.18.3",
+            "UID": "99c3171647dc05d3"
+          },
+          "InstalledVersion": "2.18.3",
+          "FixedVersion": "2.18.8, 3.1.4, 2.21.4",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-54512",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:39b0a3dba775a8ccb429603676a641f295d5b71da6a866dab369779511268ff9",
+          "Title": "jackson-databind has a PolymorphicTypeValidator bypass via generic type parameters that allows arbitrary class instantiation",
+          "Description": "jackson-databind contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor. From 2.10.0 until 2.18.8, 2.21.4, and 3.1.4, jackson-databind's PolymorphicTypeValidator (PTV) is the primary safety mechanism guarding polymorphic deserialization. When polymorphic typing is enabled and a type identifier contains generic parameters (i.e. the type ID string contains \u003c), DatabindContext._resolveAndValidateGeneric() validates only the raw container class name (the substring before \u003c) against the configured PTV. If the container type is approved, the method parses the full canonical type string via TypeFactory.constructFromCanonical() and returns the fully parameterized type without ever validating the nested type arguments against the PTV. The nested type arguments are then resolved, instantiated, and populated as beans during deserialization. An attacker who controls the type ID can therefore place a denied class as a generic type parameter of an allowed container — for example java.util.ArrayList\u003ccom.evil.Gadget\u003e when only java.util.ArrayList is allow-listed. The container passes the PTV check; com.evil.Gadget is loaded via Class.forName(name, true, loader), instantiated, and its properties are set from attacker-controlled JSON. This completely bypasses an explicitly configured PTV allow-list. This vulnerability is fixed in 2.18.8, 2.21.4, and 3.1.4.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-184",
+            "CWE-502"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 8.1
+            }
+          },
+          "References": [
+            "https://github.com/FasterXML/jackson-databind",
+            "https://github.com/FasterXML/jackson-databind/commit/434d6c511de7fdd9872f29157aafb6162d12d8d5",
+            "https://github.com/FasterXML/jackson-databind/issues/5988",
+            "https://github.com/FasterXML/jackson-databind/security/advisories/GHSA-j3rv-43j4-c7qm"
+          ],
+          "PublishedDate": "2026-06-23T21:17:02.203Z",
+          "LastModifiedDate": "2026-06-23T21:17:02.203Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-54513",
+          "VendorIDs": [
+            "GHSA-rmj7-2vxq-3g9f"
+          ],
+          "PkgName": "com.fasterxml.jackson.core:jackson-databind",
+          "PkgPath": "internal-jars/lib/liquibase-commercial.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.18.3",
+            "UID": "99c3171647dc05d3"
+          },
+          "InstalledVersion": "2.18.3",
+          "FixedVersion": "2.18.8, 2.21.4, 3.1.4",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-54513",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:93f63cf417ffd892069be4d4ffcc8bb757f0e2725b11d8fd0a2af6e471fc3102",
+          "Title": "jackson-databind has an array subtype allowlist bypass in BasicPolymorphicTypeValidator (allowIfSubTypeIsArray)",
+          "Description": "jackson-databind contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor. From 2.10.0 until 2.18.8, 2.21.4, and 3.1.4, BasicPolymorphicTypeValidator.Builder.allowIfSubTypeIsArray() allowlists any array type based only on clazz.isArray(), without validating the array's component (element) type against the configured allowlist. A PTV built with allowIfSubTypeIsArray() plus an explicit concrete-type allowlist therefore still permits EvilType[] even though EvilType is not allowlisted. When Jackson deserializes the elements and no per-element type IDs are present, it instantiates the component type directly with no further PTV check, bypassing the allowlist. This vulnerability is fixed in 2.18.8, 2.21.4, and 3.1.4.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-184"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 8.1
+            }
+          },
+          "References": [
+            "https://github.com/FasterXML/jackson-databind",
+            "https://github.com/FasterXML/jackson-databind/commit/01d1692c8d0ed03e51a0e3c4f8a9e6908e4931e5",
+            "https://github.com/FasterXML/jackson-databind/commit/24529da29fdf46ff94ca38de9ebf31cd188f5e8e",
+            "https://github.com/FasterXML/jackson-databind/issues/5981",
+            "https://github.com/FasterXML/jackson-databind/issues/5983",
+            "https://github.com/FasterXML/jackson-databind/pull/5984",
+            "https://github.com/FasterXML/jackson-databind/security/advisories/GHSA-rmj7-2vxq-3g9f"
+          ],
+          "PublishedDate": "2026-06-23T21:17:02.333Z",
+          "LastModifiedDate": "2026-06-23T21:17:02.333Z"
+        },
         {
           "VulnerabilityID": "CVE-2025-49146",
           "VendorIDs": [
@@ -2846,6 +2942,7 @@
             "CWE-200"
           ],
           "VendorSeverity": {
+            "alma": 3,
             "amazon": 2,
             "azure": 3,
             "ghsa": 3,
@@ -2870,7 +2967,11 @@
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:28000",
             "https://access.redhat.com/security/cve/CVE-2026-44431",
+            "https://bugzilla.redhat.com/2477154",
+            "https://bugzilla.redhat.com/2477167",
+            "https://errata.almalinux.org/10/ALSA-2026-28000.html",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-44431",
@@ -2909,6 +3010,7 @@
             "CWE-200"
           ],
           "VendorSeverity": {
+            "alma": 3,
             "amazon": 2,
             "azure": 3,
             "ghsa": 3,
@@ -2933,7 +3035,11 @@
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:28000",
             "https://access.redhat.com/security/cve/CVE-2026-44431",
+            "https://bugzilla.redhat.com/2477154",
+            "https://bugzilla.redhat.com/2477167",
+            "https://errata.almalinux.org/10/ALSA-2026-28000.html",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-44431",
@@ -2972,6 +3078,7 @@
             "CWE-200"
           ],
           "VendorSeverity": {
+            "alma": 3,
             "amazon": 2,
             "azure": 3,
             "ghsa": 3,
@@ -2996,7 +3103,11 @@
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:28000",
             "https://access.redhat.com/security/cve/CVE-2026-44431",
+            "https://bugzilla.redhat.com/2477154",
+            "https://bugzilla.redhat.com/2477167",
+            "https://errata.almalinux.org/10/ALSA-2026-28000.html",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-44431",

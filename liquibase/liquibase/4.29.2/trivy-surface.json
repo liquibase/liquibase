@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019ef426-bb2a-711e-9ca1-0cc3f2ce1325",
-  "CreatedAt": "2026-06-23T11:03:59.530075341Z",
+  "ReportID": "019ef94b-5bb2-7788-a341-197f45a1d8a9",
+  "CreatedAt": "2026-06-24T11:02:06.00249482Z",
   "ArtifactID": "sha256:fe59e17b8dd462f1d6802df374458762c85a3823a1fbd2353b56870492563c00",
   "ArtifactName": "liquibase/liquibase:4.29.2",
   "ArtifactType": "container_image",
@@ -12043,7 +12043,7 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:26447",
+            "https://access.redhat.com/errata/RHSA-2026:28074",
             "https://access.redhat.com/security/cve/CVE-2026-32280",
             "https://bugzilla.redhat.com/2456333",
             "https://bugzilla.redhat.com/2456338",
@@ -12054,7 +12054,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32280",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32281",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32283",
-            "https://errata.almalinux.org/9/ALSA-2026-26447.html",
+            "https://errata.almalinux.org/9/ALSA-2026-28074.html",
             "https://errata.rockylinux.org/RLSA-2026:26447",
             "https://go.dev/cl/758320",
             "https://go.dev/issue/78282",
@@ -12124,7 +12124,7 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:26447",
+            "https://access.redhat.com/errata/RHSA-2026:28074",
             "https://access.redhat.com/security/cve/CVE-2026-32281",
             "https://bugzilla.redhat.com/2456333",
             "https://bugzilla.redhat.com/2456338",
@@ -12135,7 +12135,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32280",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32281",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32283",
-            "https://errata.almalinux.org/9/ALSA-2026-26447.html",
+            "https://errata.almalinux.org/9/ALSA-2026-28074.html",
             "https://errata.rockylinux.org/RLSA-2026:26447",
             "https://go.dev/cl/758061",
             "https://go.dev/issue/78281",
@@ -12204,7 +12204,7 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:26447",
+            "https://access.redhat.com/errata/RHSA-2026:28074",
             "https://access.redhat.com/security/cve/CVE-2026-32283",
             "https://bugzilla.redhat.com/2456333",
             "https://bugzilla.redhat.com/2456338",
@@ -12215,7 +12215,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32280",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32281",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32283",
-            "https://errata.almalinux.org/9/ALSA-2026-26447.html",
+            "https://errata.almalinux.org/9/ALSA-2026-28074.html",
             "https://errata.rockylinux.org/RLSA-2026:26447",
             "https://go.dev/cl/763767",
             "https://go.dev/issue/78334",
