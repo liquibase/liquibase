@@ -1,4 +1,5 @@
 
+
 name-template: 'Liquibase v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
 # filter-by-commitish must stay false: existing releases (v4.x and v5.0.x)
