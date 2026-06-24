@@ -19,7 +19,10 @@ permissions:
 
 jobs:
   claude-review:
-    if: ${{ !endsWith(github.actor, '[bot]') }}
+    # Skip PRs from forks: GitHub withholds secrets and downgrades id-token to
+    # read-only for fork-triggered pull_request runs, so the vault/OIDC auth step
+    # cannot succeed and the job fails instead of reviewing (TECHOPS-683).
+    if: ${{ !endsWith(github.actor, '[bot]') && github.event.pull_request.head.repo.full_name == github.repository }}
     uses: liquibase/build-logic/.github/workflows/claude-code-review.yml@main
     permissions:
       contents: read
