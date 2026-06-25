@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019ef94b-5b5d-79a8-95f6-a76375912352",
-  "CreatedAt": "2026-06-24T11:02:05.917634066Z",
+  "ReportID": "019efe6d-a95b-79b6-8590-609f02c11b95",
+  "CreatedAt": "2026-06-25T10:57:40.187638039Z",
   "ArtifactID": "sha256:fadf7e34e3a45ff62c9582f9e5173fdb93e0e2440cf246babed77a5b50372e0c",
   "ArtifactName": "liquibase/liquibase:4.30.0",
   "ArtifactType": "container_image",
@@ -13938,7 +13938,7 @@
             "https://go.dev/issue/78282",
             "https://groups.google.com/g/golang-announce/c/0uYbvbPZRWU",
             "https://linux.oracle.com/cve/CVE-2026-32280.html",
-            "https://linux.oracle.com/errata/ELSA-2026-16875.html",
+            "https://linux.oracle.com/errata/ELSA-2026-19350.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-32280",
             "https://pkg.go.dev/vuln/GO-2026-4947",
             "https://www.cve.org/CVERecord?id=CVE-2026-32280"
@@ -14099,7 +14099,7 @@
             "https://go.dev/issue/78334",
             "https://groups.google.com/g/golang-announce/c/0uYbvbPZRWU",
             "https://linux.oracle.com/cve/CVE-2026-32283.html",
-            "https://linux.oracle.com/errata/ELSA-2026-17075.html",
+            "https://linux.oracle.com/errata/ELSA-2026-19352.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-32283",
             "https://pkg.go.dev/vuln/GO-2026-4870",
             "https://www.cve.org/CVERecord?id=CVE-2026-32283"
@@ -14167,7 +14167,7 @@
             "https://go.dev/issue/78803",
             "https://groups.google.com/g/golang-announce/c/qcCIEXso47M",
             "https://linux.oracle.com/cve/CVE-2026-33811.html",
-            "https://linux.oracle.com/errata/ELSA-2026-22112.html",
+            "https://linux.oracle.com/errata/ELSA-2026-22121.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-33811",
             "https://pkg.go.dev/vuln/GO-2026-4981",
             "https://www.cve.org/CVERecord?id=CVE-2026-33811"
@@ -14201,7 +14201,7 @@
             "URL": "https://pkg.go.dev/vuln/"
           },
           "Fingerprint": "sha256:00280d78a8f282b46b2f33b6f7a1f0bfb14d89e6f1f2e34105456196de603ce5",
-          "Title": "When processing HTTP/2 SETTINGS frames, transport will enter an infini ...",
+          "Title": "net/http/internal/http2: golang: golang.org/x/net: Go HTTP/2: Denial of Service via malformed SETTINGS_MAX_FRAME_SIZE frame",
           "Description": "When processing HTTP/2 SETTINGS frames, transport will enter an infinite loop of writing CONTINUATION frames if it receives a SETTINGS_MAX_FRAME_SIZE with a value of 0.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -14214,6 +14214,7 @@
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
+            "redhat": 3,
             "ubuntu": 2
           },
           "CVSS": {
@@ -14224,9 +14225,14 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
               "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
             }
           },
           "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-33814",
             "https://github.com/golang/go/issues/78476",
             "https://go-review.googlesource.com/c/go/+/761581",
             "https://go-review.googlesource.com/c/net/+/761640",
@@ -14235,7 +14241,7 @@
             "https://go.dev/issue/78476",
             "https://groups.google.com/g/golang-announce/c/qcCIEXso47M",
             "https://linux.oracle.com/cve/CVE-2026-33814.html",
-            "https://linux.oracle.com/errata/ELSA-2026-22112.html",
+            "https://linux.oracle.com/errata/ELSA-2026-22121.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-33814",
             "https://pkg.go.dev/vuln/GO-2026-4918",
             "https://ubuntu.com/security/notices/USN-8430-1",
@@ -14298,7 +14304,7 @@
             "https://go.dev/issue/78566",
             "https://groups.google.com/g/golang-announce/c/qcCIEXso47M",
             "https://linux.oracle.com/cve/CVE-2026-39820.html",
-            "https://linux.oracle.com/errata/ELSA-2026-22112.html",
+            "https://linux.oracle.com/errata/ELSA-2026-22121.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-39820",
             "https://pkg.go.dev/vuln/GO-2026-4986"
           ],
@@ -14353,64 +14359,12 @@
             "https://go.dev/issue/78913",
             "https://groups.google.com/g/golang-announce/c/qcCIEXso47M",
             "https://linux.oracle.com/cve/CVE-2026-39823.html",
-            "https://linux.oracle.com/errata/ELSA-2026-22112.html",
+            "https://linux.oracle.com/errata/ELSA-2026-22121.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-39823",
             "https://pkg.go.dev/vuln/GO-2026-4982"
           ],
           "PublishedDate": "2026-05-07T20:16:43.29Z",
           "LastModifiedDate": "2026-06-17T10:42:38.473Z"
-        },
-        {
-          "VulnerabilityID": "CVE-2026-39825",
-          "VendorIDs": [
-            "GO-2026-4976"
-          ],
-          "PkgID": "stdlib@v1.22.7",
-          "PkgName": "stdlib",
-          "PkgIdentifier": {
-            "PURL": "pkg:golang/stdlib@v1.22.7",
-            "UID": "cf173b2c10d5ac82"
-          },
-          "InstalledVersion": "v1.22.7",
-          "FixedVersion": "1.25.10, 1.26.3",
-          "Status": "fixed",
-          "Layer": {
-            "Digest": "sha256:d4e09011ac9ce2e4747f1117b10602e84683855f35e35422060b49632c19c1f6",
-            "DiffID": "sha256:daf89b137c7fd76f7d94a2d3ed715fe2645d62766d5d6de3523e11ed36761e7b"
-          },
-          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-39825",
-          "DataSource": {
-            "ID": "govulndb",
-            "Name": "The Go Vulnerability Database",
-            "URL": "https://pkg.go.dev/vuln/"
-          },
-          "Fingerprint": "sha256:e15ea68b1cecf9827fc48dffcdf816f01bc92eaf633cf12d38fc91a7eb7e3922",
-          "Title": "ReverseProxy can forward queries containing parameters not visible to  ...",
-          "Description": "ReverseProxy can forward queries containing parameters not visible to Rewrite functions. When used with a Rewrite function, or a Director function which parses query parameters, ReverseProxy sanitizes the forwarded request to remove query parameters which are not parsed by url.ParseQuery. ReverseProxy does not take ParseQuery's limit on the total number of query parameters (controlled by GODEBUG=urlmaxqueryparams=N) into account. This can permit ReverseProxy to forward a request containing a query parameter that is not visible to the Rewrite function. For example, the query \"a1=x\u0026a2=x\u0026...\u0026a10000=x\u0026hidden=y\" can forward the parameter \"hidden=y\" while hiding it from the proxy's Rewrite function.",
-          "Severity": "HIGH",
-          "VendorSeverity": {
-            "amazon": 3,
-            "bitnami": 2,
-            "oracle-oval": 3,
-            "photon": 2
-          },
-          "CVSS": {
-            "bitnami": {
-              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
-              "V3Score": 5.3
-            }
-          },
-          "References": [
-            "https://go.dev/cl/770541",
-            "https://go.dev/issue/78948",
-            "https://groups.google.com/g/golang-announce/c/qcCIEXso47M",
-            "https://linux.oracle.com/cve/CVE-2026-39825.html",
-            "https://linux.oracle.com/errata/ELSA-2026-22112.html",
-            "https://nvd.nist.gov/vuln/detail/CVE-2026-39825",
-            "https://pkg.go.dev/vuln/GO-2026-4976"
-          ],
-          "PublishedDate": "2026-05-07T20:16:43.39Z",
-          "LastModifiedDate": "2026-06-17T10:42:38.77Z"
         },
         {
           "VulnerabilityID": "CVE-2026-39836",
@@ -14438,7 +14392,7 @@
             "URL": "https://pkg.go.dev/vuln/"
           },
           "Fingerprint": "sha256:45a4288dad8082c90724c25807c436a761f93a353386c3c1907159c477886def",
-          "Title": "ELSA-2026-22112:  go-toolset:ol8 security update (IMPORTANT)",
+          "Title": "ELSA-2026-22121:  golang security update (IMPORTANT)",
           "Description": "The Dial and LookupPort functions panic on Windows when provided with an input containing a NUL (0).",
           "Severity": "HIGH",
           "CweIDs": [
@@ -14465,7 +14419,7 @@
             "https://go.dev/issue/79006",
             "https://groups.google.com/g/golang-announce/c/qcCIEXso47M",
             "https://linux.oracle.com/cve/CVE-2026-39836.html",
-            "https://linux.oracle.com/errata/ELSA-2026-22112.html",
+            "https://linux.oracle.com/errata/ELSA-2026-22121.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-39836",
             "https://pkg.go.dev/vuln/GO-2026-4971"
           ],
@@ -14517,7 +14471,7 @@
             "https://go.dev/issue/78987",
             "https://groups.google.com/g/golang-announce/c/qcCIEXso47M",
             "https://linux.oracle.com/cve/CVE-2026-42499.html",
-            "https://linux.oracle.com/errata/ELSA-2026-22112.html",
+            "https://linux.oracle.com/errata/ELSA-2026-22121.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-42499",
             "https://pkg.go.dev/vuln/GO-2026-4977"
           ],

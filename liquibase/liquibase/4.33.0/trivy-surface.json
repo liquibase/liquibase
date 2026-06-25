@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019ef94b-bb8e-7168-87fd-05ec9cd0d67f",
-  "CreatedAt": "2026-06-24T11:02:30.542093196Z",
+  "ReportID": "019efe6d-dd5d-79be-9729-a6b4dfc0d11f",
+  "CreatedAt": "2026-06-25T10:57:53.501639945Z",
   "ArtifactID": "sha256:d2ad381244ad087ec0c44faacfed4eef39240c2965f37afa23519688cb8ad01e",
   "ArtifactName": "liquibase/liquibase:4.33.0",
   "ArtifactType": "container_image",
@@ -13303,7 +13303,7 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
           },
           "Fingerprint": "sha256:3115d393ba2aa779178df9ba5304bab67805adf4bcdf718ebdee2ab9cc888f21",
-          "Title": "jackson-databind has a PolymorphicTypeValidator bypass via generic type parameters that allows arbitrary class instantiation",
+          "Title": "jackson-databind contains the general-purpose data-binding functionali ...",
           "Description": "jackson-databind contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor. From 2.10.0 until 2.18.8, 2.21.4, and 3.1.4, jackson-databind's PolymorphicTypeValidator (PTV) is the primary safety mechanism guarding polymorphic deserialization. When polymorphic typing is enabled and a type identifier contains generic parameters (i.e. the type ID string contains \u003c), DatabindContext._resolveAndValidateGeneric() validates only the raw container class name (the substring before \u003c) against the configured PTV. If the container type is approved, the method parses the full canonical type string via TypeFactory.constructFromCanonical() and returns the fully parameterized type without ever validating the nested type arguments against the PTV. The nested type arguments are then resolved, instantiated, and populated as beans during deserialization. An attacker who controls the type ID can therefore place a denied class as a generic type parameter of an allowed container — for example java.util.ArrayList\u003ccom.evil.Gadget\u003e when only java.util.ArrayList is allow-listed. The container passes the PTV check; com.evil.Gadget is loaded via Class.forName(name, true, loader), instantiated, and its properties are set from attacker-controlled JSON. This completely bypasses an explicitly configured PTV allow-list. This vulnerability is fixed in 2.18.8, 2.21.4, and 3.1.4.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -13326,7 +13326,7 @@
             "https://github.com/FasterXML/jackson-databind/security/advisories/GHSA-j3rv-43j4-c7qm"
           ],
           "PublishedDate": "2026-06-23T21:17:02.203Z",
-          "LastModifiedDate": "2026-06-23T21:17:02.203Z"
+          "LastModifiedDate": "2026-06-24T16:16:32.5Z"
         },
         {
           "VulnerabilityID": "CVE-2026-54513",
@@ -13354,32 +13354,40 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
           },
           "Fingerprint": "sha256:533d05085e184b564b6b887ec3fe2cfd92de0ff00043e5319caf02c13a9df7bc",
-          "Title": "jackson-databind has an array subtype allowlist bypass in BasicPolymorphicTypeValidator (allowIfSubTypeIsArray)",
+          "Title": "jackson-databind: Jackson-databind: Security bypass allows arbitrary code execution",
           "Description": "jackson-databind contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor. From 2.10.0 until 2.18.8, 2.21.4, and 3.1.4, BasicPolymorphicTypeValidator.Builder.allowIfSubTypeIsArray() allowlists any array type based only on clazz.isArray(), without validating the array's component (element) type against the configured allowlist. A PTV built with allowIfSubTypeIsArray() plus an explicit concrete-type allowlist therefore still permits EvilType[] even though EvilType is not allowlisted. When Jackson deserializes the elements and no per-element type IDs are present, it instantiates the component type directly with no further PTV check, bypassing the allowlist. This vulnerability is fixed in 2.18.8, 2.21.4, and 3.1.4.",
           "Severity": "HIGH",
           "CweIDs": [
             "CWE-184"
           ],
           "VendorSeverity": {
-            "ghsa": 3
+            "ghsa": 3,
+            "redhat": 3
           },
           "CVSS": {
             "ghsa": {
               "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
               "V3Score": 8.1
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 8.1
             }
           },
           "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-54513",
             "https://github.com/FasterXML/jackson-databind",
             "https://github.com/FasterXML/jackson-databind/commit/01d1692c8d0ed03e51a0e3c4f8a9e6908e4931e5",
             "https://github.com/FasterXML/jackson-databind/commit/24529da29fdf46ff94ca38de9ebf31cd188f5e8e",
             "https://github.com/FasterXML/jackson-databind/issues/5981",
             "https://github.com/FasterXML/jackson-databind/issues/5983",
             "https://github.com/FasterXML/jackson-databind/pull/5984",
-            "https://github.com/FasterXML/jackson-databind/security/advisories/GHSA-rmj7-2vxq-3g9f"
+            "https://github.com/FasterXML/jackson-databind/security/advisories/GHSA-rmj7-2vxq-3g9f",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-54513",
+            "https://www.cve.org/CVERecord?id=CVE-2026-54513"
           ],
           "PublishedDate": "2026-06-23T21:17:02.333Z",
-          "LastModifiedDate": "2026-06-23T21:17:02.333Z"
+          "LastModifiedDate": "2026-06-24T16:16:32.6Z"
         },
         {
           "VulnerabilityID": "CVE-2025-59250",
@@ -14084,7 +14092,7 @@
             "https://go.dev/issue/78282",
             "https://groups.google.com/g/golang-announce/c/0uYbvbPZRWU",
             "https://linux.oracle.com/cve/CVE-2026-32280.html",
-            "https://linux.oracle.com/errata/ELSA-2026-16875.html",
+            "https://linux.oracle.com/errata/ELSA-2026-19350.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-32280",
             "https://pkg.go.dev/vuln/GO-2026-4947",
             "https://www.cve.org/CVERecord?id=CVE-2026-32280"
@@ -14245,7 +14253,7 @@
             "https://go.dev/issue/78334",
             "https://groups.google.com/g/golang-announce/c/0uYbvbPZRWU",
             "https://linux.oracle.com/cve/CVE-2026-32283.html",
-            "https://linux.oracle.com/errata/ELSA-2026-17075.html",
+            "https://linux.oracle.com/errata/ELSA-2026-19352.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-32283",
             "https://pkg.go.dev/vuln/GO-2026-4870",
             "https://www.cve.org/CVERecord?id=CVE-2026-32283"
@@ -14313,7 +14321,7 @@
             "https://go.dev/issue/78803",
             "https://groups.google.com/g/golang-announce/c/qcCIEXso47M",
             "https://linux.oracle.com/cve/CVE-2026-33811.html",
-            "https://linux.oracle.com/errata/ELSA-2026-22112.html",
+            "https://linux.oracle.com/errata/ELSA-2026-22121.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-33811",
             "https://pkg.go.dev/vuln/GO-2026-4981",
             "https://www.cve.org/CVERecord?id=CVE-2026-33811"
@@ -14347,7 +14355,7 @@
             "URL": "https://pkg.go.dev/vuln/"
           },
           "Fingerprint": "sha256:7f9a301f510848aa8a172c328003714b543d47b922b3d7a72ac63d4fe3847bda",
-          "Title": "When processing HTTP/2 SETTINGS frames, transport will enter an infini ...",
+          "Title": "net/http/internal/http2: golang: golang.org/x/net: Go HTTP/2: Denial of Service via malformed SETTINGS_MAX_FRAME_SIZE frame",
           "Description": "When processing HTTP/2 SETTINGS frames, transport will enter an infinite loop of writing CONTINUATION frames if it receives a SETTINGS_MAX_FRAME_SIZE with a value of 0.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -14360,6 +14368,7 @@
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
+            "redhat": 3,
             "ubuntu": 2
           },
           "CVSS": {
@@ -14370,9 +14379,14 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
               "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
             }
           },
           "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-33814",
             "https://github.com/golang/go/issues/78476",
             "https://go-review.googlesource.com/c/go/+/761581",
             "https://go-review.googlesource.com/c/net/+/761640",
@@ -14381,7 +14395,7 @@
             "https://go.dev/issue/78476",
             "https://groups.google.com/g/golang-announce/c/qcCIEXso47M",
             "https://linux.oracle.com/cve/CVE-2026-33814.html",
-            "https://linux.oracle.com/errata/ELSA-2026-22112.html",
+            "https://linux.oracle.com/errata/ELSA-2026-22121.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-33814",
             "https://pkg.go.dev/vuln/GO-2026-4918",
             "https://ubuntu.com/security/notices/USN-8430-1",
@@ -14444,7 +14458,7 @@
             "https://go.dev/issue/78566",
             "https://groups.google.com/g/golang-announce/c/qcCIEXso47M",
             "https://linux.oracle.com/cve/CVE-2026-39820.html",
-            "https://linux.oracle.com/errata/ELSA-2026-22112.html",
+            "https://linux.oracle.com/errata/ELSA-2026-22121.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-39820",
             "https://pkg.go.dev/vuln/GO-2026-4986"
           ],
@@ -14499,64 +14513,12 @@
             "https://go.dev/issue/78913",
             "https://groups.google.com/g/golang-announce/c/qcCIEXso47M",
             "https://linux.oracle.com/cve/CVE-2026-39823.html",
-            "https://linux.oracle.com/errata/ELSA-2026-22112.html",
+            "https://linux.oracle.com/errata/ELSA-2026-22121.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-39823",
             "https://pkg.go.dev/vuln/GO-2026-4982"
           ],
           "PublishedDate": "2026-05-07T20:16:43.29Z",
           "LastModifiedDate": "2026-06-17T10:42:38.473Z"
-        },
-        {
-          "VulnerabilityID": "CVE-2026-39825",
-          "VendorIDs": [
-            "GO-2026-4976"
-          ],
-          "PkgID": "stdlib@v1.24.4",
-          "PkgName": "stdlib",
-          "PkgIdentifier": {
-            "PURL": "pkg:golang/stdlib@v1.24.4",
-            "UID": "d49a183bd177e6a2"
-          },
-          "InstalledVersion": "v1.24.4",
-          "FixedVersion": "1.25.10, 1.26.3",
-          "Status": "fixed",
-          "Layer": {
-            "Digest": "sha256:ec2687e4519388f119f0f8d3456d95136e18a8ec0838a22e4872d210d6040b2a",
-            "DiffID": "sha256:a73b98fd869f61381341eeadb881230cc0b7e640f69084b4a9ce618fdb2b6ac2"
-          },
-          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-39825",
-          "DataSource": {
-            "ID": "govulndb",
-            "Name": "The Go Vulnerability Database",
-            "URL": "https://pkg.go.dev/vuln/"
-          },
-          "Fingerprint": "sha256:e578d353c58daa3b76db75fd5087ad9bf02f09ce03c4af68cefd55029285a08c",
-          "Title": "ReverseProxy can forward queries containing parameters not visible to  ...",
-          "Description": "ReverseProxy can forward queries containing parameters not visible to Rewrite functions. When used with a Rewrite function, or a Director function which parses query parameters, ReverseProxy sanitizes the forwarded request to remove query parameters which are not parsed by url.ParseQuery. ReverseProxy does not take ParseQuery's limit on the total number of query parameters (controlled by GODEBUG=urlmaxqueryparams=N) into account. This can permit ReverseProxy to forward a request containing a query parameter that is not visible to the Rewrite function. For example, the query \"a1=x\u0026a2=x\u0026...\u0026a10000=x\u0026hidden=y\" can forward the parameter \"hidden=y\" while hiding it from the proxy's Rewrite function.",
-          "Severity": "HIGH",
-          "VendorSeverity": {
-            "amazon": 3,
-            "bitnami": 2,
-            "oracle-oval": 3,
-            "photon": 2
-          },
-          "CVSS": {
-            "bitnami": {
-              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
-              "V3Score": 5.3
-            }
-          },
-          "References": [
-            "https://go.dev/cl/770541",
-            "https://go.dev/issue/78948",
-            "https://groups.google.com/g/golang-announce/c/qcCIEXso47M",
-            "https://linux.oracle.com/cve/CVE-2026-39825.html",
-            "https://linux.oracle.com/errata/ELSA-2026-22112.html",
-            "https://nvd.nist.gov/vuln/detail/CVE-2026-39825",
-            "https://pkg.go.dev/vuln/GO-2026-4976"
-          ],
-          "PublishedDate": "2026-05-07T20:16:43.39Z",
-          "LastModifiedDate": "2026-06-17T10:42:38.77Z"
         },
         {
           "VulnerabilityID": "CVE-2026-39836",
@@ -14584,7 +14546,7 @@
             "URL": "https://pkg.go.dev/vuln/"
           },
           "Fingerprint": "sha256:139093994f2d800941051630144562a94ad58039b96a48f8d5903b0c1da0a7fe",
-          "Title": "ELSA-2026-22112:  go-toolset:ol8 security update (IMPORTANT)",
+          "Title": "ELSA-2026-22121:  golang security update (IMPORTANT)",
           "Description": "The Dial and LookupPort functions panic on Windows when provided with an input containing a NUL (0).",
           "Severity": "HIGH",
           "CweIDs": [
@@ -14611,7 +14573,7 @@
             "https://go.dev/issue/79006",
             "https://groups.google.com/g/golang-announce/c/qcCIEXso47M",
             "https://linux.oracle.com/cve/CVE-2026-39836.html",
-            "https://linux.oracle.com/errata/ELSA-2026-22112.html",
+            "https://linux.oracle.com/errata/ELSA-2026-22121.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-39836",
             "https://pkg.go.dev/vuln/GO-2026-4971"
           ],
@@ -14663,7 +14625,7 @@
             "https://go.dev/issue/78987",
             "https://groups.google.com/g/golang-announce/c/qcCIEXso47M",
             "https://linux.oracle.com/cve/CVE-2026-42499.html",
-            "https://linux.oracle.com/errata/ELSA-2026-22112.html",
+            "https://linux.oracle.com/errata/ELSA-2026-22121.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-42499",
             "https://pkg.go.dev/vuln/GO-2026-4977"
           ],
