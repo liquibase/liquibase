@@ -446,6 +446,9 @@ createTable: |
   ifNotExists boolean 
     Description: If true, creates the table only if it does not already exist. Appends IF NOT EXISTS syntax to SQL query
     Supported: all
+  partitionBy string 
+    Description: PostgreSQL partition definition, e.g. 'RANGE (created_at)' or 'LIST (region)'. Causes CREATE TABLE to be emitted as a partitioned parent table.
+    Supported: postgresql
   remarks string 
     Description: A brief descriptive comment to store in the table metadata
     Supported: all
