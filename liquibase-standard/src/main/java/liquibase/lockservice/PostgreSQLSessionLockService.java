@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Date;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
@@ -86,10 +87,18 @@ public class PostgreSQLSessionLockService extends SessionLockService {
                 if (!lockInfoResultSet.next()) {
                     return new DatabaseChangeLogLock[0];
                 }
+                // This reports any session in the cluster holding an advisory lock with our
+                // classid/objid; because the key embeds the lock-table schema, that is effectively
+                // only sessions guarding the same changelog, so the first row is the current holder.
+                //
                 // backend_start (session start) is only an upper bound on when the lock was taken;
-                // PostgreSQL does not record the actual advisory-lock acquisition time.
+                // PostgreSQL does not record the actual advisory-lock acquisition time. It comes
+                // from the LEFT-JOINed pg_stat_activity and can be null (system processes, a race
+                // with backend termination, or restricted visibility for non-superusers); the
+                // DatabaseChangeLogLock constructor would NPE on null, so fall back to the epoch.
                 Timestamp lockGranted = lockInfoResultSet.getTimestamp("backend_start");
-                DatabaseChangeLogLock lock = new DatabaseChangeLogLock(1, lockGranted, describeLockHolder(lockInfoResultSet));
+                Date lockGrantedDate = lockGranted == null ? new Date(0L) : lockGranted;
+                DatabaseChangeLogLock lock = new DatabaseChangeLogLock(1, lockGrantedDate, describeLockHolder(lockInfoResultSet));
                 return new DatabaseChangeLogLock[]{lock};
             }
         } catch (SQLException e) {
@@ -99,17 +108,28 @@ public class PostgreSQLSessionLockService extends SessionLockService {
 
     /**
      * The 64-bit advisory key split into the two {@code int4} arguments {@code pg_advisory_lock}
-     * takes, keyed on the lock table name and the default schema so distinct schemas never contend.
-     * {@link String#hashCode()} is stable across JVMs.
+     * takes. It is scoped exactly like the {@code DATABASECHANGELOGLOCK} table {@link
+     * StandardLockService} uses: by the catalog and schema the lock table lives in (its
+     * {@code liquibaseSchemaName}), not the connection's {@code current_schema()}. Keying on
+     * {@code getDefaultSchemaName()} would diverge from the table's real location whenever
+     * {@code liquibase.liquibaseSchemaName} is set explicitly, either over-serializing unrelated
+     * deployments or, worse, losing mutual exclusion between sessions that share the table but see
+     * a different {@code current_schema()}. {@link String#hashCode()} is stable across JVMs. Two
+     * {@code int4} hashes can theoretically collide, but for any single deployment the
+     * (catalog/schema, table-name) pair is constant, so a collision cannot affect correctness.
      */
     private int[] getChangeLogLockId() throws LockException {
-        String defaultSchemaName = database.getDefaultSchemaName();
-        if (defaultSchemaName == null) {
-            throw new LockException("Default schema name is not set for the current database connection");
+        String liquibaseSchemaName = database.getLiquibaseSchemaName();
+        if (liquibaseSchemaName == null) {
+            throw new LockException("Liquibase schema name is not set for the current database connection");
         }
+        String liquibaseCatalogName = database.getLiquibaseCatalogName();
+        String schemaScope = liquibaseCatalogName == null
+                ? liquibaseSchemaName
+                : liquibaseCatalogName + "." + liquibaseSchemaName;
         return new int[]{
                 database.getDatabaseChangeLogLockTableName().hashCode(),
-                defaultSchemaName.hashCode()
+                schemaScope.hashCode()
         };
     }
 
@@ -118,7 +138,8 @@ public class PostgreSQLSessionLockService extends SessionLockService {
         if (clientHostname == null) {
             return "pid#" + lockInfoResultSet.getInt("pid");
         }
-        return clientHostname + " (" + lockInfoResultSet.getString("state") + ")";
+        String state = lockInfoResultSet.getString("state");
+        return clientHostname + " (" + (state == null ? "unknown" : state) + ")";
     }
 
     private static Boolean queryForBoolean(PreparedStatement statement) throws SQLException {
