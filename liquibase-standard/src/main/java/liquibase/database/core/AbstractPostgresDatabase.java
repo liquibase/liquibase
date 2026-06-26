@@ -92,15 +92,8 @@ public abstract class AbstractPostgresDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean isSystemObject(DatabaseObject example) {
         // All tables in the schemas pg_catalog and pg_toast are definitely system tables.
-        if
-        (
-                (example instanceof Table)
-                        && (example.getSchema() != null)
-                        && (
-                        ("pg_catalog".equals(example.getSchema().getName()))
-                                || ("pg_toast".equals(example.getSchema().getName()))
-                )
-        ) {
+        if (example instanceof Table && example.getSchema() != null
+                && ("pg_catalog".equals(example.getSchema().getName()) || "pg_toast".equals(example.getSchema().getName()))) {
             return true;
         }
 
