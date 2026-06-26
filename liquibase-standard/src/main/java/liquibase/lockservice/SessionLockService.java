@@ -4,10 +4,12 @@ import java.sql.Connection;
 import java.text.DateFormat;
 import java.util.Date;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
 
 /**
@@ -31,8 +33,10 @@ public abstract class SessionLockService implements LockService {
 
     protected Database database;
     protected boolean hasChangeLogLock;
-    protected long changeLogLockWaitTimeMinutes = 5;
-    protected long changeLogLockRecheckTimeSeconds = 10;
+    // Null means "not set explicitly", in which case the global configuration is consulted; an
+    // explicit setChangeLogLock* call wins. Mirrors StandardLockService.
+    protected Long changeLogLockWaitTimeMinutes;
+    protected Long changeLogLockRecheckTimeSeconds;
 
     @Override
     public int getPriority() {
@@ -60,6 +64,22 @@ public abstract class SessionLockService implements LockService {
         this.changeLogLockRecheckTimeSeconds = changeLogLockRecheckTime;
     }
 
+    /** Wait timeout in minutes: the explicit setter wins, otherwise the global configuration. */
+    protected long getChangeLogLockWaitTimeMinutes() {
+        if (changeLogLockWaitTimeMinutes != null) {
+            return changeLogLockWaitTimeMinutes;
+        }
+        return GlobalConfiguration.CHANGELOGLOCK_WAIT_TIME.getCurrentValue();
+    }
+
+    /** Recheck interval in seconds: the explicit setter wins, otherwise the global configuration. */
+    protected long getChangeLogLockRecheckTimeSeconds() {
+        if (changeLogLockRecheckTimeSeconds != null) {
+            return changeLogLockRecheckTimeSeconds;
+        }
+        return GlobalConfiguration.CHANGELOGLOCK_POLL_RATE.getCurrentValue();
+    }
+
     @Override
     public boolean hasChangeLogLock() {
         return hasChangeLogLock;
@@ -72,10 +92,19 @@ public abstract class SessionLockService implements LockService {
 
     @Override
     public boolean acquireLock() throws LockException {
+        // The hasChangeLogLock guard means we acquire at most once per service instance. Session
+        // advisory locks are re-entrant (a per-session reference count), so acquiring twice would
+        // need two releases; acquiring once keeps the count at 1 and a single release frees it.
         if (hasChangeLogLock) {
             return true;
         }
-        if (acquireLock(getConnection())) {
+        boolean acquired = acquireLock(getConnection());
+        // The lock SQL runs inside Liquibase's implicit (autoCommit=false) transaction. A
+        // session-level lock is unaffected by transaction boundaries, but leaving the transaction
+        // open would hold catalog locks and start the migration's first DML mid-transaction. End
+        // it now, mirroring StandardLockService which brackets its lock work with rollback().
+        endTransaction();
+        if (acquired) {
             hasChangeLogLock = true;
             Scope.getCurrentScope().getLog(getClass()).info("Successfully acquired change log lock");
             return true;
@@ -91,6 +120,7 @@ public abstract class SessionLockService implements LockService {
         // Only clear the flag once the unlock actually succeeds; if it throws, we still hold the
         // session lock and must not let Liquibase think otherwise.
         releaseLock(getConnection());
+        endTransaction();
         hasChangeLogLock = false;
         Scope.getCurrentScope().getLog(getClass()).info("Successfully released change log lock");
     }
@@ -98,7 +128,7 @@ public abstract class SessionLockService implements LockService {
     @Override
     public void waitForLock() throws LockException {
         boolean locked = acquireLock();
-        long giveUpAtMillis = new Date().getTime() + (changeLogLockWaitTimeMinutes * 60 * 1000);
+        long giveUpAtMillis = new Date().getTime() + (getChangeLogLockWaitTimeMinutes() * 60 * 1000);
         while (!locked && new Date().getTime() < giveUpAtMillis) {
             Scope.getCurrentScope().getLog(getClass()).info("Waiting for changelog lock....");
             sleepRecheckInterval();
@@ -112,6 +142,7 @@ public abstract class SessionLockService implements LockService {
     @Override
     public void forceReleaseLock() throws LockException {
         releaseLock(getConnection());
+        endTransaction();
         hasChangeLogLock = false;
     }
 
@@ -155,17 +186,26 @@ public abstract class SessionLockService implements LockService {
             return "UNKNOWN";
         }
         DatabaseChangeLogLock currentLock = locks[0];
-        Date lockGranted = currentLock.getLockGranted();
-        if (lockGranted == null) {
-            return currentLock.getLockedBy();
-        }
-        String grantedAt = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lockGranted);
+        String grantedAt = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+                .format(currentLock.getLockGranted());
         return currentLock.getLockedBy() + " since " + grantedAt;
+    }
+
+    /**
+     * Ends Liquibase's implicit transaction so a session-lock acquire/release does not leave a
+     * transaction open. The session-level lock itself is unaffected by the rollback.
+     */
+    private void endTransaction() throws LockException {
+        try {
+            database.rollback();
+        } catch (DatabaseException e) {
+            throw new LockException(e);
+        }
     }
 
     private void sleepRecheckInterval() throws LockException {
         try {
-            Thread.sleep(changeLogLockRecheckTimeSeconds * 1000);
+            Thread.sleep(getChangeLogLockRecheckTimeSeconds() * 1000);
         } catch (InterruptedException e) {
             // Preserve the interrupt and abort the wait loop: otherwise the next sleep would throw
             // immediately and waitForLock() would hot-spin on lock polls until the full timeout.
