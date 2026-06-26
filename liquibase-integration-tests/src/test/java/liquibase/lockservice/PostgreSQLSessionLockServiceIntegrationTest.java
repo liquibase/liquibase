@@ -6,11 +6,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.exception.DatabaseException;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import org.junit.AfterClass;
@@ -49,9 +51,13 @@ public class PostgreSQLSessionLockServiceIntegrationTest {
     @Test
     public void sessionLockIsReleasedWhenTheHoldingSessionDies() throws Exception {
         Scope.child(GlobalConfiguration.USE_SESSION_LOCK.getKey(), true, () -> {
-            PostgresDatabase holderDatabase = openDatabase();
-            PostgresDatabase contenderDatabase = openDatabase();
+            // Open both connections inside the try so a failure opening the second still closes the
+            // first in the finally.
+            PostgresDatabase holderDatabase = null;
+            PostgresDatabase contenderDatabase = null;
             try {
+                holderDatabase = openDatabase();
+                contenderDatabase = openDatabase();
                 PostgreSQLSessionLockService holder = lockServiceFor(holderDatabase);
                 PostgreSQLSessionLockService contender = lockServiceFor(contenderDatabase);
 
@@ -81,13 +87,23 @@ public class PostgreSQLSessionLockServiceIntegrationTest {
         return lockService;
     }
 
-    private static PostgresDatabase openDatabase() throws Exception {
+    private static PostgresDatabase openDatabase() throws SQLException, DatabaseException {
         Connection connection = DriverManager.getConnection(
                 POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
-        connection.setAutoCommit(false);
-        Database database = DatabaseFactory.getInstance()
-                .findCorrectDatabaseImplementation(new JdbcConnection(connection));
-        return (PostgresDatabase) database;
+        boolean wrapped = false;
+        try {
+            connection.setAutoCommit(false);
+            PostgresDatabase database = (PostgresDatabase) DatabaseFactory.getInstance()
+                    .findCorrectDatabaseImplementation(new JdbcConnection(connection));
+            wrapped = true;
+            return database;
+        } finally {
+            // If wrapping the raw connection failed, close it here so it is not leaked: the caller
+            // only owns it via the returned Database, which it never received.
+            if (!wrapped) {
+                closeQuietly(connection);
+            }
+        }
     }
 
     private static int backendPidOf(Database database) throws Exception {
@@ -126,10 +142,17 @@ public class PostgreSQLSessionLockServiceIntegrationTest {
     }
 
     private static void closeQuietly(Database database) {
+        if (database != null) {
+            closeQuietly(underlyingConnection(database));
+        }
+    }
+
+    private static void closeQuietly(Connection connection) {
         try {
-            underlyingConnection(database).close();
-        } catch (Exception e) {
-            // The holder connection is already dead after pg_terminate_backend; nothing to do.
+            connection.close();
+        } catch (SQLException e) {
+            // Best-effort cleanup: e.g. the holder connection is already dead after
+            // pg_terminate_backend, so close() reports the broken backend. Nothing to do.
         }
     }
 }
