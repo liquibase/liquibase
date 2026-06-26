@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019efe6e-c170-7c2d-8c9a-93d5c71a7daf",
-  "CreatedAt": "2026-06-25T10:58:51.888798972Z",
+  "ReportID": "019f0398-3c12-71af-96d3-42dbc2518b55",
+  "CreatedAt": "2026-06-26T11:02:16.338111953Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -2134,7 +2134,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2218,7 +2218,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2302,7 +2302,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2386,7 +2386,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2473,7 +2473,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2560,7 +2560,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2909,7 +2909,9 @@
             "azure": 3,
             "ghsa": 3,
             "nvd": 2,
+            "oracle-oval": 3,
             "redhat": 2,
+            "rocky": 3,
             "ubuntu": 2
           },
           "CVSS": {
@@ -2929,13 +2931,20 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:28000",
+            "https://access.redhat.com/errata/RHSA-2026:28159",
             "https://access.redhat.com/security/cve/CVE-2026-44431",
             "https://bugzilla.redhat.com/2477154",
             "https://bugzilla.redhat.com/2477167",
-            "https://errata.almalinux.org/10/ALSA-2026-28000.html",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2477154",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2477167",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-44431",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-44432",
+            "https://errata.almalinux.org/9/ALSA-2026-28159.html",
+            "https://errata.rockylinux.org/RLSA-2026:28158",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc",
+            "https://linux.oracle.com/cve/CVE-2026-44431.html",
+            "https://linux.oracle.com/errata/ELSA-2026-28159.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-44431",
             "https://ubuntu.com/security/notices/USN-8379-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-44431"
@@ -2977,7 +2986,9 @@
             "azure": 3,
             "ghsa": 3,
             "nvd": 2,
+            "oracle-oval": 3,
             "redhat": 2,
+            "rocky": 3,
             "ubuntu": 2
           },
           "CVSS": {
@@ -2997,13 +3008,20 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:28000",
+            "https://access.redhat.com/errata/RHSA-2026:28159",
             "https://access.redhat.com/security/cve/CVE-2026-44431",
             "https://bugzilla.redhat.com/2477154",
             "https://bugzilla.redhat.com/2477167",
-            "https://errata.almalinux.org/10/ALSA-2026-28000.html",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2477154",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2477167",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-44431",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-44432",
+            "https://errata.almalinux.org/9/ALSA-2026-28159.html",
+            "https://errata.rockylinux.org/RLSA-2026:28158",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc",
+            "https://linux.oracle.com/cve/CVE-2026-44431.html",
+            "https://linux.oracle.com/errata/ELSA-2026-28159.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-44431",
             "https://ubuntu.com/security/notices/USN-8379-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-44431"
@@ -3045,7 +3063,9 @@
             "azure": 3,
             "ghsa": 3,
             "nvd": 2,
+            "oracle-oval": 3,
             "redhat": 2,
+            "rocky": 3,
             "ubuntu": 2
           },
           "CVSS": {
@@ -3065,13 +3085,20 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:28000",
+            "https://access.redhat.com/errata/RHSA-2026:28159",
             "https://access.redhat.com/security/cve/CVE-2026-44431",
             "https://bugzilla.redhat.com/2477154",
             "https://bugzilla.redhat.com/2477167",
-            "https://errata.almalinux.org/10/ALSA-2026-28000.html",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2477154",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2477167",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-44431",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-44432",
+            "https://errata.almalinux.org/9/ALSA-2026-28159.html",
+            "https://errata.rockylinux.org/RLSA-2026:28158",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc",
+            "https://linux.oracle.com/cve/CVE-2026-44431.html",
+            "https://linux.oracle.com/errata/ELSA-2026-28159.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-44431",
             "https://ubuntu.com/security/notices/USN-8379-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-44431"
