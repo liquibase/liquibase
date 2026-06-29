@@ -44,7 +44,9 @@ public class MariaDBDatabase extends MySQLDatabase {
                 "STATS_AUTO_RECALC",
                 "STATS_PERSISTENT",
                 "STATS_SAMPLE_PAGES",
-                "VECTOR"
+                "VECTOR",
+                // fix for https://liquibase.jira.com/browse/CORE-3437
+                "PERIOD"
         ));
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
         // According to https://mariadb.com/kb/en/library/data-types/, retrieved on 2019-02-12
