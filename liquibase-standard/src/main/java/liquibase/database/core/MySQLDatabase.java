@@ -700,6 +700,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             // words that became reserved in 8.4
             if (major >= 9 || (major == 8 && minor >= 4)) {
                 reservedWords.remove("MASTER_BIND");
+                // this is re-added in MariaDBDatabase
                 reservedWords.remove("MASTER_SSL_VERIFY_SERVER_CERT");
                 reservedWords.add("MANUAL");
                 reservedWords.add("PARALLEL");
