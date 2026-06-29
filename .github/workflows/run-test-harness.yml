@@ -42,7 +42,7 @@ jobs:
           echo "github.event.pull_request.merged: ${{ github.event.pull_request.merged }}"
           echo "github.event_name: ${{ github.event_name }}"
 
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
 
@@ -51,7 +51,7 @@ jobs:
     needs: [ test-harness-build ]
     name: Trigger Test Harness Tests
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Set environment variables for PR branch and SHA
         run: |
@@ -71,7 +71,7 @@ jobs:
           echo "ossWorkflowUrl=${ossWorkflowUrl}" >> $GITHUB_ENV
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59 # v6.1.3
+        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1

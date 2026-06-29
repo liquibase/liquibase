@@ -63,7 +63,7 @@ jobs:
     steps:
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59 # v6.1.3
+        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -88,7 +88,7 @@ jobs:
 
       - name: Invoke Create Release
         id: trigger-step
-        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@a220b5f9914de6995d944c33587da54d24088d64 # main
+        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@229fbce5c1014f2c9844868a60d59d49f1cba945 # main
         with:
           workflow: create-release.yml
           ref: main
@@ -194,7 +194,7 @@ jobs:
     steps:
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59 # v6.1.3
+        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -218,7 +218,7 @@ jobs:
           permission-actions: write
 
       - name: Trigger release-published-orchestrator workflow
-        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@a220b5f9914de6995d944c33587da54d24088d64 # main
+        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@229fbce5c1014f2c9844868a60d59d49f1cba945 # main
         with:
           workflow: release-published-orchestrator.yml
           ref: main
@@ -232,7 +232,7 @@ jobs:
     needs: [setup, dry-run-create-release, dry-run-release-published]
     steps:
       - name: Checkout liquibase
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Set up Git
         run: |
@@ -259,7 +259,7 @@ jobs:
     steps:
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59 # v6.1.3
+        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
