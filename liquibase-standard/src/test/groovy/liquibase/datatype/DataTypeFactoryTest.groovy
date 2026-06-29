@@ -200,6 +200,10 @@ class DataTypeFactoryTest extends Specification {
         "TINYINT"                                      | new MySQLDatabase()    | "TINYINT"                                      | TinyIntType   | false
         "TINYINT UNSIGNED"                             | new MySQLDatabase()    | "TINYINT UNSIGNED"                             | TinyIntType   | false
         "TINYINT(1) UNSIGNED"                          | new MySQLDatabase()    | "TINYINT(1) UNSIGNED"                          | TinyIntType   | false
+        // boolean / bit(1) on MySQL must canonicalise to TINYINT(1); bit(n>1) stays as BIT(n)
+        "boolean"                                      | new MySQLDatabase()    | "TINYINT(1)"                                   | BooleanType   | false
+        "bit(1)"                                       | new MySQLDatabase()    | "TINYINT(1)"                                   | BooleanType   | false
+        "bit(8)"                                       | new MySQLDatabase()    | "BIT(8)"                                       | BooleanType   | false
         "SMALLINT"                                     | new MySQLDatabase()    | "SMALLINT"                                     | SmallIntType  | false
         "SMALLINT UNSIGNED"                            | new MySQLDatabase()    | "SMALLINT UNSIGNED"                            | SmallIntType  | false
         "MEDIUMINT"                                    | new MySQLDatabase()    | "MEDIUMINT"                                    | MediumIntType | false

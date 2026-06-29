@@ -37,10 +37,33 @@ public class BooleanType extends LiquibaseDataType {
         } else if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("bit"));
         } else if (database instanceof MySQLDatabase) {
-            if (originalDefinition.toLowerCase(Locale.US).startsWith("bit")) {
+            if (database instanceof MariaDBDatabase) {
+                if (originalDefinition.toLowerCase(Locale.US).startsWith("bit")) {
+                    return new DatabaseDataType("BIT", getParameters());
+                }
+                return new DatabaseDataType("TINYINT(1)");
+            }
+            // For MySQL (not MariaDB): collapse bit / bit(1) / boolean → TINYINT(1).
+            //
+            // BooleanType handles the "bit" alias (see @DataTypeInfo).  Two separate
+            // scenarios arrive here:
+            //   a) A snapshot produced by the JDBC driver with tinyInt1isBit=true
+            //      (the default): TINYINT(1) columns are reported as TYPE_NAME="BIT",
+            //      so Liquibase builds originalDefinition="BIT(1)".  Without the guard
+            //      below, generating a changelog from that snapshot would write BIT(1),
+            //      re-applying it would create BIT(1) ≠ TINYINT(1), and every subsequent
+            //      generateChangeLog would see a spurious diff.
+            //   b) A changeset authored with type="boolean" or type="bit" (implying
+            //      size 1 or unspecified): TINYINT(1) is the MySQL de-facto boolean type.
+            //
+            // Preserve genuine BIT(n) columns (n > 1) — users who declare
+            // type="bit(8)" explicitly want a bit-field, not a boolean column.
+            String lowerDef = originalDefinition.toLowerCase(Locale.US);
+            if (lowerDef.startsWith("bit") && getParameters().length > 0
+                    && !"1".equals(String.valueOf(getParameters()[0]))) {
                 return new DatabaseDataType("BIT", getParameters());
             }
-            return database instanceof MariaDBDatabase ? new DatabaseDataType("TINYINT(1)") : new DatabaseDataType("TINYINT");
+            return new DatabaseDataType("TINYINT(1)");
         } else if (database instanceof OracleDatabase) {
             try {
                 if (database.getDatabaseMajorVersion() >= OracleDatabase.ORACLE_23C_MAJOR_VERSION) {
