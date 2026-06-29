@@ -484,8 +484,7 @@ public class DiffToChangeLog {
                         return order;
                     });
 
-                    toSort.addAll(toNotSort);
-                    return toSort;
+                    return mergeSortedObjectsPreservingUnsortablePositions(objects, toSort);
                 }
             } catch (DatabaseException e) {
                 Scope.getCurrentScope().getLog(getClass()).fine("Cannot get object dependencies: " + e.getMessage());
@@ -496,6 +495,24 @@ public class DiffToChangeLog {
             }
         }
         return new ArrayList<>(objects);
+    }
+
+    private List<DatabaseObject> mergeSortedObjectsPreservingUnsortablePositions(Collection<DatabaseObject> originalObjects, List<DatabaseObject> sortedObjects) {
+        Set<DatabaseObject> sortableObjects = Collections.newSetFromMap(new IdentityHashMap<>());
+        sortableObjects.addAll(sortedObjects);
+
+        List<DatabaseObject> mergedObjects = new ArrayList<>(originalObjects.size());
+        Iterator<DatabaseObject> sortedIterator = sortedObjects.iterator();
+
+        for (DatabaseObject originalObject : originalObjects) {
+            if (sortableObjects.contains(originalObject)) {
+                mergedObjects.add(sortedIterator.next());
+            } else {
+                mergedObjects.add(originalObject);
+            }
+        }
+
+        return mergedObjects;
     }
 
     private static Integer determineOrderingForTablesAndStoredLogic(DatabaseObject o1, DatabaseObject o2) {
