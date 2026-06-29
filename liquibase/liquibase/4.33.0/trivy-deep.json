@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019f0398-31d2-78d9-9469-990ce660172e",
-  "CreatedAt": "2026-06-26T11:02:13.714581212Z",
+  "ReportID": "019f132f-43b4-72b7-aca0-8220096e7294",
+  "CreatedAt": "2026-06-29T11:41:32.46817928Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -470,7 +470,7 @@
             "https://github.com/FasterXML/jackson-databind/security/advisories/GHSA-j3rv-43j4-c7qm"
           ],
           "PublishedDate": "2026-06-23T21:17:02.203Z",
-          "LastModifiedDate": "2026-06-25T16:14:14.483Z"
+          "LastModifiedDate": "2026-06-27T21:01:36.47Z"
         },
         {
           "VulnerabilityID": "CVE-2026-54513",
@@ -527,7 +527,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-54513"
           ],
           "PublishedDate": "2026-06-23T21:17:02.333Z",
-          "LastModifiedDate": "2026-06-25T16:14:14.483Z"
+          "LastModifiedDate": "2026-06-27T21:00:19.3Z"
         },
         {
           "VulnerabilityID": "CVE-2025-59250",
@@ -1014,12 +1014,10 @@
             "https://linux.oracle.com/cve/CVE-2022-40897.html",
             "https://linux.oracle.com/errata/ELSA-2024-2987.html",
             "https://lists.debian.org/debian-lts-announce/2024/09/msg00018.html",
-            "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/ADES3NLOE5QJKBLGNZNI2RGVOSQXA37R",
-            "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/ADES3NLOE5QJKBLGNZNI2RGVOSQXA37R/",
-            "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/YNA2BAH2ACBZ4TVJZKFLCR7L23BG5C3H",
-            "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/YNA2BAH2ACBZ4TVJZKFLCR7L23BG5C3H/",
             "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/ADES3NLOE5QJKBLGNZNI2RGVOSQXA37R",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/ADES3NLOE5QJKBLGNZNI2RGVOSQXA37R/",
             "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/YNA2BAH2ACBZ4TVJZKFLCR7L23BG5C3H",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/YNA2BAH2ACBZ4TVJZKFLCR7L23BG5C3H/",
             "https://nvd.nist.gov/vuln/detail/CVE-2022-40897",
             "https://pyup.io/posts/pyup-discovers-redos-vulnerabilities-in-top-python-packages",
             "https://pyup.io/posts/pyup-discovers-redos-vulnerabilities-in-top-python-packages/",
@@ -1114,12 +1112,10 @@
             "https://linux.oracle.com/cve/CVE-2022-40897.html",
             "https://linux.oracle.com/errata/ELSA-2024-2987.html",
             "https://lists.debian.org/debian-lts-announce/2024/09/msg00018.html",
-            "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/ADES3NLOE5QJKBLGNZNI2RGVOSQXA37R",
-            "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/ADES3NLOE5QJKBLGNZNI2RGVOSQXA37R/",
-            "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/YNA2BAH2ACBZ4TVJZKFLCR7L23BG5C3H",
-            "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/YNA2BAH2ACBZ4TVJZKFLCR7L23BG5C3H/",
             "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/ADES3NLOE5QJKBLGNZNI2RGVOSQXA37R",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/ADES3NLOE5QJKBLGNZNI2RGVOSQXA37R/",
             "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/YNA2BAH2ACBZ4TVJZKFLCR7L23BG5C3H",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/YNA2BAH2ACBZ4TVJZKFLCR7L23BG5C3H/",
             "https://nvd.nist.gov/vuln/detail/CVE-2022-40897",
             "https://pyup.io/posts/pyup-discovers-redos-vulnerabilities-in-top-python-packages",
             "https://pyup.io/posts/pyup-discovers-redos-vulnerabilities-in-top-python-packages/",
@@ -1214,12 +1210,10 @@
             "https://linux.oracle.com/cve/CVE-2022-40897.html",
             "https://linux.oracle.com/errata/ELSA-2024-2987.html",
             "https://lists.debian.org/debian-lts-announce/2024/09/msg00018.html",
-            "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/ADES3NLOE5QJKBLGNZNI2RGVOSQXA37R",
-            "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/ADES3NLOE5QJKBLGNZNI2RGVOSQXA37R/",
-            "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/YNA2BAH2ACBZ4TVJZKFLCR7L23BG5C3H",
-            "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/YNA2BAH2ACBZ4TVJZKFLCR7L23BG5C3H/",
             "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/ADES3NLOE5QJKBLGNZNI2RGVOSQXA37R",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/ADES3NLOE5QJKBLGNZNI2RGVOSQXA37R/",
             "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/YNA2BAH2ACBZ4TVJZKFLCR7L23BG5C3H",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/YNA2BAH2ACBZ4TVJZKFLCR7L23BG5C3H/",
             "https://nvd.nist.gov/vuln/detail/CVE-2022-40897",
             "https://pyup.io/posts/pyup-discovers-redos-vulnerabilities-in-top-python-packages",
             "https://pyup.io/posts/pyup-discovers-redos-vulnerabilities-in-top-python-packages/",
@@ -2232,7 +2226,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 2,
+            "amazon": 3,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2316,7 +2310,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 2,
+            "amazon": 3,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2400,7 +2394,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 2,
+            "amazon": 3,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2484,7 +2478,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 2,
+            "amazon": 3,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2571,7 +2565,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 2,
+            "amazon": 3,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2658,7 +2652,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 2,
+            "amazon": 3,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -3043,12 +3037,13 @@
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc",
             "https://linux.oracle.com/cve/CVE-2026-44431.html",
             "https://linux.oracle.com/errata/ELSA-2026-28159.html",
+            "https://lists.debian.org/debian-lts-announce/2026/06/msg00040.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-44431",
             "https://ubuntu.com/security/notices/USN-8379-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-44431"
           ],
           "PublishedDate": "2026-05-13T16:16:57.15Z",
-          "LastModifiedDate": "2026-06-17T10:50:38.253Z"
+          "LastModifiedDate": "2026-06-26T12:16:32.423Z"
         },
         {
           "VulnerabilityID": "CVE-2026-44431",
@@ -3120,12 +3115,13 @@
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc",
             "https://linux.oracle.com/cve/CVE-2026-44431.html",
             "https://linux.oracle.com/errata/ELSA-2026-28159.html",
+            "https://lists.debian.org/debian-lts-announce/2026/06/msg00040.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-44431",
             "https://ubuntu.com/security/notices/USN-8379-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-44431"
           ],
           "PublishedDate": "2026-05-13T16:16:57.15Z",
-          "LastModifiedDate": "2026-06-17T10:50:38.253Z"
+          "LastModifiedDate": "2026-06-26T12:16:32.423Z"
         },
         {
           "VulnerabilityID": "CVE-2026-44431",
@@ -3197,12 +3193,13 @@
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc",
             "https://linux.oracle.com/cve/CVE-2026-44431.html",
             "https://linux.oracle.com/errata/ELSA-2026-28159.html",
+            "https://lists.debian.org/debian-lts-announce/2026/06/msg00040.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-44431",
             "https://ubuntu.com/security/notices/USN-8379-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-44431"
           ],
           "PublishedDate": "2026-05-13T16:16:57.15Z",
-          "LastModifiedDate": "2026-06-17T10:50:38.253Z"
+          "LastModifiedDate": "2026-06-26T12:16:32.423Z"
         }
       ]
     }

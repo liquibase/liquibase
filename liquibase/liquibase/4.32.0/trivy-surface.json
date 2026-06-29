@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019f0397-bcc4-79b9-92b1-301b85f73258",
-  "CreatedAt": "2026-06-26T11:01:43.748638172Z",
+  "ReportID": "019f132e-afae-72a6-95c9-9e261599fc9c",
+  "CreatedAt": "2026-06-29T11:40:54.57417542Z",
   "ArtifactID": "sha256:e7e081a7e3694fb8b42307622ba7f47f327e178eeb8e4f00ab5da0b12bd0cfb3",
   "ArtifactName": "liquibase/liquibase:4.32.0",
   "ArtifactType": "container_image",
@@ -11553,9 +11553,9 @@
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
-            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
-            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372 (gnupg-2.2.51)",
-            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48 (gnupg-2.4.9)",
+            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9%20%28gnupg-2.5.14%29",
+            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372%20%28gnupg-2.2.51%29",
+            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48%20%28gnupg-2.4.9%29",
             "https://github.com/gpg/gnupg/compare/gnupg-2.2.50...gnupg-2.2.51",
             "https://gpg.fail/memcpy",
             "https://linux.oracle.com/cve/CVE-2025-68973.html",
@@ -11643,9 +11643,9 @@
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
-            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
-            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372 (gnupg-2.2.51)",
-            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48 (gnupg-2.4.9)",
+            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9%20%28gnupg-2.5.14%29",
+            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372%20%28gnupg-2.2.51%29",
+            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48%20%28gnupg-2.4.9%29",
             "https://github.com/gpg/gnupg/compare/gnupg-2.2.50...gnupg-2.2.51",
             "https://gpg.fail/memcpy",
             "https://linux.oracle.com/cve/CVE-2025-68973.html",
@@ -11733,9 +11733,9 @@
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
-            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
-            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372 (gnupg-2.2.51)",
-            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48 (gnupg-2.4.9)",
+            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9%20%28gnupg-2.5.14%29",
+            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372%20%28gnupg-2.2.51%29",
+            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48%20%28gnupg-2.4.9%29",
             "https://github.com/gpg/gnupg/compare/gnupg-2.2.50...gnupg-2.2.51",
             "https://gpg.fail/memcpy",
             "https://linux.oracle.com/cve/CVE-2025-68973.html",
@@ -11823,9 +11823,9 @@
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
-            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
-            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372 (gnupg-2.2.51)",
-            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48 (gnupg-2.4.9)",
+            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9%20%28gnupg-2.5.14%29",
+            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372%20%28gnupg-2.2.51%29",
+            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48%20%28gnupg-2.4.9%29",
             "https://github.com/gpg/gnupg/compare/gnupg-2.2.50...gnupg-2.2.51",
             "https://gpg.fail/memcpy",
             "https://linux.oracle.com/cve/CVE-2025-68973.html",
@@ -11913,9 +11913,9 @@
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
-            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
-            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372 (gnupg-2.2.51)",
-            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48 (gnupg-2.4.9)",
+            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9%20%28gnupg-2.5.14%29",
+            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372%20%28gnupg-2.2.51%29",
+            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48%20%28gnupg-2.4.9%29",
             "https://github.com/gpg/gnupg/compare/gnupg-2.2.50...gnupg-2.2.51",
             "https://gpg.fail/memcpy",
             "https://linux.oracle.com/cve/CVE-2025-68973.html",
@@ -12003,9 +12003,9 @@
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
-            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
-            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372 (gnupg-2.2.51)",
-            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48 (gnupg-2.4.9)",
+            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9%20%28gnupg-2.5.14%29",
+            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372%20%28gnupg-2.2.51%29",
+            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48%20%28gnupg-2.4.9%29",
             "https://github.com/gpg/gnupg/compare/gnupg-2.2.50...gnupg-2.2.51",
             "https://gpg.fail/memcpy",
             "https://linux.oracle.com/cve/CVE-2025-68973.html",
@@ -12093,9 +12093,9 @@
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
-            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
-            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372 (gnupg-2.2.51)",
-            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48 (gnupg-2.4.9)",
+            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9%20%28gnupg-2.5.14%29",
+            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372%20%28gnupg-2.2.51%29",
+            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48%20%28gnupg-2.4.9%29",
             "https://github.com/gpg/gnupg/compare/gnupg-2.2.50...gnupg-2.2.51",
             "https://gpg.fail/memcpy",
             "https://linux.oracle.com/cve/CVE-2025-68973.html",
@@ -12183,9 +12183,9 @@
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
-            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
-            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372 (gnupg-2.2.51)",
-            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48 (gnupg-2.4.9)",
+            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9%20%28gnupg-2.5.14%29",
+            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372%20%28gnupg-2.2.51%29",
+            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48%20%28gnupg-2.4.9%29",
             "https://github.com/gpg/gnupg/compare/gnupg-2.2.50...gnupg-2.2.51",
             "https://gpg.fail/memcpy",
             "https://linux.oracle.com/cve/CVE-2025-68973.html",
@@ -12273,9 +12273,9 @@
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
-            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
-            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372 (gnupg-2.2.51)",
-            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48 (gnupg-2.4.9)",
+            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9%20%28gnupg-2.5.14%29",
+            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372%20%28gnupg-2.2.51%29",
+            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48%20%28gnupg-2.4.9%29",
             "https://github.com/gpg/gnupg/compare/gnupg-2.2.50...gnupg-2.2.51",
             "https://gpg.fail/memcpy",
             "https://linux.oracle.com/cve/CVE-2025-68973.html",
@@ -12363,9 +12363,9 @@
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
-            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
-            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372 (gnupg-2.2.51)",
-            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48 (gnupg-2.4.9)",
+            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9%20%28gnupg-2.5.14%29",
+            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372%20%28gnupg-2.2.51%29",
+            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48%20%28gnupg-2.4.9%29",
             "https://github.com/gpg/gnupg/compare/gnupg-2.2.50...gnupg-2.2.51",
             "https://gpg.fail/memcpy",
             "https://linux.oracle.com/cve/CVE-2025-68973.html",
@@ -12453,9 +12453,9 @@
             "https://github.com/advisories/GHSA-pj23-86ww-f72p",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
-            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
-            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372 (gnupg-2.2.51)",
-            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48 (gnupg-2.4.9)",
+            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9%20%28gnupg-2.5.14%29",
+            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372%20%28gnupg-2.2.51%29",
+            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48%20%28gnupg-2.4.9%29",
             "https://github.com/gpg/gnupg/compare/gnupg-2.2.50...gnupg-2.2.51",
             "https://gpg.fail/memcpy",
             "https://linux.oracle.com/cve/CVE-2025-68973.html",
@@ -13326,7 +13326,7 @@
             "https://github.com/FasterXML/jackson-databind/security/advisories/GHSA-j3rv-43j4-c7qm"
           ],
           "PublishedDate": "2026-06-23T21:17:02.203Z",
-          "LastModifiedDate": "2026-06-25T16:14:14.483Z"
+          "LastModifiedDate": "2026-06-27T21:01:36.47Z"
         },
         {
           "VulnerabilityID": "CVE-2026-54513",
@@ -13387,7 +13387,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-54513"
           ],
           "PublishedDate": "2026-06-23T21:17:02.333Z",
-          "LastModifiedDate": "2026-06-25T16:14:14.483Z"
+          "LastModifiedDate": "2026-06-27T21:00:19.3Z"
         },
         {
           "VulnerabilityID": "CVE-2025-49146",
@@ -13728,7 +13728,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 2,
+            "amazon": 3,
             "azure": 2,
             "bitnami": 3,
             "cbl-mariner": 2,
@@ -13881,7 +13881,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "bitnami": 3,
             "oracle-oval": 3,
@@ -13918,6 +13918,54 @@
           ],
           "PublishedDate": "2026-03-06T22:16:00.72Z",
           "LastModifiedDate": "2026-06-17T10:25:02.933Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-27145",
+          "VendorIDs": [
+            "GO-2026-5037"
+          ],
+          "PkgID": "stdlib@v1.23.8",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.23.8",
+            "UID": "af094e69e359ed3c"
+          },
+          "InstalledVersion": "v1.23.8",
+          "FixedVersion": "1.25.11, 1.26.4",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:9dc188453f0392ffaf7354ce0f976d9e32aadfbcf9aa08a4d5b8c071e8f61221",
+            "DiffID": "sha256:917067296a3044589d844057e6a7a75ecc4bd24f75811d248cc8abceefb5d741"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-27145",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:0ac1a476c788df7e4544904d2869ed887866676b2bda2db88ed25215296db245",
+          "Title": "*x509.Certificate).VerifyHostname previously called matchHostnames in ...",
+          "Description": "(*x509.Certificate).VerifyHostname previously called matchHostnames in a loop over all DNS Subject Alternative Name (SAN) entries. This caused strings.Split(host, \".\") to execute repeatedly on the same input hostname. With a large DNS SAN list, verification costs scaled quadratically based on the number of SAN entries multiplied by the hostname's label count. Because x509.Verify validates hostnames before building the certificate chain, this overhead occurred even for untrusted certificates.",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "amazon": 3,
+            "bitnami": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:H",
+              "V3Score": 6.5
+            }
+          },
+          "References": [
+            "https://go.dev/cl/783621",
+            "https://go.dev/issue/79694",
+            "https://groups.google.com/g/golang-announce/c/tKs3rmcBcKw",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-27145",
+            "https://pkg.go.dev/vuln/GO-2026-5037"
+          ],
+          "PublishedDate": "2026-06-02T23:16:35.57Z",
+          "LastModifiedDate": "2026-06-17T10:26:45.23Z"
         },
         {
           "VulnerabilityID": "CVE-2026-32280",
@@ -13979,14 +14027,16 @@
             "https://bugzilla.redhat.com/2456339",
             "https://bugzilla.redhat.com/2480681",
             "https://bugzilla.redhat.com/2480684",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2445356",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456333",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456338",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456339",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-25679",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32280",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32281",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32283",
             "https://errata.almalinux.org/9/ALSA-2026-29455.html",
-            "https://errata.rockylinux.org/RLSA-2026:28074",
+            "https://errata.rockylinux.org/RLSA-2026:29703",
             "https://go.dev/cl/758320",
             "https://go.dev/issue/78282",
             "https://groups.google.com/g/golang-announce/c/0uYbvbPZRWU",
@@ -14064,14 +14114,16 @@
             "https://bugzilla.redhat.com/2456339",
             "https://bugzilla.redhat.com/2480681",
             "https://bugzilla.redhat.com/2480684",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2445356",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456333",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456338",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456339",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-25679",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32280",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32281",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32283",
             "https://errata.almalinux.org/9/ALSA-2026-29455.html",
-            "https://errata.rockylinux.org/RLSA-2026:28074",
+            "https://errata.rockylinux.org/RLSA-2026:29703",
             "https://go.dev/cl/758061",
             "https://go.dev/issue/78281",
             "https://groups.google.com/g/golang-announce/c/0uYbvbPZRWU",
@@ -14149,14 +14201,16 @@
             "https://bugzilla.redhat.com/2456339",
             "https://bugzilla.redhat.com/2480681",
             "https://bugzilla.redhat.com/2480684",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2445356",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456333",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456338",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456339",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-25679",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32280",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32281",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32283",
             "https://errata.almalinux.org/9/ALSA-2026-29455.html",
-            "https://errata.rockylinux.org/RLSA-2026:28074",
+            "https://errata.rockylinux.org/RLSA-2026:29703",
             "https://go.dev/cl/763767",
             "https://go.dev/issue/78334",
             "https://groups.google.com/g/golang-announce/c/0uYbvbPZRWU",
@@ -14487,6 +14541,57 @@
           ],
           "PublishedDate": "2026-05-07T20:16:44.54Z",
           "LastModifiedDate": "2026-06-17T10:47:56.183Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-42504",
+          "VendorIDs": [
+            "GO-2026-5038"
+          ],
+          "PkgID": "stdlib@v1.23.8",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.23.8",
+            "UID": "af094e69e359ed3c"
+          },
+          "InstalledVersion": "v1.23.8",
+          "FixedVersion": "1.25.11, 1.26.4",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:9dc188453f0392ffaf7354ce0f976d9e32aadfbcf9aa08a4d5b8c071e8f61221",
+            "DiffID": "sha256:917067296a3044589d844057e6a7a75ecc4bd24f75811d248cc8abceefb5d741"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-42504",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:79723ce84fb4aa2ca61e1bf970b854d2aba5e55e3c53806d0a1e03aad79d9e94",
+          "Title": "Decoding a maliciously-crafted MIME header containing many invalid enc ...",
+          "Description": "Decoding a maliciously-crafted MIME header containing many invalid encoded-words can consume excessive CPU.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-407"
+          ],
+          "VendorSeverity": {
+            "amazon": 3,
+            "bitnami": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://go.dev/cl/774481",
+            "https://go.dev/issue/79217",
+            "https://groups.google.com/g/golang-announce/c/tKs3rmcBcKw",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-42504",
+            "https://pkg.go.dev/vuln/GO-2026-5038"
+          ],
+          "PublishedDate": "2026-06-02T23:16:37.927Z",
+          "LastModifiedDate": "2026-06-17T10:47:56.86Z"
         }
       ]
     }
