@@ -3,6 +3,7 @@ package liquibase.snapshot.jvm;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -13,6 +14,7 @@ import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -90,6 +92,18 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         table.setRemarks(remarks);
         table.setTablespace(tablespace);
         table.setDefaultTablespace(BooleanUtil.isTrue(Boolean.parseBoolean(defaultTablespaceString)));
+
+        if (database instanceof PostgresDatabase) {
+            // PARTITION_BY is stamped onto the row by JdbcDatabaseSnapshot.enrichPostgresqlTablesResult
+            // (pg_get_partkeydef on pg_partitioned_table) for relkind='p' parent tables.
+            // Uses org.apache.commons.lang3.StringUtils.trimToNull (the non-deprecated variant);
+            // surrounding reads still use the deprecated liquibase.util.StringUtil.trimToNull for
+            // consistency with the rest of this method and are out of scope for #6885.
+            String partitionBy = StringUtils.trimToNull(tableMetadataResultSet.getString("PARTITION_BY"));
+            if (partitionBy != null) {
+                table.setPartitionBy(partitionBy);
+            }
+        }
 
         CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
         table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));

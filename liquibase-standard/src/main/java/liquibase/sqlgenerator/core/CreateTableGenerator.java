@@ -6,6 +6,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -37,6 +38,15 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
         }
         return validationErrors;
+    }
+
+    @Override
+    public Warnings warn(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        Warnings warnings = super.warn(statement, database, sqlGeneratorChain);
+        if (!(database instanceof PostgresDatabase) && statement.getPartitionBy() != null) {
+            warnings.addWarning("partitionBy is only supported on PostgreSQL; the clause will be dropped from the generated SQL for " + database);
+        }
+        return warnings;
     }
 
     @Override
@@ -343,6 +353,19 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         if ((database instanceof MySQLDatabase) && (mysqlTableOptionStartWith != null)) {
             Scope.getCurrentScope().getLog(getClass()).info("[MySQL] Using last startWith statement ("+ mysqlTableOptionStartWith +") as table option.");
             sql += " " + ((MySQLDatabase) database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
+        }
+
+        // PARTITION BY must come BEFORE TABLESPACE per PostgreSQL grammar:
+        //   (columns) [PARTITION BY ...] [USING ...] [WITH ...] [ON COMMIT ...] [TABLESPACE ...]
+        // Emitting them in the reverse order causes a syntax error when both are set on the same
+        // statement. Flagged by @filipelautert on PR #7759.
+        //
+        // Defense-in-depth even though CreateTableChange.generateCreateTableStatement already
+        // trims-to-null: a CreateTableStatement constructed programmatically (or by a future change-
+        // type) could still arrive with whitespace-only partitionBy. Reported by CodeRabbit on PR #7759.
+        String partitionBy = StringUtils.trimToNull(statement.getPartitionBy());
+        if (database instanceof PostgresDatabase && partitionBy != null) {
+            sql += " PARTITION BY " + partitionBy;
         }
 
         if ((statement.getTablespace() != null) && database.supportsTablespaces()) {

@@ -113,13 +113,9 @@ class XMLChangeLogSAXParserTest extends Specification {
         new XMLChangeLogSAXParser().parse("com/example/insecure.xml", new ChangeLogParameters(), resourceAccessor)
 
         then:
-        // Under SECURE_PARSING=true the parser now rejects DOCTYPE declarations outright
-        // (defense in depth on top of the LiquibaseEntityResolver's remote-lookup block).
-        // JAXP wording is stable across recent JDKs but assertion is intentionally
-        // loose against the keywords to survive future parser-version changes.
         def e = thrown(ChangeLogParseException)
         e.message.contains("DOCTYPE")
-        e.message.contains("disallow")
+        e.message.contains("not supported")
     }
 
     def "DOCTYPE with path-traversal entity SYSTEM URI is rejected"() {
@@ -134,16 +130,12 @@ class XMLChangeLogSAXParserTest extends Specification {
         new XMLChangeLogSAXParser().parse("com/example/xxe.xml", new ChangeLogParameters(), resourceAccessor)
 
         then:
-        // DOCTYPE rejection fires before entity expansion, so the path-traversal
-        // entity URI never reaches the (now-confined) AbstractPathResourceAccessor.
-        // Both defences are exercised: this test for DOCTYPE rejection,
-        // DirectoryResourceAccessorTest for accessor containment.
         def e = thrown(ChangeLogParseException)
         e.message.contains("DOCTYPE")
-        e.message.contains("disallow")
+        e.message.contains("not supported")
     }
 
-    def "allows liquibase.secureParsing=false to disable secure parsing"() {
+    def "DOCTYPE is rejected unconditionally even when secureParsing=false"() {
         when:
         def resourceAccessor = new MockResourceAccessor(["com/example/insecure.xml": INSECURE_XML])
 
@@ -151,10 +143,12 @@ class XMLChangeLogSAXParserTest extends Specification {
             new XMLChangeLogSAXParser().parse("com/example/insecure.xml", new ChangeLogParameters(), resourceAccessor)
         })
 
-
         then:
+        // disallow-doctype-decl is unconditional — DOCTYPE is blocked before entity resolution
+        // even when secureParsing=false, so the file-system entity URI is never reached.
         def e = thrown(ChangeLogParseException)
-        e.message.contains("Error Reading Changelog File: " + File.separator + "invalid.txt")
+        e.message.contains("DOCTYPE")
+        e.message.contains("not supported")
     }
 
     def "by default validate XML file based on XSD files"() {
