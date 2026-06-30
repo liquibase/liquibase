@@ -219,6 +219,9 @@ class DataTypeFactoryTest extends Specification {
         "java.sql.Types.TIMESTAMP_WITH_TIMEZONE(6)"    | new MySQLDatabase()    | "timestamp(6)"                                 | TimestampType | false
         "timestamp"                                    | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
         "timestamp(3)"                                 | new MySQLDatabase()    | "timestamp(3)"                                 | TimestampType | false
+        "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" | new MySQLDatabase() | "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" | TimestampType | false
+        "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" | new MariaDBDatabase() | "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" | TimestampType | false
+        "timestamp(3) not null default current_timestamp(3) on update current_timestamp(3)" | new MySQLDatabase() | "timestamp(3) not null default current_timestamp(3) on update current_timestamp(3)" | TimestampType | false
         "TIMESTAMPTZ"                                  | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
         "timestamptz(3)"                               | new MySQLDatabase()    | "timestamp(3)"                                 | TimestampType | false
         "java.sql.Types.TIMESTAMP"                     | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
