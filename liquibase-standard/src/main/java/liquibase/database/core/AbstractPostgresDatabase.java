@@ -13,6 +13,7 @@ import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -160,7 +161,7 @@ public abstract class AbstractPostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isReservedWord(String tableName) {
-        return reservedWords.contains(tableName.toUpperCase());
+        return reservedWords.contains(tableName.toUpperCase(Locale.US));
     }
 
     @Override
@@ -175,7 +176,7 @@ public abstract class AbstractPostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void setDefaultCatalogName(String defaultCatalogName) {
-        if (StringUtil.isNotEmpty(defaultCatalogName)) {
+        if (StringUtils.isNotEmpty(defaultCatalogName)) {
             Scope.getCurrentScope().getUI().sendMessage("WARNING: Postgres does not support catalogs, so the values set in 'defaultCatalogName' and 'referenceDefaultCatalogName' will be ignored.");
         }
         super.setDefaultCatalogName(defaultCatalogName);
