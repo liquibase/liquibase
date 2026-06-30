@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019f132e-52dd-7bec-ba79-fbbc19624c03",
-  "CreatedAt": "2026-06-29T11:40:30.813782577Z",
+  "ReportID": "019f1832-2dbe-7c7e-8a21-975bb6162c84",
+  "CreatedAt": "2026-06-30T11:02:49.534819844Z",
   "ArtifactID": "sha256:ab06f77e82c54ce2f2a004f579c5c6b6c1689d650816b8124569f23747ebbd32",
   "ArtifactName": "liquibase/liquibase:5.0.3",
   "ArtifactType": "container_image",
@@ -10650,7 +10650,8 @@
           "Description": "Issue summary: A specially crafted PKCS#7 or S/MIME signed message could\ntrigger a use-after-free during PKCS#7 signature verification.\n\nImpact summary: A use-after-free may result in process crashes, heap\ncorruption, or potentially remote code execution.\n\nWhen processing a PKCS#7 or S/MIME signed message, if the SignedData\ndigestAlgorithms field is present as an empty ASN.1 SET, OpenSSL may\nincorrectly free a caller-owned BIO during PKCS7_verify(). A subsequent\nuse of the BIO by the calling application results in a use-after-free\ncondition.\n\nIn the common case this occurs when the application later calls\nBIO_free() on the BIO originally passed to PKCS7_verify(). Depending\non allocator behavior and application-specific BIO usage patterns, this\nmay result in a crash or other memory corruption. In some application\ncontexts this may potentially be exploitable for remote code execution.\n\nApplications that process PKCS#7 or S/MIME signed messages using OpenSSL\nPKCS#7 APIs may be affected. Applications using the CMS APIs for this\nprocessing are not affected.\n\nThe FIPS modules in 4.0, 3.6, 3.5, 3.4, and 3.0 are not affected by this\nissue, as the affected code is outside the OpenSSL FIPS module boundary.",
           "Severity": "HIGH",
           "CweIDs": [
-            "CWE-416"
+            "CWE-416",
+            "CWE-825"
           ],
           "VendorSeverity": {
             "alma": 3,
@@ -10669,55 +10670,20 @@
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:25237",
             "https://access.redhat.com/errata/RHSA-2026:25239",
+            "https://access.redhat.com/errata/RHSA-2026:26275",
+            "https://access.redhat.com/errata/RHSA-2026:26319",
+            "https://access.redhat.com/errata/RHSA-2026:29197",
             "https://access.redhat.com/security/cve/CVE-2026-45447",
-            "https://bugzilla.redhat.com/2481879",
-            "https://bugzilla.redhat.com/2481880",
-            "https://bugzilla.redhat.com/2481881",
-            "https://bugzilla.redhat.com/2481882",
-            "https://bugzilla.redhat.com/2481884",
-            "https://bugzilla.redhat.com/2481885",
-            "https://bugzilla.redhat.com/2481887",
-            "https://bugzilla.redhat.com/2481890",
-            "https://bugzilla.redhat.com/2481891",
-            "https://bugzilla.redhat.com/2481892",
-            "https://bugzilla.redhat.com/2481893",
-            "https://bugzilla.redhat.com/2481894",
-            "https://bugzilla.redhat.com/2481896",
-            "https://bugzilla.redhat.com/2481897",
+            "https://bugzilla.redhat.com/2283757",
             "https://bugzilla.redhat.com/2481898",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481879",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481880",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481881",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481882",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481884",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481885",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481887",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481890",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481891",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481892",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481893",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481894",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481896",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481897",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2283757",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2481898",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-34180",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-34181",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-34182",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-34183",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42764",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42766",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42767",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42768",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42769",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42770",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-45445",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-45446",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-4741",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-45447",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-7383",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-9076",
-            "https://errata.almalinux.org/9/ALSA-2026-25239.html",
-            "https://errata.rockylinux.org/RLSA-2026:25239",
+            "https://errata.almalinux.org/8/ALSA-2026-26275.html",
+            "https://errata.rockylinux.org/RLSA-2026:26275",
             "https://github.com/openssl/openssl/commit/3aad5eb7af4de4ee0633c30a8541a54d9bbde63c",
             "https://github.com/openssl/openssl/commit/7d4a980c62258c5910cc883936e0c8dbab4d75a8",
             "https://github.com/openssl/openssl/commit/9dfd688ad2290fc5075cacbc9bf0c9a93eefed54",
@@ -10727,12 +10693,13 @@
             "https://linux.oracle.com/errata/ELSA-2026-50323.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-45447",
             "https://openssl-library.org/news/secadv/20260609.txt",
+            "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-45447.json",
             "https://ubuntu.com/security/notices/USN-8414-1",
             "https://ubuntu.com/security/notices/USN-8414-2",
             "https://www.cve.org/CVERecord?id=CVE-2026-45447"
           ],
           "PublishedDate": "2026-06-09T17:17:19.277Z",
-          "LastModifiedDate": "2026-06-17T10:52:04.14Z"
+          "LastModifiedDate": "2026-06-30T03:20:04.08Z"
         },
         {
           "VulnerabilityID": "CVE-2026-45447",
@@ -10761,7 +10728,8 @@
           "Description": "Issue summary: A specially crafted PKCS#7 or S/MIME signed message could\ntrigger a use-after-free during PKCS#7 signature verification.\n\nImpact summary: A use-after-free may result in process crashes, heap\ncorruption, or potentially remote code execution.\n\nWhen processing a PKCS#7 or S/MIME signed message, if the SignedData\ndigestAlgorithms field is present as an empty ASN.1 SET, OpenSSL may\nincorrectly free a caller-owned BIO during PKCS7_verify(). A subsequent\nuse of the BIO by the calling application results in a use-after-free\ncondition.\n\nIn the common case this occurs when the application later calls\nBIO_free() on the BIO originally passed to PKCS7_verify(). Depending\non allocator behavior and application-specific BIO usage patterns, this\nmay result in a crash or other memory corruption. In some application\ncontexts this may potentially be exploitable for remote code execution.\n\nApplications that process PKCS#7 or S/MIME signed messages using OpenSSL\nPKCS#7 APIs may be affected. Applications using the CMS APIs for this\nprocessing are not affected.\n\nThe FIPS modules in 4.0, 3.6, 3.5, 3.4, and 3.0 are not affected by this\nissue, as the affected code is outside the OpenSSL FIPS module boundary.",
           "Severity": "HIGH",
           "CweIDs": [
-            "CWE-416"
+            "CWE-416",
+            "CWE-825"
           ],
           "VendorSeverity": {
             "alma": 3,
@@ -10780,55 +10748,20 @@
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:25237",
             "https://access.redhat.com/errata/RHSA-2026:25239",
+            "https://access.redhat.com/errata/RHSA-2026:26275",
+            "https://access.redhat.com/errata/RHSA-2026:26319",
+            "https://access.redhat.com/errata/RHSA-2026:29197",
             "https://access.redhat.com/security/cve/CVE-2026-45447",
-            "https://bugzilla.redhat.com/2481879",
-            "https://bugzilla.redhat.com/2481880",
-            "https://bugzilla.redhat.com/2481881",
-            "https://bugzilla.redhat.com/2481882",
-            "https://bugzilla.redhat.com/2481884",
-            "https://bugzilla.redhat.com/2481885",
-            "https://bugzilla.redhat.com/2481887",
-            "https://bugzilla.redhat.com/2481890",
-            "https://bugzilla.redhat.com/2481891",
-            "https://bugzilla.redhat.com/2481892",
-            "https://bugzilla.redhat.com/2481893",
-            "https://bugzilla.redhat.com/2481894",
-            "https://bugzilla.redhat.com/2481896",
-            "https://bugzilla.redhat.com/2481897",
+            "https://bugzilla.redhat.com/2283757",
             "https://bugzilla.redhat.com/2481898",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481879",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481880",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481881",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481882",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481884",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481885",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481887",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481890",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481891",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481892",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481893",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481894",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481896",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2481897",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2283757",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2481898",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-34180",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-34181",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-34182",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-34183",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42764",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42766",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42767",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42768",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42769",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42770",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-45445",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-45446",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-4741",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-45447",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-7383",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-9076",
-            "https://errata.almalinux.org/9/ALSA-2026-25239.html",
-            "https://errata.rockylinux.org/RLSA-2026:25239",
+            "https://errata.almalinux.org/8/ALSA-2026-26275.html",
+            "https://errata.rockylinux.org/RLSA-2026:26275",
             "https://github.com/openssl/openssl/commit/3aad5eb7af4de4ee0633c30a8541a54d9bbde63c",
             "https://github.com/openssl/openssl/commit/7d4a980c62258c5910cc883936e0c8dbab4d75a8",
             "https://github.com/openssl/openssl/commit/9dfd688ad2290fc5075cacbc9bf0c9a93eefed54",
@@ -10838,12 +10771,13 @@
             "https://linux.oracle.com/errata/ELSA-2026-50323.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-45447",
             "https://openssl-library.org/news/secadv/20260609.txt",
+            "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-45447.json",
             "https://ubuntu.com/security/notices/USN-8414-1",
             "https://ubuntu.com/security/notices/USN-8414-2",
             "https://www.cve.org/CVERecord?id=CVE-2026-45447"
           ],
           "PublishedDate": "2026-06-09T17:17:19.277Z",
-          "LastModifiedDate": "2026-06-17T10:52:04.14Z"
+          "LastModifiedDate": "2026-06-30T03:20:04.08Z"
         }
       ]
     },
@@ -11082,28 +11016,40 @@
             "URL": "https://pkg.go.dev/vuln/"
           },
           "Fingerprint": "sha256:87c4889eec327be25b594c629f2b4b322cb74c24918216c643fa22cca4c1e3e2",
-          "Title": "*x509.Certificate).VerifyHostname previously called matchHostnames in ...",
+          "Title": "crypto/x509: golang: golang crypto/x509: Denial of Service via excessive processing of DNS SAN entries",
           "Description": "(*x509.Certificate).VerifyHostname previously called matchHostnames in a loop over all DNS Subject Alternative Name (SAN) entries. This caused strings.Split(host, \".\") to execute repeatedly on the same input hostname. With a large DNS SAN list, verification costs scaled quadratically based on the number of SAN entries multiplied by the hostname's label count. Because x509.Verify validates hostnames before building the certificate chain, this overhead occurred even for untrusted certificates.",
           "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-606"
+          ],
           "VendorSeverity": {
             "amazon": 3,
-            "bitnami": 2
+            "bitnami": 2,
+            "redhat": 3
           },
           "CVSS": {
             "bitnami": {
               "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:H",
               "V3Score": 6.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
             }
           },
           "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-27145",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2484207",
             "https://go.dev/cl/783621",
             "https://go.dev/issue/79694",
             "https://groups.google.com/g/golang-announce/c/tKs3rmcBcKw",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-27145",
-            "https://pkg.go.dev/vuln/GO-2026-5037"
+            "https://pkg.go.dev/vuln/GO-2026-5037",
+            "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-27145.json",
+            "https://www.cve.org/CVERecord?id=CVE-2026-27145"
           ],
           "PublishedDate": "2026-06-02T23:16:35.57Z",
-          "LastModifiedDate": "2026-06-17T10:26:45.23Z"
+          "LastModifiedDate": "2026-06-30T03:17:54.533Z"
         },
         {
           "VulnerabilityID": "CVE-2026-42504",
