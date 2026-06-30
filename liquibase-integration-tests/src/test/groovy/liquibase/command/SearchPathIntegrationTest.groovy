@@ -93,6 +93,47 @@ class SearchPathIntegrationTest extends Specification {
         } catch (Exception e) {}
     }
 
+    def "defaultSchemaName works when runInTransaction is false (#7791)"() {
+        given:
+        def customSchema = "concurrent_idx_" + System.currentTimeMillis()
+        def database = postgres.getDatabaseFromFactory()
+        def connection = database.getConnection()
+        connection.createStatement().execute("CREATE SCHEMA IF NOT EXISTS " + customSchema)
+        connection.commit()
+
+        when:
+        def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()): resourceAccessor
+        ]
+        Scope.child(scopeSettings, {
+            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, postgres.getConnectionUrl())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, postgres.getUsername())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, postgres.getPassword())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DEFAULT_SCHEMA_NAME_ARG, customSchema)
+            commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "changelogs/pgsql/update/default-schema-name-run-in-transaction-false.xml")
+            commandScope.execute()
+        } as Scope.ScopedRunner)
+
+        then:
+        noExceptionThrown()
+
+        // Verify the concurrent index was actually created in the custom schema
+        def rs = connection.createStatement().executeQuery("""
+            SELECT COUNT(*) FROM pg_indexes
+            WHERE schemaname = '${customSchema}'
+              AND indexname = 'idx_test_id'
+        """)
+        rs.next()
+        rs.getInt(1) == 1
+
+        cleanup:
+        try {
+            connection.createStatement().execute("DROP SCHEMA IF EXISTS " + customSchema + " CASCADE")
+        } catch (Exception e) {}
+    }
+
     def "SET LOCAL search_path reverts after transaction completes"() {
         given:
         def customSchema = "local_test_" + System.currentTimeMillis()
