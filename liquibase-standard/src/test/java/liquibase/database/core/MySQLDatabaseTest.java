@@ -118,14 +118,15 @@ public class MySQLDatabaseTest extends AbstractJdbcDatabaseTest {
     static Stream<Arguments> reservedWordMatrix() {
         return Stream.of(
                 forVersion(5, 7, List.of("MASTER_SSL_VERIFY_SERVER_CERT"), List.of("FUNCTION", "ROW", "ROWS", "PERIOD", "CURRENT_ROLE")),
-                forVersion(8, 0, List.of("FUNCTION", "ROW", "ROWS", "MASTER_BIND"), List.of()),
-                forVersion(8, 4, List.of("FUNCTION", "ROW", "ROWS", "MANUAL"), List.of("MASTER_SSL_VERIFY_SERVER_CERT")),
+                forVersion(8, 0, List.of("FUNCTION", "ROW", "ROWS", "MASTER_BIND"), List.of("MANUAL", "PARALLEL")),
+                forVersion(8, 4, List.of("FUNCTION", "ROW", "ROWS", "MANUAL", "PARALLEL"), List.of("MASTER_SSL_VERIFY_SERVER_CERT")),
                 // no changes in 9.0
                 forVersion(9, 0, List.of("FUNCTION", "ROW", "ROWS", "MANUAL"), List.of("MASTER_SSL_VERIFY_SERVER_CERT", "LIBRARY")),
                 forVersion(9, 3, List.of("LIBRARY", "MANUAL", "SYSTEM"), List.of("MASTER_BIND", "EXTERNAL")),
                 forVersion(9, 4, List.of("EXTERNAL", "LIBRARY", "SYSTEM"), List.of("SETS", "MASTER_BIND", "PERIOD")),
-                forVersion(9, 6, List.of("SETS", "EXTERNAL", "LIBRARY", "CUBE", "ACCESSIBLE"), List.of("SOMETHING_ELSE", "MASTER_BIND")),
-                forVersion(10, 0, List.of("SETS", "EXTERNAL", "LIBRARY", "CUBE", "ACCESSIBLE"), List.of("SOMETHING_ELSE", "MASTER_BIND"))
+                forVersion(9, 6, List.of("SETS", "EXTERNAL", "LIBRARY", "CUBE", "ACCESSIBLE", "MANUAL", "PARALLEL"), List.of("SOMETHING_ELSE", "MASTER_BIND")),
+                forVersion(9, 7, List.of("SETS", "EXTERNAL", "LIBRARY", "CUBE", "ACCESSIBLE"), List.of("SOMETHING_ELSE", "MASTER_BIND", "MANUAL", "PARALLEL")),
+                forVersion(10, 0, List.of("SETS", "EXTERNAL", "LIBRARY", "CUBE", "ACCESSIBLE"), List.of("SOMETHING_ELSE", "MASTER_BIND", "MANUAL", "PARALLEL"))
         ).flatMap(s -> s);
     }
 

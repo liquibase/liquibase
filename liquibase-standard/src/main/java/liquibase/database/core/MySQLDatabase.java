@@ -722,6 +722,12 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             if (major >= 10 || (major == 9 && minor >= 6)) {
                 reservedWords.add("SETS");
             }
+
+            // words that sopped being reserved in 9.7
+            if (major >= 10 || (major == 9 && minor >= 7)) {
+                reservedWords.remove("MANUAL");
+                reservedWords.remove("PARALLEL");
+            }
         } catch (DatabaseException e) {
             throw new RuntimeException(e);
         }
