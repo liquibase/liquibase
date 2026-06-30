@@ -1,12 +1,16 @@
 package liquibase.snapshot.jvm
 
+import liquibase.Scope
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MySQLDatabase
 import liquibase.database.core.PostgresDatabase
+import liquibase.executor.Executor
+import liquibase.executor.ExecutorService
 import liquibase.snapshot.CachedRow
 import liquibase.statement.DatabaseFunction
 import liquibase.structure.core.Column
 import liquibase.structure.core.DataType
+import liquibase.structure.core.Table
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -68,8 +72,15 @@ class ColumnSnapshotGeneratorTest extends Specification {
 
     @Unroll
     def "readDefaultValue"() {
+        given:
+        if (db instanceof MySQLDatabase) {
+            def executor = Mock(Executor)
+            executor.queryForObject(_, _) >> null
+            Scope.currentScope.getSingleton(ExecutorService).setExecutor("jdbc", db, executor)
+        }
+
         expect:
-        columnSnapshotGenerator.readDefaultValue(new CachedRow(["COLUMN_DEF": columnValue]), new Column("col").setType(new DataType(datatype)), db) == expected
+        columnSnapshotGenerator.readDefaultValue(new CachedRow(["COLUMN_DEF": columnValue]), column(datatype), db) == expected
 
         where:
         columnValue          | datatype  | db                     | expected
@@ -80,5 +91,12 @@ class ColumnSnapshotGeneratorTest extends Specification {
         "(3)::real"          | "float"   | new PostgresDatabase() | 3
         "3::real"            | "float"   | new PostgresDatabase() | 3
         "'a value'::varchar" | "varchar" | new PostgresDatabase() | "a value"
+        "NULL"               | "enum"    | new MySQLDatabase()    | null
+        "NULL"               | "varchar" | new MySQLDatabase()    | "NULL"
+        3                    | "enum"    | new MySQLDatabase()    | 3
+    }
+
+    private static Column column(String datatype) {
+        new Column(Table, "catalog", "schema", "table", "col").setType(new DataType(datatype))
     }
 }
