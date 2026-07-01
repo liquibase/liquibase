@@ -11,7 +11,6 @@ import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.StringUtil;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.util.Map;
 import java.util.Properties;
 import java.util.SortedSet;
@@ -20,17 +19,44 @@ import java.util.TreeSet;
 @LiquibaseService(skip = true)
 public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProvider {
 
+    private static final int DEFAULT_PRECEDENCE = 50;
     private final Properties properties;
     private final String sourceDescription;
+    private final int precedence;
 
-    protected DefaultsFileValueProvider(Properties properties) {
+    protected DefaultsFileValueProvider(Properties properties, String sourceDescription, int precedenceOffset) {
         this.properties = properties;
-        sourceDescription = "Passed default properties";
+        this.sourceDescription = sourceDescription;
+        this.precedence = DEFAULT_PRECEDENCE - precedenceOffset;
+    }
+
+    protected DefaultsFileValueProvider(Properties properties, int precedenceOffset) throws IOException {
+        this(properties, "Passed default properties", precedenceOffset);
+    }
+
+    protected DefaultsFileValueProvider(Properties properties) throws IOException {
+        this(properties, 0);
+    }
+
+    public DefaultsFileValueProvider(InputStream stream, String sourceDescription, int precedenceOffset) throws IOException {
+        this(propertiesFromStream(stream), sourceDescription, precedenceOffset);
+    }
+
+    public DefaultsFileValueProvider(File path, int precedenceOffset) throws IOException {
+        this(propertiesFromFile(path), "File " + path.getAbsolutePath(), precedenceOffset);
     }
 
     public DefaultsFileValueProvider(InputStream stream, String sourceDescription) throws IOException {
-        this.sourceDescription = sourceDescription;
-        this.properties = new Properties();
+        this(stream, sourceDescription, 0);
+    }
+
+    public DefaultsFileValueProvider(File path) throws IOException {
+        this(path, 0);
+    }
+
+    private static Properties propertiesFromStream(InputStream stream) throws IOException {
+
+        Properties properties = new Properties();
         // CWE-94 guard: keep this bare java.util.Properties.load(). Do NOT add
         // ${...} interpolation, environment-variable expansion, or include-file
         // directives here. A defaults file may contain user-controlled values;
@@ -38,19 +64,15 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
         // info-disclosure issues (e.g. CVE-2022-33980 in Apache Commons Configuration).
         // Pro extensions that need safe substitution can register a
         // ConfiguredValueModifier instead of changing this loader.
-        this.properties.load(stream);
-        trimAllProperties();
+        properties.load(stream);
+        trimAllProperties(properties);
+        return properties;
     }
 
-    public DefaultsFileValueProvider(File path) throws IOException {
-        this.sourceDescription = "File " + path.getAbsolutePath();
+    private static Properties propertiesFromFile(File file) throws IOException {
 
-        try (InputStream stream = Files.newInputStream(path.toPath())) {
-            this.properties = new Properties();
-            // CWE-94 guard: see the InputStream-arg ctor above. Bare Properties.load —
-            // adding ${...} / env-var / include expansion requires a security review.
-            this.properties.load(stream);
-            trimAllProperties();
+        try (InputStream stream = new FileInputStream(file)) {
+            return propertiesFromStream(stream);
         }
     }
 
@@ -59,8 +81,7 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
         boolean strict = GlobalConfiguration.STRICT.getCurrentValue();
         SortedSet<String> invalidKeys = new TreeSet<>();
         for (Map.Entry<Object, Object> entry : this.properties.entrySet()) {
-            String key = (String) entry.getKey();
-            key = StringUtil.toCamelCase(key);
+            String key = StringUtil.toCamelCase(entry.getKey().toString());
             String originalKey = key;
 
             if (key.equalsIgnoreCase("strict") || key.startsWith("parameter.")) {
@@ -103,7 +124,7 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
             }
         }
 
-        if (invalidKeys.size() > 0) {
+        if (!invalidKeys.isEmpty()) {
             if (strict) {
                 String message = "Strict check failed due to undefined key(s) for '" + StringUtil.join(commandScope.getCommand().getName(), " ")
                     + "' command in " + StringUtil.lowerCaseFirst(sourceDescription) + "':\n"
@@ -119,21 +140,17 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
     //
     // Remove trailing spaces on the property file values
     //
-    private void trimAllProperties() {
+    private static void trimAllProperties(Properties properties) {
         properties.forEach((key, value) -> {
-            if (value == null) {
-                return;
+            if (value instanceof String) {
+                properties.put(key, StringUtil.trimToEmpty((String) value));
             }
-            if (!(value instanceof String)) {
-                return;
-            }
-            properties.put(key, StringUtil.trimToEmpty((String) value));
         });
     }
 
     @Override
     public int getPrecedence() {
-        return 50;
+        return this.precedence;
     }
 
     @Override
