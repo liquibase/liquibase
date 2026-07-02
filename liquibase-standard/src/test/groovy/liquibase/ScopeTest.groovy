@@ -238,9 +238,9 @@ class ScopeTest extends Specification {
         def testManager = new TestMdcManager()
         mdcFactory.unregister(existingManager)
         mdcFactory.register(testManager)
+        def errors = Collections.synchronizedList([])
 
         def scopeId = Scope.enter(null, [:])
-        def errors = Collections.synchronizedList([])
 
         when:
         def childThread = Thread.start {
@@ -248,15 +248,15 @@ class ScopeTest extends Specification {
                 Scope.child([:], {
                     Scope.getCurrentScope().addMdcValue("childKey", "childValue", true)
                     if (!testManager.getValues().containsKey("childKey")) {
-                        errors.add("MDC value 'childKey' was not set in the child scope")
+                        errors.add("childKey missing while child scope active")
                     }
                 } as Scope.ScopedRunner)
                 // After exiting child scope, it should be cleaned up on the child thread
                 if (testManager.getValues().containsKey("childKey")) {
-                    errors.add("MDC value 'childKey' was not cleaned up after exiting the child scope")
+                    errors.add("childKey not cleaned up after child scope exit")
                 }
-            } catch (Throwable t) {
-                errors.add("Error in child thread: " + t.getMessage())
+            } catch (Exception e) {
+                errors.add("Child thread failed: ${e.message}")
             }
         }
         childThread.join()
