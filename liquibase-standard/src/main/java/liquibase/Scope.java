@@ -33,7 +33,6 @@ import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This scope object is used to hold configuration and other parameters within a call without needing complex method signatures.
@@ -127,7 +126,7 @@ public class Scope {
     private final SmartMap values = new SmartMap();
     @Getter
     private final String scopeId;
-    private static final Map<String, List<MdcObject>> addedMdcEntries = new ConcurrentHashMap<>();
+    private static final ThreadLocal<Map<String, List<MdcObject>>> addedMdcEntries = new ThreadLocal<>();
 
     private LiquibaseListener listener;
 
@@ -291,9 +290,15 @@ public class Scope {
         }
 
         // clear the MDC values added in this scope
-        List<MdcObject> mdcObjects = addedMdcEntries.remove(currentScope.scopeId);
-        for (MdcObject mdcObject : CollectionUtil.createIfNull(mdcObjects)) {
-            mdcObject.close();
+        Map<String, List<MdcObject>> map = addedMdcEntries.get();
+        if (map != null) {
+            List<MdcObject> mdcObjects = map.remove(currentScope.scopeId);
+            for (MdcObject mdcObject : CollectionUtil.createIfNull(mdcObjects)) {
+                mdcObject.close();
+            }
+            if (map.isEmpty()) {
+                addedMdcEntries.remove();
+            }
         }
 
         getScopeManagerThreadLocal().get().setCurrentScope(currentScope.getParent());
@@ -487,9 +492,13 @@ public class Scope {
     private void removeMdcObjectWhenScopeExits(boolean removeWhenScopeExits, MdcObject mdcObject) {
         if (removeWhenScopeExits) {
             Scope currentScope = getCurrentScope();
-            addedMdcEntries
-                    .computeIfAbsent(currentScope.scopeId, k -> new ArrayList<>())
-                    .add(mdcObject);
+            Map<String, List<MdcObject>> map = addedMdcEntries.get();
+            if (map == null) {
+                map = new HashMap<>();
+                addedMdcEntries.set(map);
+            }
+            map.computeIfAbsent(currentScope.scopeId, k -> new ArrayList<>())
+               .add(mdcObject);
         }
     }
 
