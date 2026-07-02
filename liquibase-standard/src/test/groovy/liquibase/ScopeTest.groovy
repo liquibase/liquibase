@@ -240,22 +240,31 @@ class ScopeTest extends Specification {
         mdcFactory.register(testManager)
 
         def scopeId = Scope.enter(null, [:])
+        def errors = Collections.synchronizedList([])
 
         when:
         def childThread = Thread.start {
-            Scope.child([:], {
-                Scope.getCurrentScope().addMdcValue("childKey", "childValue", true)
-                assert testManager.getValues().containsKey("childKey")
-            } as Scope.ScopedRunner)
-            // After exiting child scope, it should be cleaned up on the child thread
-            assert !testManager.getValues().containsKey("childKey")
+            try {
+                Scope.child([:], {
+                    Scope.getCurrentScope().addMdcValue("childKey", "childValue", true)
+                    if (!testManager.getValues().containsKey("childKey")) {
+                        errors.add("MDC value 'childKey' was not set in the child scope")
+                    }
+                } as Scope.ScopedRunner)
+                // After exiting child scope, it should be cleaned up on the child thread
+                if (testManager.getValues().containsKey("childKey")) {
+                    errors.add("MDC value 'childKey' was not cleaned up after exiting the child scope")
+                }
+            } catch (Throwable t) {
+                errors.add("Error in child thread: " + t.getMessage())
+            }
         }
         childThread.join()
 
         Scope.exit(scopeId)
 
         then:
-        true
+        errors.isEmpty()
 
         cleanup:
         mdcFactory.unregister(testManager)
