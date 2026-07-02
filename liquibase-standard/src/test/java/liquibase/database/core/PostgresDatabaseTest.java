@@ -42,6 +42,16 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
         assertTrue(getDatabase().supportsInitiallyDeferrableColumns());
     }
 
+    @Test
+    public void postgresFamilyCapabilities() {
+        // Real PostgreSQL opts in to every Postgres-family capability (INT-2139).
+        PostgresDatabase database = new PostgresDatabase();
+        assertTrue(database.supportsEnumTypes());
+        assertTrue(database.supportsCompositeTypes());
+        assertTrue(database.supportsCheckConstraintSnapshot());
+        assertTrue(database.supportsStoredLogicSnapshot());
+    }
+
     @Override
     @Test
     public void getCurrentDateTimeFunction() {
