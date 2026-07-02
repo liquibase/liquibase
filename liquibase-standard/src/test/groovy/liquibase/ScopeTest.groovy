@@ -231,6 +231,37 @@ class ScopeTest extends Specification {
         errors.isEmpty()
     }
 
+    def "mdc values added by child thread in a child scope are cleaned up"() {
+        given:
+        def mdcFactory = Scope.currentScope.getSingleton(MdcManagerFactory)
+        def existingManager = mdcFactory.getMdcManager()
+        def testManager = new TestMdcManager()
+        mdcFactory.unregister(existingManager)
+        mdcFactory.register(testManager)
+
+        def scopeId = Scope.enter(null, [:])
+
+        when:
+        def childThread = Thread.start {
+            Scope.child([:], {
+                Scope.getCurrentScope().addMdcValue("childKey", "childValue", true)
+                assert testManager.getValues().containsKey("childKey")
+            } as Scope.ScopedRunner)
+            // After exiting child scope, it should be cleaned up on the child thread
+            assert !testManager.getValues().containsKey("childKey")
+        }
+        childThread.join()
+
+        Scope.exit(scopeId)
+
+        then:
+        true
+
+        cleanup:
+        mdcFactory.unregister(testManager)
+        mdcFactory.register(existingManager)
+    }
+
     def "custom scope manager can be set"() {
         given:
         def customManager = new SingletonScopeManager()
