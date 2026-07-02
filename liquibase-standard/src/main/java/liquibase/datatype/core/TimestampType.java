@@ -156,7 +156,7 @@ public class TimestampType extends DateTimeType {
             || database instanceof OracleDatabase
             || database instanceof H2Database
             || database instanceof HsqlDatabase
-            || database instanceof SybaseASADatabase)) || (originalDefinition.toLowerCase().startsWith("timestamptz"))) {
+            || database instanceof SybaseASADatabase)) || isTimezoneAware) {
 
             if (database instanceof PostgresDatabase
                     || database instanceof H2Database
