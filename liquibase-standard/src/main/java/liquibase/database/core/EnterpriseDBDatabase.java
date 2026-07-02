@@ -75,4 +75,13 @@ public class EnterpriseDBDatabase extends PostgresDatabase {
     public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
         return false;
     }
+
+    /**
+     * EnterpriseDB does not support composite types for snapshotting; opts down from
+     * {@link PostgresDatabase}.
+     */
+    @Override
+    public boolean supportsCompositeTypes() {
+        return false;
+    }
 }
