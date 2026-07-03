@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019f2277-5afa-7c3f-9d0a-c7899aed28fe",
-  "CreatedAt": "2026-07-02T10:54:35.258804036Z",
+  "ReportID": "019f279d-604a-7cc6-8c73-67af437c3e0f",
+  "CreatedAt": "2026-07-03T10:54:13.066838707Z",
   "ArtifactID": "sha256:ab06f77e82c54ce2f2a004f579c5c6b6c1689d650816b8124569f23747ebbd32",
   "ArtifactName": "liquibase/liquibase:5.0.3",
   "ArtifactType": "container_image",
@@ -10722,8 +10722,8 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-45447",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-7383",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-9076",
-            "https://errata.almalinux.org/9/ALSA-2026-25239.html",
-            "https://errata.rockylinux.org/RLSA-2026:25239",
+            "https://errata.almalinux.org/10/ALSA-2026-25237.html",
+            "https://errata.rockylinux.org/RLSA-2026:25237",
             "https://github.com/openssl/openssl/commit/3aad5eb7af4de4ee0633c30a8541a54d9bbde63c",
             "https://github.com/openssl/openssl/commit/7d4a980c62258c5910cc883936e0c8dbab4d75a8",
             "https://github.com/openssl/openssl/commit/9dfd688ad2290fc5075cacbc9bf0c9a93eefed54",
@@ -10840,8 +10840,8 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-45447",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-7383",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-9076",
-            "https://errata.almalinux.org/9/ALSA-2026-25239.html",
-            "https://errata.rockylinux.org/RLSA-2026:25239",
+            "https://errata.almalinux.org/10/ALSA-2026-25237.html",
+            "https://errata.rockylinux.org/RLSA-2026:25237",
             "https://github.com/openssl/openssl/commit/3aad5eb7af4de4ee0633c30a8541a54d9bbde63c",
             "https://github.com/openssl/openssl/commit/7d4a980c62258c5910cc883936e0c8dbab4d75a8",
             "https://github.com/openssl/openssl/commit/9dfd688ad2290fc5075cacbc9bf0c9a93eefed54",
@@ -11119,6 +11119,8 @@
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2026:33574",
+            "https://access.redhat.com/errata/RHSA-2026:34357",
+            "https://access.redhat.com/errata/RHSA-2026:34359",
             "https://access.redhat.com/security/cve/CVE-2026-27145",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2484207",
             "https://go.dev/cl/783621",
@@ -11130,7 +11132,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-27145"
           ],
           "PublishedDate": "2026-06-02T23:16:35.57Z",
-          "LastModifiedDate": "2026-07-01T13:16:53.713Z"
+          "LastModifiedDate": "2026-07-02T12:16:59.51Z"
         },
         {
           "VulnerabilityID": "CVE-2026-42504",
@@ -11165,6 +11167,7 @@
           ],
           "VendorSeverity": {
             "amazon": 3,
+            "azure": 3,
             "bitnami": 3
           },
           "CVSS": {
