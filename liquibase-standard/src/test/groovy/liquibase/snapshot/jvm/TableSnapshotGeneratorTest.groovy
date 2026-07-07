@@ -1,9 +1,13 @@
 package liquibase.snapshot.jvm
 
+import liquibase.database.Database
+import liquibase.database.core.CockroachDatabase
 import liquibase.database.core.MySQLDatabase
 import liquibase.database.core.PostgresDatabase
 import liquibase.snapshot.CachedRow
+import liquibase.snapshot.JdbcDatabaseSnapshot
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class TableSnapshotGeneratorTest extends Specification {
 
@@ -75,5 +79,29 @@ class TableSnapshotGeneratorTest extends Specification {
 
         then:
         table.getPartitionBy() == null
+    }
+
+    @Unroll
+    def "supportsPartitionKeyCatalog is #expected for #desc"() {
+        expect:
+        JdbcDatabaseSnapshot.supportsPartitionKeyCatalog(database) == expected
+
+        where:
+        desc                        | database                     || expected
+        "PostgreSQL 10"             | postgresWithVersion(10)      || true
+        "PostgreSQL 15"             | postgresWithVersion(15)      || true
+        "PostgreSQL 9 (pre-10)"     | postgresWithVersion(9)       || false
+        "Redshift-like PG 8.0.2"    | postgresWithVersion(8)       || false
+        "CockroachDB"               | new CockroachDatabase()      || false
+        "non-Postgres (MySQL)"      | new MySQLDatabase()          || false
+    }
+
+    // RedshiftDatabase lives in an extension off core's classpath, so a PostgresDatabase pinned to major
+    // version 8 stands in for it — the guard only sees `instanceof PostgresDatabase` and the reported version.
+    private static Database postgresWithVersion(int major) {
+        new PostgresDatabase() {
+            @Override
+            int getDatabaseMajorVersion() { major }
+        }
     }
 }
