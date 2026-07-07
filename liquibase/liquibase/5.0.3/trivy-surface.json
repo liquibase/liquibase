@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019f3733-87ba-71ff-8644-c09d2435b8c6",
-  "CreatedAt": "2026-07-06T11:32:31.802131982Z",
+  "ReportID": "019f3c3d-f425-74c4-b35c-2f9e228d2883",
+  "CreatedAt": "2026-07-07T11:02:00.997313476Z",
   "ArtifactID": "sha256:ab06f77e82c54ce2f2a004f579c5c6b6c1689d650816b8124569f23747ebbd32",
   "ArtifactName": "liquibase/liquibase:5.0.3",
   "ArtifactType": "container_image",
@@ -10676,6 +10676,7 @@
             "https://access.redhat.com/errata/RHSA-2026:26319",
             "https://access.redhat.com/errata/RHSA-2026:29197",
             "https://access.redhat.com/errata/RHSA-2026:34102",
+            "https://access.redhat.com/errata/RHSA-2026:35869",
             "https://access.redhat.com/security/cve/CVE-2026-45447",
             "https://bugzilla.redhat.com/2481879",
             "https://bugzilla.redhat.com/2481880",
@@ -10722,7 +10723,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-45447",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-7383",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-9076",
-            "https://errata.almalinux.org/9/ALSA-2026-25239.html",
+            "https://errata.almalinux.org/10/ALSA-2026-25237.html",
             "https://errata.rockylinux.org/RLSA-2026:25239",
             "https://github.com/openssl/openssl/commit/3aad5eb7af4de4ee0633c30a8541a54d9bbde63c",
             "https://github.com/openssl/openssl/commit/7d4a980c62258c5910cc883936e0c8dbab4d75a8",
@@ -10739,7 +10740,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-45447"
           ],
           "PublishedDate": "2026-06-09T17:17:19.277Z",
-          "LastModifiedDate": "2026-07-01T13:17:32.217Z"
+          "LastModifiedDate": "2026-07-06T13:16:59.4Z"
         },
         {
           "VulnerabilityID": "CVE-2026-45447",
@@ -10794,6 +10795,7 @@
             "https://access.redhat.com/errata/RHSA-2026:26319",
             "https://access.redhat.com/errata/RHSA-2026:29197",
             "https://access.redhat.com/errata/RHSA-2026:34102",
+            "https://access.redhat.com/errata/RHSA-2026:35869",
             "https://access.redhat.com/security/cve/CVE-2026-45447",
             "https://bugzilla.redhat.com/2481879",
             "https://bugzilla.redhat.com/2481880",
@@ -10840,7 +10842,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-45447",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-7383",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-9076",
-            "https://errata.almalinux.org/9/ALSA-2026-25239.html",
+            "https://errata.almalinux.org/10/ALSA-2026-25237.html",
             "https://errata.rockylinux.org/RLSA-2026:25239",
             "https://github.com/openssl/openssl/commit/3aad5eb7af4de4ee0633c30a8541a54d9bbde63c",
             "https://github.com/openssl/openssl/commit/7d4a980c62258c5910cc883936e0c8dbab4d75a8",
@@ -10857,7 +10859,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-45447"
           ],
           "PublishedDate": "2026-06-09T17:17:19.277Z",
-          "LastModifiedDate": "2026-07-01T13:17:32.217Z"
+          "LastModifiedDate": "2026-07-06T13:16:59.4Z"
         }
       ]
     },
@@ -11121,6 +11123,7 @@
             "https://access.redhat.com/errata/RHSA-2026:33574",
             "https://access.redhat.com/errata/RHSA-2026:34357",
             "https://access.redhat.com/errata/RHSA-2026:34359",
+            "https://access.redhat.com/errata/RHSA-2026:35832",
             "https://access.redhat.com/security/cve/CVE-2026-27145",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2484207",
             "https://go.dev/cl/783621",
@@ -11132,7 +11135,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-27145"
           ],
           "PublishedDate": "2026-06-02T23:16:35.57Z",
-          "LastModifiedDate": "2026-07-02T12:16:59.51Z"
+          "LastModifiedDate": "2026-07-06T13:16:35.233Z"
         },
         {
           "VulnerabilityID": "CVE-2026-42504",
