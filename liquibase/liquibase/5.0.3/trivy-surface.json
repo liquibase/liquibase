@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019f4689-f742-73a1-baad-dd9230cb02df",
-  "CreatedAt": "2026-07-09T11:01:14.690238777Z",
+  "ReportID": "019f4bb0-9dd1-79d0-961f-c31014853f7a",
+  "CreatedAt": "2026-07-10T11:01:33.777644732Z",
   "ArtifactID": "sha256:ab06f77e82c54ce2f2a004f579c5c6b6c1689d650816b8124569f23747ebbd32",
   "ArtifactName": "liquibase/liquibase:5.0.3",
   "ArtifactType": "container_image",
@@ -10657,7 +10657,7 @@
             "alma": 3,
             "amazon": 3,
             "azure": 3,
-            "oracle-oval": 3,
+            "oracle-oval": 2,
             "photon": 3,
             "redhat": 3,
             "rocky": 3,
@@ -10733,7 +10733,7 @@
             "https://github.com/openssl/openssl/commit/a541ae8bfe849a30cc885e8780715c0f488e496c",
             "https://github.com/openssl/openssl/commit/c505d7559da5d5f9f2c3913c6883a5562ce7273e",
             "https://linux.oracle.com/cve/CVE-2026-45447.html",
-            "https://linux.oracle.com/errata/ELSA-2026-50323.html",
+            "https://linux.oracle.com/errata/ELSA-2026-50379.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-45447",
             "https://openssl-library.org/news/secadv/20260609.txt",
             "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-45447.json",
@@ -10778,7 +10778,7 @@
             "alma": 3,
             "amazon": 3,
             "azure": 3,
-            "oracle-oval": 3,
+            "oracle-oval": 2,
             "photon": 3,
             "redhat": 3,
             "rocky": 3,
@@ -10854,7 +10854,7 @@
             "https://github.com/openssl/openssl/commit/a541ae8bfe849a30cc885e8780715c0f488e496c",
             "https://github.com/openssl/openssl/commit/c505d7559da5d5f9f2c3913c6883a5562ce7273e",
             "https://linux.oracle.com/cve/CVE-2026-45447.html",
-            "https://linux.oracle.com/errata/ELSA-2026-50323.html",
+            "https://linux.oracle.com/errata/ELSA-2026-50379.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-45447",
             "https://openssl-library.org/news/secadv/20260609.txt",
             "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-45447.json",
@@ -11113,7 +11113,8 @@
             "amazon": 2,
             "bitnami": 2,
             "oracle-oval": 3,
-            "redhat": 3
+            "redhat": 3,
+            "rocky": 3
           },
           "CVSS": {
             "bitnami": {
@@ -11126,17 +11127,31 @@
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:29981",
             "https://access.redhat.com/errata/RHSA-2026:33574",
             "https://access.redhat.com/errata/RHSA-2026:34357",
             "https://access.redhat.com/errata/RHSA-2026:34359",
             "https://access.redhat.com/errata/RHSA-2026:35832",
             "https://access.redhat.com/errata/RHSA-2026:36317",
             "https://access.redhat.com/errata/RHSA-2026:36648",
+            "https://access.redhat.com/errata/RHSA-2026:36797",
             "https://access.redhat.com/security/cve/CVE-2026-27145",
             "https://bugzilla.redhat.com/2445356",
             "https://bugzilla.redhat.com/2484207",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2466505",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2466507",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2467822",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2480756",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2480761",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2484207",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-25681",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-27145",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-33811",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-39821",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42151",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42154",
             "https://errata.almalinux.org/9/ALSA-2026-36317.html",
+            "https://errata.rockylinux.org/RLSA-2026:34359",
             "https://go.dev/cl/783621",
             "https://go.dev/issue/79694",
             "https://groups.google.com/g/golang-announce/c/tKs3rmcBcKw",
@@ -11148,7 +11163,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-27145"
           ],
           "PublishedDate": "2026-06-02T23:16:35.57Z",
-          "LastModifiedDate": "2026-07-08T13:16:33.35Z"
+          "LastModifiedDate": "2026-07-09T13:16:54.55Z"
         },
         {
           "VulnerabilityID": "CVE-2026-42504",

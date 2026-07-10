@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019f468b-48ee-7c71-ab5f-a9e36e6fe843",
-  "CreatedAt": "2026-07-09T11:02:41.134816627Z",
+  "ReportID": "019f4bb2-0398-7e95-909f-ec71421ccb90",
+  "CreatedAt": "2026-07-10T11:03:05.368957715Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -2132,7 +2132,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2216,7 +2216,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2300,7 +2300,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2384,7 +2384,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2471,7 +2471,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2558,7 +2558,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -3231,7 +3231,7 @@
             "azure": 3,
             "ghsa": 3,
             "nvd": 2,
-            "oracle-oval": 3,
+            "oracle-oval": 2,
             "redhat": 2,
             "rocky": 3,
             "ubuntu": 2
@@ -3266,7 +3266,7 @@
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc",
             "https://linux.oracle.com/cve/CVE-2026-44431.html",
-            "https://linux.oracle.com/errata/ELSA-2026-32992.html",
+            "https://linux.oracle.com/errata/ELSA-2026-36732.html",
             "https://lists.debian.org/debian-lts-announce/2026/06/msg00040.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-44431",
             "https://ubuntu.com/security/notices/USN-8379-1",
@@ -3309,7 +3309,7 @@
             "azure": 3,
             "ghsa": 3,
             "nvd": 2,
-            "oracle-oval": 3,
+            "oracle-oval": 2,
             "redhat": 2,
             "rocky": 3,
             "ubuntu": 2
@@ -3344,7 +3344,7 @@
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc",
             "https://linux.oracle.com/cve/CVE-2026-44431.html",
-            "https://linux.oracle.com/errata/ELSA-2026-32992.html",
+            "https://linux.oracle.com/errata/ELSA-2026-36732.html",
             "https://lists.debian.org/debian-lts-announce/2026/06/msg00040.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-44431",
             "https://ubuntu.com/security/notices/USN-8379-1",
@@ -3387,7 +3387,7 @@
             "azure": 3,
             "ghsa": 3,
             "nvd": 2,
-            "oracle-oval": 3,
+            "oracle-oval": 2,
             "redhat": 2,
             "rocky": 3,
             "ubuntu": 2
@@ -3422,7 +3422,7 @@
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc",
             "https://linux.oracle.com/cve/CVE-2026-44431.html",
-            "https://linux.oracle.com/errata/ELSA-2026-32992.html",
+            "https://linux.oracle.com/errata/ELSA-2026-36732.html",
             "https://lists.debian.org/debian-lts-announce/2026/06/msg00040.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-44431",
             "https://ubuntu.com/security/notices/USN-8379-1",
