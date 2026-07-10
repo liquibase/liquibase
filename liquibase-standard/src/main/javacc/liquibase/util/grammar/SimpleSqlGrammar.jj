@@ -17,6 +17,41 @@ public class SimpleSqlGrammar {
 
 PARSER_END(SimpleSqlGrammar)
 
+TOKEN_MGR_DECLS:
+{
+    private char getOracleQuoteClosingDelimiter(char openingDelimiter) {
+        switch (openingDelimiter) {
+            case '[':
+                return ']';
+            case '{':
+                return '}';
+            case '(':
+                return ')';
+            case '<':
+                return '>';
+            default:
+                return openingDelimiter;
+        }
+    }
+
+    private void consumeOracleAlternativeQuotedString(String openingToken) {
+        char closingDelimiter = getOracleQuoteClosingDelimiter(openingToken.charAt(openingToken.length() - 1));
+        char previousCharacter = 0;
+
+        try {
+            while (true) {
+                char currentCharacter = input_stream.readChar();
+                if (previousCharacter == closingDelimiter && currentCharacter == '\'') {
+                    return;
+                }
+                previousCharacter = currentCharacter;
+            }
+        } catch (java.io.IOException ignored) {
+            // Leave an unterminated literal as a single token so its contents are not split into separate statements.
+        }
+    }
+}
+
 TOKEN :
 {
   < WHITESPACE: (" " | "\t" | "\n" | "\r"
@@ -68,7 +103,14 @@ TOKEN : /* Numeric Constants */
 
 TOKEN:
 {
-    < COMPLEX_IDENTIFIER: (<S_IDENTIFIER> | <S_QUOTED_IDENTIFIER>) ((["\r","\n"," "])* "." (["\r","\n"," "])* (<S_IDENTIFIER> | <S_QUOTED_IDENTIFIER>))+ >
+    < S_ORACLE_Q_QUOTED_STRING: ("N")? "Q" "'" ~[" ","\t","\n","\r"] >
+    {
+        consumeOracleAlternativeQuotedString(matchedToken.image);
+        matchedToken.image = input_stream.GetImage();
+        matchedToken.endLine = input_stream.getEndLine();
+        matchedToken.endColumn = input_stream.getEndColumn();
+    }
+|   < COMPLEX_IDENTIFIER: (<S_IDENTIFIER> | <S_QUOTED_IDENTIFIER>) ((["\r","\n"," "])* "." (["\r","\n"," "])* (<S_IDENTIFIER> | <S_QUOTED_IDENTIFIER>))+ >
 |   < S_IDENTIFIER: ( <LETTER> | <UNICODE_LETTERS> | <SPECIAL_CHARS> ) ( <LETTER> | <UNICODE_LETTERS> | <SPECIAL_CHARS> | <DIGIT> )* >
 |   < #LETTER: ["a"-"z", "A"-"Z"] >
 |   < #SPECIAL_CHARS: "$" | "_" | "@" | "#" >

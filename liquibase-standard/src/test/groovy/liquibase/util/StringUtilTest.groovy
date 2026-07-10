@@ -50,6 +50,24 @@ class StringUtilTest extends Specification {
         true          | true            | null         | "SELECT 'normal'; SELECT 'a\\'b;\nDROP TABLE users; --';"                                                                                                                                            | ["SELECT 'normal'", "SELECT 'a\\'b;\nDROP TABLE users; --'"]
     }
 
+    def "processMultiLineSQL splits Oracle q-quoted statements on slash delimiters"() {
+        given:
+        String sql = '''
+            |merge into t values(to_clob(q'[{ "s": "exec('_p[\\"r\\"]=v\\nif x')" }]'))
+            |/
+            |merge into t values(to_clob(q'[{ "s": "second" }]'))
+            |/
+        '''.stripMargin()
+
+        when:
+        String[] statements = StringUtil.processMultiLineSQL(sql, true, true, null)
+
+        then:
+        statements.size() == 2
+        statements.every { it.count("merge into") == 1 }
+        statements.every { statement -> statement.readLines().every { it.trim() != "/" } }
+    }
+
     @Unroll
     def "stripComments examples"() {
         expect:
