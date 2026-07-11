@@ -802,8 +802,44 @@ create table table1 (
 
         then:
         PreconditionContainer preconditions = changeLog.getChangeSets().first().getPreconditions()
+        preconditions.getOnFail() == PreconditionContainer.FailOption.HALT
         preconditions.getOnFailMessage() == "Application 'value' not found. Skipping insertion."
+        preconditions.getOnError() == PreconditionContainer.ErrorOption.HALT
         preconditions.getOnErrorMessage() == "Unable to verify application."
+    }
+
+    def "leave precondition messages unset when not specified"() throws Exception {
+        given:
+        String changeLogWithoutPreconditionMessages = "--liquibase formatted sql\n" +
+                "--changeset test:test\n" +
+                "--preconditions onFail:HALT onError:HALT\n" +
+                "select 1;\n"
+
+        when:
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithoutPreconditionMessages)
+                .parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        PreconditionContainer preconditions = changeLog.getChangeSets().first().getPreconditions()
+        preconditions.getOnFailMessage() == null
+        preconditions.getOnErrorMessage() == null
+    }
+
+    def "parse precondition message with onSqlOutput"() throws Exception {
+        given:
+        String changeLogWithMessageAndOnSqlOutput = "--liquibase formatted sql\n" +
+                "--changeset test:test\n" +
+                "--preconditions onFail:HALT onFailMessage:\"Application missing.\" onSqlOutput:TEST\n" +
+                "select 1;\n"
+
+        when:
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithMessageAndOnSqlOutput)
+                .parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        PreconditionContainer preconditions = changeLog.getChangeSets().first().getPreconditions()
+        preconditions.getOnFailMessage() == "Application missing."
+        preconditions.getOnSqlOutput() == PreconditionContainer.OnSqlOutputOption.TEST
     }
 
     def "do not parse message attribute names from inside quoted messages"() throws Exception {
