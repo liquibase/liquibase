@@ -69,6 +69,27 @@ class StringUtilTest extends Specification {
     }
 
     @Unroll
+    def "processMultiLineSQL splits #quotePrefix literals with odd apostrophes on #delimiterName delimiters"() {
+        given:
+        String firstStatement = "select to_clob(${quotePrefix}'[don't]') from dual"
+        String secondStatement = "select to_clob(${quotePrefix}'[x]') from dual"
+        String sql = firstStatement + separator + secondStatement + terminator
+
+        when:
+        String[] statements = StringUtil.processMultiLineSQL(sql, true, true, null)
+
+        then:
+        statements == [firstStatement, secondStatement]
+
+        where:
+        quotePrefix | delimiterName | separator | terminator
+        "q"         | "slash"       | "\n/\n"   | "\n/"
+        "nq"        | "slash"       | "\n/\n"   | "\n/"
+        "q"         | "semicolon"   | ";\n"     | ";"
+        "nq"        | "semicolon"   | ";\n"     | ";"
+    }
+
+    @Unroll
     def "stripComments examples"() {
         expect:
         StringUtil.stripComments(rawString) == expected
