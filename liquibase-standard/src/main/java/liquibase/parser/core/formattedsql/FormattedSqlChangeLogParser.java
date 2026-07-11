@@ -82,7 +82,15 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
 
             PreconditionContainer pc = new PreconditionContainer();
             pc.setOnFail(StringUtil.trimToNull(parseString(onFailMatcher, ON_FAIL)));
+            String onFailMessage = parseStringAttribute(body, "onFailMessage");
+            if (onFailMessage != null) {
+                pc.setOnFailMessage(StringUtil.stripEnclosingQuotes(onFailMessage));
+            }
             pc.setOnError(StringUtil.trimToNull(parseString(onErrorMatcher, ON_ERROR)));
+            String onErrorMessage = parseStringAttribute(body, "onErrorMessage");
+            if (onErrorMessage != null) {
+                pc.setOnErrorMessage(StringUtil.stripEnclosingQuotes(onErrorMessage));
+            }
 
             if (onSqlOutputMatcher.matches() && onUpdateSqlMatcher.matches()) {
                 throw new IllegalArgumentException("Please modify the changelog to have preconditions set with either " +
@@ -95,6 +103,35 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
             }
             changeSet.setPreconditions(pc);
         }
+    }
+
+    private String parseStringAttribute(String body, String attributeName) {
+        int tokenStart = -1;
+        char quote = 0;
+
+        for (int i = 0; i <= body.length(); i++) {
+            char current = i < body.length() ? body.charAt(i) : ' ';
+            if (quote != 0) {
+                if (current == quote) {
+                    quote = 0;
+                }
+            } else if (((current == '\"') || (current == '\'')) &&
+                    (tokenStart >= 0) && (i > tokenStart) && (body.charAt(i - 1) == ':')) {
+                quote = current;
+            } else if (Character.isWhitespace(current)) {
+                if (tokenStart >= 0) {
+                    String token = body.substring(tokenStart, i);
+                    int separator = token.indexOf(':');
+                    if ((separator > 0) && attributeName.equalsIgnoreCase(token.substring(0, separator))) {
+                        return StringUtil.trimToNull(token.substring(separator + 1));
+                    }
+                    tokenStart = -1;
+                }
+            } else if (tokenStart < 0) {
+                tokenStart = i;
+            }
+        }
+        return null;
     }
 
     @Override
