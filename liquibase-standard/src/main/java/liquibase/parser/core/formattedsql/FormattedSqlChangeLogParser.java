@@ -105,10 +105,20 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
         }
     }
 
+    /**
+     * Parses a string attribute without treating attribute-like text inside quoted values as a new token. A quote
+     * starts a quoted value only when it immediately follows the attribute separator. Unquoted values are returned
+     * as-is, while quoted values retain their surrounding quotes for the caller to remove.
+     *
+     * @param body The preconditions body
+     * @param attributeName The attribute to parse
+     * @return The attribute value, or {@code null} when the attribute is missing or empty
+     */
     private String parseStringAttribute(String body, String attributeName) {
         int tokenStart = -1;
         char quote = 0;
 
+        // The synthetic trailing space flushes the final token when the body has no trailing whitespace.
         for (int i = 0; i <= body.length(); i++) {
             char current = i < body.length() ? body.charAt(i) : ' ';
             if (quote != 0) {
@@ -123,7 +133,11 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
                     String token = body.substring(tokenStart, i);
                     int separator = token.indexOf(':');
                     if ((separator > 0) && attributeName.equalsIgnoreCase(token.substring(0, separator))) {
-                        return StringUtil.trimToNull(token.substring(separator + 1));
+                        String value = StringUtil.trimToNull(token.substring(separator + 1));
+                        if (value != null) {
+                            logMatch(attributeName, value, getClass());
+                        }
+                        return value;
                     }
                     tokenStart = -1;
                 }
