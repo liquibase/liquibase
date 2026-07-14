@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019f5b24-ef60-7c0e-8c10-04c3e8cbe303",
-  "CreatedAt": "2026-07-13T11:02:55.072791525Z",
+  "ReportID": "019f6030-3b32-7713-9cb8-6979cfc8e257",
+  "CreatedAt": "2026-07-14T10:33:21.45846504Z",
   "ArtifactID": "sha256:ab06f77e82c54ce2f2a004f579c5c6b6c1689d650816b8124569f23747ebbd32",
   "ArtifactName": "liquibase/liquibase:5.0.3",
   "ArtifactType": "container_image",
@@ -11193,6 +11193,7 @@
             "CWE-61"
           ],
           "VendorSeverity": {
+            "alma": 3,
             "oracle-oval": 3,
             "redhat": 3
           },
@@ -11203,7 +11204,10 @@
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:37436",
             "https://access.redhat.com/security/cve/CVE-2026-39822",
+            "https://bugzilla.redhat.com/2480756",
+            "https://errata.almalinux.org/10/ALSA-2026-37436.html",
             "https://go.dev/cl/797880",
             "https://go.dev/issue/79005",
             "https://groups.google.com/g/golang-announce/c/OrmQE_Yp5Sc",
@@ -11214,7 +11218,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-39822"
           ],
           "PublishedDate": "2026-07-08T17:17:21.31Z",
-          "LastModifiedDate": "2026-07-10T18:57:32.923Z"
+          "LastModifiedDate": "2026-07-13T14:54:26.317Z"
         },
         {
           "VulnerabilityID": "CVE-2026-42504",

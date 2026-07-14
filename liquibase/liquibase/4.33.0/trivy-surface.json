@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019f5b25-ce8c-75b5-be48-d220927c327e",
-  "CreatedAt": "2026-07-13T11:03:52.204376331Z",
+  "ReportID": "019f6030-8a29-7c67-bacf-1b2fc82ac573",
+  "CreatedAt": "2026-07-14T10:33:41.673814402Z",
   "ArtifactID": "sha256:d2ad381244ad087ec0c44faacfed4eef39240c2965f37afa23519688cb8ad01e",
   "ArtifactName": "liquibase/liquibase:4.33.0",
   "ArtifactType": "container_image",
@@ -15151,6 +15151,7 @@
             "https://access.redhat.com/errata/RHSA-2026:36776",
             "https://access.redhat.com/errata/RHSA-2026:36796",
             "https://access.redhat.com/errata/RHSA-2026:36797",
+            "https://access.redhat.com/errata/RHSA-2026:38504",
             "https://access.redhat.com/security/cve/CVE-2026-33811",
             "https://bugzilla.redhat.com/2466505",
             "https://bugzilla.redhat.com/2466507",
@@ -15173,7 +15174,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-33811"
           ],
           "PublishedDate": "2026-05-07T20:16:42.77Z",
-          "LastModifiedDate": "2026-07-10T12:16:41.18Z"
+          "LastModifiedDate": "2026-07-13T13:16:33.713Z"
         },
         {
           "VulnerabilityID": "CVE-2026-33814",
@@ -15377,6 +15378,7 @@
             "CWE-61"
           ],
           "VendorSeverity": {
+            "alma": 3,
             "oracle-oval": 3,
             "redhat": 3
           },
@@ -15387,7 +15389,10 @@
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:37436",
             "https://access.redhat.com/security/cve/CVE-2026-39822",
+            "https://bugzilla.redhat.com/2480756",
+            "https://errata.almalinux.org/10/ALSA-2026-37436.html",
             "https://go.dev/cl/797880",
             "https://go.dev/issue/79005",
             "https://groups.google.com/g/golang-announce/c/OrmQE_Yp5Sc",
@@ -15398,7 +15403,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-39822"
           ],
           "PublishedDate": "2026-07-08T17:17:21.31Z",
-          "LastModifiedDate": "2026-07-10T18:57:32.923Z"
+          "LastModifiedDate": "2026-07-13T14:54:26.317Z"
         },
         {
           "VulnerabilityID": "CVE-2026-39836",
