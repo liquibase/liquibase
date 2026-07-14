@@ -170,13 +170,16 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
         Sql[] sql = instance.generateSql(statements, new MySQLDatabase());
 
         assertEquals(5, sql.length);
-        assertEquals("ALTER TABLE schema_name.table_name ADD column1 BIGINT NULL, ADD column2 TINYINT NULL", sql[0].toSql());
+        // MySQL boolean is canonicalised to TINYINT(1) — the de-facto MySQL boolean
+        // convention — so that snapshot round-trips produce the same type and avoid
+        // spurious diffs caused by the JDBC driver mapping TINYINT(1) to TYPE_NAME="BIT".
+        assertEquals("ALTER TABLE schema_name.table_name ADD column1 BIGINT NULL, ADD column2 TINYINT(1) NULL", sql[0].toSql());
         assertEquals("UPDATE schema_name.table_name SET column1 = 0", sql[1].toSql());
         assertEquals("UPDATE schema_name.table_name SET column2 = 1", sql[2].toSql());
         assertEquals("ALTER TABLE schema_name.table_name MODIFY column1 BIGINT NOT NULL", sql[3].toSql());
-        assertEquals("ALTER TABLE schema_name.table_name MODIFY column2 TINYINT NOT NULL", sql[4].toSql());
+        assertEquals("ALTER TABLE schema_name.table_name MODIFY column2 TINYINT(1) NOT NULL", sql[4].toSql());
 
-        // repeat with MariaDBDatabase which shall result in TINYINT(1) for boolean column (instead of just TINYINT)
+        // MariaDB also emits TINYINT(1) for boolean columns
         statements = change.generateStatements(new MariaDBDatabase());
         sql = instance.generateSql(statements, new MariaDBDatabase());
 
