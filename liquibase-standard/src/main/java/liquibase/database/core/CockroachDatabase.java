@@ -59,22 +59,33 @@ public class CockroachDatabase extends PostgresDatabase {
         return this.databaseMinorVersion;
     }
 
+    /**
+     * Checks if the given connection points to a CockroachDB database.
+     * <p>
+     * Returns false early if the URL is null (which can happen with some JDBC drivers
+     * like IBM Informix), since a null URL cannot match any database type.
+     *
+     * @param conn the database connection to check
+     * @return true if this is a CockroachDB connection, false otherwise
+     * @throws DatabaseException if there is an error querying the database
+     */
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         final String url = conn.getURL();
-        if (url.startsWith("jdbc:postgres") || url.startsWith("postgres")) {
-            if (conn instanceof JdbcConnection) {
-                try (Statement stmt = ((JdbcConnection) conn).createStatement()) {
-                    if (stmt != null) {
-                        try (ResultSet rs = stmt.executeQuery("select version()")) {
-                            if (rs.next()) {
-                                return ((String) JdbcUtil.getResultSetValue(rs, 1)).startsWith("CockroachDB");
-                            }
+        if (url == null || (!url.startsWith("jdbc:postgres") && !url.startsWith("postgres"))) {
+            return false;
+        }
+        if (conn instanceof JdbcConnection) {
+            try (Statement stmt = ((JdbcConnection) conn).createStatement()) {
+                if (stmt != null) {
+                    try (ResultSet rs = stmt.executeQuery("select version()")) {
+                        if (rs.next()) {
+                            return ((String) JdbcUtil.getResultSetValue(rs, 1)).startsWith("CockroachDB");
                         }
                     }
-                } catch (SQLException throwables) {
-                    return false;
                 }
+            } catch (SQLException throwables) {
+                return false;
             }
         }
 
