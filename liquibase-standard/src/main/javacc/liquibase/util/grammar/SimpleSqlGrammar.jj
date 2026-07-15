@@ -84,6 +84,40 @@ TOKEN:
 |   < #S_QUOTED_STRING_HYBRID: ( "'" ( <ESC_S_QUOTE> | <ESC_ANY_CHAR> | ~["\\","'"] )* ("'" | "\\'")) >
     /* ... but many DBs tolerate double-quotes around string literals, including MySQL (unless you enable ANSI SQL mode), and MSSQL (if you disable SET QUOTED_IDENTIFIER) */
 |   < #D_QUOTED_STRING_HYBRID: ( "\"" ( <ESC_D_QUOTE> | <ESC_ANY_CHAR> | ~["\\","\""] )* ("\"" | "\\\"")) >
+    /* Oracle Alternative Quoting Mechanism */
+|   < ORACLE_Q_STRING : (["N","n"])? ["Q","q"] "'" ~["'", " ", "\t", "\n", "\r"] > {
+        char open = image.charAt(image.length() - 1);
+        char close;
+        if (open == '[') close = ']';
+        else if (open == '{') close = '}';
+        else if (open == '(') close = ')';
+        else if (open == '<') close = '>';
+        else close = open;
+
+        char prev = 0;
+        char curr = 0;
+
+        while (true) {
+            try {
+                curr = input_stream.readChar();
+
+                image.append(curr);
+
+                if (prev == close && curr == '\'') {
+                    break;
+                }
+                prev = curr;
+            } catch (java.io.IOException e) {
+                throw new TokenMgrError(
+                    "Unterminated Oracle q-quoted string",
+                    TokenMgrError.LEXICAL_ERROR
+                );
+            }
+        }
+        matchedToken.image = image.toString();
+        matchedToken.endLine = input_stream.getEndLine();
+        matchedToken.endColumn = input_stream.getEndColumn();
+    }
     /* Finally... */
 |   < S_CHAR_LITERAL: (["U","E","N","R","B"]|"RB"|"_utf8")? (<S_QUOTED_STRING_HYBRID> | <D_QUOTED_STRING_HYBRID>) >
 
