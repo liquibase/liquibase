@@ -86,6 +86,13 @@ public class RanChangeSet {
         return (Date) dateExecuted.clone();
     }
 
+    public String getStoredChangeLog() {
+        if (storedChangeLog == null) {
+            return changeLog;
+        }
+        return storedChangeLog;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
