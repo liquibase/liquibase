@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019f6a83-27d3-7668-b51f-8b710a7cc64c",
-  "CreatedAt": "2026-07-16T10:40:08.147421096Z",
+  "ReportID": "019f6fa3-882b-77f9-846b-d69f60e05aac",
+  "CreatedAt": "2026-07-17T10:33:36.043523581Z",
   "ArtifactID": "sha256:ab06f77e82c54ce2f2a004f579c5c6b6c1689d650816b8124569f23747ebbd32",
   "ArtifactName": "liquibase/liquibase:5.0.3",
   "ArtifactType": "container_image",
@@ -11133,6 +11133,8 @@
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:23262",
+            "https://access.redhat.com/errata/RHSA-2026:23264",
             "https://access.redhat.com/errata/RHSA-2026:29981",
             "https://access.redhat.com/errata/RHSA-2026:33574",
             "https://access.redhat.com/errata/RHSA-2026:34357",
@@ -11144,6 +11146,7 @@
             "https://access.redhat.com/errata/RHSA-2026:38995",
             "https://access.redhat.com/errata/RHSA-2026:39005",
             "https://access.redhat.com/errata/RHSA-2026:39573",
+            "https://access.redhat.com/errata/RHSA-2026:39879",
             "https://access.redhat.com/security/cve/CVE-2026-27145",
             "https://bugzilla.redhat.com/2466505",
             "https://bugzilla.redhat.com/2466507",
@@ -11168,7 +11171,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-27145"
           ],
           "PublishedDate": "2026-06-02T23:16:35.57Z",
-          "LastModifiedDate": "2026-07-15T12:17:18.45Z"
+          "LastModifiedDate": "2026-07-16T12:17:16.803Z"
         },
         {
           "VulnerabilityID": "CVE-2026-39822",
