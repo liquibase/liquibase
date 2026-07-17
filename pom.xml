@@ -275,7 +275,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.11</version>
+            <version>42.7.13</version>
             <scope>test</scope>
         </dependency>
 
@@ -310,7 +310,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>4.3.1</version>
+            <version>4.3.2</version>
             <scope>test</scope>
         </dependency>
 
