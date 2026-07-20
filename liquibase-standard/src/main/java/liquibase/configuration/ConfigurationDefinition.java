@@ -394,28 +394,17 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         }
 
         /**
-         * Marks this definition reference-scopable. While the reference connection of a two-connection command
-         * (e.g. {@code diff} / {@code diff-changelog}) is opened, the definition resolves from its
-         * {@code <namespace>.reference.<suffix>} sibling key when that sibling is set — enabling a different
-         * value (e.g. a different auth mechanism) on the reference connection than on the primary. When the
-         * sibling is unset the primary value is inherited; a sibling value of {@link #REFERENCE_DEFAULT_SENTINEL}
-         * opts out (resolves as if unset). No behavior changes for single-connection commands or the primary
-         * connection.
-         *
-         * <p><b>Read synchronously during connection open.</b> Reference scoping is active only while the
-         * reference connection is being opened (see {@link #IS_REFERENCE_CONNECTION_SCOPE_KEY}). A value read
-         * outside that window — lazy initialization, a token/credential refresh after {@code open()} returns,
-         * connection-pool re-authentication — resolves the <i>primary</i> value with no error. Consumers must
-         * read reference-scoped configuration synchronously inside their {@code DatabaseConnection.open(...)}.
-         *
-         * <p><b>Primary key only.</b> Only the definition's canonical key gets a {@code .reference.} sibling;
-         * alias keys are not reference-scoped. Apply this to non-aliased definitions (as the auth selectors are).
-         *
-         * <p><b>Not for value-activated auth.</b> This mechanism is for a selector/companion read at open time.
-         * Authentication activated by the credential <i>value</i> itself (e.g. a password reference resolved by a
-         * {@link ConfiguredValueModifier} on the distinct {@code referencePassword} command argument) is already
-         * per-connection via its own key and must not use this flag — the scope marker is not set during
-         * value-modifier resolution, so it would have no effect there.
+         * Marks this definition reference-scopable: while the reference connection of a two-connection command
+         * (e.g. {@code diff}) is opening, it resolves from its {@code <namespace>.reference.<suffix>} sibling
+         * instead of the primary key. An unset sibling inherits the primary value; a sibling of
+         * {@link #REFERENCE_DEFAULT_SENTINEL} opts out (resolves as if unset). No effect on single-connection
+         * commands or the primary connection.
+         * <p>
+         * Caveats: the reference value resolves only while the reference connection is opening, so read it
+         * synchronously in {@code DatabaseConnection.open(...)} (a later/async read sees the primary value);
+         * only the canonical key is scoped, not aliases; and it does not apply to auth activated by the
+         * credential value itself (e.g. a {@code referencePassword} resolved by a {@link ConfiguredValueModifier}),
+         * which is already per-connection.
          */
         public Building<DataType> referenceScoped() {
             final String fullKey = definition.getKey();
