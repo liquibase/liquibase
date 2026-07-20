@@ -155,19 +155,20 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
      */
     private ConfiguredValue<DataType> applyDefaultAndConvert(ConfiguredValue<?> configurationValue) {
         if (!configurationValue.found()) {
-            defaultValue = this.getDefaultValue();
-            if (defaultValue != null) {
+            // Use a local rather than writing the shared instance field on this read path.
+            final DataType resolvedDefault = this.getDefaultValue();
+            if (resolvedDefault != null) {
                 DataType obfuscatedValue;
                 if (valueObfuscator == null) {
-                    obfuscatedValue = defaultValue;
+                    obfuscatedValue = resolvedDefault;
                 } else {
-                    obfuscatedValue = valueObfuscator.obfuscate(defaultValue);
+                    obfuscatedValue = valueObfuscator.obfuscate(resolvedDefault);
                 }
                 if (!loggedUsingDefault) {
                     Scope.getCurrentScope().getLog(getClass()).fine("Configuration " + key + " is using the default value of " + obfuscatedValue);
                     loggedUsingDefault = true;
                 }
-                configurationValue.override(new DefaultValueProvider(this.getDefaultValue()).getProvidedValue(key));
+                configurationValue.override(new DefaultValueProvider(resolvedDefault).getProvidedValue(key));
             }
         }
 
@@ -400,11 +401,32 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
          * sibling is unset the primary value is inherited; a sibling value of {@link #REFERENCE_DEFAULT_SENTINEL}
          * opts out (resolves as if unset). No behavior changes for single-connection commands or the primary
          * connection.
+         *
+         * <p><b>Read synchronously during connection open.</b> Reference scoping is active only while the
+         * reference connection is being opened (see {@link #IS_REFERENCE_CONNECTION_SCOPE_KEY}). A value read
+         * outside that window — lazy initialization, a token/credential refresh after {@code open()} returns,
+         * connection-pool re-authentication — resolves the <i>primary</i> value with no error. Consumers must
+         * read reference-scoped configuration synchronously inside their {@code DatabaseConnection.open(...)}.
+         *
+         * <p><b>Primary key only.</b> Only the definition's canonical key gets a {@code .reference.} sibling;
+         * alias keys are not reference-scoped. Apply this to non-aliased definitions (as the auth selectors are).
+         *
+         * <p><b>Not for value-activated auth.</b> This mechanism is for a selector/companion read at open time.
+         * Authentication activated by the credential <i>value</i> itself (e.g. a password reference resolved by a
+         * {@link ConfiguredValueModifier} on the distinct {@code referencePassword} command argument) is already
+         * per-connection via its own key and must not use this flag — the scope marker is not set during
+         * value-modifier resolution, so it would have no effect there.
          */
         public Building<DataType> referenceScoped() {
             final String fullKey = definition.getKey();
             // define() always prepends "defaultKeyPrefix.", so the sibling is prefix + ".reference." + suffix.
-            final String suffix = fullKey.substring(defaultKeyPrefix.length() + 1);
+            // Assert that invariant explicitly so a future change fails loudly instead of deriving a wrong key.
+            final String expectedPrefix = defaultKeyPrefix + ".";
+            if (!fullKey.startsWith(expectedPrefix)) {
+                throw new IllegalStateException("referenceScoped() requires a key under the builder prefix '"
+                        + defaultKeyPrefix + "', but was '" + fullKey + "'.");
+            }
+            final String suffix = fullKey.substring(expectedPrefix.length());
             definition.referenceKey = defaultKeyPrefix + ".reference." + suffix;
 
             return this;
