@@ -1,15 +1,20 @@
 package liquibase.configuration
 
+import liquibase.Scope
+import liquibase.servicelocator.ServiceLocator
 import spock.lang.Specification
 
 class ConfiguredValueModifierFactoryTest extends Specification {
 
-    // Private constructor; on the core test classpath no ConfiguredValueModifiers are registered via SPI,
-    // so a reflectively-constructed instance starts empty and lets us register controlled test modifiers.
-    private static ConfiguredValueModifierFactory newFactory() {
-        def ctor = ConfiguredValueModifierFactory.getDeclaredConstructor()
-        ctor.setAccessible(true)
-        return ctor.newInstance()
+    // Build the factory with a fake ServiceLocator that returns exactly the given modifiers, so tests are
+    // isolated from whatever ConfiguredValueModifiers happen to be on the classpath.
+    private static ConfiguredValueModifierFactory factoryWith(List<ConfiguredValueModifier> modifiers) {
+        def locator = locatorReturning(ConfiguredValueModifier, modifiers)
+        return Scope.child([(Scope.Attr.serviceLocator.name()): locator], {
+            def ctor = ConfiguredValueModifierFactory.getDeclaredConstructor()
+            ctor.setAccessible(true)
+            ctor.newInstance()
+        } as Scope.ScopedRunnerWithReturn)
     }
 
     private static ConfiguredValue stringValue(String key, String value) {
@@ -21,9 +26,7 @@ class ConfiguredValueModifierFactoryTest extends Specification {
     def "two modifiers with the same getOrder() both run (no silent drop)"() {
         given:
         def calls = []
-        def factory = newFactory()
-        factory.register(recording(100, "A", calls))
-        factory.register(recording(100, "B", calls))
+        def factory = factoryWith([recording(100, "A", calls), recording(100, "B", calls)])
 
         when:
         factory.override(stringValue("k", "v"))
@@ -35,7 +38,7 @@ class ConfiguredValueModifierFactoryTest extends Specification {
     def "register de-duplicates by identity; unregister removes that instance"() {
         given:
         def calls = []
-        def factory = newFactory()
+        def factory = factoryWith([])
         def a = recording(100, "A", calls)
         def b = recording(100, "B", calls)
         factory.register(a)
@@ -58,9 +61,7 @@ class ConfiguredValueModifierFactoryTest extends Specification {
 
     def "override(String) applies the highest-order modifier first and stops at the first change"() {
         given:
-        def factory = newFactory()
-        factory.register(appending(100, "-low"))
-        factory.register(appending(200, "-high"))
+        def factory = factoryWith([appending(100, "-low"), appending(200, "-high")])
 
         expect:
         factory.override("x") == "x-high"
@@ -79,6 +80,13 @@ class ConfiguredValueModifierFactoryTest extends Specification {
         return new ConfiguredValueModifier<String>() {
             @Override int getOrder() { order }
             @Override void override(ConfiguredValue o) { o.override(String.valueOf(o.getValue()) + suffix, "test") }
+        }
+    }
+
+    private static ServiceLocator locatorReturning(Class type, List instances) {
+        return new ServiceLocator() {
+            @Override int getPriority() { 0 }
+            @Override List findInstances(Class interfaceType) { interfaceType == type ? instances : [] }
         }
     }
 }

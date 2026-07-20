@@ -5,6 +5,7 @@ import liquibase.SingletonObject;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Factory for working with {@link ConfiguredValueModifier}s.
@@ -20,9 +21,10 @@ public class ConfiguredValueModifierFactory  implements SingletonObject {
             Comparator.<ConfiguredValueModifier>comparingInt(ConfiguredValueModifier::getOrder)
                     .thenComparing(modifier -> modifier.getClass().getName());
 
-    // Mutable backing set, guarded by 'this'. Reads use the immutable, fully-sorted snapshot below.
+    // Mutable backing set, guarded by 'this'. Reads use the immutable, fully-sorted snapshot below,
+    // published atomically via an AtomicReference (the snapshot is never mutated in place, only replaced).
     private final List<ConfiguredValueModifier> registered = new ArrayList<>();
-    private volatile List<ConfiguredValueModifier> sorted = Collections.emptyList();
+    private final AtomicReference<List<ConfiguredValueModifier>> sorted = new AtomicReference<>(Collections.emptyList());
 
     private ConfiguredValueModifierFactory() {
         ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
@@ -52,7 +54,7 @@ public class ConfiguredValueModifierFactory  implements SingletonObject {
     }
 
     public void override(ConfiguredValue configuredValue) {
-        for (ConfiguredValueModifier modifier : sorted) {
+        for (ConfiguredValueModifier modifier : sorted.get()) {
             modifier.override(configuredValue);
         }
     }
@@ -60,7 +62,7 @@ public class ConfiguredValueModifierFactory  implements SingletonObject {
     public String override(String configuredValue) {
         // Apply the highest-order modifiers first (reverse of the ascending sort), stopping at the first
         // that changes the value.
-        final List<ConfiguredValueModifier> snapshot = sorted;
+        final List<ConfiguredValueModifier> snapshot = sorted.get();
         for (int i = snapshot.size() - 1; i >= 0; i--) {
             String overriddenValue = snapshot.get(i).override(configuredValue);
             if (configuredValue == null || !configuredValue.equals(overriddenValue)) {
@@ -73,6 +75,6 @@ public class ConfiguredValueModifierFactory  implements SingletonObject {
     private void publish() {
         List<ConfiguredValueModifier> copy = new ArrayList<>(registered);
         copy.sort(ORDER_COMPARATOR);
-        sorted = Collections.unmodifiableList(copy);
+        sorted.set(Collections.unmodifiableList(copy));
     }
 }
