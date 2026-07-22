@@ -404,7 +404,9 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
          * synchronously in {@code DatabaseConnection.open(...)} (a later/async read sees the primary value);
          * only the canonical key is scoped, not aliases; and it does not apply to auth activated by the
          * credential value itself (e.g. a {@code referencePassword} resolved by a {@link ConfiguredValueModifier}),
-         * which is already per-connection.
+         * which is already per-connection. Intended for {@code String}-typed selectors: the
+         * {@link #REFERENCE_DEFAULT_SENTINEL} opt-out is matched on the raw sibling value before type
+         * conversion, so a non-{@code String} {@code DataType} (e.g. an enum) would not see the sentinel honored.
          */
         public Building<DataType> referenceScoped() {
             final String fullKey = definition.getKey();
