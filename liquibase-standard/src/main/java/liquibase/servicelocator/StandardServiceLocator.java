@@ -21,8 +21,12 @@ public class StandardServiceLocator implements ServiceLocator {
 
         final Logger log = Scope.getCurrentScope().getLog(getClass());
         final Iterator<T> services = ServiceLoader.load(interfaceType, Scope.getCurrentScope().getClassLoader(true)).iterator();
-        while (services.hasNext()) {
+        // Guard hasNext() too: ServiceLoader may throw LinkageError (e.g. NoClassDefFoundError) from it.
+        while (true) {
             try {
+                if (!services.hasNext()) {
+                    break;
+                }
                 final T service = services.next();
                 log.fine("Loaded "+interfaceType.getName()+" instance "+service.getClass().getName());
                 allInstances.add(service);
