@@ -61,11 +61,12 @@ public class ConfiguredValueModifierFactory  implements SingletonObject {
 
     public String override(String configuredValue) {
         // Apply the highest-order modifiers first (reverse of the ascending sort), stopping at the first
-        // that changes the value.
+        // that changes the value. Objects.equals so a null value a modifier leaves as null counts as
+        // unchanged and the next modifier still runs, rather than short-circuiting on the first modifier.
         final List<ConfiguredValueModifier> snapshot = sorted.get();
         for (int i = snapshot.size() - 1; i >= 0; i--) {
             String overriddenValue = snapshot.get(i).override(configuredValue);
-            if (configuredValue == null || !configuredValue.equals(overriddenValue)) {
+            if (!Objects.equals(configuredValue, overriddenValue)) {
                 return overriddenValue;
             }
         }

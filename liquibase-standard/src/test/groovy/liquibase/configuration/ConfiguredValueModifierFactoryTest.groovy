@@ -67,7 +67,31 @@ class ConfiguredValueModifierFactoryTest extends Specification {
         factory.override("x") == "x-high"
     }
 
+    def "override(String) with a null value does not short-circuit on a no-op modifier"() {
+        given: "the highest-order modifier leaves null unchanged; a lower-order one supplies a default"
+        def factory = factoryWith([defaulting(100, "filled"), noOp(200)])
+
+        expect: "the no-op higher-order modifier is skipped and the lower-order default still applies"
+        factory.override((String) null) == "filled"
+    }
+
     // --- helpers ---
+
+    private static ConfiguredValueModifier noOp(int order) {
+        return new ConfiguredValueModifier<String>() {
+            @Override int getOrder() { order }
+            @Override void override(ConfiguredValue o) {}
+            @Override String override(String value) { value }   // true no-op — keeps null as null
+        }
+    }
+
+    private static ConfiguredValueModifier defaulting(int order, String defaultValue) {
+        return new ConfiguredValueModifier<String>() {
+            @Override int getOrder() { order }
+            @Override void override(ConfiguredValue o) {}
+            @Override String override(String value) { value == null ? defaultValue : value }
+        }
+    }
 
     private static ConfiguredValueModifier recording(int order, String tag, List<String> log) {
         return new ConfiguredValueModifier<String>() {
