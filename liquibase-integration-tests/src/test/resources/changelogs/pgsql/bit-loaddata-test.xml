@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="issue-4677-bit-loaddata-create-table" author="test">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="bit_loaddata_table"/>
+            </not>
+        </preConditions>
+        <createTable tableName="bit_loaddata_table">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="active" type="BIT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="flag" type="BIT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="issue-4677-bit-loaddata-data" author="test">
+        <loadData tableName="bit_loaddata_table"
+                  file="changelogs/pgsql/bit-test-data.csv"
+                  relativeToChangelogFile="false">
+            <column name="id" type="NUMERIC"/>
+            <column name="active" type="BIT"/>
+            <column name="flag" type="BIT"/>
+        </loadData>
+        <rollback>
+            <delete tableName="bit_loaddata_table"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
