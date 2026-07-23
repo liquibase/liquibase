@@ -796,10 +796,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().info("Parsing Liquibase Properties File");
             getLog().info("  File: " + propertyFile);
             try (InputStreamList isl = handlePropertyFileInputStreams(propertyFile)) {
-                if (isl == null) {
-                    throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(this.propertyFile));
-                }
-
                 parsePropertiesFiles(isl);
                 getLog().info(MavenUtils.LOG_SEPARATOR);
             } catch (IOException | MojoFailureException e) {
@@ -844,7 +840,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         try {
             InputStreamList inputStreamList = Scope.getCurrentScope().getResourceAccessor().openStreams(null, propertyFile);
             if (inputStreamList == null || inputStreamList.isEmpty()) {
-                throw new MojoFailureException("Failed to resolve the properties file: Not found");
+                throw new MojoFailureException("Failed to resolve the properties file: " + FileUtil.getFileNotFoundMessage(propertyFile));
             }
             return inputStreamList;
         } catch (IOException e) {
@@ -955,9 +951,17 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     private static Properties loadProperties(InputStreamList inputStreamList) throws MojoExecutionException {
         Properties props = new Properties();
+
+        // Here, we change the direction of the InputStreamList.
+        // We do this to ensure that, in the event of multiple
+        // entries, the first one overwrites the subsequent ones.
+        LinkedList<InputStream> list = new LinkedList<>();
+        inputStreamList.iterator().forEachRemaining(list::add);
+        Iterator<InputStream> reverseIterator = list.descendingIterator();
+
         try {
-            for (InputStream is : inputStreamList) {
-                props.load(is);
+            while(reverseIterator.hasNext()) {
+                props.load(reverseIterator.next());
             }
             return props;
         } catch (IOException e) {
