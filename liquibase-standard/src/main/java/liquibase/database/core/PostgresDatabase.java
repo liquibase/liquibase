@@ -286,4 +286,24 @@ public class PostgresDatabase extends AbstractPostgresDatabase {
     public boolean supportsDatabaseChangeLogHistory() {
         return true;
     }
+
+    @Override
+    public boolean supportsEnumTypeSnapshot() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsCompositeTypeSnapshot() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsCheckConstraintSnapshot() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsStoredLogicSnapshot() {
+        return true;
+    }
 }

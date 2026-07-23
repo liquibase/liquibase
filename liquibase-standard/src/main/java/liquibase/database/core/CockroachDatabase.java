@@ -149,4 +149,24 @@ public class CockroachDatabase extends PostgresDatabase {
     public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
         return type.isAssignableFrom(Table.class);
     }
+
+    /**
+     * The standard composite-type snapshot generator reads composite types via {@code pg_type}/
+     * {@code typrelid}, which CockroachDB does not populate for user-defined composite types, so it
+     * must not be treated as real PostgreSQL for composite-type snapshotting. Opts down from
+     * {@link PostgresDatabase}.
+     */
+    @Override
+    public boolean supportsCompositeTypeSnapshot() {
+        return false;
+    }
+
+    /**
+     * CockroachDB does not expose the stored-logic catalog the standard generators rely on.
+     * Opts down from {@link PostgresDatabase}.
+     */
+    @Override
+    public boolean supportsStoredLogicSnapshot() {
+        return false;
+    }
 }

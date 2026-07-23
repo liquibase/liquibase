@@ -41,6 +41,19 @@ class CockroachDatabaseTest extends Specification {
         QUOTE_ALL_OBJECTS         || 'col with space' | Column     || 'col with space' | '"col with space"'
     }
 
+    def "postgres-family capabilities"() {
+        given:
+        def database = new CockroachDatabase()
+
+        expect:
+        verifyAll {
+            database.supportsEnumTypeSnapshot()              // inherited from PostgresDatabase
+            !database.supportsCompositeTypeSnapshot()        // not snapshot-able on CockroachDB
+            database.supportsCheckConstraintSnapshot()       // inherited from PostgresDatabase
+            !database.supportsStoredLogicSnapshot()          // no stored-logic catalog
+        }
+    }
+
     def useSerialDatatypes() {
         when:
         def db = new CockroachDatabase()
