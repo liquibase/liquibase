@@ -6,14 +6,16 @@ import liquibase.database.MockDatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Tests for {@link MySQLDatabase}
@@ -98,42 +100,40 @@ public class MySQLDatabaseTest extends AbstractJdbcDatabaseTest {
         assertEquals("\\\\0", database.escapeStringForDatabase("\\0"));
     }
 
-    /**
-     * Tests whether reserved keywords are added for MySQL 8.0.
-     */
-    @Test
-    public void verifyMySQL8ReservedWordsAreNotPresent() {
+    @ParameterizedTest(name = "MySQL {0}.{1}: {2} reserved={3}")
+    @MethodSource("reservedWordMatrix")
+    public void verifyMySQLReservedWords(int major, int minor, String word, boolean expectedReserved) {
         Database database = getDatabase();
         MockDatabaseConnection connection = new MockDatabaseConnection();
-        connection.setDatabaseMajorVersion(5);
-        connection.setDatabaseMinorVersion(7);
+        connection.setDatabaseMajorVersion(major);
+        connection.setDatabaseMinorVersion(minor);
         database.setConnection(connection);
         // attaching the connection should trigger calling "addReservedWords" - as the
         // MockDatabaseConnection does not do that, we trigger it manually
-        database.addReservedWords(Arrays.asList());
+        database.addReservedWords(List.of());
 
-        // in 5.7, the words were not reserved yet
-        List<String> reservedForMySQL8 = Arrays.asList("FUNCTION", "ROW", "ROWS");
-        for (String reservedWord : reservedForMySQL8) {
-            String message = String.format("Expected %s to be non-reserved in MySQL < 8", reservedWord);
-            assertFalse(database.isReservedWord(reservedWord), message);
-        }
+        assertEquals(expectedReserved, database.isReservedWord(word));
     }
 
-    @Test
-    public void verifyMySQL8ReservedWordsArePresent() {
-        MySQLDatabase database = new MySQLDatabase();
-        MockDatabaseConnection connection = new MockDatabaseConnection();
-        connection.setDatabaseMajorVersion(8);
-        connection.setDatabaseMinorVersion(0);
-        database.setConnection(connection);
-        database.addReservedWords(Arrays.asList());
+    static Stream<Arguments> reservedWordMatrix() {
+        return Stream.of(
+                forVersion(5, 7, List.of("MASTER_SSL_VERIFY_SERVER_CERT"), List.of("FUNCTION", "ROW", "ROWS", "PERIOD", "CURRENT_ROLE")),
+                forVersion(8, 0, List.of("FUNCTION", "ROW", "ROWS", "MASTER_BIND"), List.of("MANUAL", "PARALLEL")),
+                forVersion(8, 4, List.of("FUNCTION", "ROW", "ROWS", "MANUAL", "PARALLEL"), List.of("MASTER_SSL_VERIFY_SERVER_CERT")),
+                // no changes in 9.0
+                forVersion(9, 0, List.of("FUNCTION", "ROW", "ROWS", "MANUAL"), List.of("MASTER_SSL_VERIFY_SERVER_CERT", "LIBRARY")),
+                forVersion(9, 3, List.of("LIBRARY", "MANUAL", "SYSTEM"), List.of("MASTER_BIND", "EXTERNAL")),
+                forVersion(9, 4, List.of("EXTERNAL", "LIBRARY", "SYSTEM"), List.of("SETS", "MASTER_BIND", "PERIOD")),
+                forVersion(9, 6, List.of("SETS", "EXTERNAL", "LIBRARY", "CUBE", "ACCESSIBLE", "MANUAL", "PARALLEL"), List.of("SOMETHING_ELSE", "MASTER_BIND")),
+                forVersion(9, 7, List.of("SETS", "EXTERNAL", "LIBRARY", "CUBE", "ACCESSIBLE"), List.of("SOMETHING_ELSE", "MASTER_BIND", "MANUAL", "PARALLEL")),
+                forVersion(10, 0, List.of("SETS", "EXTERNAL", "LIBRARY", "CUBE", "ACCESSIBLE"), List.of("SOMETHING_ELSE", "MASTER_BIND", "MANUAL", "PARALLEL"))
+        ).flatMap(s -> s);
+    }
 
-        List<String> reservedForMySQL8 = Arrays.asList("FUNCTION", "ROW", "ROWS");
-        // starting with 8.0, they should be reserved
-        for (String reservedWord : reservedForMySQL8) {
-            String message = String.format("Expected %s to be reserved in MySQL >= 8", reservedWord);
-            assertTrue(database.isReservedWord(reservedWord), message);
-        }
+    private static Stream<Arguments> forVersion(int major, int minor, List<String> reserved, List<String> notReserved) {
+        return Stream.concat(
+                reserved.stream().map(word -> Arguments.of(major, minor, word, true)),
+                notReserved.stream().map(word -> Arguments.of(major, minor, word, false))
+        );
     }
 }
