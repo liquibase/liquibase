@@ -194,4 +194,83 @@ class ConfigurationDefinitionTest extends Specification {
         "SHOULD.RUN"           | true
         null                   | false
     }
+
+    @Unroll
+    def "referenceScoped resolves from the .reference. sibling only while the reference-connection scope is set"() {
+        when:
+        def definition = new ConfigurationDefinition.Builder("test.refScope")
+                .define("auth.type", String)
+                .referenceScoped()
+                .buildTemporary()
+
+        def scopeVars = new HashMap<String, Object>()
+        if (primary != null) {
+            scopeVars.put("test.refScope.auth.type", primary)
+        }
+        if (reference != null) {
+            scopeVars.put("test.refScope.reference.auth.type", reference)
+        }
+        if (isReference) {
+            scopeVars.put(ConfigurationDefinition.IS_REFERENCE_CONNECTION_SCOPE_KEY, Boolean.TRUE)
+        }
+
+        def value = Scope.child(scopeVars, { definition.getCurrentValue() } as Scope.ScopedRunnerWithReturn)
+
+        then:
+        value == expected
+
+        where:
+        isReference | primary | reference | expected
+        false       | "PKI"   | "OAUTH"   | "PKI"   // primary connection ignores the reference sibling
+        true        | "PKI"   | null      | "PKI"   // unset reference inherits the primary value
+        true        | "PKI"   | "OAUTH"   | "OAUTH" // reference sibling overrides the primary
+        true        | "PKI"   | "DEFAULT" | null    // sentinel opts out -> resolves as unset (no default)
+        true        | "PKI"   | "default" | null    // sentinel is case-insensitive
+        true        | null    | "OAUTH"   | "OAUTH" // reference-only configuration
+        false       | null    | "OAUTH"   | null    // primary side with no primary value
+    }
+
+    @Unroll
+    def "referenceScoped DEFAULT sentinel resolves to the definition's default value when one is set"() {
+        when:
+        def definition = new ConfigurationDefinition.Builder("test.refScopeDefault")
+                .define("auth.type", String)
+                .setDefaultValue("PWD")
+                .referenceScoped()
+                .buildTemporary()
+
+        def scopeVars = new HashMap<String, Object>()
+        scopeVars.put("test.refScopeDefault.auth.type", "PKI") // primary is set to a non-default value
+        if (reference != null) {
+            scopeVars.put("test.refScopeDefault.reference.auth.type", reference)
+        }
+        scopeVars.put(ConfigurationDefinition.IS_REFERENCE_CONNECTION_SCOPE_KEY, Boolean.TRUE)
+
+        def value = Scope.child(scopeVars, { definition.getCurrentValue() } as Scope.ScopedRunnerWithReturn)
+
+        then:
+        value == expected
+
+        where:
+        reference | expected
+        "OAUTH"   | "OAUTH" // explicit reference value wins over the default
+        null      | "PKI"   // unset reference inherits the primary (not the default)
+        "DEFAULT" | "PWD"   // sentinel opts out -> the definition's default, NOT the primary and NOT null
+    }
+
+    def "referenceScoped is inert for definitions that were not flagged"() {
+        when:
+        def definition = new ConfigurationDefinition.Builder("test.refScopeUnflagged")
+                .define("auth.type", String)
+                .buildTemporary()
+
+        def value = Scope.child([
+                "test.refScopeUnflagged.auth.type"          : "PKI",
+                "test.refScopeUnflagged.reference.auth.type" : "OAUTH",
+                (ConfigurationDefinition.IS_REFERENCE_CONNECTION_SCOPE_KEY): Boolean.TRUE
+        ], { definition.getCurrentValue() } as Scope.ScopedRunnerWithReturn)
+
+        then:
+        value == "PKI"
+    }
 }
