@@ -23,7 +23,8 @@ public class FirebirdDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        return conn.getDatabaseProductName().startsWith("Firebird");
+        String productName = conn.getDatabaseProductName();
+        return productName.startsWith("Firebird") || productName.startsWith("RedDatabase");
     }
 
     @Override
