@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DB2DatabaseTest {
 
@@ -24,5 +25,12 @@ public class DB2DatabaseTest {
     public void testMaxFractionDigits() {
         Database database = new DB2Database();
         assertEquals(12, database.getMaxFractionalDigitsForTimestamp());
+    }
+
+    @Test
+    public void testSupportsEfficientPreconditionChecks() {
+        Database database = new DB2Database();
+        assertTrue(database.supportsEfficientPreconditionChecks(),
+                "DB2 should support efficient precondition checks to avoid performance issues with snapshots");
     }
 }
