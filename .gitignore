@@ -45,3 +45,4 @@ original-pom.xml
 CLAUDE.md
 
 .worktrees/
+/liquibase/
