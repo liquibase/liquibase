@@ -26,14 +26,30 @@ jobs:
     steps:
       - name: Get run-tests.yml runId
         id: get_run_id
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Fetch the list of workflow runs
-          response=$(curl -s \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/liquibase/liquibase/actions/workflows/run-tests.yml/runs?branch=main&status=success&per_page=1")
-            # Extract the last successful run ID
-          run_id=$(echo "$response" | jq -r '.workflow_runs[0].id')
+          # Find the most recent run-tests.yml run on main that has a valid (non-expired) liquibase-artifacts artifact.
+          # We scan up to 20 recent completed runs, so a single unrelated failing job
+          # (e.g. test-harness dispatch) cannot starve the dry-run of fresh build artifacts.
+          response=$(gh api "repos/${{ github.repository }}/actions/workflows/run-tests.yml/runs?branch=main&status=completed&per_page=20")
+
+          run_id=""
+          while IFS= read -r candidate_id; do
+            valid=$(gh api "repos/${{ github.repository }}/actions/runs/${candidate_id}/artifacts" \
+              --jq 'any(.artifacts[]; .name == "liquibase-artifacts" and (.expired | not))') || continue
+            if [ "$valid" = "true" ]; then
+              run_id="$candidate_id"
+              echo "Found valid liquibase-artifacts in run-tests run $run_id"
+              break
+            fi
+          done < <(echo "$response" | jq -r '.workflow_runs[].id')
+
+          if [ -z "$run_id" ]; then
+            echo "ERROR: No run-tests.yml run found with a valid liquibase-artifacts artifact in the last 20 completed runs on main"
+            exit 1
+          fi
+
           echo "dry_run_id=$run_id" >> $GITHUB_OUTPUT
           echo "dry_run_branch_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
 
@@ -47,7 +63,7 @@ jobs:
     steps:
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59 # v6.1.3
+        uses: aws-actions/configure-aws-credentials@517a711dbcd0e402f90c77e7e2f81e849156e31d # v6.2.2
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -72,7 +88,7 @@ jobs:
 
       - name: Invoke Create Release
         id: trigger-step
-        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@main
+        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@ed848500f3dec90a4184042c6b77e23515af732f # main
         with:
           workflow: create-release.yml
           ref: main
@@ -178,7 +194,7 @@ jobs:
     steps:
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59 # v6.1.3
+        uses: aws-actions/configure-aws-credentials@517a711dbcd0e402f90c77e7e2f81e849156e31d # v6.2.2
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -202,7 +218,7 @@ jobs:
           permission-actions: write
 
       - name: Trigger release-published-orchestrator workflow
-        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@main
+        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@ed848500f3dec90a4184042c6b77e23515af732f # main
         with:
           workflow: release-published-orchestrator.yml
           ref: main
@@ -216,7 +232,7 @@ jobs:
     needs: [setup, dry-run-create-release, dry-run-release-published]
     steps:
       - name: Checkout liquibase
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Set up Git
         run: |
@@ -243,7 +259,7 @@ jobs:
     steps:
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59 # v6.1.3
+        uses: aws-actions/configure-aws-credentials@517a711dbcd0e402f90c77e7e2f81e849156e31d # v6.2.2
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -257,7 +273,7 @@ jobs:
           parse-json-secrets: true
 
       - name: Notify Slack on Build Failure
-        uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
+        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
         with:
           method: chat.postMessage
           token: ${{ env.DRY_RUN_SLACK_BOT_TOKEN }}

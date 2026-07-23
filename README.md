@@ -55,6 +55,18 @@ Liquibase system requirements can be found on the [Download Liquibase](https://w
 
 See also how to [get started with Liquibase in minutes](https://docs.liquibase.com/start/home.html) or refer to our [Installing Liquibase](https://docs.liquibase.com/start/install/home.html) documentation page for more details.
 
+## Docker
+
+The official Liquibase Community Docker images are built from the [`docker/`](docker/) directory of this repository and published to [Docker Hub](https://hub.docker.com/r/liquibase/liquibase), GitHub Container Registry, and Amazon ECR Public:
+
+```bash
+docker pull liquibase/liquibase
+```
+
+See the [Docker README](docker/README.md) for tags, usage, and examples, and file Docker image issues in this repository. The images were previously maintained in the now-deprecated [`liquibase/docker`](https://github.com/liquibase/docker) repository.
+
+The commercial [`liquibase/liquibase-secure`](https://hub.docker.com/r/liquibase/liquibase-secure) image is maintained internally by Liquibase — contact [Liquibase Support](https://support.liquibase.com/) for issues.
+
 ## Documentation
 
 Visit the [Liquibase Documentation](https://docs.liquibase.com/home.html) website to find the information on how Liquibase works.

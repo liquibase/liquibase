@@ -66,6 +66,30 @@ class ColumnSnapshotGeneratorTest extends Specification {
         dataType.getTypeName() == "datetime"
     }
 
+    /**
+     * MySQL Connector/J with tinyInt1isBit=true (the driver default) reports TINYINT(1)
+     * columns as TYPE_NAME="BIT", DATA_TYPE=Types.BIT (-7), COLUMN_SIZE=1.
+     * readDataType must preserve the type name as reported by JDBC ("BIT") so that the
+     * upstream BooleanType.toDatabaseDataType fix can normalise it to TINYINT(1).
+     * This test verifies that readDataType correctly passes through the "BIT" type name
+     * and column size of 1 for MySQL without altering them at the snapshot level.
+     */
+    def "ReadDataType preserves BIT type name for MySQL TINYINT(1) JDBC artifact"() {
+        given:
+        def columnMetadata = new HashMap<String, Object>()
+        columnMetadata.put("TYPE_NAME", "BIT")
+        columnMetadata.put("DATA_TYPE", -7)   // java.sql.Types.BIT
+        columnMetadata.put("COLUMN_SIZE", 1)
+
+        when:
+        def dataType = columnSnapshotGenerator
+                .readDataType(new CachedRow(columnMetadata), new Column(), new MySQLDatabase())
+
+        then:
+        dataType.getTypeName() == "BIT"
+        dataType.getColumnSize() == 1
+    }
+
     @Unroll
     def "readDefaultValue"() {
         expect:

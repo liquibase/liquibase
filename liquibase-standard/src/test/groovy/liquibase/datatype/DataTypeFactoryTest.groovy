@@ -200,6 +200,10 @@ class DataTypeFactoryTest extends Specification {
         "TINYINT"                                      | new MySQLDatabase()    | "TINYINT"                                      | TinyIntType   | false
         "TINYINT UNSIGNED"                             | new MySQLDatabase()    | "TINYINT UNSIGNED"                             | TinyIntType   | false
         "TINYINT(1) UNSIGNED"                          | new MySQLDatabase()    | "TINYINT(1) UNSIGNED"                          | TinyIntType   | false
+        // boolean / bit(1) on MySQL must canonicalise to TINYINT(1); bit(n>1) stays as BIT(n)
+        "boolean"                                      | new MySQLDatabase()    | "TINYINT(1)"                                   | BooleanType   | false
+        "bit(1)"                                       | new MySQLDatabase()    | "TINYINT(1)"                                   | BooleanType   | false
+        "bit(8)"                                       | new MySQLDatabase()    | "BIT(8)"                                       | BooleanType   | false
         "SMALLINT"                                     | new MySQLDatabase()    | "SMALLINT"                                     | SmallIntType  | false
         "SMALLINT UNSIGNED"                            | new MySQLDatabase()    | "SMALLINT UNSIGNED"                            | SmallIntType  | false
         "MEDIUMINT"                                    | new MySQLDatabase()    | "MEDIUMINT"                                    | MediumIntType | false
@@ -219,6 +223,9 @@ class DataTypeFactoryTest extends Specification {
         "java.sql.Types.TIMESTAMP_WITH_TIMEZONE(6)"    | new MySQLDatabase()    | "timestamp(6)"                                 | TimestampType | false
         "timestamp"                                    | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
         "timestamp(3)"                                 | new MySQLDatabase()    | "timestamp(3)"                                 | TimestampType | false
+        "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" | new MySQLDatabase() | "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" | TimestampType | false
+        "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" | new MariaDBDatabase() | "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" | TimestampType | false
+        "timestamp(3) not null default current_timestamp(3) on update current_timestamp(3)" | new MySQLDatabase() | "timestamp(3) not null default current_timestamp(3) on update current_timestamp(3)" | TimestampType | false
         "TIMESTAMPTZ"                                  | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
         "timestamptz(3)"                               | new MySQLDatabase()    | "timestamp(3)"                                 | TimestampType | false
         "java.sql.Types.TIMESTAMP"                     | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false

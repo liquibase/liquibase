@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Encapsulates logic for evaluating if a set of runtime contexts matches a context expression string.
@@ -14,6 +15,28 @@ import java.util.*;
 @NoArgsConstructor
 @Setter
 public class ContextExpression {
+
+    /**
+     * Pseudo-context that evaluates to {@code true} when no runtime contexts are specified.
+     * <p>
+     * This can be used in context expressions to opt into stricter context-matching behaviour while
+     * keeping backward compatibility.  For example, a changeset with
+     * {@code context="!nocontexts AND specificcontext"} will only be applied when at least one
+     * runtime context is provided <em>and</em> that context matches {@code specificcontext}.
+     * When no runtime context is specified the {@code nocontexts} pseudo-context evaluates to
+     * {@code true}, so {@code !nocontexts} evaluates to {@code false} and the changeset is
+     * skipped.
+     * </p>
+     */
+    public static final String NOCONTEXTS = "nocontexts";
+
+    /**
+     * Matches the {@code nocontexts} pseudo-context token as a whole word, but only when it is
+     * <em>not</em> preceded by the {@code @} required-context prefix (i.e. {@code @nocontexts}
+     * falls through to normal matching and is intentionally excluded).
+     */
+    private static final Pattern NOCONTEXTS_PATTERN =
+            Pattern.compile("(?i)(?<![\\w@])" + NOCONTEXTS + "(?!\\w)");
 
     private HashSet<String> contexts = new HashSet<>();
     @Getter
@@ -86,7 +109,12 @@ public class ContextExpression {
                 .noneMatch(context -> context.startsWith("@"));
 
         if (this.contexts.isEmpty() && noRequiredRuntime) {
-            return true;
+            // Legacy behaviour: an empty context expression matches anything when no required
+            // runtime contexts are present. Exception: if any of the items being matched against
+            // mentions the `nocontexts` pseudo-context, the changeset author has opted into
+            // strict matching, so we fall through to per-expression evaluation instead.
+            return runtimeContexts.getContexts().stream()
+                    .noneMatch(item -> NOCONTEXTS_PATTERN.matcher(item).find());
         }
 
         for (String expression : this.contexts) {

@@ -1,6 +1,7 @@
 package liquibase.change.core
 
 
+import liquibase.ChecksumVersion
 import liquibase.change.ChangeStatus
 import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
@@ -372,5 +373,45 @@ public class CreateTableChangeTest extends StandardChangeTest {
         "int" | true    | new OracleDatabase()       | "CREATE TABLE test_table (id INTEGER)"
         "int" | true    | new SybaseASADatabase()    | "CREATE TABLE test_table (id INTEGER NULL)"
         "int" | true    | new SybaseDatabase()       | "CREATE TABLE test_table (id INT NULL)"
+    }
+
+    def "partitionBy round-trips through setter/getter"() {
+        when:
+        def change = new CreateTableChange()
+        change.setPartitionBy("RANGE (created_at)")
+
+        then:
+        change.getPartitionBy() == "RANGE (created_at)"
+    }
+
+    def "generateStatements threads partitionBy onto the CreateTableStatement"() {
+        when:
+        def change = new CreateTableChange()
+        change.setTableName("test_tbl_part")
+        def col = new ColumnConfig()
+        col.setName("test_date_int")
+        col.setType("int")
+        change.addColumn(col)
+        change.setPartitionBy("RANGE (test_date_int)")
+
+        then:
+        def stmt = (CreateTableStatement) change.generateStatements(new PostgresDatabase())[0]
+        stmt.getPartitionBy() == "RANGE (test_date_int)"
+    }
+
+    @Unroll
+    def "getExcludedFieldFilters version-gating for partitionBy: V#version.version excludes=#shouldExclude"() {
+        expect:
+        // Pre-V9 checksums must keep partitionBy out of the hash so existing changesets
+        // (which never had this field) keep their stored checksums after upgrade. V9+
+        // includes partitionBy so changes to the partition spec are caught by validation.
+        def excluded = new CreateTableChange().getExcludedFieldFilters(version) as List
+        excluded.contains("partitionBy") == shouldExclude
+
+        where:
+        version            | shouldExclude
+        ChecksumVersion.V7 | true
+        ChecksumVersion.V8 | true
+        ChecksumVersion.V9 | false
     }
 }
