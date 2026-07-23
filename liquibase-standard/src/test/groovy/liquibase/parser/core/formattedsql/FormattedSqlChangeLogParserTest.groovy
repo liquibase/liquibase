@@ -786,6 +786,97 @@ create table table1 (
         assert changeLog.getPreconditions().getOnSqlOutput() == PreconditionContainer.OnSqlOutputOption.TEST
     }
 
+    def "parse quoted precondition messages"() throws Exception {
+        given:
+        String changeLogWithPreconditionMessages = "--liquibase formatted sql\n" +
+                "--changeset test:test\n" +
+                "--preconditions onFail:HALT " +
+                "onFailMessage:\"Application 'value' not found. Skipping insertion.\" " +
+                "onError:HALT onErrorMessage:\"Unable to verify application.\"\n" +
+                "--precondition-sql-check expectedResult:1 select count(*) from application;\n" +
+                "select 1;\n"
+
+        when:
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithPreconditionMessages)
+                .parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        PreconditionContainer preconditions = changeLog.getChangeSets().first().getPreconditions()
+        preconditions.getOnFail() == PreconditionContainer.FailOption.HALT
+        preconditions.getOnFailMessage() == "Application 'value' not found. Skipping insertion."
+        preconditions.getOnError() == PreconditionContainer.ErrorOption.HALT
+        preconditions.getOnErrorMessage() == "Unable to verify application."
+    }
+
+    def "leave precondition messages unset when not specified"() throws Exception {
+        given:
+        String changeLogWithoutPreconditionMessages = "--liquibase formatted sql\n" +
+                "--changeset test:test\n" +
+                "--preconditions onFail:HALT onError:HALT\n" +
+                "select 1;\n"
+
+        when:
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithoutPreconditionMessages)
+                .parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        PreconditionContainer preconditions = changeLog.getChangeSets().first().getPreconditions()
+        preconditions.getOnFailMessage() == null
+        preconditions.getOnErrorMessage() == null
+    }
+
+    def "parse precondition message with onSqlOutput"() throws Exception {
+        given:
+        String changeLogWithMessageAndOnSqlOutput = "--liquibase formatted sql\n" +
+                "--changeset test:test\n" +
+                "--preconditions onFail:HALT onFailMessage:\"Application missing.\" onSqlOutput:TEST\n" +
+                "select 1;\n"
+
+        when:
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithMessageAndOnSqlOutput)
+                .parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        PreconditionContainer preconditions = changeLog.getChangeSets().first().getPreconditions()
+        preconditions.getOnFailMessage() == "Application missing."
+        preconditions.getOnSqlOutput() == PreconditionContainer.OnSqlOutputOption.TEST
+    }
+
+    def "do not parse message attribute names from inside quoted messages"() throws Exception {
+        given:
+        String changeLogWithAttributeNamesInMessages = "--liquibase formatted sql\n" +
+                "--changeset test:test\n" +
+                "--preconditions onErrorMessage:\"No onFailMessage:configured.\" " +
+                "onFailMessage:\"First onFailMessage:second.\"\n" +
+                "select 1;\n"
+
+        when:
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithAttributeNamesInMessages)
+                .parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        PreconditionContainer preconditions = changeLog.getChangeSets().first().getPreconditions()
+        preconditions.getOnFailMessage() == "First onFailMessage:second."
+        preconditions.getOnErrorMessage() == "No onFailMessage:configured."
+    }
+
+    def "parse unquoted message attributes containing apostrophes"() throws Exception {
+        given:
+        String changeLogWithUnquotedMessages = "--liquibase formatted sql\n" +
+                "--changeset test:test\n" +
+                "--preconditions onErrorMessage:can't-connect onFailMessage:plain\n" +
+                "select 1;\n"
+
+        when:
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithUnquotedMessages)
+                .parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        PreconditionContainer preconditions = changeLog.getChangeSets().first().getPreconditions()
+        preconditions.getOnFailMessage() == "plain"
+        preconditions.getOnErrorMessage() == "can't-connect"
+    }
+
     def "parse error when changeset with both 'onSqlOutput' and 'onUpdateSql' preconditions set"() throws Exception {
         when:
         final String changeLogWithOnSqlOutputPrecondition = "--liquibase formatted sql\n" +
