@@ -5,20 +5,25 @@ import liquibase.SingletonObject;
 import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.ServiceLocator;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public class LiquibaseTableNamesFactory implements SingletonObject {
 
-    private final SortedSet<LiquibaseTableNames> generators;
+    private final List<LiquibaseTableNames> generators;
 
     private LiquibaseTableNamesFactory() {
         ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
-        generators = new TreeSet<>(Comparator.comparingInt(LiquibaseTableNames::getOrder));
-        generators.addAll(serviceLocator.findInstances(LiquibaseTableNames.class));
+        // Sorted by getOrder() ascending, tie-broken by class name for deterministic iteration. Not a
+        // comparator-keyed TreeSet: that would silently drop generators that share a getOrder() value
+        // (same defect as ConfiguredValueModifierFactory — see INT-2215).
+        List<LiquibaseTableNames> found = new ArrayList<>(serviceLocator.findInstances(LiquibaseTableNames.class));
+        found.sort(Comparator.comparingInt(LiquibaseTableNames::getOrder)
+                .thenComparing(generator -> generator.getClass().getName()));
+        generators = Collections.unmodifiableList(found);
     }
 
     public List<String> getLiquibaseTableNames(Database database) {
