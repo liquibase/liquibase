@@ -2,7 +2,7 @@ package liquibase.database;
 
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
-import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.lockservice.LockServiceFactory;
 
 import java.util.Arrays;
@@ -15,7 +15,7 @@ public class StandardLiquibaseTableNames implements LiquibaseTableNames {
     }
 
     @Override
-    public void destroy(Database database) throws DatabaseException {
+    public void destroy(Database database) throws LiquibaseException {
         Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).destroy();
         LockServiceFactory.getInstance().getLockService(database).destroy();
     }
