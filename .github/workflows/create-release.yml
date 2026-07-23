@@ -94,7 +94,7 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
+        uses: aws-actions/configure-aws-credentials@517a711dbcd0e402f90c77e7e2f81e849156e31d # v6.2.2
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -131,7 +131,7 @@ jobs:
           } >> $GITHUB_ENV
 
       - name: Set up JDK
-        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
+        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
         with:
           java-version: "8"
           distribution: "temurin"
@@ -200,7 +200,7 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
+        uses: aws-actions/configure-aws-credentials@517a711dbcd0e402f90c77e7e2f81e849156e31d # v6.2.2
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -230,7 +230,7 @@ jobs:
 
        # https://github.com/actions/setup-java/tree/v4/?tab=readme-ov-file#install-multiple-jdks   
       - name: Set up JDK for GPG
-        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
+        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
         with:
           java-version: |
             17
@@ -356,7 +356,7 @@ jobs:
 
       - name: Attach Files to Draft Release
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
-        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v2
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
           fail_on_unmatched_files: true
@@ -370,7 +370,7 @@ jobs:
       - name: Attach Files to Dry-Run Draft Release
         id: attach-files-dry-run
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == true }}
-        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v2
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
           fail_on_unmatched_files: true
