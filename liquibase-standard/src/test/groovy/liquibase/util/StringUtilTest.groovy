@@ -50,6 +50,45 @@ class StringUtilTest extends Specification {
         true          | true            | null         | "SELECT 'normal'; SELECT 'a\\'b;\nDROP TABLE users; --';"                                                                                                                                            | ["SELECT 'normal'", "SELECT 'a\\'b;\nDROP TABLE users; --'"]
     }
 
+    def "processMultiLineSQL splits Oracle q-quoted statements on slash delimiters"() {
+        given:
+        String sql = '''
+            |merge into t values(to_clob(q'[{ "s": "exec('_p[\\"r\\"]=v\\nif x')" }]'))
+            |/
+            |merge into t values(to_clob(q'[{ "s": "second" }]'))
+            |/
+        '''.stripMargin()
+
+        when:
+        String[] statements = StringUtil.processMultiLineSQL(sql, true, true, null)
+
+        then:
+        statements.size() == 2
+        statements.every { it.count("merge into") == 1 }
+        statements.every { statement -> statement.readLines().every { it.trim() != "/" } }
+    }
+
+    @Unroll
+    def "processMultiLineSQL splits #quotePrefix literals with odd apostrophes on #delimiterName delimiters"() {
+        given:
+        String firstStatement = "select to_clob(${quotePrefix}'[don't]') from dual"
+        String secondStatement = "select to_clob(${quotePrefix}'[x]') from dual"
+        String sql = firstStatement + separator + secondStatement + terminator
+
+        when:
+        String[] statements = StringUtil.processMultiLineSQL(sql, true, true, null)
+
+        then:
+        statements == [firstStatement, secondStatement]
+
+        where:
+        quotePrefix | delimiterName | separator | terminator
+        "q"         | "slash"       | "\n/\n"   | "\n/"
+        "nq"        | "slash"       | "\n/\n"   | "\n/"
+        "q"         | "semicolon"   | ";\n"     | ";"
+        "nq"        | "semicolon"   | ";\n"     | ";"
+    }
+
     @Unroll
     def "stripComments examples"() {
         expect:
