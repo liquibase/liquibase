@@ -151,11 +151,13 @@ public class CockroachDatabase extends PostgresDatabase {
     }
 
     /**
-     * CockroachDB has no composite types (no {@code pg_collation}); it must not be treated as
-     * real PostgreSQL for composite-type snapshotting. Opts down from {@link PostgresDatabase}.
+     * The standard composite-type snapshot generator reads composite types via {@code pg_type}/
+     * {@code typrelid}, which CockroachDB does not populate for user-defined composite types, so it
+     * must not be treated as real PostgreSQL for composite-type snapshotting. Opts down from
+     * {@link PostgresDatabase}.
      */
     @Override
-    public boolean supportsCompositeTypes() {
+    public boolean supportsCompositeTypeSnapshot() {
         return false;
     }
 

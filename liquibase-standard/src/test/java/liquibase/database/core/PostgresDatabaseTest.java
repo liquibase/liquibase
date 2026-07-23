@@ -46,8 +46,8 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
     public void postgresFamilyCapabilities() {
         // Real PostgreSQL opts in to every Postgres-family capability (INT-2139).
         PostgresDatabase database = new PostgresDatabase();
-        assertTrue(database.supportsEnumTypes());
-        assertTrue(database.supportsCompositeTypes());
+        assertTrue(database.supportsEnumTypeSnapshot());
+        assertTrue(database.supportsCompositeTypeSnapshot());
         assertTrue(database.supportsCheckConstraintSnapshot());
         assertTrue(database.supportsStoredLogicSnapshot());
     }

@@ -194,22 +194,25 @@ public abstract class AbstractPostgresDatabase extends AbstractJdbcDatabase {
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Whether this database supports PostgreSQL-style enumerated types
-     * ({@code CREATE TYPE ... AS ENUM (...)}).
+     * Whether PostgreSQL-style enumerated types ({@code CREATE TYPE ... AS ENUM (...)}) on this
+     * database can be read by the standard enum-type snapshot generator. Named for
+     * <em>snapshot-ability</em>, not raw SQL capability.
      *
-     * @return true if enum types can be created and snapshotted on this database
+     * @return true if enum types on this database are snapshot-able via the standard generator
      */
-    public boolean supportsEnumTypes() {
+    public boolean supportsEnumTypeSnapshot() {
         return false;
     }
 
     /**
-     * Whether this database supports PostgreSQL-style composite types
-     * ({@code CREATE TYPE ... AS (...)}).
+     * Whether PostgreSQL-style composite types ({@code CREATE TYPE ... AS (...)}) on this database
+     * can be read by the standard composite-type snapshot generator. Named for
+     * <em>snapshot-ability</em>, not raw SQL capability: a variant may accept the DDL yet return
+     * {@code false} here because the standard generator cannot read its catalog.
      *
-     * @return true if composite types can be created and snapshotted on this database
+     * @return true if composite types on this database are snapshot-able via the standard generator
      */
-    public boolean supportsCompositeTypes() {
+    public boolean supportsCompositeTypeSnapshot() {
         return false;
     }
 

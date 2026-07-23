@@ -288,12 +288,12 @@ public class PostgresDatabase extends AbstractPostgresDatabase {
     }
 
     @Override
-    public boolean supportsEnumTypes() {
+    public boolean supportsEnumTypeSnapshot() {
         return true;
     }
 
     @Override
-    public boolean supportsCompositeTypes() {
+    public boolean supportsCompositeTypeSnapshot() {
         return true;
     }
 

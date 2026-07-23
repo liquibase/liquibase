@@ -50,10 +50,10 @@ class EnterpriseDBDatabaseTest extends Specification {
 
         expect:
         verifyAll {
-            database.supportsEnumTypes()                // inherited from PostgresDatabase
-            !database.supportsCompositeTypes()          // EnterpriseDB has no composite types
-            database.supportsCheckConstraintSnapshot()  // inherited from PostgresDatabase
-            database.supportsStoredLogicSnapshot()      // inherited from PostgresDatabase
+            database.supportsEnumTypeSnapshot()              // inherited from PostgresDatabase
+            !database.supportsCompositeTypeSnapshot()        // not snapshot-able on EnterpriseDB
+            database.supportsCheckConstraintSnapshot()       // inherited from PostgresDatabase
+            database.supportsStoredLogicSnapshot()           // inherited from PostgresDatabase
         }
     }
 

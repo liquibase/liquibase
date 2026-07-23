@@ -47,10 +47,10 @@ class CockroachDatabaseTest extends Specification {
 
         expect:
         verifyAll {
-            database.supportsEnumTypes()                // inherited from PostgresDatabase
-            !database.supportsCompositeTypes()          // CockroachDB has no composite types
-            database.supportsCheckConstraintSnapshot()  // inherited from PostgresDatabase
-            !database.supportsStoredLogicSnapshot()     // no stored-logic catalog
+            database.supportsEnumTypeSnapshot()              // inherited from PostgresDatabase
+            !database.supportsCompositeTypeSnapshot()        // not snapshot-able on CockroachDB
+            database.supportsCheckConstraintSnapshot()       // inherited from PostgresDatabase
+            !database.supportsStoredLogicSnapshot()          // no stored-logic catalog
         }
     }
 

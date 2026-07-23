@@ -77,11 +77,13 @@ public class EnterpriseDBDatabase extends PostgresDatabase {
     }
 
     /**
-     * EnterpriseDB does not support composite types for snapshotting; opts down from
-     * {@link PostgresDatabase}.
+     * EnterpriseDB (Advanced Server) accepts {@code CREATE TYPE ... AS (...)}, but the standard
+     * composite-type snapshot generator does not read composite types on it, so it opts down from
+     * {@link PostgresDatabase}. This preserves today's behavior, where the generator explicitly
+     * excludes EnterpriseDB.
      */
     @Override
-    public boolean supportsCompositeTypes() {
+    public boolean supportsCompositeTypeSnapshot() {
         return false;
     }
 }
