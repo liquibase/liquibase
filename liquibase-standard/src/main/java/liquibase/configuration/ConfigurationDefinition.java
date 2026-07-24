@@ -35,9 +35,25 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     private boolean internal;
     private ConfigurationValueConverter<DataType> valueConverter;
     private ConfigurationValueObfuscator<DataType> valueObfuscator;
+    private String referenceKey;
 
     private static final String ALLOWED_KEY_REGEX = "[a-zA-Z0-9._]+";
     private static final Pattern ALLOWED_KEY_PATTERN = Pattern.compile(ALLOWED_KEY_REGEX);
+
+    /**
+     * Scope key set to {@link Boolean#TRUE} while the reference connection of a two-connection command
+     * (e.g. {@code diff} / {@code diff-changelog}) is being opened. Reference-scoped definitions
+     * (see {@link Builder.Building#referenceScoped()}) resolve from their {@code .reference.} sibling
+     * key while this is set. Unset (the primary connection and every single-connection command) preserves
+     * the standard resolution.
+     */
+    public static final String IS_REFERENCE_CONNECTION_SCOPE_KEY = "liquibase.connection.isReference";
+
+    /**
+     * Value of a {@code .reference.} sibling key that explicitly opts the reference connection out of an
+     * inherited mechanism, resolving the definition as if unset (i.e. to its default). Case-insensitive.
+     */
+    public static final String REFERENCE_DEFAULT_SENTINEL = "DEFAULT";
 
     private boolean loggedUsingDefault = false;
     private boolean hidden = false;
@@ -99,26 +115,60 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     public ConfiguredValue<DataType> getCurrentConfiguredValue(ConfigurationValueProvider... additionalValueProviders) {
         final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
 
+        // Reference-scoped resolution: while the reference connection of a two-connection command is being
+        // opened, a flagged definition resolves from its `.reference.` sibling. This lets diff/diff-changelog
+        // use a different auth mechanism on the reference side than on the primary. The value still flows
+        // through this definition, so its type conversion, default, and obfuscator all apply unchanged.
+        if (referenceKey != null && isReferenceConnectionScope()) {
+            ConfiguredValue<?> referenceValue = liquibaseConfiguration.getCurrentConfiguredValue(valueConverter, valueObfuscator, additionalValueProviders, referenceKey);
+            if (referenceValue.found()) {
+                if (isReferenceDefaultSentinel(referenceValue.getProvidedValue().getValue())) {
+                    // Explicit opt-out: resolve as if unset for this connection (→ this definition's default).
+                    return applyDefaultAndConvert(new ConfiguredValue<>(key, valueConverter, valueObfuscator));
+                }
+                return applyDefaultAndConvert(referenceValue);
+            }
+            // No `.reference.` value set → fall through and inherit the primary value below.
+        }
+
         List<String> keyList = new ArrayList<>();
         keyList.add(this.getKey());
         keyList.addAll(this.getAliasKeys());
 
         ConfiguredValue<?> configurationValue = liquibaseConfiguration.getCurrentConfiguredValue(valueConverter, valueObfuscator, additionalValueProviders, keyList.toArray(new String[0]));
 
+        return applyDefaultAndConvert(configurationValue);
+    }
+
+    private static boolean isReferenceConnectionScope() {
+        return Boolean.TRUE.equals(Scope.getCurrentScope().get(IS_REFERENCE_CONNECTION_SCOPE_KEY, Boolean.FALSE));
+    }
+
+    private static boolean isReferenceDefaultSentinel(Object value) {
+        return value != null && REFERENCE_DEFAULT_SENTINEL.equalsIgnoreCase(String.valueOf(value).trim());
+    }
+
+    /**
+     * Applies this definition's default value (when nothing was configured) and its value converter to a
+     * resolved {@link ConfiguredValue}, returning the final typed value. Shared by the standard and the
+     * reference-scoped resolution paths.
+     */
+    private ConfiguredValue<DataType> applyDefaultAndConvert(ConfiguredValue<?> configurationValue) {
         if (!configurationValue.found()) {
-            defaultValue = this.getDefaultValue();
-            if (defaultValue != null) {
+            // Use a local rather than writing the shared instance field on this read path.
+            final DataType resolvedDefault = this.getDefaultValue();
+            if (resolvedDefault != null) {
                 DataType obfuscatedValue;
                 if (valueObfuscator == null) {
-                    obfuscatedValue = defaultValue;
+                    obfuscatedValue = resolvedDefault;
                 } else {
-                    obfuscatedValue = valueObfuscator.obfuscate(defaultValue);
+                    obfuscatedValue = valueObfuscator.obfuscate(resolvedDefault);
                 }
                 if (!loggedUsingDefault) {
                     Scope.getCurrentScope().getLog(getClass()).fine("Configuration " + key + " is using the default value of " + obfuscatedValue);
                     loggedUsingDefault = true;
                 }
-                configurationValue.override(new DefaultValueProvider(this.getDefaultValue()).getProvidedValue(key));
+                configurationValue.override(new DefaultValueProvider(resolvedDefault).getProvidedValue(key));
             }
         }
 
@@ -339,6 +389,36 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
 
         public Building<DataType> setHidden(boolean hidden) {
             definition.hidden = hidden;
+
+            return this;
+        }
+
+        /**
+         * Marks this definition reference-scopable: while the reference connection of a two-connection command
+         * (e.g. {@code diff}) is opening, it resolves from its {@code <namespace>.reference.<suffix>} sibling
+         * instead of the primary key. An unset sibling inherits the primary value; a sibling of
+         * {@link #REFERENCE_DEFAULT_SENTINEL} opts out (resolves as if unset). No effect on single-connection
+         * commands or the primary connection.
+         * <p>
+         * Caveats: the reference value resolves only while the reference connection is opening, so read it
+         * synchronously in {@code DatabaseConnection.open(...)} (a later/async read sees the primary value);
+         * only the canonical key is scoped, not aliases; and it does not apply to auth activated by the
+         * credential value itself (e.g. a {@code referencePassword} resolved by a {@link ConfiguredValueModifier}),
+         * which is already per-connection. Intended for {@code String}-typed selectors: the
+         * {@link #REFERENCE_DEFAULT_SENTINEL} opt-out is matched on the raw sibling value before type
+         * conversion, so a non-{@code String} {@code DataType} (e.g. an enum) would not see the sentinel honored.
+         */
+        public Building<DataType> referenceScoped() {
+            final String fullKey = definition.getKey();
+            // define() always prepends "defaultKeyPrefix.", so the sibling is prefix + ".reference." + suffix.
+            // Assert that invariant explicitly so a future change fails loudly instead of deriving a wrong key.
+            final String expectedPrefix = defaultKeyPrefix + ".";
+            if (!fullKey.startsWith(expectedPrefix)) {
+                throw new IllegalStateException("referenceScoped() requires a key under the builder prefix '"
+                        + defaultKeyPrefix + "', but was '" + fullKey + "'.");
+            }
+            final String suffix = fullKey.substring(expectedPrefix.length());
+            definition.referenceKey = defaultKeyPrefix + ".reference." + suffix;
 
             return this;
         }

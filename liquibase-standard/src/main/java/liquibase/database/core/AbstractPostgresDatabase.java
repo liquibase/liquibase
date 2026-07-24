@@ -181,4 +181,62 @@ public abstract class AbstractPostgresDatabase extends AbstractJdbcDatabase {
         }
         super.setDefaultCatalogName(defaultCatalogName);
     }
+
+    // ---------------------------------------------------------------------------------------------
+    // Explicit Postgres-family capabilities (INT-2139).
+    //
+    // The class-level contract: default to the safe/minimal value here, real PostgresDatabase opts
+    // in, and variants that lack the feature opt down. This replaces the fragile
+    // "inherit-by-default, override-to-disable" pattern (and the off-classpath short-name checks
+    // such as getShortName().equalsIgnoreCase("redshift")) that previously lived in the snapshot
+    // generators. These live on the Postgres-family SPI for now; they may be promoted to the core
+    // Database interface once the model is proven and generalized to other families (6.1+).
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Whether PostgreSQL-style enumerated types ({@code CREATE TYPE ... AS ENUM (...)}) on this
+     * database can be read by the standard enum-type snapshot generator. Named for
+     * <em>snapshot-ability</em>, not raw SQL capability.
+     *
+     * @return true if enum types on this database are snapshot-able via the standard generator
+     */
+    public boolean supportsEnumTypeSnapshot() {
+        return false;
+    }
+
+    /**
+     * Whether PostgreSQL-style composite types ({@code CREATE TYPE ... AS (...)}) on this database
+     * can be read by the standard composite-type snapshot generator. Named for
+     * <em>snapshot-ability</em>, not raw SQL capability: a variant may accept the DDL yet return
+     * {@code false} here because the standard generator cannot read its catalog.
+     *
+     * @return true if composite types on this database are snapshot-able via the standard generator
+     */
+    public boolean supportsCompositeTypeSnapshot() {
+        return false;
+    }
+
+    /**
+     * Whether check constraints on this database can be read by the standard check-constraint
+     * snapshot service. Named for <em>snapshot-ability</em>, not enforcement: e.g. Redshift accepts
+     * {@code CHECK} in DDL but never enforces it and exposes no usable catalog for it, so it returns
+     * {@code false}. (Cross-family concept; non-Postgres families still gate via {@code instanceof}
+     * in {@code StandardCheckConstraintService} until the 6.1+ sweep.)
+     *
+     * @return true if check constraints on this database are snapshot-able via the standard service
+     */
+    public boolean supportsCheckConstraintSnapshot() {
+        return false;
+    }
+
+    /**
+     * Whether stored database logic (functions, procedures, packages, triggers) can be snapshotted
+     * from this database via the standard stored-logic snapshot generators. (Cross-family concept;
+     * non-Postgres families still gate via {@code instanceof} until the 6.1+ sweep.)
+     *
+     * @return true if stored logic on this database is snapshot-able via the standard generators
+     */
+    public boolean supportsStoredLogicSnapshot() {
+        return false;
+    }
 }
