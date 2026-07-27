@@ -38,9 +38,9 @@ public class IntType extends LiquibaseDataType {
             return new DatabaseDataType("INTEGER");
         }
 
-        if (database instanceof AbstractPostgresDatabase postgresDatabase) {
+        if (database instanceof AbstractPostgresDatabase postgresLike) {
             if (isAutoIncrement()) {
-                if (postgresDatabase.useSerialDatatypes()) {
+                if (postgresLike.useSerialDatatypes()) {
                     return new DatabaseDataType("SERIAL");
                 } else {
                     if (GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue() || this.getRawDefinition() == null) {

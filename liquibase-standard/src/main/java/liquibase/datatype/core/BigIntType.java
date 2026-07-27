@@ -53,8 +53,8 @@ public class BigIntType extends LiquibaseDataType {
                 || (database instanceof SybaseASADatabase) || (database instanceof H2Database)) {
             return new DatabaseDataType("BIGINT");
         }
-        if (database instanceof AbstractPostgresDatabase postgresDatabase) {
-            if (isAutoIncrement() && postgresDatabase.useSerialDatatypes()) {
+        if (database instanceof AbstractPostgresDatabase postgresLike) {
+            if (isAutoIncrement() && postgresLike.useSerialDatatypes()) {
                 return new DatabaseDataType("BIGSERIAL");
             } else {
                 if (GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue() || this.getRawDefinition() == null) {
