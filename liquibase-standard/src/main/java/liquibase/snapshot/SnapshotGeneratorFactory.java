@@ -8,7 +8,6 @@ import liquibase.database.*;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MariaDBDatabase;
 import liquibase.database.core.MockDatabase;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.AbstractPostgresDatabase;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;

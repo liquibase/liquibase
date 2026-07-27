@@ -8,7 +8,6 @@ import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.AbstractPostgresDatabase;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.BooleanType;
@@ -293,7 +292,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
     }
 
     /**
-     * For {@link PostgresDatabase} if column is of autoIncrement/SERIAL type we can ignore 'defaultValue' differences
+     * For {@link AbstractPostgresDatabase} if column is of autoIncrement/SERIAL type we can ignore 'defaultValue' differences
      * (because its execution of sequence.next() anyway)
      */
     private boolean shouldTriggerAddDefaultChange(Column column, Difference difference, Database comparisonDatabase) {

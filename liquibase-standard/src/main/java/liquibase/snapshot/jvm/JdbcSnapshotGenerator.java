@@ -4,7 +4,6 @@ import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.AbstractPostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.DiffStatusListener;

@@ -8,7 +8,6 @@ import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
 import liquibase.database.core.MariaDBDatabase;
 import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.AbstractPostgresDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.datatype.DataTypeFactory;
