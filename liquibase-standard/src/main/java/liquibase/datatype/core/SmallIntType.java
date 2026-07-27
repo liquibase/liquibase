@@ -47,9 +47,9 @@ public class SmallIntType extends LiquibaseDataType {
         }
 
 
-        if (database instanceof PostgresDatabase) {
+        if (database instanceof AbstractPostgresDatabase) {
             if (isAutoIncrement()) {
-                if (((PostgresDatabase) database).useSerialDatatypes()) {
+                if (((AbstractPostgresDatabase) database).useSerialDatatypes()) {
                     return new DatabaseDataType("SMALLSERIAL");
                 }
             } else {

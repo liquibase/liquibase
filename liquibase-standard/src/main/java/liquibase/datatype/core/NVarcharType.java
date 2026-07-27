@@ -19,7 +19,7 @@ public class NVarcharType extends CharType {
         if ((getRawDefinition() != null) && getRawDefinition().toLowerCase(Locale.US).contains("national character varying")) {
             setAdditionalInformation(null); //just go to nvarchar
         }
-        if ((database instanceof HsqlDatabase) || (database instanceof PostgresDatabase) || (database instanceof
+        if ((database instanceof HsqlDatabase) || (database instanceof AbstractPostgresDatabase) || (database instanceof
             DerbyDatabase)) {
 
             return new DatabaseDataType("VARCHAR", getParameters());

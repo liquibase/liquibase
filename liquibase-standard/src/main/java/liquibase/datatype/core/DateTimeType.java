@@ -95,7 +95,7 @@ public class DateTimeType extends LiquibaseDataType {
 
             return new DatabaseDataType("DATETIME YEAR TO FRACTION", 5);
         }
-        if (database instanceof PostgresDatabase) {
+        if (database instanceof AbstractPostgresDatabase) {
             String rawDefinition = originalDefinition.toLowerCase(Locale.US);
             Object[] params = getParameters();
             if (rawDefinition.contains("tz") || rawDefinition.contains("with time zone")) {

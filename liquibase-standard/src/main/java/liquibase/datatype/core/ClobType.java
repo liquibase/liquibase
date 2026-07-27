@@ -100,7 +100,7 @@ public class ClobType extends LiquibaseDataType {
             } else {
                 return new DatabaseDataType("CLOB");
             }
-        } else if ((database instanceof PostgresDatabase) || (database instanceof SQLiteDatabase) || (database
+        } else if ((database instanceof AbstractPostgresDatabase) || (database instanceof SQLiteDatabase) || (database
             instanceof SybaseDatabase)) {
             return new DatabaseDataType("TEXT");
         } else if (database instanceof OracleDatabase) {

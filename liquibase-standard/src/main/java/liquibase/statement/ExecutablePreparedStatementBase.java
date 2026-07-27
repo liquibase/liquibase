@@ -9,6 +9,7 @@ import liquibase.database.PreparedStatementFactory;
 import liquibase.database.core.MariaDBDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.AbstractPostgresDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
@@ -182,7 +183,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     }
 
     protected void executePreparedStatement(PreparedStatement stmt) throws SQLException {
-        if (database instanceof PostgresDatabase) {
+        if (database instanceof AbstractPostgresDatabase) {
             //postgresql's default prepared statement setup is slow for normal liquibase usage. Calling with QUERY_ONESHOT seems faster, even when we keep re-calling the same prepared statement for many rows in loadData
             try {
                 if (EXECUTE_WITH_FLAGS_METHOD.get() == null) {
@@ -255,7 +256,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 stmt.setBlob(i, new ByteArrayInputStream(Base64.getDecoder().decode(col.getValue())));
             } else if (LoadDataChange.LOAD_DATA_TYPE.CLOB.name().equalsIgnoreCase(col.getType())) {
                 try {
-                    if (database instanceof PostgresDatabase || database instanceof SQLiteDatabase) {
+                    if (database instanceof AbstractPostgresDatabase || database instanceof SQLiteDatabase) {
                         // JDBC driver does not have the .createClob() call implemented yet
                         stmt.setString(i, col.getValue());
                     } else {
@@ -315,7 +316,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             try {
                 LOBContent<InputStream> lob = toBinaryStream(col.getValueBlobFile());
 
-                if (database instanceof PostgresDatabase) {
+                if (database instanceof AbstractPostgresDatabase) {
                     String snapshotKeyName = String.format("%s-%s-%s-%s", getCatalogName(), getSchemaName(), getTableName(), col.getName());
                     Column snapshot = (Column) this.getScratchData(snapshotKeyName);
                     if (snapshot == null) {

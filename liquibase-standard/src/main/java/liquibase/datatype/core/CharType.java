@@ -7,6 +7,7 @@ import liquibase.database.core.H2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.AbstractPostgresDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
@@ -52,7 +53,7 @@ public class CharType extends LiquibaseDataType {
             DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("char"), parameters);
             type.addAdditionalInformation(getAdditionalInformation());
             return type;
-        } else if (database instanceof PostgresDatabase){
+        } else if (database instanceof AbstractPostgresDatabase){
             final Object[] parameters = getParameters();
             if ((parameters != null) && (parameters.length == 1)) {
                 // PostgreSQL only supports (n) syntax but not (n CHAR) syntax, so we need to remove CHAR.

@@ -7,6 +7,7 @@ import liquibase.change.core.*;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.AbstractPostgresDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
@@ -296,7 +297,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
      * (because its execution of sequence.next() anyway)
      */
     private boolean shouldTriggerAddDefaultChange(Column column, Difference difference, Database comparisonDatabase) {
-        if (!(comparisonDatabase instanceof PostgresDatabase)) {
+        if (!(comparisonDatabase instanceof AbstractPostgresDatabase)) {
             return true;
         }
         return column.getAutoIncrementInformation() == null || !(difference.getReferenceValue() instanceof DatabaseFunction);

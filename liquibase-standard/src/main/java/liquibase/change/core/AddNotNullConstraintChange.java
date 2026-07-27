@@ -4,6 +4,7 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.AbstractPostgresDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
@@ -142,7 +143,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
                         }
                     }
 
-                    if (database instanceof PostgresDatabase) {
+                    if (database instanceof AbstractPostgresDatabase) {
                         if (finalDefaultNullValue.equals(0)) {
                             finalDefaultNullValue = new DatabaseFunction( "B'0'");
                         } else if (finalDefaultNullValue.equals(1)) {

@@ -46,7 +46,7 @@ public class NumberType extends LiquibaseDataType {
             } else {
                 return new DatabaseDataType("NUMBER", getParameters());
             }
-        } else if (database instanceof PostgresDatabase) {
+        } else if (database instanceof AbstractPostgresDatabase) {
             if ((getParameters().length > 0)) {
                 try {
                     if ((Integer.parseInt(getParameters()[0].toString()) > 1000)) {
