@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019f93b8-c2c1-7897-8949-1ea23bf688ea",
-  "CreatedAt": "2026-07-24T10:43:07.073564224Z",
+  "ReportID": "019fa340-5138-7c93-b6d8-1bef724b333e",
+  "CreatedAt": "2026-07-27T11:05:29.144825354Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -2197,7 +2197,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2281,7 +2281,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2365,7 +2365,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2449,7 +2449,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2536,7 +2536,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2623,7 +2623,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2841,6 +2841,7 @@
             "https://access.redhat.com/errata/RHSA-2026:4271",
             "https://access.redhat.com/errata/RHSA-2026:4466",
             "https://access.redhat.com/errata/RHSA-2026:4467",
+            "https://access.redhat.com/errata/RHSA-2026:44696",
             "https://access.redhat.com/errata/RHSA-2026:5459",
             "https://access.redhat.com/errata/RHSA-2026:6287",
             "https://access.redhat.com/errata/RHSA-2026:6292",
@@ -2873,7 +2874,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-21441"
           ],
           "PublishedDate": "2026-01-07T22:15:44.04Z",
-          "LastModifiedDate": "2026-07-22T12:17:11.127Z"
+          "LastModifiedDate": "2026-07-24T13:17:28.117Z"
         },
         {
           "VulnerabilityID": "CVE-2026-21441",
@@ -3036,6 +3037,7 @@
             "https://access.redhat.com/errata/RHSA-2026:4271",
             "https://access.redhat.com/errata/RHSA-2026:4466",
             "https://access.redhat.com/errata/RHSA-2026:4467",
+            "https://access.redhat.com/errata/RHSA-2026:44696",
             "https://access.redhat.com/errata/RHSA-2026:5459",
             "https://access.redhat.com/errata/RHSA-2026:6287",
             "https://access.redhat.com/errata/RHSA-2026:6292",
@@ -3068,7 +3070,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-21441"
           ],
           "PublishedDate": "2026-01-07T22:15:44.04Z",
-          "LastModifiedDate": "2026-07-22T12:17:11.127Z"
+          "LastModifiedDate": "2026-07-24T13:17:28.117Z"
         },
         {
           "VulnerabilityID": "CVE-2026-21441",
@@ -3231,6 +3233,7 @@
             "https://access.redhat.com/errata/RHSA-2026:4271",
             "https://access.redhat.com/errata/RHSA-2026:4466",
             "https://access.redhat.com/errata/RHSA-2026:4467",
+            "https://access.redhat.com/errata/RHSA-2026:44696",
             "https://access.redhat.com/errata/RHSA-2026:5459",
             "https://access.redhat.com/errata/RHSA-2026:6287",
             "https://access.redhat.com/errata/RHSA-2026:6292",
@@ -3263,7 +3266,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-21441"
           ],
           "PublishedDate": "2026-01-07T22:15:44.04Z",
-          "LastModifiedDate": "2026-07-22T12:17:11.127Z"
+          "LastModifiedDate": "2026-07-24T13:17:28.117Z"
         },
         {
           "VulnerabilityID": "CVE-2026-44431",
