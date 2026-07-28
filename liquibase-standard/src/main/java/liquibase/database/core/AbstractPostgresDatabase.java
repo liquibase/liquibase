@@ -6,6 +6,7 @@ import liquibase.Scope;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.exception.DatabaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.structure.DatabaseObject;
@@ -180,6 +181,14 @@ public abstract class AbstractPostgresDatabase extends AbstractJdbcDatabase {
             Scope.getCurrentScope().getUI().sendMessage("WARNING: Postgres does not support catalogs, so the values set in 'defaultCatalogName' and 'referenceDefaultCatalogName' will be ignored.");
         }
         super.setDefaultCatalogName(defaultCatalogName);
+    }
+
+    public boolean useSerialDatatypes() {
+        try {
+            return getDatabaseMajorVersion() < 10;
+        } catch (DatabaseException e) {
+            return true;
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
