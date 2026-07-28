@@ -38,6 +38,13 @@ public class PrimaryKeyComparator implements DatabaseObjectComparator {
         }
     }
 
+    /**
+     * Two primary keys are the same object when they belong to the same table and their names match,
+     * where a null name matches any PK on the table. Differing names still match when both sides carry
+     * column definitions (snapshotted objects), since a table has a single PK and auto-generated names
+     * vary across environments. A side without columns is a name-based lookup example
+     * (e.g. the primaryKeyExists precondition) and must match by name.
+     */
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
         if (!((databaseObject1 instanceof PrimaryKey) && (databaseObject2 instanceof PrimaryKey))) {
@@ -49,10 +56,21 @@ public class PrimaryKeyComparator implements DatabaseObjectComparator {
 
         if ((thisPrimaryKey.getTable() != null) && (thisPrimaryKey.getTable().getName() != null) && (otherPrimaryKey
             .getTable() != null) && (otherPrimaryKey.getTable().getName() != null)) {
-            return DatabaseObjectComparatorFactory.getInstance().isSameObject(thisPrimaryKey.getTable(), otherPrimaryKey.getTable(), chain.getSchemaComparisons(), accordingTo);
+            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisPrimaryKey.getTable(), otherPrimaryKey.getTable(), chain.getSchemaComparisons(), accordingTo)) {
+                return false;
+            }
+            if ((thisPrimaryKey.getName() == null) || (otherPrimaryKey.getName() == null)
+                || thisPrimaryKey.getName().equalsIgnoreCase(otherPrimaryKey.getName())) {
+                return true;
+            }
+            return hasColumns(thisPrimaryKey) && hasColumns(otherPrimaryKey);
         } else {
             return StringUtil.trimToEmpty(thisPrimaryKey.getName()).equalsIgnoreCase(otherPrimaryKey.getName());
         }
+    }
+
+    private static boolean hasColumns(PrimaryKey primaryKey) {
+        return (primaryKey.getColumns() != null) && !primaryKey.getColumns().isEmpty();
     }
 
 
