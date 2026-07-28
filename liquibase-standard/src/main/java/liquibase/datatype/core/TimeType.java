@@ -59,7 +59,7 @@ public class TimeType extends LiquibaseDataType {
             return new DatabaseDataType("DATE");
         }
 
-        if (database instanceof PostgresDatabase) {
+        if (database instanceof AbstractPostgresDatabase) {
             DatabaseDataType datatype = new DatabaseDataType(getName(), getValidatedParameters());
             String rawDefinition = originalDefinition.toLowerCase(Locale.US);
 
