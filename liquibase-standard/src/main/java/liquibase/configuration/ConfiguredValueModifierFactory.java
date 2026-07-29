@@ -60,6 +60,9 @@ public class ConfiguredValueModifierFactory  implements SingletonObject {
     }
 
     public String override(String configuredValue) {
+        // The "same-order modifiers all coexist and run" guarantee is specific to override(ConfiguredValue);
+        // this overload returns on the first modifier that changes the value, so among same-order modifiers
+        // only one takes effect here.
         // Apply the highest-order modifiers first (reverse of the ascending sort), stopping at the first
         // that changes the value. Objects.equals so a null value a modifier leaves as null counts as
         // unchanged and the next modifier still runs, rather than short-circuiting on the first modifier.
