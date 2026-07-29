@@ -166,9 +166,9 @@ public class DiffToChangeLog {
             //
             // Get a Database instance and save it in the scope for later use
             //
-            Database database = determineDatabase(diffResult.getReferenceSnapshot());
+            Database database = liveDatabaseForSerialization(diffResult.getReferenceSnapshot());
             if (database == null) {
-                database = determineDatabase(diffResult.getComparisonSnapshot());
+                database = liveDatabaseForSerialization(diffResult.getComparisonSnapshot());
             }
             ChangelogPrintServiceFactory printServiceFactory = Scope.getCurrentScope().getSingleton(ChangelogPrintServiceFactory.class);
             ChangelogPrintService printService = printServiceFactory.getChangeLogPrintService(this);
@@ -176,19 +176,16 @@ public class DiffToChangeLog {
             if (file.exists() && Boolean.FALSE.equals(overwriteOutputFile) && changeLogSerializer instanceof FormattedSqlChangeLogSerializer) {
                 newScopeObjects.put(ADD_FORMATTED_SQL_HEADER, false);
             }
-            Scope.child(newScopeObjects, new Scope.ScopedRunner() {
-                @Override
-                public void run() {
-                    try {
-                        if (!file.exists()) {
-                            //print changeLog only if there are available changeSets to print instead of printing it always
-                            printService.printNew(changeLogSerializer, file);
-                        } else {
-                            printService.printToExisting(changeLogSerializer, file, overwriteOutputFile);
-                        }
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
+            Scope.child(newScopeObjects, (Scope.ScopedRunner) () -> {
+                try {
+                    if (!file.exists()) {
+                        //print changeLog only if there are available changeSets to print instead of printing it always
+                        printService.printNew(changeLogSerializer, file);
+                    } else {
+                        printService.printToExisting(changeLogSerializer, file, overwriteOutputFile);
                     }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
             });
         } catch (Exception e) {
@@ -209,10 +206,12 @@ public class DiffToChangeLog {
     }
 
     //
-    // Return the Database from this snapshot
-    // if it is not offline
+    // Live Database for changelog SQL serialization, or null to derive it from the
+    // changelog filename. Gated to online Postgres-family connections: their SQL
+    // generation is connection-state-sensitive (SERIAL vs GENERATED-IDENTITY depends on
+    // the live server version, EDB Redwood mode), so a filename-derived stand-in is wrong.
     //
-    private Database determineDatabase(DatabaseSnapshot snapshot) {
+    Database liveDatabaseForSerialization(DatabaseSnapshot snapshot) {
         Database database = snapshot.getDatabase();
         DatabaseConnection connection = database.getConnection();
         if (! (connection instanceof OfflineConnection) && database instanceof AbstractPostgresDatabase) {
@@ -351,25 +350,14 @@ public class DiffToChangeLog {
     // FK changes with the same constraint name, we make sure that the
     // drop FK goes first
     //
-    private List<ChangeSet> bringDropFKToTop(List<ChangeSet> changeSets) {
-        List<ChangeSet> dropFk = changeSets.stream().filter(cs ->
-            cs.getChanges().stream().anyMatch(DropForeignKeyConstraintChange.class::isInstance)
-        ).collect(Collectors.toList());
-        if (dropFk.isEmpty()) {
-            return changeSets;
-        }
-        List<ChangeSet> returnList = new ArrayList<>();
-        changeSets.stream().forEach(cs -> {
-            if (dropFk.contains(cs)) {
-                returnList.add(cs);
-            }
-        });
-        changeSets.stream().forEach(cs -> {
-            if (! dropFk.contains(cs)) {
-                returnList.add(cs);
-            }
-        });
-        return returnList;
+    protected List<ChangeSet> bringDropFKToTop(List<ChangeSet> changeSets) {
+        return changeSets.stream()
+                .sorted(Comparator.comparingInt(cs -> hasDropForeignKey(cs) ? 0 : 1))
+                .collect(Collectors.toList());
+    }
+
+    private boolean hasDropForeignKey(ChangeSet changeSet) {
+        return changeSet.getChanges().stream().anyMatch(DropForeignKeyConstraintChange.class::isInstance);
     }
 
     private DatabaseObjectCollectionComparator getDatabaseObjectCollectionComparator() {
@@ -511,11 +499,9 @@ public class DiffToChangeLog {
     /**
      *
      * POSTGRES ONLY:
-     *
      * If we have a stored logic object then we edit the name
      * to replace the parameter list with a list of just the types.
      * This is the format that the dependency computation puts out.
-     *
      * Example:  calculate_bonus(emp_salary numeric, emp_name character varying) becomes
      *           calculate_bonus(numeric, character varying)
      *
@@ -712,11 +698,9 @@ public class DiffToChangeLog {
                 String tabName = StringUtils.trimToEmpty((String)row.get("REFERENCED_SCHEMA_NAME")) +
                         "." + StringUtils.trimToEmpty((String)row.get("REFERENCED_NAME"));
 
-                if (!(tabName.isEmpty() || bName.isEmpty())) {
-                    graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
-                    graph.add(bName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*",""),
-                            tabName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*", ""));
-                }
+                graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
+                graph.add(bName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*",""),
+                        tabName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*", ""));
             }
         }
     }
@@ -836,7 +820,7 @@ public class DiffToChangeLog {
                     changeSets.add(changeSet);
                 }
             } else {
-                final boolean runOnChange = Arrays.asList(changes).stream().allMatch(this::isContainedInRunOnChangeTypes);
+                final boolean runOnChange = Arrays.stream(changes).allMatch(this::isContainedInRunOnChangeTypes);
                 ChangeSet changeSet = service.createChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
                                         null, null, null, true, quotingStrategy, null);
                 changeSet.setCreated(created);
@@ -1017,7 +1001,7 @@ public class DiffToChangeLog {
                 for (Iterator<Edge> it = node.outEdges.iterator(); it.hasNext(); ) {
                     //remove edge e from the graph
                     Edge edge = it.next();
-                    Node nodePointedTo = edge.to;
+                    Node nodePointedTo = edge.to();
                     it.remove();//Remove edge from node
                     nodePointedTo.inEdges.remove(edge);//Remove edge from nodePointedTo
 
@@ -1067,10 +1051,10 @@ public class DiffToChangeLog {
                         SortedSet<String> fromTypes = new TreeSet<>();
                         SortedSet<String> toTypes = new TreeSet<>();
                         for (Edge edge : node.inEdges) {
-                            fromTypes.add(edge.from.type.getSimpleName());
+                            fromTypes.add(edge.from().type.getSimpleName());
                         }
                         for (Edge edge : node.outEdges) {
-                            toTypes.add(edge.to.type.getSimpleName());
+                            toTypes.add(edge.to().type.getSimpleName());
                         }
                         String from = StringUtil.join(fromTypes, ",");
                         String to = StringUtil.join(toTypes, ",");
@@ -1106,31 +1090,7 @@ public class DiffToChangeLog {
             }
         }
 
-        static class Edge {
-            public final Node from;
-            public final Node to;
-
-            public Edge(Node from, Node to) {
-                this.from = from;
-                this.to = to;
-            }
-
-            @Override
-            public boolean equals(Object obj) {
-                if (obj == null) {
-                    return false;
-                }
-                if (!(obj instanceof Edge)) {
-                    return false;
-                }
-                Edge e = (Edge) obj;
-                return (e.from == from) && (e.to == to);
-            }
-
-            @Override
-            public int hashCode() {
-                return (this.from.toString() + "." + this.to.toString()).hashCode();
-            }
+        record Edge(Node from, Node to) {
         }
     }
 }
