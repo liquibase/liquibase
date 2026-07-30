@@ -134,6 +134,58 @@ class SearchPathIntegrationTest extends Specification {
         } catch (Exception e) {}
     }
 
+    def "session-level search_path set for runInTransaction=false changeset is restored (#7791)"() {
+        given:
+        def customSchema = "restore_path_" + System.currentTimeMillis()
+        def database = postgres.getDatabaseFromFactory()
+        def connection = database.getConnection()
+        connection.createStatement().execute("CREATE SCHEMA IF NOT EXISTS " + customSchema)
+        connection.commit()
+        database.setDefaultSchemaName(customSchema)
+
+        when:
+        def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()): resourceAccessor
+        ]
+        Scope.child(scopeSettings, {
+            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+            // pass the database object so the search_path can be inspected on the same
+            // session the update ran on
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database)
+            commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "changelogs/pgsql/update/default-schema-name-run-in-transaction-false.xml")
+            commandScope.execute()
+        } as Scope.ScopedRunner)
+
+        // End any transaction left open by the update so transaction-scoped SET LOCAL values are
+        // discarded and SHOW reflects the session-level value the next pool client would inherit
+        connection.rollback()
+        def searchPathRs = connection.createStatement().executeQuery("SHOW SEARCH_PATH")
+        searchPathRs.next()
+        def currentSearchPath = searchPathRs.getString(1)
+
+        then:
+        noExceptionThrown()
+
+        // The concurrent index from the runInTransaction=false changeset was created in the custom schema
+        def rs = connection.createStatement().executeQuery("""
+            SELECT COUNT(*) FROM pg_indexes
+            WHERE schemaname = '${customSchema}'
+              AND indexname = 'idx_test_id'
+        """)
+        rs.next()
+        rs.getInt(1) == 1
+
+        // The session-level SET SEARCH_PATH issued for the runInTransaction=false changeset
+        // must not linger on the connection after the changeset completes
+        !currentSearchPath.contains(customSchema)
+
+        cleanup:
+        try {
+            connection.createStatement().execute("DROP SCHEMA IF EXISTS " + customSchema + " CASCADE")
+        } catch (Exception e) {}
+    }
+
     def "SET LOCAL search_path reverts after transaction completes"() {
         given:
         def customSchema = "local_test_" + System.currentTimeMillis()

@@ -14,6 +14,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
@@ -56,6 +57,12 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     private final Set<String> systemTablesAndViews = new HashSet<>();
 
     private final Set<String> reservedWords = new HashSet<>();
+
+    /**
+     * The search_path in effect before it was changed session-level for a runInTransaction="false"
+     * changeset, or null if no restore is pending. See {@link #restoreSearchPath()}.
+     */
+    private String searchPathToRestore;
 
     public PostgresDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
@@ -420,9 +427,24 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         }
     }
 
+    public void saveSearchPath(String searchPath) {
+        if (this.searchPathToRestore == null) {
+            this.searchPathToRestore = searchPath;
+        }
+    }
+
+    public void restoreSearchPath() throws DatabaseException {
+        if (searchPathToRestore == null) {
+            return;
+        }
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this);
+        executor.execute(new RawParameterizedSqlStatement(String.format("SET SEARCH_PATH TO %s", searchPathToRestore)));
+        searchPathToRestore = null;
+    }
+
     @Override
     public void setDefaultCatalogName(String defaultCatalogName) {
-        if (StringUtil.isNotEmpty(defaultCatalogName)) {
+        if (StringUtils.isNotEmpty(defaultCatalogName)) {
             Scope.getCurrentScope().getUI().sendMessage("WARNING: Postgres does not support catalogs, so the values set in 'defaultCatalogName' and 'referenceDefaultCatalogName' will be ignored.");
         }
         super.setDefaultCatalogName(defaultCatalogName);

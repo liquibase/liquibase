@@ -37,7 +37,7 @@ public class DatabaseUtils {
                 }
                 executor.execute(
                         new RawParameterizedSqlStatement(String.format("ALTER SESSION SET CURRENT_SCHEMA=%s", database.escapeObjectName(schema, Schema.class))));
-            } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
+            } else if (database instanceof PostgresDatabase pgDataBase && defaultSchemaName != null) {
                 String searchPath = executor.queryForObject(new RawParameterizedSqlStatement("SHOW SEARCH_PATH"), String.class);
 
                 if (!searchPath.equals(defaultCatalogName) && !searchPath.equals(defaultSchemaName) && !searchPath.equals("\"" + defaultSchemaName + "\"") && !searchPath.startsWith(defaultSchemaName + ",") && !searchPath.startsWith("\"" + defaultSchemaName + "\",")) {
@@ -46,23 +46,31 @@ public class DatabaseUtils {
                     //
                     String finalSearchPath;
                     if (Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue()) || defaultSchemaName.contains("@")) {
-                        finalSearchPath = ((PostgresDatabase) database).quoteObject(defaultSchemaName, Schema.class);
+                        finalSearchPath = pgDataBase.quoteObject(defaultSchemaName, Schema.class);
                     } else {
                         finalSearchPath = defaultSchemaName;
                     }
 
+                    String quotedSearchPath = null;
                     if (StringUtils.isNotEmpty(searchPath)) {
                         //If existing search path entries are not quoted, quote them. Some databases do not show them as quoted even though they need to be (like $user or case sensitive schemas)
-                        finalSearchPath += ", " + StringUtil.join(StringUtil.splitAndTrim(searchPath, ","), ",", (StringUtil.StringUtilFormatter<String>) obj -> {
+                        quotedSearchPath = StringUtil.join(StringUtil.splitAndTrim(searchPath, ","), ",", (StringUtil.StringUtilFormatter<String>) obj -> {
                             if (obj.startsWith("\"")) {
                                 return obj;
                             }
-                            return ((PostgresDatabase) database).quoteObject(obj, Schema.class);
+                            return pgDataBase.quoteObject(obj, Schema.class);
                         });
+                        finalSearchPath += ", " + quotedSearchPath;
                     }
 
-                    String setSearchPathSql = isInTransaction(database) ? "SET LOCAL SEARCH_PATH TO %s" : "SET SEARCH_PATH TO %s";
-                    executor.execute(new RawParameterizedSqlStatement(String.format(setSearchPathSql, finalSearchPath)));
+                    if (isInTransaction(database)) {
+                        executor.execute(new RawParameterizedSqlStatement(String.format("SET LOCAL SEARCH_PATH TO %s", finalSearchPath)));
+                    } else {
+                        if (quotedSearchPath != null) {
+                            pgDataBase.saveSearchPath(quotedSearchPath);
+                        }
+                        executor.execute(new RawParameterizedSqlStatement(String.format("SET SEARCH_PATH TO %s", finalSearchPath)));
+                    }
                 }
 
             } else if (database instanceof AbstractDb2Database) {
