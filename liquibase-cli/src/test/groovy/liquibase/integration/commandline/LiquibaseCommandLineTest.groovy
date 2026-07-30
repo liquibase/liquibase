@@ -1016,6 +1016,15 @@ https://docs.liquibase.com
                 "--show-summary=OFF") == 0
     }
 
+    def "blank URL in driver properties file is treated as missing"() {
+        expect:
+        new LiquibaseCommandLine().execute(
+                "--changelog-file=changelog.xml",
+                "--driver-properties-file=src/test/resources/driver-properties-with-blank-url.properties",
+                "update",
+                "--show-summary=OFF") == 1
+    }
+
     def "help output" () {
         System.setProperty("picocli.ansi", "false") // Required for cygwin / MSYS
         when:

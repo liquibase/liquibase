@@ -95,7 +95,7 @@ class CommandRunner implements Callable<CommandResults> {
             driverProperties.load(stream);
         }
         String url = driverProperties.getProperty("url");
-        if (StringUtils.isNotEmpty(url)) {
+        if (StringUtils.isNotBlank(url)) {
             commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, url);
         }
     }
