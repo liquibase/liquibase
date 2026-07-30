@@ -131,6 +131,7 @@ class SearchPathIntegrationTest extends Specification {
         cleanup:
         try {
             connection.createStatement().execute("DROP SCHEMA IF EXISTS " + customSchema + " CASCADE")
+            connection.commit()
         } catch (Exception e) {}
     }
 
@@ -183,6 +184,7 @@ class SearchPathIntegrationTest extends Specification {
         cleanup:
         try {
             connection.createStatement().execute("DROP SCHEMA IF EXISTS " + customSchema + " CASCADE")
+            connection.commit()
         } catch (Exception e) {}
     }
 
