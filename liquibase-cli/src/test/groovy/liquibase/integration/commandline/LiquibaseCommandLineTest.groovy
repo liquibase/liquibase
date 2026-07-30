@@ -997,6 +997,25 @@ https://docs.liquibase.com
         Level.WARNING                                                        | "WARNING Test exception"
     }
 
+    def "loads URL from driver properties file"() {
+        expect:
+        new LiquibaseCommandLine().execute(
+                "--changelog-file=changelog.xml",
+                "--driver-properties-file=src/test/resources/driver-properties-with-url.properties",
+                "update",
+                "--show-summary=OFF") == 0
+    }
+
+    def "explicit URL takes precedence over driver properties file URL"() {
+        expect:
+        new LiquibaseCommandLine().execute(
+                "--changelog-file=changelog.xml",
+                "--driver-properties-file=src/test/resources/driver-properties-with-invalid-url.properties",
+                "--url=jdbc:h2:mem:liquibaseExplicitUrl",
+                "update",
+                "--show-summary=OFF") == 0
+    }
+
     def "help output" () {
         System.setProperty("picocli.ansi", "false") // Required for cygwin / MSYS
         when:

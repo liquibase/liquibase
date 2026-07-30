@@ -4,15 +4,22 @@ import liquibase.Scope;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.CommonArgumentNames;
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.exception.CommandValidationException;
 import liquibase.exception.MissingRequiredArgumentException;
 import liquibase.io.OutputFileHandler;
 import liquibase.io.OutputFileHandlerFactory;
+import liquibase.resource.PathHandlerFactory;
+import liquibase.resource.Resource;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import picocli.CommandLine;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -44,6 +51,7 @@ class CommandRunner implements Callable<CommandResults> {
         OutputFileHandler outputFileHandler = outputFileHandlerFactory.getOutputFileHandler(outputFile);
 
         try {
+            setUrlFromDriverPropertiesFile(commandScope);
             if (outputFile != null) {
                 outputFileHandler.create(outputFile, commandScope);
             }
@@ -62,6 +70,33 @@ class CommandRunner implements Callable<CommandResults> {
             }
         } finally {
             outputFileHandler.close();
+        }
+    }
+
+    private void setUrlFromDriverPropertiesFile(CommandScope commandScope) throws IOException {
+        if (commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG) != null) {
+            return;
+        }
+
+        String driverPropertiesFile = commandScope.getArgumentValue(
+                DbUrlConnectionArgumentsCommandStep.DRIVER_PROPERTIES_FILE_ARG);
+        if (driverPropertiesFile == null) {
+            return;
+        }
+
+        PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+        Resource resource = pathHandlerFactory.getResource(driverPropertiesFile);
+        if (!resource.exists()) {
+            return;
+        }
+
+        Properties driverProperties = new Properties();
+        try (InputStream stream = resource.openInputStream()) {
+            driverProperties.load(stream);
+        }
+        String url = driverProperties.getProperty("url");
+        if (StringUtils.isNotEmpty(url)) {
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, url);
         }
     }
 
