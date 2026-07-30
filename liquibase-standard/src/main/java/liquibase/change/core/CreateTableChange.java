@@ -37,6 +37,7 @@ import liquibase.structure.core.Table;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Creates a new table.
@@ -62,6 +63,8 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     private Boolean ifNotExists;
     @Setter
     private Boolean rowDependencies;
+    @Setter
+    private String partitionBy;
 
     public CreateTableChange() {
         super();
@@ -191,7 +194,11 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     protected CreateTableStatement generateCreateTableStatement() {
-        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(), getRemarks(), getTableType(), Boolean.TRUE.equals(getIfNotExists()), Boolean.TRUE.equals(getRowDependencies()));
+        // Trim-to-null on partitionBy mirrors how tablespace is normalized below in generateStatements;
+        // prevents a whitespace-only attribute from being forwarded into the SQL generator and emitting
+        // an invalid trailing "PARTITION BY ". Reported by CodeRabbit on PR #7759.
+        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(), getRemarks(), getTableType(), Boolean.TRUE.equals(getIfNotExists()), Boolean.TRUE.equals(getRowDependencies()))
+                .setPartitionBy(StringUtils.trimToNull(getPartitionBy()));
     }
 
     @Override
@@ -315,10 +322,25 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return rowDependencies;
     }
 
+    @DatabaseChangeProperty(
+            description = "PostgreSQL partition definition, e.g. 'RANGE (created_at)' or 'LIST (region)'. " +
+                    "Causes CREATE TABLE to be emitted as a partitioned parent table.",
+            supportsDatabase = "postgresql"
+    )
+    public String getPartitionBy() {
+        return partitionBy;
+    }
+
     @Override
     public String[] getExcludedFieldFilters(ChecksumVersion version) {
-        return new String[] {
-                "ifNotExists", "rowDependencies"
-        };
+        // For checksum versions before V9, partitionBy must be excluded so that pre-existing
+        // <createTable> changesets (which never had this field) keep the same checksum after
+        // upgrading to a Liquibase version that knows about partitionBy. From V9 onward,
+        // partitionBy contributes to the checksum so that changes to the partition spec are
+        // caught by validation. Mirrors the version-gating pattern in CreateViewChange.
+        if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
+            return new String[] { "ifNotExists", "rowDependencies", "partitionBy" };
+        }
+        return new String[] { "ifNotExists", "rowDependencies" };
     }
 }

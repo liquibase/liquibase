@@ -1,7 +1,6 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.CockroachDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.sql.Sql;
@@ -110,7 +109,7 @@ public class AlterSequenceGeneratorTest extends AbstractSqlGeneratorTest<AlterSe
             Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
             if (database instanceof OracleDatabase) {
                 assertEquals("ALTER SEQUENCE CATALOG_NAME.SEQUENCE_NAME NOCYCLE", generatedSql[0].toSql());
-            } else if (database instanceof PostgresDatabase || database instanceof CockroachDatabase) {
+            } else if (database instanceof PostgresDatabase) {
                 assertEquals("ALTER SEQUENCE SCHEMA_NAME.SEQUENCE_NAME NO CYCLE", generatedSql[0].toSql());
             }
         }

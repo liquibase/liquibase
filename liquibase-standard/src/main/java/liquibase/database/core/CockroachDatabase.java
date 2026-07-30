@@ -59,22 +59,33 @@ public class CockroachDatabase extends PostgresDatabase {
         return this.databaseMinorVersion;
     }
 
+    /**
+     * Checks if the given connection points to a CockroachDB database.
+     * <p>
+     * Returns false early if the URL is null (which can happen with some JDBC drivers
+     * like IBM Informix), since a null URL cannot match any database type.
+     *
+     * @param conn the database connection to check
+     * @return true if this is a CockroachDB connection, false otherwise
+     * @throws DatabaseException if there is an error querying the database
+     */
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         final String url = conn.getURL();
-        if (url.startsWith("jdbc:postgres") || url.startsWith("postgres")) {
-            if (conn instanceof JdbcConnection) {
-                try (Statement stmt = ((JdbcConnection) conn).createStatement()) {
-                    if (stmt != null) {
-                        try (ResultSet rs = stmt.executeQuery("select version()")) {
-                            if (rs.next()) {
-                                return ((String) JdbcUtil.getResultSetValue(rs, 1)).startsWith("CockroachDB");
-                            }
+        if (url == null || (!url.startsWith("jdbc:postgres") && !url.startsWith("postgres"))) {
+            return false;
+        }
+        if (conn instanceof JdbcConnection) {
+            try (Statement stmt = ((JdbcConnection) conn).createStatement()) {
+                if (stmt != null) {
+                    try (ResultSet rs = stmt.executeQuery("select version()")) {
+                        if (rs.next()) {
+                            return ((String) JdbcUtil.getResultSetValue(rs, 1)).startsWith("CockroachDB");
                         }
                     }
-                } catch (SQLException throwables) {
-                    return false;
                 }
+            } catch (SQLException throwables) {
+                return false;
             }
         }
 
@@ -137,5 +148,25 @@ public class CockroachDatabase extends PostgresDatabase {
     @Override
     public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
         return type.isAssignableFrom(Table.class);
+    }
+
+    /**
+     * The standard composite-type snapshot generator reads composite types via {@code pg_type}/
+     * {@code typrelid}, which CockroachDB does not populate for user-defined composite types, so it
+     * must not be treated as real PostgreSQL for composite-type snapshotting. Opts down from
+     * {@link PostgresDatabase}.
+     */
+    @Override
+    public boolean supportsCompositeTypeSnapshot() {
+        return false;
+    }
+
+    /**
+     * CockroachDB does not expose the stored-logic catalog the standard generators rely on.
+     * Opts down from {@link PostgresDatabase}.
+     */
+    @Override
+    public boolean supportsStoredLogicSnapshot() {
+        return false;
     }
 }

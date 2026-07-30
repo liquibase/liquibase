@@ -71,7 +71,7 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
                     } else {
                         sql += " AND ROWNUM="+statement.getLimit();
                     }
-                } else if ((database instanceof MySQLDatabase) || (database instanceof PostgresDatabase)) {
+                } else if ((database instanceof MySQLDatabase) || (database instanceof AbstractPostgresDatabase)) {
                     sql += " LIMIT "+statement.getLimit();
                 } else if (database instanceof AbstractDb2Database) {
                     sql += " FETCH FIRST "+statement.getLimit()+" ROWS ONLY";

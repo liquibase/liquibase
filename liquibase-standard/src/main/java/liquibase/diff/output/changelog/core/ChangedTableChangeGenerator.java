@@ -55,10 +55,19 @@ public class ChangedTableChangeGenerator extends AbstractChangeGenerator impleme
         }
 
         Difference changedTablespace = differences.getDifference("tablespace");
-        
+
         if (changedTablespace != null) {
             // TODO: Implement moveTableToDifferentTablespace change type!
             Scope.getCurrentScope().getLog(getClass()).warning("A change of the tablespace was detected, however, Liquibase does not currently generate statements to move a table between tablespaces.");
+        }
+
+        Difference changedPartitionBy = differences.getDifference("partitionBy");
+
+        if (changedPartitionBy != null) {
+            // PostgreSQL declarative partitioning cannot be added/removed/modified via ALTER TABLE;
+            // the parent table has to be dropped and recreated. Warn the operator rather than
+            // silently producing a changelog that would no-op the partition-key change at apply time.
+            Scope.getCurrentScope().getLog(getClass()).warning("A change to the PostgreSQL partitionBy specification was detected, however, Liquibase does not currently generate statements to alter declarative partitioning; the parent table would need to be dropped and recreated to change its partition key.");
         }
 
         return null;

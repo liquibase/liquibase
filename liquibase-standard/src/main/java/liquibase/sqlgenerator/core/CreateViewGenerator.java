@@ -152,7 +152,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
             dropIfCannotReplace = GlobalConfiguration.ALWAYS_DROP_INSTEAD_OF_REPLACE.getCurrentValue();
         } 
         return database instanceof HsqlDatabase ||
-              (database instanceof PostgresDatabase && dropIfCannotReplace);
+              (database instanceof AbstractPostgresDatabase && dropIfCannotReplace);
     }
 
     //

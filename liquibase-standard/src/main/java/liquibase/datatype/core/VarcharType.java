@@ -53,7 +53,7 @@ public class VarcharType extends CharType {
             DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("varchar"), parameters);
             type.addAdditionalInformation(getAdditionalInformation());
             return type;
-        } else if (database instanceof PostgresDatabase) {
+        } else if (database instanceof AbstractPostgresDatabase) {
             final Object[] parameters = getParameters();
             if ((parameters != null) && (parameters.length == 1)) {
                 // PostgreSQL only supports (n) syntax but not (n CHAR) syntax, so we need to remove CHAR.

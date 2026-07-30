@@ -11,6 +11,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
 
     private String tablespace;
     private String remarks;
+    private String partitionBy;
     private final List<String> columns = new ArrayList<>();
     private final Set<AutoIncrementConstraint> autoIncrementConstraints = new HashSet<>();
     private final Map<String, LiquibaseDataType> columnTypes = new HashMap<>();
@@ -94,6 +95,15 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
 
     public CreateTableStatement setTablespace(String tablespace) {
         this.tablespace = tablespace;
+        return this;
+    }
+
+    public String getPartitionBy() {
+        return partitionBy;
+    }
+
+    public CreateTableStatement setPartitionBy(String partitionBy) {
+        this.partitionBy = partitionBy;
         return this;
     }
 

@@ -1031,6 +1031,7 @@
             <xsd:attribute name="remarks" type="xsd:string"/>
             <xsd:attribute name="ifNotExists" type="xsd:boolean"/>
             <xsd:attribute name="rowDependencies" type="xsd:boolean" default="false"/>
+            <xsd:attribute name="partitionBy" type="xsd:string"/>
             <xsd:anyAttribute namespace="##other" processContents="lax"/>
         </xsd:complexType>
     </xsd:element>

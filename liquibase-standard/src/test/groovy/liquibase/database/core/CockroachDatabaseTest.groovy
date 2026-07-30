@@ -1,5 +1,6 @@
 package liquibase.database.core
 
+import liquibase.database.DatabaseConnection
 import liquibase.structure.core.Column
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -40,6 +41,19 @@ class CockroachDatabaseTest extends Specification {
         QUOTE_ALL_OBJECTS         || 'col with space' | Column     || 'col with space' | '"col with space"'
     }
 
+    def "postgres-family capabilities"() {
+        given:
+        def database = new CockroachDatabase()
+
+        expect:
+        verifyAll {
+            database.supportsEnumTypeSnapshot()              // inherited from PostgresDatabase
+            !database.supportsCompositeTypeSnapshot()        // not snapshot-able on CockroachDB
+            database.supportsCheckConstraintSnapshot()       // inherited from PostgresDatabase
+            !database.supportsStoredLogicSnapshot()          // no stored-logic catalog
+        }
+    }
+
     def useSerialDatatypes() {
         when:
         def db = new CockroachDatabase()
@@ -59,5 +73,29 @@ class CockroachDatabaseTest extends Specification {
         21           | 2            | false
         21           | 3            | false
         22           | 0            | false
+    }
+
+    def "isCorrectDatabaseImplementation returns false when connection URL is null"() {
+        given:
+        def conn = Mock(DatabaseConnection)
+        conn.getURL() >> null
+
+        when:
+        def result = new CockroachDatabase().isCorrectDatabaseImplementation(conn)
+
+        then:
+        result == false
+    }
+
+    def "isCorrectDatabaseImplementation returns false when connection URL does not match postgres patterns"() {
+        given:
+        def conn = Mock(DatabaseConnection)
+        conn.getURL() >> "jdbc:oracle:thin:@localhost:1521:orcl"
+
+        when:
+        def result = new CockroachDatabase().isCorrectDatabaseImplementation(conn)
+
+        then:
+        result == false
     }
 }

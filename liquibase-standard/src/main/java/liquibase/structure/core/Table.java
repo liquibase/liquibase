@@ -106,4 +106,19 @@ public class Table extends Relation {
         Boolean b = getAttribute("default_tablespace",Boolean.class);
         return BooleanUtil.isTrue(b);
     }
+
+    /**
+     * For declaratively-partitioned PostgreSQL tables, holds the partition-key definition as
+     * returned verbatim by {@code pg_get_partkeydef()} — e.g. {@code "RANGE (created_at)"},
+     * {@code "LIST (region)"}, {@code "HASH (id)"}. Null for non-partitioned tables and on
+     * databases that do not support declarative partitioning.
+     */
+    public String getPartitionBy() {
+        return getAttribute("partitionBy", String.class);
+    }
+
+    public Table setPartitionBy(String partitionBy) {
+        setAttribute("partitionBy", partitionBy);
+        return this;
+    }
 }

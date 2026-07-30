@@ -62,7 +62,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     public OracleDatabase() {
         super.unquotedObjectsAreUppercased = true;
         //noinspection HardCodedStringLiteral
-        super.setCurrentDateTimeFunction("SYSTIMESTAMP");
+        super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP");
         // Setting list of Oracle's native functions
         //noinspection HardCodedStringLiteral
         dateFunctions.add(new DatabaseFunction("SYSDATE"));

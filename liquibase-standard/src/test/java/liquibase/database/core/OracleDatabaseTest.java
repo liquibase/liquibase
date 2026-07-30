@@ -97,7 +97,7 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
     @Override
     @Test
     public void getCurrentDateTimeFunction() {
-        assertEquals("SYSTIMESTAMP", getDatabase().getCurrentDateTimeFunction(), "Oracle Database's 'give me the current timestamp' function is correctly reported.");
+        assertEquals("CURRENT_TIMESTAMP", getDatabase().getCurrentDateTimeFunction(), "Oracle Database's 'give me the current timestamp' function is correctly reported.");
     }
 
     @Test

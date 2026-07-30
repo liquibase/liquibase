@@ -138,6 +138,14 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
                 change.setTableType("GLOBAL TEMPORARY");
         }
 
+        if (referenceDatabase instanceof PostgresDatabase && missingTable.getPartitionBy() != null) {
+            // Postgres declarative partitioning: surface the PARTITION BY (<strategy> (<keys>))
+            // clause captured by TableSnapshotGenerator / JdbcDatabaseSnapshot.enrichPostgresqlTablesResult
+            // so it makes it into the generated changelog. Without this, diff-changelog silently
+            // produces a plain CREATE TABLE for partitioned-table parents (#6885).
+            change.setPartitionBy(missingTable.getPartitionBy());
+        }
+
         for (Column column : missingTable.getColumns()) {
             ColumnConfig columnConfig = new ColumnConfig();
             columnConfig.setName(column.getName());

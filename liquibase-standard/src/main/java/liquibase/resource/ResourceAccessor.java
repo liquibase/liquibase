@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 /**
@@ -302,8 +303,19 @@ public interface ResourceAccessor extends AutoCloseable {
         private final ResourceAccessor resourceAccessor;
 
         public NotFoundResource(String path, ResourceAccessor resourceAccessor) {
-            super(path, URI.create("resourceaccessor:"+path.replace(" ", "%20").replace('\\', '/')));
+            super(path, createSafeUri(path));
             this.resourceAccessor = resourceAccessor;
+        }
+
+        private static URI createSafeUri(String path) {
+            try {
+                // The 3-arg URI constructor percent-encodes any illegal characters in the
+                // scheme-specific part, so it does not throw for the inputs seen here. The
+                // catch below is purely defensive and is not expected to be reached.
+                return new URI("resourceaccessor", path.replace('\\', '/'), null);
+            } catch (URISyntaxException e) {
+                return URI.create("resourceaccessor:unknown");
+            }
         }
 
         @Override

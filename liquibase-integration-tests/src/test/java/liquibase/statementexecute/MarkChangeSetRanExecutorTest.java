@@ -42,7 +42,7 @@ public class MarkChangeSetRanExecutorTest extends AbstractExecutorTest {
                 MSSQLDatabase.class);
         assertCorrect(String.format("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
                         "md5sum, description, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
-                        "('a', 'b', 'c', systimestamp, 1, '9:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', " +
+                        "('a', 'b', 'c', current_timestamp, 1, '9:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', " +
                         "'executed', 'e', null, '" + version + "', '%s')", deploymentId),
                 OracleDatabase.class);
         assertCorrect(String.format("insert into [databasechangelog] ([id], [author], [filename], [dateexecuted], " +
@@ -133,7 +133,7 @@ public class MarkChangeSetRanExecutorTest extends AbstractExecutorTest {
                         " 'a' and" +
                         " [author] = 'b' and [filename] = 'c'", deploymentId),
                 MSSQLDatabase.class);
-        assertCorrect(String.format("update databasechangelog set comments = '', contexts = 'e', dateexecuted = systimestamp, deployment_id = '%s', [description] = 'empty', exectype = " +
+        assertCorrect(String.format("update databasechangelog set comments = '', contexts = 'e', dateexecuted = current_timestamp, deployment_id = '%s', [description] = 'empty', exectype = " +
                         "'reran', labels = null, liquibase = 'dev', md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where id = 'a' and" +
                         " author " +
                         "= 'b' and filename = 'c'", deploymentId),
