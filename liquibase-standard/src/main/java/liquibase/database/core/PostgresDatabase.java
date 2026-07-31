@@ -50,10 +50,6 @@ public class PostgresDatabase extends AbstractPostgresDatabase {
     private static final int PGSQL_DEFAULT_TCP_PORT_NUMBER = 5432;
     private static final Logger LOG = Scope.getCurrentScope().getLog(PostgresDatabase.class);
 
-    private final Set<String> systemTablesAndViews = new HashSet<>();
-
-    private final Set<String> reservedWords = new HashSet<>();
-
     /**
      * The search_path in effect before it was changed session-level for a runInTransaction="false"
      * changeset, or null if no restore is pending. See {@link #restoreSearchPath()}.
@@ -292,14 +288,6 @@ public class PostgresDatabase extends AbstractPostgresDatabase {
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this);
         executor.execute(new RawParameterizedSqlStatement(String.format("SET SEARCH_PATH TO %s", searchPathToRestore)));
         searchPathToRestore = null;
-    }
-
-    @Override
-    public void setDefaultCatalogName(String defaultCatalogName) {
-        if (StringUtils.isNotEmpty(defaultCatalogName)) {
-            Scope.getCurrentScope().getUI().sendMessage("WARNING: Postgres does not support catalogs, so the values set in 'defaultCatalogName' and 'referenceDefaultCatalogName' will be ignored.");
-        }
-        super.setDefaultCatalogName(defaultCatalogName);
     }
 
     @Override
