@@ -81,7 +81,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     } else {
                         ascOrDesc = row.getString("ASC_OR_DESC");
                     }
-                    if (database instanceof PostgresDatabase) {
+                    if (database instanceof AbstractPostgresDatabase) {
                         String indexType = row.getString("INDEX_TYPE");
                         index.setUsing(indexType);
                     }
@@ -293,7 +293,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
                         // Is this column a simple column (definition == null)
                         // or is it a computed expression (definition != null)
-                        if (definition == null || database instanceof PostgresDatabase ||  database instanceof MSSQLDatabase) {
+                        if (definition == null || database instanceof AbstractPostgresDatabase ||  database instanceof MSSQLDatabase) {
                             String ascOrDesc;
                             if (database instanceof Db2zDatabase) {
                                 ascOrDesc = row.getString("ORDER");

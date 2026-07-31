@@ -64,6 +64,10 @@ public class TimestampType extends DateTimeType {
             // All timestamp types (with or without timezone) map to TIMESTAMP
             String lowerDef = originalDefinition.toLowerCase();
 
+            if (isNativeMySqlTimestampDefinitionWithColumnAttributes(lowerDef)) {
+                return new DatabaseDataType(getRawDefinition());
+            }
+
             if (lowerDef.startsWith("java.sql.types.timestamp_with_timezone")
                     || lowerDef.startsWith("java.sql.types.timestamp")
                     || lowerDef.startsWith("java.sql.timestamp")
@@ -152,13 +156,13 @@ public class TimestampType extends DateTimeType {
         }
 
         if ((originalDefinition.toUpperCase().startsWith("JAVA.SQL.TYPES.TIMESTAMP_WITH_TIMEZONE")
-            && (database instanceof PostgresDatabase
+            && (database instanceof AbstractPostgresDatabase
             || database instanceof OracleDatabase
             || database instanceof H2Database
             || database instanceof HsqlDatabase
             || database instanceof SybaseASADatabase)) || (originalDefinition.toLowerCase().startsWith("timestamptz"))) {
 
-            if (database instanceof PostgresDatabase
+            if (database instanceof AbstractPostgresDatabase
                     || database instanceof H2Database
                     || database instanceof SybaseASADatabase
                     || database instanceof OracleDatabase) {
@@ -172,7 +176,7 @@ public class TimestampType extends DateTimeType {
 
 
         if (getAdditionalInformation() != null
-                && (database instanceof PostgresDatabase
+                && (database instanceof AbstractPostgresDatabase
                 || database instanceof OracleDatabase
                 || database instanceof H2Database
                 || database instanceof HsqlDatabase
@@ -182,7 +186,7 @@ public class TimestampType extends DateTimeType {
             if (additionalInformation != null) {
                 String additionInformation = additionalInformation.toUpperCase(Locale.US);
                 // Normalize "TIMEZONE" to "TIME ZONE" for databases that require it
-                if ((database instanceof PostgresDatabase || database instanceof H2Database || database instanceof SybaseASADatabase || database instanceof OracleDatabase)
+                if ((database instanceof AbstractPostgresDatabase || database instanceof H2Database || database instanceof SybaseASADatabase || database instanceof OracleDatabase)
                         && additionInformation.contains("TIMEZONE")) {
                     additionalInformation = additionInformation.replace("TIMEZONE", "TIME ZONE");
                 }
@@ -213,12 +217,26 @@ public class TimestampType extends DateTimeType {
         // Firebird doesn't support TIMESTAMP(precision) syntax, so let it fall through to super
         if (getParameters().length > 0
                 && !(database instanceof SybaseASADatabase)
-                && !(database instanceof PostgresDatabase)
+                && !(database instanceof AbstractPostgresDatabase)
                 && !(database instanceof FirebirdDatabase)) {
             return type;
         }
 
         return super.toDatabaseDataType(database);
+    }
+
+    /**
+     * Returns true for lowercased MySQL-like TIMESTAMP definitions that include
+     * column attributes to preserve, while excluding plain TIMESTAMP precision
+     * forms and WITH/WITHOUT TIME ZONE aliases that should keep normal handling.
+     */
+    private boolean isNativeMySqlTimestampDefinitionWithColumnAttributes(String lowerDefinition) {
+        if (!lowerDefinition.matches("^timestamp(\\s|\\(|$).*")
+                || lowerDefinition.matches("^timestamp\\s*(\\([^)]*\\))?\\s*$")) {
+            return false;
+        }
+
+        return !lowerDefinition.matches("^timestamp\\s*(\\([^)]*\\))?\\s+(with|without)\\s+time\\s*zone$");
     }
 
     @Override

@@ -215,7 +215,7 @@ public class DiffToChangeLog {
     private Database determineDatabase(DatabaseSnapshot snapshot) {
         Database database = snapshot.getDatabase();
         DatabaseConnection connection = database.getConnection();
-        if (! (connection instanceof OfflineConnection) && database instanceof PostgresDatabase) {
+        if (! (connection instanceof OfflineConnection) && database instanceof AbstractPostgresDatabase) {
             return database;
         }
         return null;
@@ -458,7 +458,7 @@ public class DiffToChangeLog {
                         //
                         // For Postgres, make tables appear before stored logic
                         //
-                        if (database instanceof PostgresDatabase) {
+                        if (database instanceof AbstractPostgresDatabase) {
                             Integer x = determineOrderingForTablesAndStoredLogic(o1, o2);
                             if (x != null) {
                                 return x;
@@ -525,7 +525,7 @@ public class DiffToChangeLog {
      */
     private static String convertStoredLogicObjectName(String schemaName, String objectName, Database database) {
         String name = schemaName + "." + objectName;
-        if (! (database instanceof PostgresDatabase) || ! (objectName.contains("(") && objectName.contains(")"))) {
+        if (! (database instanceof AbstractPostgresDatabase) || ! (objectName.contains("(") && objectName.contains(")"))) {
             return name;
         }
         Pattern p = Pattern.compile(".*?[(]+(.*)?[)]+[\\s]*?$");
@@ -584,7 +584,7 @@ public class DiffToChangeLog {
             return false;
         }
         return (database instanceof AbstractDb2Database) || (database instanceof MSSQLDatabase) || (database instanceof
-                OracleDatabase) || database instanceof PostgresDatabase;
+                OracleDatabase) || database instanceof AbstractPostgresDatabase;
     }
 
     /**
@@ -701,7 +701,7 @@ public class DiffToChangeLog {
                     }
                 }
             }
-        } else if (database instanceof PostgresDatabase) {
+        } else if (database instanceof AbstractPostgresDatabase) {
             final String sql = queryForDependenciesPostgreSql(schemas);
             final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
             final List<Map<String, ?>> queryForListResult = executor.queryForList(new RawParameterizedSqlStatement(sql));

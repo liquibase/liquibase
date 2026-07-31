@@ -22,7 +22,7 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
 
     @Override
     public boolean supports(SetColumnRemarksStatement statement, Database database) {
-        return (database instanceof OracleDatabase) || (database instanceof PostgresDatabase) || (database instanceof
+        return (database instanceof OracleDatabase) || (database instanceof AbstractPostgresDatabase) || (database instanceof
                 AbstractDb2Database) || (database instanceof MSSQLDatabase) || (database instanceof H2Database) || (database
                 instanceof SybaseASADatabase) || (database instanceof MySQLDatabase);
     }
