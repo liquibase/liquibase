@@ -44,7 +44,7 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
                                         "ON C." + orderColumnNameEscaped + " = D." + orderColumnNameEscaped + " " +
                                         "SET C." + tagColumnNameEscaped + " = " + tagEscaped)
                 };
-            } else if (database instanceof PostgresDatabase) {
+            } else if (database instanceof AbstractPostgresDatabase) {
                 return new Sql[]{
                         new UnparsedSql(
                                 "UPDATE " + tableNameEscaped + " t SET TAG=" + tagEscaped +

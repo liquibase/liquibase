@@ -87,7 +87,7 @@ public class BlobType extends LiquibaseDataType {
             }
         }
 
-        if (database instanceof PostgresDatabase) {
+        if (database instanceof AbstractPostgresDatabase) {
             if (blob) {
                 // There are two ways of handling byte arrays ("BLOBs") in pgsql. For consistency with Hibernate ORM
                 // (see upstream bug https://liquibase.jira.com/browse/CORE-1863) we choose the oid variant.

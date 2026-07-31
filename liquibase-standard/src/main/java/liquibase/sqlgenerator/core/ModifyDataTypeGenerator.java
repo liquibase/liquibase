@@ -62,7 +62,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
 
         alterTable += newDataType;
 
-        if (database instanceof PostgresDatabase) {
+        if (database instanceof AbstractPostgresDatabase) {
             alterTable += " USING ("+columnName+"::"+newDataType+")";
         }
 

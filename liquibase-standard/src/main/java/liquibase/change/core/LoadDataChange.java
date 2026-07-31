@@ -9,7 +9,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.AbstractPostgresDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.*;
@@ -497,7 +497,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
      * should we use prepared statements as a default?
      */
     private boolean preferPreparedStatements(Database database) {
-        if (database instanceof PostgresDatabase) {
+        if (database instanceof AbstractPostgresDatabase) {
             return false; //postgresql seems surprisingly slow with prepared statements
         }
         return supportsBatchUpdates(database);
@@ -874,7 +874,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         if (rows.stream().anyMatch(LoadDataRowConfig::needsPreparedStatement)) {
             // If we have only prepared statements and the database supports batching, let's roll
             if (supportsBatchUpdates(database) && !preparedStatements.isEmpty()) {
-                if (database instanceof PostgresDatabase || database instanceof MySQLDatabase) {
+                if (database instanceof AbstractPostgresDatabase || database instanceof MySQLDatabase) {
                     // we don't do batch updates for Postgres but we still send as a prepared statement, see LB-744
                     // mysql supports batch updates, but the performance vs. the big insert is worse
                     return preparedStatements.toArray(SqlStatement.EMPTY_SQL_STATEMENT);
@@ -904,7 +904,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             }
 
             if ((database instanceof MSSQLDatabase) || (database instanceof MySQLDatabase) || (database
-                    instanceof PostgresDatabase)) {
+                    instanceof AbstractPostgresDatabase)) {
                 List<InsertStatement> innerStatements = statementSet.getStatements();
                 if ((innerStatements != null) && (!innerStatements.isEmpty()) && (innerStatements.get(0)
                         instanceof InsertOrUpdateStatement)) {
