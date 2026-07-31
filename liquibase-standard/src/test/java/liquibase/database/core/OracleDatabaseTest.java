@@ -15,6 +15,8 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.UpdateStatement;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.Table;
 import liquibase.test.JUnitResourceAccessor;
 import org.junit.jupiter.api.Test;
 
@@ -184,6 +186,15 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
         }
         String primaryKeyName = spyDatabase.generatePrimaryKeyName(tableName);
         assertEquals(expectedPrimaryKeyName, primaryKeyName, assertMessage);
+    }
+
+    @Test
+    public void correctObjectNamePreservesCaseForIndexNamesThatMustBeQuoted() {
+        // #3876: createIndex quotes names like index_-id, so correctObjectName must not uppercase them
+        final Database database = getDatabase();
+        assertEquals("index_-id", database.correctObjectName("index_-id", Index.class));
+        assertEquals("MY_INDEX", database.correctObjectName("my_index", Index.class));
+        assertEquals("MY-TABLE", database.correctObjectName("my-table", Table.class));
     }
 }
 
