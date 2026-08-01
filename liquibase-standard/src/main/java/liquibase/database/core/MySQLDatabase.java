@@ -723,7 +723,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 reservedWords.add("SETS");
             }
 
-            // words that sopped being reserved in 9.7
+            // words that stopped being reserved in 9.7
             if (major >= 10 || (major == 9 && minor >= 7)) {
                 reservedWords.remove("MANUAL");
                 reservedWords.remove("PARALLEL");
