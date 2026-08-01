@@ -12,6 +12,7 @@ import liquibase.precondition.core.SqlPrecondition;
 import liquibase.precondition.core.TableExistsPrecondition;
 import liquibase.precondition.core.ViewExistsPrecondition;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -133,7 +134,7 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
                     String token = body.substring(tokenStart, i);
                     int separator = token.indexOf(':');
                     if ((separator > 0) && attributeName.equalsIgnoreCase(token.substring(0, separator))) {
-                        String value = StringUtil.trimToNull(token.substring(separator + 1));
+                        String value = StringUtils.trimToNull(token.substring(separator + 1));
                         if (value != null) {
                             logMatch(attributeName, value, getClass());
                         }
