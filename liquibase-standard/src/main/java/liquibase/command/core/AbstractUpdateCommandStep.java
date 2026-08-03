@@ -23,6 +23,8 @@ import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.logging.mdc.customobjects.ChangesetsUpdated;
 import liquibase.report.UpdateReportParameters;
+import liquibase.ui.ColoredUIService;
+import liquibase.ui.UIService;
 import liquibase.util.ShowSummaryUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.UpdateSummaryDetails;
@@ -334,6 +336,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
      * @param messageWithoutRowCount message to display when rowsAffected == -1
      */
     protected void postUpdateLogForActualUpdate(int rowsAffected, List<ChangeSet> exceptionChangeSets, String messageWithRowCount, String messageWithoutRowCount) {
+        UIService uiService = Scope.getCurrentScope().getUI();
         if (exceptionChangeSets != null && !exceptionChangeSets.isEmpty()) {
             Scope.getCurrentScope().getUI().sendMessage("Errors encountered while deploying the following changesets: ");
             for (ChangeSet changeSet : exceptionChangeSets) {
@@ -342,7 +345,11 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             Scope.getCurrentScope().getUI().sendMessage("For more information use the --log-level flag.\n");
         }
         if (rowsAffected > -1) {
-            Scope.getCurrentScope().getUI().sendMessage(String.format(messageWithRowCount, rowsAffected));
+            if (uiService instanceof ColoredUIService) {
+                ((ColoredUIService) uiService).sendColoredMessage(String.format(messageWithRowCount, rowsAffected), "green");
+            } else {
+                Scope.getCurrentScope().getUI().sendMessage(String.format(messageWithRowCount, rowsAffected));
+            }
         } else {
             Scope.getCurrentScope().getUI().sendMessage(messageWithoutRowCount);
         }

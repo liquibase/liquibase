@@ -876,6 +876,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 if (execType == null) {
                     execType = ExecType.EXECUTED;
                 }
+                Thread.sleep(4000);
 
                 setStopTime();
                 getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, stopInstant.toString());
