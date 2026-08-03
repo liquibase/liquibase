@@ -8,8 +8,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.Logger;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
