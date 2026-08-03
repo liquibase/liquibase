@@ -1,5 +1,6 @@
 package liquibase.snapshot.jvm
 
+import liquibase.database.core.MariaDBDatabase
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MySQLDatabase
 import liquibase.database.core.PostgresDatabase
@@ -96,13 +97,14 @@ class ColumnSnapshotGeneratorTest extends Specification {
         columnSnapshotGenerator.readDefaultValue(new CachedRow(["COLUMN_DEF": columnValue]), new Column("col").setType(new DataType(datatype)), db) == expected
 
         where:
-        columnValue          | datatype  | db                     | expected
-        null                 | "varchar" | new MSSQLDatabase()    | null
-        "(NULL)"             | "varchar" | new MSSQLDatabase()    | new DatabaseFunction("null")
-        "3"                  | "int"     | new PostgresDatabase() | 3
-        3                    | "int"     | new PostgresDatabase() | 3
-        "(3)::real"          | "float"   | new PostgresDatabase() | 3
-        "3::real"            | "float"   | new PostgresDatabase() | 3
-        "'a value'::varchar" | "varchar" | new PostgresDatabase() | "a value"
+        columnValue          | datatype           | db                     | expected
+        null                 | "varchar"          | new MSSQLDatabase()    | null
+        "(NULL)"             | "varchar"          | new MSSQLDatabase()    | new DatabaseFunction("null")
+        "3"                  | "int"              | new PostgresDatabase() | 3
+        3                    | "int"              | new PostgresDatabase() | 3
+        "(3)::real"          | "float"            | new PostgresDatabase() | 3
+        "3::real"            | "float"            | new PostgresDatabase() | 3
+        "'a value'::varchar" | "varchar"          | new PostgresDatabase() | "a value"
+        "null"               | "ENUM('yo', 'lo')" | new MariaDBDatabase()  | new DatabaseFunction("NULL")
     }
 }

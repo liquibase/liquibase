@@ -610,6 +610,11 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     private void readDefaultValueForMysqlDatabase(CachedRow columnMetadataResultSet, Column column, Database database) {
+        if (isMysqlEnumNullDefaultValue(columnMetadataResultSet, column)) {
+            columnMetadataResultSet.set(COLUMN_DEF_COL, new DatabaseFunction("NULL"));
+            return;
+        }
+        
         try {
             StringBuilder selectQuery = new StringBuilder("SELECT EXTRA FROM INFORMATION_SCHEMA.COLUMNS\n")
                     .append("WHERE TABLE_SCHEMA = ?\n")
@@ -627,6 +632,20 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         } catch (DatabaseException e) {
             Scope.getCurrentScope().getLog(getClass()).warning("Error fetching extra values", e);
         }
+    }
+
+    private boolean isMysqlEnumNullDefaultValue(CachedRow columnMetadataResultSet, Column column) {
+        Object defaultValue = columnMetadataResultSet.get(COLUMN_DEF_COL);
+
+        if (!(defaultValue instanceof String) || !StringUtil.equalsWordNull((String) defaultValue)) {
+            return false;
+        }
+
+        if (column.getType() == null || column.getType().getTypeName() == null) {
+            return false;
+        }
+
+        return StringUtils.startsWithIgnoreCase(column.getType().getTypeName(), "ENUM");
     }
 
     private void readDefaultValueForPostgresDatabase(CachedRow columnMetadataResultSet, Column columnInfo) {
