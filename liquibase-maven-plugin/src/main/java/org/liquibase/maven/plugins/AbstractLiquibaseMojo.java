@@ -19,6 +19,7 @@ import liquibase.integration.commandline.ChangeExecListenerUtils;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.DirectoryResourceAccessor;
+import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.SearchPathResourceAccessor;
 import liquibase.util.FileUtil;
@@ -41,12 +42,14 @@ import javax.xml.bind.annotation.XmlSchema;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.util.ObjectUtil.defaultIfNull;
@@ -792,19 +795,23 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         if (propertyFile != null) {
             getLog().info("Parsing Liquibase Properties File");
             getLog().info("  File: " + propertyFile);
-            try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
-                if (is == null) {
-                    throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(propertyFile));
-                }
-                parsePropertiesFile(is);
+            try (InputStreamList isl = handlePropertyFileInputStreams(propertyFile)) {
+                parsePropertiesFiles(isl);
                 getLog().info(MavenUtils.LOG_SEPARATOR);
             } catch (IOException | MojoFailureException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
-            try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
+            try (InputStreamList isl = handlePropertyFileInputStreams(this.propertyFile)) {
+                if (isl == null) {
+                    throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(this.propertyFile));
+                }
+
                 LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
-                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(is, "Property file " + propertyFile);
-                liquibaseConfiguration.registerProvider(fileProvider);
+                int precedenceOffset = 0;
+                for (Map.Entry<URI,InputStream> entry : isl.iterableWithURI()) {
+                    final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(entry.getValue(), entry.getKey().toString(), ++precedenceOffset);
+                    liquibaseConfiguration.registerProvider(fileProvider);
+                }
             } catch (IOException | MojoFailureException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
@@ -814,9 +821,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected void configureChangeLogProperties() throws MojoFailureException, MojoExecutionException {
         if (propertyFile != null) {
             getLog().info("Parsing Liquibase Properties File " + propertyFile + " for changeLog parameters");
-            try (InputStream propertiesInputStream = handlePropertyFileInputStream(propertyFile)) {
-                Properties props = loadProperties(propertiesInputStream);
-                for (Map.Entry entry : props.entrySet()) {
+            try (InputStreamList inputStreamList = handlePropertyFileInputStreams(propertyFile)) {
+                Properties props = loadProperties(inputStreamList);
+                for (Map.Entry<Object,Object> entry : props.entrySet()) {
                     String key = (String) entry.getKey();
                     if (key.startsWith("parameter.")) {
                         getLog().debug("Setting changeLog parameter " + key);
@@ -829,9 +836,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
     }
 
-    private static InputStream handlePropertyFileInputStream(String propertyFile) throws MojoFailureException {
+    private static InputStreamList handlePropertyFileInputStreams(String propertyFile) throws MojoFailureException {
         try {
-            return Scope.getCurrentScope().getResourceAccessor().getExisting(propertyFile).openInputStream();
+            InputStreamList inputStreamList = Scope.getCurrentScope().getResourceAccessor().openStreams(null, propertyFile);
+            if (inputStreamList == null || inputStreamList.isEmpty()) {
+                throw new MojoFailureException("Failed to resolve the properties file: " + FileUtil.getFileNotFoundMessage(propertyFile));
+            }
+            return inputStreamList;
         } catch (IOException e) {
             throw new MojoFailureException("Failed to resolve the properties file.", e);
         }
@@ -862,7 +873,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             classpathElements.add(project.getBuild().getOutputDirectory());
             URL urls[] = new URL[classpathElements.size()];
             for (int i = 0; i < classpathElements.size(); ++i) {
-                urls[i] = new File((String) classpathElements.get(i)).toURI().toURL();
+                urls[i] = new File(classpathElements.get(i)).toURI().toURL();
             }
             return new URLClassLoader(urls, getMavenArtifactClassLoader());
         } catch (Exception e) {
@@ -938,10 +949,20 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
     }
 
-    private static Properties loadProperties(InputStream propertiesInputStream) throws MojoExecutionException {
+    private static Properties loadProperties(InputStreamList inputStreamList) throws MojoExecutionException {
         Properties props = new Properties();
+
+        // Here, we change the direction of the InputStreamList.
+        // We do this to ensure that, in the event of multiple
+        // entries, the first one overwrites the subsequent ones.
+        LinkedList<InputStream> list = new LinkedList<>();
+        inputStreamList.iterator().forEachRemaining(list::add);
+        Iterator<InputStream> reverseIterator = list.descendingIterator();
+
         try {
-            props.load(propertiesInputStream);
+            while(reverseIterator.hasNext()) {
+                props.load(reverseIterator.next());
+            }
             return props;
         } catch (IOException e) {
             throw new MojoExecutionException("Could not load the properties Liquibase file", e);
@@ -956,26 +977,27 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @throws org.apache.maven.plugin.MojoExecutionException If there is a problem parsing
      *                                                        the file.
      */
-    protected void parsePropertiesFile(InputStream propertiesInputStream)
+    protected void parsePropertiesFiles(InputStreamList inputStreamList)
             throws MojoExecutionException {
-        if (propertiesInputStream == null) {
+        if (inputStreamList == null || inputStreamList.isEmpty()) {
             throw new MojoExecutionException("Properties file InputStream is null.");
         }
-        Properties props = loadProperties(propertiesInputStream);
+        Properties props = loadProperties(inputStreamList);
+        Map<String,String> map = props.entrySet().stream().collect(Collectors.toMap(r -> r.getKey().toString().trim(), r -> r.getValue().toString().trim()));
 
-        for (Iterator<Object> it = props.keySet().iterator(); it.hasNext(); ) {
-            String key = null;
+        for (Map.Entry<String,String> entry: map.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
             try {
-                key = (String) it.next();
                 Field field = MavenUtils.getDeclaredField(this.getClass(), key);
 
                 if (propertyFileWillOverride) {
                     getLog().debug("  properties file setting value: " + field.getName());
-                    setFieldValue(field, props.get(key).toString());
+                    setFieldValue(field, value);
                 } else {
                     if (!isCurrentFieldValueSpecified(field)) {
                         getLog().debug("  properties file setting value: " + field.getName());
-                        setFieldValue(field, props.get(key).toString());
+                        setFieldValue(field, value);
                     }
                 }
             } catch (Exception e) {

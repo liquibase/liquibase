@@ -1413,9 +1413,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     public boolean isCheckSumValid(CheckSum storedCheckSum) {
         // no need to generate the checksum if any has been set as the valid checksum
         for (CheckSum validCheckSum : validCheckSums) {
-            if ("1:any".equalsIgnoreCase(validCheckSum.toString())
-                    || "1:all".equalsIgnoreCase(validCheckSum.toString())
-                    || "1:*".equalsIgnoreCase(validCheckSum.toString())) {
+            String validCheckSumAsString = validCheckSum == null ? null : validCheckSum.toString();
+            if ("1:any".equalsIgnoreCase(validCheckSumAsString)
+                    || "1:all".equalsIgnoreCase(validCheckSumAsString)
+                    || "1:*".equalsIgnoreCase(validCheckSumAsString)) {
                 return true;
             }
         }

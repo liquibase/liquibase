@@ -2,9 +2,12 @@ package liquibase.integration.commandline;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.command.*;
+import liquibase.command.CommandArgumentDefinition;
+import liquibase.command.CommandDefinition;
+import liquibase.command.CommandFactory;
+import liquibase.command.CommandFailedException;
+import liquibase.command.CommandScope;
 import liquibase.command.core.*;
-import liquibase.command.core.ProCommandsRegistry;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueProvider;
 import liquibase.configuration.ConfiguredValue;
@@ -29,8 +32,8 @@ import liquibase.ui.ConsoleUIService;
 import liquibase.ui.LoggerUIService;
 import liquibase.ui.UIService;
 import liquibase.util.*;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemProperties;
+import org.apache.commons.lang3.StringUtils;
 import picocli.CommandLine;
 
 import java.io.*;
@@ -48,7 +51,6 @@ import java.util.zip.GZIPOutputStream;
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
 import static liquibase.util.VersionUtils.*;
-
 
 public class LiquibaseCommandLine {
 
@@ -731,6 +733,7 @@ public class LiquibaseCommandLine {
             }
         }
 
+        boolean found = false;
         final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
         String defaultsFileConfigValue = defaultsFileConfig.getValue();
         Resource resource = pathHandlerFactory.getResource(defaultsFileConfigValue);
@@ -740,37 +743,46 @@ public class LiquibaseCommandLine {
                     final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File exists at path " + defaultsFileConfigValue);
                     liquibaseConfiguration.registerProvider(fileProvider);
                     returnList.add(fileProvider);
+                    found = true;
                 }
             }
-        } else {
-            InputStream inputStreamOnClasspath = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultsFileConfigValue);
-            if (inputStreamOnClasspath == null) {
-                Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFileConfigValue);
-                if (!defaultsFileConfig.wasDefaultValueUsed()) {
-                            //can't use UI since it's not configured correctly yet
-                    Boolean strict = GlobalConfiguration.STRICT.getCurrentValue();
-                    if (Boolean.TRUE.equals(strict)) {
-                        throw new UnexpectedLiquibaseException("ERROR: The file '"+defaultsFileConfigValue+"' was not found. The global argument 'strict' is enabled, which validates the existence of files specified in liquibase files, such as changelogs, flowfiles, checks packages files, and more. To prevent this message, check your configurations, or disable the 'strict' setting.");
-                    } else {
-                        System.err.println("Could not find defaults file " + defaultsFileConfigValue);
+        }
+
+        ClassLoaderResourceAccessor classLoaderResourceAccessor = new ClassLoaderResourceAccessor();
+        List<Resource> resources = classLoaderResourceAccessor.getAll(defaultsFileConfigValue);
+        if (resources != null && !resources.isEmpty()) {
+            // The resources are processed in the order they appear in the list, which is determined by the sorting
+            // order of {@link ResourceAccessor#getAll()}, it is supposed to be deterministic.
+            // In practice, that means the earlier a file is returned, the higher its priority.
+            for (Resource res : resources) {
+                if (res.exists() && !res.equals(resource)) {
+                    try (InputStream defaultsStream = res.openInputStream()) {
+                        final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File in classpath " + res.getUri(), returnList.size());
+                        liquibaseConfiguration.registerProvider(fileProvider);
+                        returnList.add(fileProvider);
+                        found = true;
                     }
                 }
-            } else {
-                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(inputStreamOnClasspath, "File in classpath " + defaultsFileConfigValue);
-                liquibaseConfiguration.registerProvider(fileProvider);
-                returnList.add(fileProvider);
+            }
+        }
+
+        if (! found) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFileConfigValue);
+            if (!defaultsFileConfig.wasDefaultValueUsed()) {
+                //can't use UI since it's not configured correctly yet
+                Boolean strict = GlobalConfiguration.STRICT.getCurrentValue();
+                if (Boolean.TRUE.equals(strict)) {
+                    throw new UnexpectedLiquibaseException("ERROR: The file '"+defaultsFileConfigValue+"' was not found. The global argument 'strict' is enabled, which validates the existence of files specified in liquibase files, such as changelogs, flowfiles, checks packages files, and more. To prevent this message, check your configurations, or disable the 'strict' setting.");
+                } else {
+                    System.err.println("Could not find defaults file " + defaultsFileConfigValue);
+                }
             }
         }
 
         final File defaultsFile = new File(defaultsFileConfigValue);
         File localDefaultsFile = new File(defaultsFile.getAbsolutePath().replaceFirst(".properties$", ".local.properties"));
         if (localDefaultsFile.exists()) {
-            final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(localDefaultsFile) {
-                @Override
-                public int getPrecedence() {
-                    return super.getPrecedence() + 1;
-                }
-            };
+            final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(localDefaultsFile, -1);
             liquibaseConfiguration.registerProvider(fileProvider);
             returnList.add(fileProvider);
         } else {
@@ -1286,14 +1298,12 @@ public class LiquibaseCommandLine {
                     .build());
         }
 
-
         commandSpec.usageMessage()
                 .showDefaultValues(false)
                 .sortOptions(true)
                 .abbreviateSynopsis(true)
                 .footer("\n" + footer)
         ;
-
     }
 
     protected static String[] toArgNames(CommandArgumentDefinition<?> def) {
@@ -1433,5 +1443,4 @@ public class LiquibaseCommandLine {
             }
         }
     }
-
 }

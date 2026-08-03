@@ -3,8 +3,6 @@ package liquibase.changelog
 import liquibase.*
 import liquibase.database.core.MockDatabase
 import liquibase.database.core.MySQLDatabase
-import liquibase.exception.ChangeLogParseException
-import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.exception.UnknownChangeLogParameterException
 import liquibase.parser.ChangeLogParserConfiguration
 import spock.lang.Specification
