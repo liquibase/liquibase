@@ -12,6 +12,9 @@ class LiquibaseCommandLineThreadingTest extends Specification {
         // CommandDefinition's step instances, letting one thread clean up the other's run.
         def startGate = new java.util.concurrent.CountDownLatch(1)
         def results = Collections.synchronizedList([])
+        // start from a cold cache so the test also covers two threads racing the first
+        // computation of the definition, not only the steady-state execution
+        liquibase.Scope.currentScope.getSingleton(liquibase.command.CommandFactory).resetCommandDefinitions()
 
         when:
         def threads = (1..2).collect { n ->
