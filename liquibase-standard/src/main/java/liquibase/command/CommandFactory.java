@@ -53,7 +53,9 @@ public class CommandFactory implements SingletonObject {
             adjustCommandDefinitionForSteps(commandDefinition);
             COMMAND_DEFINITIONS.put(commandNameKey, commandDefinition);
         }
-        return commandDefinition;
+        // Return a copy with fresh CommandStep instances: the cached definition is a shared template,
+        // and handing out its steps would let concurrent executions interfere with each other (#6927)
+        return new CommandDefinition(commandDefinition);
     }
 
     /**
