@@ -280,7 +280,7 @@ public class CommandFactory implements SingletonObject {
      * @return a map with key of the CommandStep intended to override and value of the valid overriding command step
      * @throws RuntimeException if more than one command step overrides another command step
      */
-    private Map<Class<? extends CommandStep>, CommandStep> findAllOverrides(Collection<CommandStep> allCommandSteps) throws RuntimeException {
+    private synchronized Map<Class<? extends CommandStep>, CommandStep> findAllOverrides(Collection<CommandStep> allCommandSteps) throws RuntimeException {
         if (commandOverrides == null) { //If we have not already found any overrides
             Map<Class<? extends CommandStep>, List<CommandStep>> overrides = new HashMap<>();
             allCommandSteps.stream()

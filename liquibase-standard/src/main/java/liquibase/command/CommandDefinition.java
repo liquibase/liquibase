@@ -55,7 +55,7 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
      * {@link CommandScope} executes on its own step instances and never shares their state.
      */
     protected CommandDefinition(CommandDefinition template) {
-        this(template.name);
+        this(template.name.clone());
         for (CommandStep step : template.pipeline) {
             try {
                 this.pipeline.add(step.getClass().getConstructor().newInstance());
@@ -72,7 +72,10 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
         this.groupFooter = template.groupFooter;
         this.groupLongDescription.putAll(template.groupLongDescription);
         this.groupShortDescription.putAll(template.groupShortDescription);
-        this.aliases = new ArrayList<>(template.aliases);
+        this.aliases = new ArrayList<>(template.aliases.size());
+        for (String[] alias : template.aliases) {
+            this.aliases.add(alias.clone());
+        }
     }
 
     /**

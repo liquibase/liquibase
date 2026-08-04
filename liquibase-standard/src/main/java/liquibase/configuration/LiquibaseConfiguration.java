@@ -40,6 +40,9 @@ public class LiquibaseConfiguration implements SingletonObject {
      * children. Integrations that run executions side by side (CLI, maven) put their per-execution providers
      * here instead of {@link #registerProvider(ConfigurationValueProvider)}, so one execution's arguments never
      * leak into or vanish from another running in parallel.
+     * <p>
+     * A nested scope that sets this key shadows the outer list rather than combining with it; integrations set
+     * it once per execution.
      */
     public static final String SCOPED_VALUE_PROVIDERS_KEY = "liquibase.scopedValueProviders";
 

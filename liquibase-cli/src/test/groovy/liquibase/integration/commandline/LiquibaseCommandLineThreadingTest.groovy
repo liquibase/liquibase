@@ -10,7 +10,7 @@ class LiquibaseCommandLineThreadingTest extends Specification {
         given:
         // Reproduces #6927: commands running at the same time used to share the cached
         // CommandDefinition's step instances, letting one thread clean up the other's run.
-        def startGate = new java.util.concurrent.CountDownLatch(1)
+        def startGate = new java.util.concurrent.CyclicBarrier(2)
         def results = Collections.synchronizedList([])
         // start from a cold cache so the test also covers two threads racing the first
         // computation of the definition, not only the steady-state execution
@@ -19,17 +19,17 @@ class LiquibaseCommandLineThreadingTest extends Specification {
         when:
         def threads = (1..2).collect { n ->
             Thread.start {
-                startGate.await()
+                startGate.await(30, java.util.concurrent.TimeUnit.SECONDS)
                 3.times {
                     results.add(new LiquibaseCommandLine().execute("update", "--show-summary=OFF",
                             "--url=jdbc:h2:mem:liquibaseConcurrent" + n, "--changeLogFile=changelog.xml"))
                 }
             }
         }
-        startGate.countDown()
-        threads*.join()
+        threads.each { it.join(java.util.concurrent.TimeUnit.MINUTES.toMillis(3)) }
 
         then:
+        threads.every { !it.alive }
         results.size() == 6
         results.every { it == 0 }
     }
