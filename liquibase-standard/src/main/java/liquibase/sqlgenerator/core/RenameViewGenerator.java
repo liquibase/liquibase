@@ -38,7 +38,7 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
             sql = "exec sp_rename '" + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldViewName()) + "', '" + statement.getNewViewName() + '\'';
         } else if (database instanceof MySQLDatabase) {
             sql = "RENAME TABLE " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldViewName()) + " TO " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getNewViewName());
-        } else if (database instanceof PostgresDatabase) {
+        } else if (database instanceof AbstractPostgresDatabase) {
             sql = "ALTER TABLE " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldViewName()) + " RENAME TO " + database.escapeObjectName(statement.getNewViewName(), View.class);
         } else if (database instanceof OracleDatabase) {
             sql = "RENAME " + database.escapeObjectName(statement.getOldViewName(), View.class) + " TO " + database.escapeObjectName(statement.getNewViewName(), View.class);

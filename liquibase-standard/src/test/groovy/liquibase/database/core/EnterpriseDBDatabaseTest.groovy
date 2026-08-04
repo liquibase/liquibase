@@ -44,6 +44,19 @@ class EnterpriseDBDatabaseTest extends Specification {
         QUOTE_ALL_OBJECTS         || 'col with space' | Column     || 'col with space' | '"col with space"'
     }
 
+    def "postgres-family capabilities"() {
+        given:
+        def database = new EnterpriseDBDatabase()
+
+        expect:
+        verifyAll {
+            database.supportsEnumTypeSnapshot()              // inherited from PostgresDatabase
+            !database.supportsCompositeTypeSnapshot()        // not snapshot-able on EnterpriseDB
+            database.supportsCheckConstraintSnapshot()       // inherited from PostgresDatabase
+            database.supportsStoredLogicSnapshot()           // inherited from PostgresDatabase
+        }
+    }
+
     @Unroll
     def "isCorrectDatabaseImplementation"() {
         when:

@@ -1847,7 +1847,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         if (tableName != null) {
                             sql += " and table_name='" + tableName + "'";
                         }
-                    } else if (database instanceof PostgresDatabase) {
+                    } else if (database instanceof AbstractPostgresDatabase) {
                         sql = "select CONSTRAINT_NAME, TABLE_NAME "
                                 + "from " + database.getSystemSchema() + ".table_constraints "
                                 + "where constraint_catalog='" + jdbcCatalogName + "' "

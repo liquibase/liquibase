@@ -3,6 +3,7 @@ package liquibase.command.core.helpers;
 import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.command.providers.ReferenceDatabase;
+import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
@@ -91,6 +92,9 @@ public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnect
             logMdc(url, username, defaultSchemaName, defaultCatalogName);
             Map<String, Object> scopeValues = new HashMap<>();
             scopeValues.put(Database.IGNORE_MISSING_REFERENCES_KEY, commandScope.getArgumentValue(DiffArgumentsCommandStep.IGNORE_MISSING_REFERENCES));
+            // Flag this connection as the reference connection so reference-scoped configuration definitions
+            // resolve from their `.reference.` sibling keys while it is opened.
+            scopeValues.put(ConfigurationDefinition.IS_REFERENCE_CONNECTION_SCOPE_KEY, Boolean.TRUE);
             AtomicReference<Database> database = new AtomicReference<>();
             try {
                 Scope.child(scopeValues, () -> {

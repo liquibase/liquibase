@@ -75,4 +75,15 @@ public class EnterpriseDBDatabase extends PostgresDatabase {
     public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
         return false;
     }
+
+    /**
+     * EnterpriseDB (Advanced Server) accepts {@code CREATE TYPE ... AS (...)}, but the standard
+     * composite-type snapshot generator does not read composite types on it, so it opts down from
+     * {@link PostgresDatabase}. This preserves today's behavior, where the generator explicitly
+     * excludes EnterpriseDB.
+     */
+    @Override
+    public boolean supportsCompositeTypeSnapshot() {
+        return false;
+    }
 }
