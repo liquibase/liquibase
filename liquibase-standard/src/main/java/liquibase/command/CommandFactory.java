@@ -45,14 +45,16 @@ public class CommandFactory implements SingletonObject {
      */
     public CommandDefinition getCommandDefinition(String... commandName) throws IllegalArgumentException{
         String commandNameKey = StringUtil.join(commandName, " ");
-        CommandDefinition commandDefinition = COMMAND_DEFINITIONS.get(commandNameKey);
-        if (commandDefinition == null) { //Check if we have already computed arguments, dependencies, pipeline and adjusted definition
-            commandDefinition = new CommandDefinition(commandName);
-            computePipelineForCommandDefinition(commandDefinition);
-            consolidateCommandArgumentsForCommand(commandDefinition);
-            adjustCommandDefinitionForSteps(commandDefinition);
-            COMMAND_DEFINITIONS.put(commandNameKey, commandDefinition);
-        }
+        // computeIfAbsent so two threads asking for the same command on first use do not build it
+        // concurrently: the plain get/put idiom let one thread consolidate arguments while the other
+        // was still registering them through the step classes' static initializers (#6927)
+        CommandDefinition commandDefinition = COMMAND_DEFINITIONS.computeIfAbsent(commandNameKey, key -> {
+            CommandDefinition template = new CommandDefinition(commandName);
+            computePipelineForCommandDefinition(template);
+            consolidateCommandArgumentsForCommand(template);
+            adjustCommandDefinitionForSteps(template);
+            return template;
+        });
         // Return a copy with fresh CommandStep instances: the cached definition is a shared template,
         // and handing out its steps would let concurrent executions interfere with each other (#6927)
         return new CommandDefinition(commandDefinition);
