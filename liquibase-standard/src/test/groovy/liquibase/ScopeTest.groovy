@@ -161,6 +161,34 @@ class ScopeTest extends Specification {
         deploymentIdScope == deploymentIdService2;
     }
 
+    def "a thread without a scope manager attaches to the existing root scope"() {
+        given:
+        // A pool thread created before Liquibase initialized (or from another lineage) gets no
+        // manager from the InheritableThreadLocal. It must adopt the already-built root instead of
+        // bootstrapping a second one with its own context classloader (#6880).
+        def mainRoot = rootOf(Scope.getCurrentScope())
+        def orphanRoot = null
+
+        when:
+        def thread = new Thread({
+            Scope.setScopeManager(null)   // simulate a thread that never inherited a manager
+            orphanRoot = rootOf(Scope.getCurrentScope())
+        })
+        thread.start()
+        thread.join(30_000)
+
+        then:
+        !thread.alive
+        orphanRoot.is(mainRoot)
+    }
+
+    private static Scope rootOf(Scope scope) {
+        while (scope.getParent() != null) {
+            scope = scope.getParent()
+        }
+        return scope
+    }
+
     def "lazy initialization of scope manager for GraalVM compatibility"() {
         when:
         // Reset scope manager to test lazy initialization

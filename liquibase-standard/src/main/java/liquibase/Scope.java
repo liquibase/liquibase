@@ -100,6 +100,14 @@ public class Scope {
     private static volatile InheritableThreadLocal<ScopeManager> scopeManager;
 
     /**
+     * The first fully-built root scope of the JVM. Threads that never inherited a scope manager (pool
+     * threads created before Liquibase initialized, or from another thread lineage) adopt this root
+     * instead of bootstrapping a second one with their own context classloader, which produced
+     * "not a subtype" ServiceLoader failures and split-brain singletons (#6880).
+     */
+    private static volatile Scope rootScope;
+
+    /**
      * Lazily initializes and returns the scopeManager ThreadLocal.
      */
     private static InheritableThreadLocal<ScopeManager> getScopeManagerThreadLocal() {
@@ -134,42 +142,58 @@ public class Scope {
     public static Scope getCurrentScope() {
         InheritableThreadLocal<ScopeManager> manager = getScopeManagerThreadLocal();
         if (manager.get() == null) {
-            manager.set(new SingletonScopeManager());
+            SingletonScopeManager newManager = new SingletonScopeManager();
+            Scope existingRoot = rootScope;
+            if (existingRoot != null) {
+                newManager.setCurrentScope(existingRoot);
+            }
+            manager.set(newManager);
         }
         if (manager.get().getCurrentScope() == null) {
-            Scope rootScope = new Scope();
-            manager.get().setCurrentScope(rootScope);
+            // Serialize root construction so the whole JVM shares a single root scope. The bootstrap
+            // below re-enters getCurrentScope() on the same thread, which is safe because the partially
+            // built root is set on the manager before the bootstrap runs.
+            synchronized (Scope.class) {
+                if (rootScope != null) {
+                    manager.get().setCurrentScope(rootScope);
+                    return manager.get().getCurrentScope();
+                }
+                Scope newRootScope = new Scope();
+                manager.get().setCurrentScope(newRootScope);
 
-            rootScope.values.put(Attr.logService.name(), new JavaLogService());
-            rootScope.values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
-            rootScope.values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
-            rootScope.values.put(Attr.latestChecksumVersion.name(), ChecksumVersion.V9);
-            rootScope.values.put(Attr.checksumVersion.name(), ChecksumVersion.latest());
+                newRootScope.values.put(Attr.logService.name(), new JavaLogService());
+                newRootScope.values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
+                newRootScope.values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
+                newRootScope.values.put(Attr.latestChecksumVersion.name(), ChecksumVersion.V9);
+                newRootScope.values.put(Attr.checksumVersion.name(), ChecksumVersion.latest());
 
-            rootScope.values.put(Attr.ui.name(), new ConsoleUIService());
+                newRootScope.values.put(Attr.ui.name(), new ConsoleUIService());
 
-            // Discover custom LogService early, before LiquibaseConfiguration.init(),
-            // so that logging during configuration setup uses the correct LogService.
-            LogService overrideLogService = rootScope.getSingleton(LogServiceFactory.class).getDefaultLogService();
-            if (overrideLogService != null) {
-                rootScope.values.put(Attr.logService.name(), overrideLogService);
-            } else {
-                rootScope.getLog(Scope.class).warning("Could not find log service via LogServiceFactory. Using JavaLogService as default.");
+                // Discover custom LogService early, before LiquibaseConfiguration.init(),
+                // so that logging during configuration setup uses the correct LogService.
+                LogService overrideLogService = newRootScope.getSingleton(LogServiceFactory.class).getDefaultLogService();
+                if (overrideLogService != null) {
+                newRootScope.values.put(Attr.logService.name(), overrideLogService);
+                } else {
+                newRootScope.getLog(Scope.class).warning("Could not find log service via LogServiceFactory. Using JavaLogService as default.");
             }
 
-            rootScope.getSingleton(LiquibaseConfiguration.class).init(rootScope);
+                newRootScope.getSingleton(LiquibaseConfiguration.class).init(newRootScope);
 
-            //check for higher-priority serviceLocator
-            ServiceLocator serviceLocator = rootScope.getServiceLocator();
-            for (ServiceLocator possibleLocator : serviceLocator.findInstances(ServiceLocator.class)) {
+                //check for higher-priority serviceLocator
+                ServiceLocator serviceLocator = newRootScope.getServiceLocator();
+                for (ServiceLocator possibleLocator : serviceLocator.findInstances(ServiceLocator.class)) {
                 if (possibleLocator.getPriority() > serviceLocator.getPriority()) {
                     serviceLocator = possibleLocator;
                 }
             }
 
-            rootScope.values.put(Attr.serviceLocator.name(), serviceLocator);
-            rootScope.values.put(Attr.osgiPlatform.name(), ContainerChecker.isOsgiPlatform());
-            rootScope.values.put(Attr.deploymentId.name(), generateDeploymentId());
+                newRootScope.values.put(Attr.serviceLocator.name(), serviceLocator);
+                newRootScope.values.put(Attr.osgiPlatform.name(), ContainerChecker.isOsgiPlatform());
+                newRootScope.values.put(Attr.deploymentId.name(), generateDeploymentId());
+
+                Scope.rootScope = newRootScope;
+            }
         }
         return manager.get().getCurrentScope();
     }
