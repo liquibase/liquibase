@@ -241,7 +241,7 @@
             CGLIB) -->
             <groupId>org.objenesis</groupId>
             <artifactId>objenesis</artifactId>
-            <version>3.5</version>
+            <version>3.6</version>
             <scope>test</scope>
         </dependency>
 
