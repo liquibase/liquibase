@@ -47,7 +47,7 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
             } else {
                 sql = "ALTER TABLE " + escapedTableName + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
             }
-        } else if (database instanceof PostgresDatabase) {
+        } else if (database instanceof AbstractPostgresDatabase) {
 			if (statement.getConstraintName() == null) {
 				String schemaName = (statement.getSchemaName() != null) ? statement.getSchemaName() : database
                     .getDefaultSchemaName();

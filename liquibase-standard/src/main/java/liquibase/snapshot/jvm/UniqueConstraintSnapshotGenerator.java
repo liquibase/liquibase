@@ -177,7 +177,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
                 sql.append("order by ordinal_position");
                 rawSql = sql.toString();
-            } else if (database instanceof PostgresDatabase) {
+            } else if (database instanceof AbstractPostgresDatabase) {
                 List<String> conditions = new ArrayList<>();
                 StringBuilder sql = new StringBuilder("select const.CONSTRAINT_NAME, COLUMN_NAME, const.constraint_schema as CONSTRAINT_CONTAINER ")
                         .append(String.format("from %s.table_constraints const ", database.getSystemSchema()))

@@ -5,7 +5,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
 import liquibase.database.core.FirebirdDatabase;
-import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.AbstractPostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.*;
 import liquibase.precondition.AbstractPrecondition;
@@ -134,7 +134,7 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
             String tableName = getTableName();
             String columnName = getColumnName();
 
-            if (database instanceof PostgresDatabase) {
+            if (database instanceof AbstractPostgresDatabase) {
                 makeSureColumnExistsInPostgres(database, changeLog, schemaName, tableName, columnName);
             } else {
                 makeSureColumnExistsInOtherDBs(database, changeLog, schemaName, tableName, columnName);

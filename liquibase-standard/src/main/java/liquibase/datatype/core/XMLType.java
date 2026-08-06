@@ -19,7 +19,7 @@ public class XMLType extends LiquibaseDataType {
         String val = value.toString();
         if ((database instanceof MSSQLDatabase) && !StringUtil.isAscii(val)) {
             return "N'" + database.escapeStringForDatabase(val) + "'";
-        } else if (database instanceof PostgresDatabase) {
+        } else if (database instanceof AbstractPostgresDatabase) {
             try {
                 if ((database.getDatabaseMajorVersion() <= 7) // 8.2 or earlier
                     || ((database.getDatabaseMajorVersion() == 8) && (database.getDatabaseMinorVersion() <= 2))) {
@@ -43,7 +43,7 @@ public class XMLType extends LiquibaseDataType {
               parameters = new Object[] { parameters[0] };
             }
             return new DatabaseDataType(database.escapeDataTypeName("xml"), parameters);
-        } else if (database instanceof PostgresDatabase) {
+        } else if (database instanceof AbstractPostgresDatabase) {
             try {
                 if ((database.getDatabaseMajorVersion() <= 7) // 8.2 or earlier
                     || ((database.getDatabaseMajorVersion() == 8) && (database.getDatabaseMinorVersion() <= 2))) {
