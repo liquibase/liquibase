@@ -140,6 +140,19 @@ public class InitProjectCommandStep extends AbstractCommandStep {
             Optional<ConfigurationValueProvider> providerOpt = lbConf.getProviders().stream().filter(vp -> vp instanceof DefaultsFileValueProvider).findFirst();
             providerOpt.ifPresent(lbConf::unregisterProvider);
 
+            // Integrations keep their defaults file provider in the scope instead of registering it, so the
+            // scoped list has to be shadowed too for init project to ignore an already existing defaults file.
+            List<?> scopedProviders = Scope.getCurrentScope().get(LiquibaseConfiguration.SCOPED_VALUE_PROVIDERS_KEY, List.class);
+            if (scopedProviders != null) {
+                List<ConfigurationValueProvider> withoutDefaultsFile = new ArrayList<>();
+                for (Object provider : scopedProviders) {
+                    if (!(provider instanceof DefaultsFileValueProvider)) {
+                        withoutDefaultsFile.add((ConfigurationValueProvider) provider);
+                    }
+                }
+                scopeValues.put(LiquibaseConfiguration.SCOPED_VALUE_PROVIDERS_KEY, withoutDefaultsFile);
+            }
+
             Scope.child(scopeValues, () -> {
                 internalRun(resultsBuilder);
             });

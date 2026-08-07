@@ -242,7 +242,7 @@ public class CommandScope {
     }
 
     public void validate() throws CommandValidationException {
-        for (ConfigurationValueProvider provider : Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getProviders()) {
+        for (ConfigurationValueProvider provider : Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getEffectiveProviders()) {
             provider.validate(this);
         }
 
