@@ -53,10 +53,16 @@ public class ChangedPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
 
         PrimaryKey pk = (PrimaryKey) changedObject;
 
-        // Use the comparison object for the drop statement to get the correct constraint name from the target database
-        PrimaryKey comparisonPk = (PrimaryKey) differences.getComparisonObject();
-        if (comparisonPk == null) {
-            comparisonPk = pk; // Fallback to reference object if comparison not available
+        // Use the comparison object for the drop statement to get the correct constraint name from the target database.
+        // When delegated from ChangedIndexChangeGenerator (the Index backing the PK changed), the differences object
+        // describes the backing Index, so its comparison object is an Index rather than a PrimaryKey; fall back to the
+        // reference PK in that case (issue #7846).
+        DatabaseObject comparisonObject = differences.getComparisonObject();
+        PrimaryKey comparisonPk;
+        if (comparisonObject instanceof PrimaryKey) {
+            comparisonPk = (PrimaryKey) comparisonObject;
+        } else {
+            comparisonPk = pk;
         }
 
         List<Change> returnList = new ArrayList<>();

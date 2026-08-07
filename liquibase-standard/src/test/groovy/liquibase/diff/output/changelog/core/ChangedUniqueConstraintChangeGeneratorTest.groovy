@@ -7,6 +7,7 @@ import liquibase.diff.ObjectDifferences
 import liquibase.diff.compare.CompareControl
 import liquibase.diff.output.DiffOutputControl
 import liquibase.structure.core.Column
+import liquibase.structure.core.Index
 import liquibase.structure.core.Table
 import liquibase.structure.core.UniqueConstraint
 import spock.lang.Specification
@@ -143,5 +144,44 @@ class ChangedUniqueConstraintChangeGeneratorTest extends Specification {
         def addChange = (AddUniqueConstraintChange) changes[1]
         addChange.getCatalogName() == "ref_catalog"
         addChange.getSchemaName() == "ref_schema"
+    }
+
+    def "fixChanged falls back to reference constraint when comparison object is an Index delegated from ChangedIndexChangeGenerator (issue #7846)"() {
+        given: "UniqueConstraint backed by an Index"
+        def table = new Table(null, "public", "test_table")
+        def col = new Column("a")
+        def uniqueConstraint = new UniqueConstraint()
+        uniqueConstraint.setName("UC_NAME")
+        uniqueConstraint.setRelation(table)
+        uniqueConstraint.setColumns([col])
+
+        and: "ObjectDifferences describing a backing Index change (comparison object is the Index, not a UniqueConstraint)"
+        def referenceIndex = new Index()
+        referenceIndex.setName("UC_IDX")
+        referenceIndex.setRelation(table)
+        referenceIndex.setColumns([col])
+        def comparisonIndex = new Index()
+        comparisonIndex.setName("UC_IDX")
+        comparisonIndex.setRelation(table)
+        comparisonIndex.setColumns([col])
+        def compareControl = new CompareControl()
+        def differences = new ObjectDifferences(compareControl, referenceIndex, comparisonIndex)
+        differences.addDifference("columns", [col], [col])
+
+        and: "Generator and databases"
+        def generator = new ChangedUniqueConstraintChangeGenerator()
+        def outputControl = new DiffOutputControl()
+        def referenceDatabase = new H2Database()
+        def comparisonDatabase = new H2Database()
+
+        when: "fixChanged with an Index comparison object (as delegated from ChangedIndexChangeGenerator)"
+        def changes = generator.fixChanged(uniqueConstraint, differences, outputControl, referenceDatabase, comparisonDatabase, null)
+
+        then: "No ClassCastException (issue #7846); produces drop + add UniqueConstraint changes using the reference constraint"
+        noExceptionThrown()
+        changes != null
+        changes.length == 2
+        changes[0] instanceof DropUniqueConstraintChange
+        changes[1] instanceof AddUniqueConstraintChange
     }
 }
