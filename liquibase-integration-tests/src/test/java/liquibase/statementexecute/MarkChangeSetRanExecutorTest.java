@@ -83,13 +83,13 @@ public class MarkChangeSetRanExecutorTest extends AbstractExecutorTest {
                         " '%s')", deploymentId),
                 SybaseASADatabase.class);
         assertCorrect(String.format("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
-                        "md5sum, `description`, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
+                        "md5sum, description, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
                         "('a', 'b', 'c', now(), 1, " +
                         "'9:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', 'e', null, '" + version + "'," +
                         " '%s')", deploymentId),
                 MySQLDatabase.class);
         assertCorrect(String.format("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
-                        "md5sum, `description`, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
+                        "md5sum, description, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
                         "('a', 'b', 'c', now(), 1, " +
                         "'9:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', 'e', null, '" + version + "'," +
                         " '%s')", deploymentId),
