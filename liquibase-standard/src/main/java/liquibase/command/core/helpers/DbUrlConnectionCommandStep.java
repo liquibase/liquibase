@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * Internal command step to be used on CommandStep pipeline to manage the database connection.
@@ -125,11 +126,32 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
             } catch (Exception e) {
                 throw new DatabaseException(e);
             }
+            applyCommandBooleanArgument(commandScope, "outputDefaultSchema", database.get()::setOutputDefaultSchema);
+            applyCommandBooleanArgument(commandScope, "outputDefaultCatalog", database.get()::setOutputDefaultCatalog);
         }
         String urlForLogging = url == null ? database.get().getConnection().getURL() : url;
         logMdc(urlForLogging, database.get());
         logLicenseUsage(urlForLogging, database.get(), true, false);
         return database.get();
+    }
+
+    /**
+     * Applies a command-specific boolean argument (e.g. "outputDefaultSchema", "outputDefaultCatalog") to the
+     * database that was just created, if the currently running command declares that argument. This connection
+     * step is shared by every command, but only some (updateSql, rollbackSql, changelogSyncSql, ...) expose
+     * these output-qualification flags, and {@link #createDatabaseObject} otherwise always leaves the database
+     * with outputDefaultSchema/outputDefaultCatalog set to true.
+     */
+    @SuppressWarnings("unchecked")
+    private static void applyCommandBooleanArgument(CommandScope commandScope, String argumentName, Consumer<Boolean> setter) {
+        CommandArgumentDefinition<?> argument = commandScope.getCommand().getArgument(argumentName);
+        if (argument == null) {
+            return;
+        }
+        Boolean value = commandScope.getArgumentValue((CommandArgumentDefinition<Boolean>) argument);
+        if (value != null) {
+            setter.accept(value);
+        }
     }
 
     private static String getDriver(CommandScope commandScope) {
