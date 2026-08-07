@@ -147,6 +147,29 @@ class LiquibaseConfigurationTest extends Specification {
         (1..2).every { n -> (0..49).every { results[n + "-" + it] == "value" + n } }
     }
 
+    def "getEffectiveProviders merges the scoped providers into the registered ones"() {
+        given:
+        def config = Scope.currentScope.getSingleton(LiquibaseConfiguration)
+        def registered = new TestValueProvider([:], 400)
+        def scoped = new TestValueProvider([:], 50)
+        config.registerProvider(registered)
+
+        when:
+        def inside = Scope.child([(LiquibaseConfiguration.SCOPED_VALUE_PROVIDERS_KEY): [scoped]], {
+            return config.getEffectiveProviders()
+        } as Scope.ScopedRunnerWithReturn)
+
+        then:
+        inside.contains(scoped)
+        inside.contains(registered)
+        inside.indexOf(scoped) < inside.indexOf(registered)   // sorted by precedence, not appended
+        !config.getEffectiveProviders().contains(scoped)
+        !config.getProviders().contains(scoped)               // getProviders stays registered-only
+
+        cleanup:
+        config.unregisterProvider(registered)
+    }
+
     class TestValueProvider extends liquibase.configuration.AbstractMapConfigurationValueProvider {
         private final Map<String, Object> values
         private final int precedence

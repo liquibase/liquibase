@@ -479,7 +479,7 @@ public class ChangeLogParameters {
      */
     public void addDefaultFileProperties() {
         final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
-        for (ConfigurationValueProvider cvp : liquibaseConfiguration.getProviders()) {
+        for (ConfigurationValueProvider cvp : liquibaseConfiguration.getEffectiveProviders()) {
             if (cvp instanceof DefaultsFileValueProvider) {
                 DefaultsFileValueProvider dfvp = (DefaultsFileValueProvider) cvp;
                 dfvp.getMap().entrySet().stream()

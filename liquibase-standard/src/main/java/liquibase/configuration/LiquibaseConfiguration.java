@@ -125,8 +125,26 @@ public class LiquibaseConfiguration implements SingletonObject {
         }
     }
 
+    /**
+     * Returns only the globally registered providers. Callers that need everything resolution would see,
+     * including the current scope's per-execution providers, want {@link #getEffectiveProviders()}.
+     */
     public SortedSet<ConfigurationValueProvider> getProviders() {
         return Collections.unmodifiableSortedSet(this.configurationValueProviders);
+    }
+
+    /**
+     * Returns the globally registered providers merged with the current scope's ones, ordered by
+     * {@link ConfigurationValueProvider#getPrecedence()} exactly as {@link #getCurrentConfiguredValue} resolves them.
+     */
+    public List<ConfigurationValueProvider> getEffectiveProviders() {
+        List<ConfigurationValueProvider> effective = new ArrayList<>(this.configurationValueProviders);
+        List<ConfigurationValueProvider> scoped = getScopedValueProviders();
+        if (scoped != null) {
+            effective.addAll(scoped);
+            effective.sort(PROVIDER_ORDER);
+        }
+        return Collections.unmodifiableList(effective);
     }
 
     @SuppressWarnings("unchecked")
@@ -163,13 +181,7 @@ public class LiquibaseConfiguration implements SingletonObject {
 
         ConfiguredValue<DataType> details = new ConfiguredValue<>(keyAndAliases[0], converter, obfuscator);
 
-        List<ConfigurationValueProvider> finalValueProviders = new ArrayList<>(configurationValueProviders);
-        List<ConfigurationValueProvider> scopedValueProviders = getScopedValueProviders();
-        if (scopedValueProviders != null) {
-            // merge and re-sort so a scoped provider ranks by its own precedence, exactly as if registered
-            finalValueProviders.addAll(scopedValueProviders);
-            finalValueProviders.sort(PROVIDER_ORDER);
-        }
+        List<ConfigurationValueProvider> finalValueProviders = new ArrayList<>(getEffectiveProviders());
         if (additionalValueProviders != null) {
             finalValueProviders.addAll(Arrays.asList(additionalValueProviders));
         }
