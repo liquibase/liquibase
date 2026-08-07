@@ -146,38 +146,48 @@ class ChangedUniqueConstraintChangeGeneratorTest extends Specification {
         addChange.getSchemaName() == "ref_schema"
     }
 
-    def "fixChanged falls back to reference constraint when comparison object is an Index delegated from ChangedIndexChangeGenerator (issue #7846)"() {
-        given: "UniqueConstraint backed by an Index"
-        def table = new Table(null, "public", "test_table")
-        def col = new Column("a")
-        def uniqueConstraint = new UniqueConstraint()
-        uniqueConstraint.setName("UC_NAME")
-        uniqueConstraint.setRelation(table)
-        uniqueConstraint.setColumns([col])
-
-        and: "ObjectDifferences describing a backing Index change (comparison object is the Index, not a UniqueConstraint)"
+    def "fixChanged does not throw ClassCastException when a backing Index of a UniqueConstraint is delegated (issue #7846)"() {
+        given: "Reference UniqueConstraint backed by an Index with column order [a, b]"
+        def referenceTable = new Table(null, "public", "test_table")
+        def refColA = new Column("a")
+        def refColB = new Column("b")
         def referenceIndex = new Index()
         referenceIndex.setName("UC_IDX")
-        referenceIndex.setRelation(table)
-        referenceIndex.setColumns([col])
+        referenceIndex.setRelation(referenceTable)
+        referenceIndex.setColumns([refColA, refColB])
+        referenceIndex.setUnique(true)
+        def referenceUc = new UniqueConstraint()
+        referenceUc.setName("UC_NAME")
+        referenceUc.setRelation(referenceTable)
+        referenceUc.setColumns([refColA, refColB])
+        referenceUc.setBackingIndex(referenceIndex)
+        referenceTable.getUniqueConstraints().add(referenceUc)
+
+        and: "Comparison Index (target database) with swapped column order [b, a]"
+        def comparisonTable = new Table(null, "public", "test_table")
+        def compColA = new Column("a")
+        def compColB = new Column("b")
         def comparisonIndex = new Index()
         comparisonIndex.setName("UC_IDX")
-        comparisonIndex.setRelation(table)
-        comparisonIndex.setColumns([col])
+        comparisonIndex.setRelation(comparisonTable)
+        comparisonIndex.setColumns([compColB, compColA])
+        comparisonIndex.setUnique(true)
+
+        and: "ObjectDifferences describing the backing Index change (comparison object is the Index, not a UniqueConstraint)"
         def compareControl = new CompareControl()
         def differences = new ObjectDifferences(compareControl, referenceIndex, comparisonIndex)
-        differences.addDifference("columns", [col], [col])
+        differences.addDifference("columns", [refColA, refColB], [compColB, compColA])
 
         and: "Generator and databases"
-        def generator = new ChangedUniqueConstraintChangeGenerator()
+        def generator = new ChangedIndexChangeGenerator()
         def outputControl = new DiffOutputControl()
         def referenceDatabase = new H2Database()
         def comparisonDatabase = new H2Database()
 
-        when: "fixChanged with an Index comparison object (as delegated from ChangedIndexChangeGenerator)"
-        def changes = generator.fixChanged(uniqueConstraint, differences, outputControl, referenceDatabase, comparisonDatabase, null)
+        when: "fixChanged on the backing Index delegates to the UniqueConstraint change generator"
+        def changes = generator.fixChanged(referenceIndex, differences, outputControl, referenceDatabase, comparisonDatabase, null)
 
-        then: "No ClassCastException (issue #7846); produces drop + add UniqueConstraint changes using the reference constraint"
+        then: "No ClassCastException (issue #7846); produces drop + add UniqueConstraint changes"
         noExceptionThrown()
         changes != null
         changes.length == 2
