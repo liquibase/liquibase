@@ -279,21 +279,32 @@ class ScopeTest extends Specification {
         mdcFactory.unregister(existingManager); mdcFactory.register(testManager)
         def added = new java.util.concurrent.CountDownLatch(1)
         def parentExited = new java.util.concurrent.CountDownLatch(1)
-        def present = new java.util.concurrent.atomic.AtomicBoolean(true)
+        def present = new java.util.concurrent.atomic.AtomicBoolean(false)
+        def childError = new java.util.concurrent.atomic.AtomicReference<Throwable>()
         def scopeId = Scope.enter(null, [:])       // parent scope; child inherits the same scopeId
 
         when:
         def child = Thread.start {
-            Scope.getCurrentScope().addMdcValue("sharedKey", "v", true)
-            added.countDown()
-            parentExited.await(30, java.util.concurrent.TimeUnit.SECONDS)
-            present.set(testManager.getValues().containsKey("sharedKey"))
+            try {
+                Scope.getCurrentScope().addMdcValue("sharedKey", "v", true)
+                added.countDown()
+                if (!parentExited.await(30, java.util.concurrent.TimeUnit.SECONDS)) {
+                    throw new IllegalStateException("timed out waiting for parent to exit its scope")
+                }
+                present.set(testManager.getValues().containsKey("sharedKey"))
+            } catch (Throwable t) {
+                childError.set(t)
+            }
         }
-        added.await(30, java.util.concurrent.TimeUnit.SECONDS)
+        def childRegistered = added.await(30, java.util.concurrent.TimeUnit.SECONDS)
         Scope.exit(scopeId)                         // parent exits the shared scope first
-        parentExited.countDown(); child.join(30000)
+        parentExited.countDown()
+        child.join(30000)
 
         then:
+        childRegistered
+        !child.isAlive()
+        childError.get() == null
         present.get()                               // main: false, PR: true
 
         cleanup:
