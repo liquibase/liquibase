@@ -1,13 +1,16 @@
 package liquibase.diff.output.changelog.core
 
+import liquibase.change.core.AddPrimaryKeyChange
 import liquibase.change.core.CreateIndexChange
 import liquibase.change.core.DropIndexChange
+import liquibase.change.core.DropPrimaryKeyChange
 import liquibase.database.core.H2Database
 import liquibase.diff.ObjectDifferences
 import liquibase.diff.compare.CompareControl
 import liquibase.diff.output.DiffOutputControl
 import liquibase.structure.core.Column
 import liquibase.structure.core.Index
+import liquibase.structure.core.PrimaryKey
 import liquibase.structure.core.Table
 import spock.lang.Specification
 
@@ -148,5 +151,55 @@ class ChangedIndexChangeGeneratorTest extends Specification {
         def createChange = (CreateIndexChange) changes[1]
         createChange.getCatalogName() == "ref_catalog"
         createChange.getSchemaName() == "ref_schema"
+    }
+
+    def "fixChanged does not throw ClassCastException when a backing Index of a swapped-column PrimaryKey is delegated (issue #7846)"() {
+        given: "Reference PK backed by an Index with column order [a, b]"
+        def referenceTable = new Table(null, "public", "test_table")
+        def refColA = new Column("a")
+        def refColB = new Column("b")
+        def referenceIndex = new Index()
+        referenceIndex.setName("PRIMARY")
+        referenceIndex.setRelation(referenceTable)
+        referenceIndex.setColumns([refColA, refColB])
+        referenceIndex.setUnique(true)
+        def referencePk = new PrimaryKey()
+        referencePk.setName("PRIMARY")
+        referencePk.setTable(referenceTable)
+        referencePk.addColumn(0, refColA)
+        referencePk.addColumn(1, refColB)
+        referencePk.setBackingIndex(referenceIndex)
+        referenceTable.setPrimaryKey(referencePk)
+
+        and: "Comparison Index (target database) with swapped column order [b, a]"
+        def comparisonTable = new Table(null, "public", "test_table")
+        def compColA = new Column("a")
+        def compColB = new Column("b")
+        def comparisonIndex = new Index()
+        comparisonIndex.setName("PRIMARY")
+        comparisonIndex.setRelation(comparisonTable)
+        comparisonIndex.setColumns([compColB, compColA])
+        comparisonIndex.setUnique(true)
+
+        and: "ObjectDifferences describing the backing Index change (comparison object is the Index, not a PrimaryKey)"
+        def compareControl = new CompareControl()
+        def differences = new ObjectDifferences(compareControl, referenceIndex, comparisonIndex)
+        differences.addDifference("columns", [refColA, refColB], [compColB, compColA])
+
+        and: "Generator and databases"
+        def generator = new ChangedIndexChangeGenerator()
+        def outputControl = new DiffOutputControl()
+        def referenceDatabase = new H2Database()
+        def comparisonDatabase = new H2Database()
+
+        when: "fixChanged on the backing Index delegates to the PrimaryKey change generator"
+        def changes = generator.fixChanged(referenceIndex, differences, outputControl, referenceDatabase, comparisonDatabase, null)
+
+        then: "No ClassCastException (issue #7846); produces drop + add PrimaryKey changes"
+        noExceptionThrown()
+        changes != null
+        changes.length == 2
+        changes[0] instanceof DropPrimaryKeyChange
+        changes[1] instanceof AddPrimaryKeyChange
     }
 }

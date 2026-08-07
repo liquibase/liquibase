@@ -45,10 +45,16 @@ public class ChangedUniqueConstraintChangeGenerator extends AbstractChangeGenera
 
         UniqueConstraint uniqueConstraint = (UniqueConstraint) changedObject;
 
-        // Use the comparison object for the drop statement to get the correct constraint name from the target database
-        UniqueConstraint comparisonUniqueConstraint = (UniqueConstraint) differences.getComparisonObject();
-        if (comparisonUniqueConstraint == null) {
-            comparisonUniqueConstraint = uniqueConstraint; // Fallback to reference object if comparison not available
+        // Use the comparison object for the drop statement to get the correct constraint name from the target database.
+        // When delegated from ChangedIndexChangeGenerator (the Index backing the unique constraint changed), the
+        // differences object describes the backing Index, so its comparison object is an Index rather than a
+        // UniqueConstraint; fall back to the reference constraint in that case (issue #7846).
+        DatabaseObject comparisonObject = differences.getComparisonObject();
+        UniqueConstraint comparisonUniqueConstraint;
+        if (comparisonObject instanceof UniqueConstraint) {
+            comparisonUniqueConstraint = (UniqueConstraint) comparisonObject;
+        } else {
+            comparisonUniqueConstraint = uniqueConstraint;
         }
 
         DropUniqueConstraintChange dropUniqueConstraintChange = createDropUniqueConstraintChange();
