@@ -271,6 +271,35 @@ class ScopeTest extends Specification {
         mdcFactory.register(existingManager)
     }
 
+    def "parent exit must not close a child thread's MDC entry under a shared inherited scope"() {
+        given:
+        def mdcFactory = Scope.currentScope.getSingleton(MdcManagerFactory)
+        def existingManager = mdcFactory.getMdcManager()
+        def testManager = new TestMdcManager()
+        mdcFactory.unregister(existingManager); mdcFactory.register(testManager)
+        def added = new java.util.concurrent.CountDownLatch(1)
+        def parentExited = new java.util.concurrent.CountDownLatch(1)
+        def present = new java.util.concurrent.atomic.AtomicBoolean(true)
+        def scopeId = Scope.enter(null, [:])       // parent scope; child inherits the same scopeId
+
+        when:
+        def child = Thread.start {
+            Scope.getCurrentScope().addMdcValue("sharedKey", "v", true)
+            added.countDown()
+            parentExited.await(30, java.util.concurrent.TimeUnit.SECONDS)
+            present.set(testManager.getValues().containsKey("sharedKey"))
+        }
+        added.await(30, java.util.concurrent.TimeUnit.SECONDS)
+        Scope.exit(scopeId)                         // parent exits the shared scope first
+        parentExited.countDown(); child.join(30000)
+
+        then:
+        present.get()                               // main: false, PR: true
+
+        cleanup:
+        mdcFactory.unregister(testManager); mdcFactory.register(existingManager)
+    }
+
     def "custom scope manager can be set"() {
         given:
         def customManager = new SingletonScopeManager()

@@ -489,6 +489,12 @@ public class Scope {
         return mdcObject;
     }
 
+    /**
+     * Tracking is per-thread: only the thread that added an entry can clean it up in {@link #exit(String)}.
+     * This is correct for the normal enter/exit-on-one-thread pattern used by commands. A thread that
+     * inherits a scope (via {@link InheritableThreadLocal}) and adds MDC values without ever entering and
+     * exiting its own child scope will never clean those entries up on this thread.
+     */
     private void removeMdcObjectWhenScopeExits(boolean removeWhenScopeExits, MdcObject mdcObject) {
         if (removeWhenScopeExits) {
             Scope currentScope = getCurrentScope();
