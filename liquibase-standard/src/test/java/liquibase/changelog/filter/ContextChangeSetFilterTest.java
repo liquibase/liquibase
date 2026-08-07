@@ -3,6 +3,7 @@ package liquibase.changelog.filter;
 import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.sql.visitor.AbstractSqlVisitor;
 import org.junit.Test;
@@ -155,6 +156,17 @@ public class ContextChangeSetFilterTest {
             assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test3, @TEST1", null, null)).isAccepted());
             assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "@test3, @TEST1", null, null)).isAccepted());
         }
+    }
+
+    @Test
+    public void groupedInheritedContextDoesNotMatchChangesetContextByFragment() {
+        DatabaseChangeLog changeLog = new DatabaseChangeLog();
+        changeLog.setContextFilter(new ContextExpression("a,b,c"));
+
+        ChangeSet changeSet = new ChangeSet("1", "example", false, false, "test.xml", "a", null, changeLog);
+        ContextChangeSetFilter filter = new ContextChangeSetFilter(new Contexts("b"));
+
+        assertFalse(filter.accepts(changeSet).isAccepted());
     }
 
 
