@@ -259,6 +259,86 @@ class ScopeTest extends Specification {
         errors.isEmpty()
     }
 
+    def "mdc values added by child thread in a child scope are cleaned up"() {
+        given:
+        def mdcFactory = Scope.currentScope.getSingleton(MdcManagerFactory)
+        def existingManager = mdcFactory.getMdcManager()
+        def testManager = new TestMdcManager()
+        mdcFactory.unregister(existingManager)
+        mdcFactory.register(testManager)
+        def errors = Collections.synchronizedList([])
+
+        def scopeId = Scope.enter(null, [:])
+
+        when:
+        def childThread = Thread.start {
+            try {
+                Scope.child([:], {
+                    Scope.getCurrentScope().addMdcValue("childKey", "childValue", true)
+                    if (!testManager.getValues().containsKey("childKey")) {
+                        errors.add("childKey missing while child scope active")
+                    }
+                } as Scope.ScopedRunner)
+                // After exiting child scope, it should be cleaned up on the child thread
+                if (testManager.getValues().containsKey("childKey")) {
+                    errors.add("childKey not cleaned up after child scope exit")
+                }
+            } catch (Exception e) {
+                errors.add("Child thread failed: ${e.message}")
+            }
+        }
+        childThread.join()
+
+        Scope.exit(scopeId)
+
+        then:
+        errors.isEmpty()
+
+        cleanup:
+        mdcFactory.unregister(testManager)
+        mdcFactory.register(existingManager)
+    }
+
+    def "parent exit must not close a child thread's MDC entry under a shared inherited scope"() {
+        given:
+        def mdcFactory = Scope.currentScope.getSingleton(MdcManagerFactory)
+        def existingManager = mdcFactory.getMdcManager()
+        def testManager = new TestMdcManager()
+        mdcFactory.unregister(existingManager); mdcFactory.register(testManager)
+        def added = new java.util.concurrent.CountDownLatch(1)
+        def parentExited = new java.util.concurrent.CountDownLatch(1)
+        def present = new java.util.concurrent.atomic.AtomicBoolean(false)
+        def childError = new java.util.concurrent.atomic.AtomicReference<Throwable>()
+        def scopeId = Scope.enter(null, [:])       // parent scope; child inherits the same scopeId
+
+        when:
+        def child = Thread.start {
+            try {
+                Scope.getCurrentScope().addMdcValue("sharedKey", "v", true)
+                added.countDown()
+                if (!parentExited.await(30, java.util.concurrent.TimeUnit.SECONDS)) {
+                    throw new IllegalStateException("timed out waiting for parent to exit its scope")
+                }
+                present.set(testManager.getValues().containsKey("sharedKey"))
+            } catch (Throwable t) {
+                childError.set(t)
+            }
+        }
+        def childRegistered = added.await(30, java.util.concurrent.TimeUnit.SECONDS)
+        Scope.exit(scopeId)                         // parent exits the shared scope first
+        parentExited.countDown()
+        child.join(30000)
+
+        then:
+        childRegistered
+        !child.isAlive()
+        childError.get() == null
+        present.get()                               // main: false, PR: true
+
+        cleanup:
+        mdcFactory.unregister(testManager); mdcFactory.register(existingManager)
+    }
+
     def "custom scope manager can be set"() {
         given:
         def customManager = new SingletonScopeManager()
