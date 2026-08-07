@@ -35,7 +35,14 @@ final class ObjectMethods {
 
   private String propertyName(String methodName, String prefix) {
     int length = prefix.length();
-    return methodName.substring(length, length + 1).toLowerCase(ROOT) + methodName.substring(length + 1);
+    String remainder = methodName.substring(length);
+    if (remainder.length() > 1
+        && Character.isUpperCase(remainder.charAt(0))
+        && Character.isUpperCase(remainder.charAt(1))) {
+      // Preserve uppercase acronyms (e.g. setGET -> "GET"), matching java.beans.Introspector.decapitalize
+      return remainder;
+    }
+    return remainder.substring(0, 1).toLowerCase(ROOT) + remainder.substring(1);
   }
 
   Method getReadMethod(String propertyName) {
