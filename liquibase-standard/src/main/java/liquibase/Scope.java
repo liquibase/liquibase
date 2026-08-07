@@ -173,20 +173,20 @@ public class Scope {
                 // so that logging during configuration setup uses the correct LogService.
                 LogService overrideLogService = newRootScope.getSingleton(LogServiceFactory.class).getDefaultLogService();
                 if (overrideLogService != null) {
-                newRootScope.values.put(Attr.logService.name(), overrideLogService);
+                    newRootScope.values.put(Attr.logService.name(), overrideLogService);
                 } else {
-                newRootScope.getLog(Scope.class).warning("Could not find log service via LogServiceFactory. Using JavaLogService as default.");
-            }
+                    newRootScope.getLog(Scope.class).warning("Could not find log service via LogServiceFactory. Using JavaLogService as default.");
+                }
 
                 newRootScope.getSingleton(LiquibaseConfiguration.class).init(newRootScope);
 
                 //check for higher-priority serviceLocator
                 ServiceLocator serviceLocator = newRootScope.getServiceLocator();
                 for (ServiceLocator possibleLocator : serviceLocator.findInstances(ServiceLocator.class)) {
-                if (possibleLocator.getPriority() > serviceLocator.getPriority()) {
-                    serviceLocator = possibleLocator;
+                    if (possibleLocator.getPriority() > serviceLocator.getPriority()) {
+                        serviceLocator = possibleLocator;
+                    }
                 }
-            }
 
                 newRootScope.values.put(Attr.serviceLocator.name(), serviceLocator);
                 newRootScope.values.put(Attr.osgiPlatform.name(), ContainerChecker.isOsgiPlatform());
