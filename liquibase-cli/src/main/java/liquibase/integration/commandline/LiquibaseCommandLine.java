@@ -377,13 +377,27 @@ public class LiquibaseCommandLine {
 
             Main.setRunningFromNewCli(true);
 
-            final List<ConfigurationValueProvider> valueProviders = registerValueProviders(finalArgs);
-            LogService newLogService = Scope.child(Collections.singletonMap(REGISTERED_VALUE_PROVIDERS_KEY, true), () -> {
+            // The per-execution providers live in the scope, not in the shared LiquibaseConfiguration:
+            // concurrent executions used to see (and unregister) each other's argument values (#6927)
+            final CommandLineArgumentValueProvider argumentProvider =
+                    new CommandLineArgumentValueProvider(commandLine.parseArgs(finalArgs));
+            final List<ConfigurationValueProvider> valueProviders = Scope.child(
+                    Collections.singletonMap(LiquibaseConfiguration.SCOPED_VALUE_PROVIDERS_KEY,
+                            Collections.singletonList(argumentProvider)),
+                    () -> resolveValueProviders(argumentProvider));
+
+            final Map<String, Object> providerScopeValues = new HashMap<>();
+            providerScopeValues.put(LiquibaseConfiguration.SCOPED_VALUE_PROVIDERS_KEY, valueProviders);
+            providerScopeValues.put(REGISTERED_VALUE_PROVIDERS_KEY, true);
+
+            LogService newLogService = Scope.child(providerScopeValues, () -> {
                 // Get a new log service after registering the value providers, since the log service might need to load parameters using newly registered value providers.
                 return Scope.getCurrentScope().getSingleton(LogServiceFactory.class).getDefaultLogService();
             });
 
-            return Scope.child(Collections.singletonMap(Scope.Attr.logService.name(), newLogService), () -> {
+            final Map<String, Object> executionScopeValues = new HashMap<>(providerScopeValues);
+            executionScopeValues.put(Scope.Attr.logService.name(), newLogService);
+            return Scope.child(executionScopeValues, () -> {
                 addEmptyMdcValues();
                 try {
                     return Scope.child(configureScope(args), () -> {
@@ -430,12 +444,7 @@ public class LiquibaseCommandLine {
                         return response;
                     });
                 } finally {
-                    final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
-
-                    for (ConfigurationValueProvider provider : valueProviders) {
-                        liquibaseConfiguration.unregisterProvider(provider);
-                    }
-
+                    // scoped value providers simply fall out of scope, there is nothing to unregister
                     LogUtil.setPersistedMdcKeysToEmptyString();
                 }
             });
@@ -704,12 +713,14 @@ public class LiquibaseCommandLine {
         return returnList.toArray(new String[0]);
     }
 
-    private List<ConfigurationValueProvider> registerValueProviders(String[] args) throws IOException {
-        final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+    /**
+     * Builds the per-execution value providers (argument values, defaults file, local defaults file).
+     * Callers make them visible through {@link LiquibaseConfiguration#SCOPED_VALUE_PROVIDERS_KEY}; nothing is
+     * registered on the shared {@link LiquibaseConfiguration}. Must run inside a scope that already exposes
+     * the given argument provider so the defaults file location can be resolved from the command line.
+     */
+    private List<ConfigurationValueProvider> resolveValueProviders(CommandLineArgumentValueProvider argumentProvider) throws IOException {
         List<ConfigurationValueProvider> returnList = new ArrayList<>();
-
-        final CommandLineArgumentValueProvider argumentProvider = new CommandLineArgumentValueProvider(commandLine.parseArgs(args));
-        liquibaseConfiguration.registerProvider(argumentProvider);
         returnList.add(argumentProvider);
 
         final ConfiguredValue<String> defaultsFileConfig = LiquibaseCommandLineConfiguration.DEFAULTS_FILE.getCurrentConfiguredValue();
@@ -738,7 +749,6 @@ public class LiquibaseCommandLine {
             try (InputStream defaultsStream = resource.openInputStream()) {
                 if (defaultsStream != null) {
                     final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File exists at path " + defaultsFileConfigValue);
-                    liquibaseConfiguration.registerProvider(fileProvider);
                     returnList.add(fileProvider);
                 }
             }
@@ -757,7 +767,6 @@ public class LiquibaseCommandLine {
                 }
             } else {
                 final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(inputStreamOnClasspath, "File in classpath " + defaultsFileConfigValue);
-                liquibaseConfiguration.registerProvider(fileProvider);
                 returnList.add(fileProvider);
             }
         }
@@ -771,7 +780,6 @@ public class LiquibaseCommandLine {
                     return super.getPrecedence() + 1;
                 }
             };
-            liquibaseConfiguration.registerProvider(fileProvider);
             returnList.add(fileProvider);
         } else {
             Scope.getCurrentScope().getLog(getClass()).fine("Cannot find local defaultsFile " + defaultsFile.getAbsolutePath());

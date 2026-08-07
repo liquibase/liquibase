@@ -161,6 +161,34 @@ class ScopeTest extends Specification {
         deploymentIdScope == deploymentIdService2;
     }
 
+    def "a thread without a scope manager attaches to the existing root scope"() {
+        given:
+        // A pool thread created before Liquibase initialized (or from another lineage) gets no
+        // manager from the InheritableThreadLocal. It must adopt the already-built root instead of
+        // bootstrapping a second one with its own context classloader (#6880).
+        def mainRoot = rootOf(Scope.getCurrentScope())
+        def orphanRoot = null
+
+        when:
+        def thread = new Thread({
+            Scope.setScopeManager(null)   // simulate a thread that never inherited a manager
+            orphanRoot = rootOf(Scope.getCurrentScope())
+        })
+        thread.start()
+        thread.join(30_000)
+
+        then:
+        !thread.alive
+        orphanRoot.is(mainRoot)
+    }
+
+    private static Scope rootOf(Scope scope) {
+        while (scope.getParent() != null) {
+            scope = scope.getParent()
+        }
+        return scope
+    }
+
     def "lazy initialization of scope manager for GraalVM compatibility"() {
         when:
         // Reset scope manager to test lazy initialization
@@ -229,6 +257,86 @@ class ScopeTest extends Specification {
         then:
         completed
         errors.isEmpty()
+    }
+
+    def "mdc values added by child thread in a child scope are cleaned up"() {
+        given:
+        def mdcFactory = Scope.currentScope.getSingleton(MdcManagerFactory)
+        def existingManager = mdcFactory.getMdcManager()
+        def testManager = new TestMdcManager()
+        mdcFactory.unregister(existingManager)
+        mdcFactory.register(testManager)
+        def errors = Collections.synchronizedList([])
+
+        def scopeId = Scope.enter(null, [:])
+
+        when:
+        def childThread = Thread.start {
+            try {
+                Scope.child([:], {
+                    Scope.getCurrentScope().addMdcValue("childKey", "childValue", true)
+                    if (!testManager.getValues().containsKey("childKey")) {
+                        errors.add("childKey missing while child scope active")
+                    }
+                } as Scope.ScopedRunner)
+                // After exiting child scope, it should be cleaned up on the child thread
+                if (testManager.getValues().containsKey("childKey")) {
+                    errors.add("childKey not cleaned up after child scope exit")
+                }
+            } catch (Exception e) {
+                errors.add("Child thread failed: ${e.message}")
+            }
+        }
+        childThread.join()
+
+        Scope.exit(scopeId)
+
+        then:
+        errors.isEmpty()
+
+        cleanup:
+        mdcFactory.unregister(testManager)
+        mdcFactory.register(existingManager)
+    }
+
+    def "parent exit must not close a child thread's MDC entry under a shared inherited scope"() {
+        given:
+        def mdcFactory = Scope.currentScope.getSingleton(MdcManagerFactory)
+        def existingManager = mdcFactory.getMdcManager()
+        def testManager = new TestMdcManager()
+        mdcFactory.unregister(existingManager); mdcFactory.register(testManager)
+        def added = new java.util.concurrent.CountDownLatch(1)
+        def parentExited = new java.util.concurrent.CountDownLatch(1)
+        def present = new java.util.concurrent.atomic.AtomicBoolean(false)
+        def childError = new java.util.concurrent.atomic.AtomicReference<Throwable>()
+        def scopeId = Scope.enter(null, [:])       // parent scope; child inherits the same scopeId
+
+        when:
+        def child = Thread.start {
+            try {
+                Scope.getCurrentScope().addMdcValue("sharedKey", "v", true)
+                added.countDown()
+                if (!parentExited.await(30, java.util.concurrent.TimeUnit.SECONDS)) {
+                    throw new IllegalStateException("timed out waiting for parent to exit its scope")
+                }
+                present.set(testManager.getValues().containsKey("sharedKey"))
+            } catch (Throwable t) {
+                childError.set(t)
+            }
+        }
+        def childRegistered = added.await(30, java.util.concurrent.TimeUnit.SECONDS)
+        Scope.exit(scopeId)                         // parent exits the shared scope first
+        parentExited.countDown()
+        child.join(30000)
+
+        then:
+        childRegistered
+        !child.isAlive()
+        childError.get() == null
+        present.get()                               // main: false, PR: true
+
+        cleanup:
+        mdcFactory.unregister(testManager); mdcFactory.register(existingManager)
     }
 
     def "custom scope manager can be set"() {

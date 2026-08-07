@@ -51,6 +51,34 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
     }
 
     /**
+     * Copies the template's metadata but instantiates a fresh {@link CommandStep} pipeline, so each
+     * {@link CommandScope} executes on its own step instances and never shares their state.
+     */
+    protected CommandDefinition(CommandDefinition template) {
+        this(template.name.clone());
+        for (CommandStep step : template.pipeline) {
+            try {
+                this.pipeline.add(step.getClass().getConstructor().newInstance());
+            } catch (ReflectiveOperationException e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
+        this.arguments.putAll(template.arguments);
+        this.longDescription = template.longDescription;
+        this.shortDescription = template.shortDescription;
+        this.internal = template.internal;
+        this.hidden = template.hidden;
+        this.footer = template.footer;
+        this.groupFooter = template.groupFooter;
+        this.groupLongDescription.putAll(template.groupLongDescription);
+        this.groupShortDescription.putAll(template.groupShortDescription);
+        this.aliases = new ArrayList<>(template.aliases.size());
+        for (String[] alias : template.aliases) {
+            this.aliases.add(alias.clone());
+        }
+    }
+
+    /**
      * The fully qualified name of this command.
      */
     public String[] getName() {
