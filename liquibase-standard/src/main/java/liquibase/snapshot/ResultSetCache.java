@@ -16,6 +16,7 @@ import liquibase.util.StringUtil;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -317,7 +318,19 @@ public class ResultSetCache {
                     returnList.add(new CachedRow(row));
                 }
             } finally {
-                JdbcUtil.closeResultSet(resultSet);
+                // This ResultSet is often obtained directly from a DatabaseMetaData call
+                // (e.g. getColumns/getTables/getImportedKeys), so the caller keeps no reference
+                // to the Statement that produced it. Closing the ResultSet alone leaks that
+                // Statement until the connection is closed (see #7780), so close its owning
+                // Statement too. getStatement() may legitimately return null for such ResultSets
+                // per the JDBC spec, which JdbcUtil.close handles.
+                Statement statement = null;
+                try {
+                    statement = resultSet.getStatement();
+                } catch (SQLException ignored) {
+                    // Some drivers may not support getStatement() here; fall back to closing the ResultSet only.
+                }
+                JdbcUtil.close(resultSet, statement);
             }
             return returnList;
         }
