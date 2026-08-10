@@ -21,7 +21,33 @@ import java.util.*;
  */
 public class LiquibaseConfiguration implements SingletonObject {
 
-    private final SortedSet<ConfigurationValueProvider> configurationValueProviders;
+    /**
+     * Orders providers by ascending {@link ConfigurationValueProvider#getPrecedence()}: resolution walks the
+     * list in order and later values override earlier ones, so the last provider wins.
+     */
+    private static final Comparator<ConfigurationValueProvider> PROVIDER_ORDER = (o1, o2) -> {
+        if (o1.getPrecedence() < o2.getPrecedence()) {
+            return -1;
+        } else if (o1.getPrecedence() > o2.getPrecedence()) {
+            return 1;
+        }
+
+        return o1.getClass().getName().compareTo(o2.getClass().getName());
+    };
+
+    /**
+     * Scope key holding a {@code List<ConfigurationValueProvider>} visible only to the current scope and its
+     * children. Integrations that run executions side by side (CLI, maven) put their per-execution providers
+     * here instead of {@link #registerProvider(ConfigurationValueProvider)}, so one execution's arguments never
+     * leak into or vanish from another running in parallel.
+     * <p>
+     * A nested scope that sets this key shadows the outer list rather than combining with it; integrations set
+     * it once per execution.
+     */
+    public static final String SCOPED_VALUE_PROVIDERS_KEY = "liquibase.scopedValueProviders";
+
+    // Immutable snapshot replaced on every mutation, so resolution never sees a half-updated set.
+    private volatile SortedSet<ConfigurationValueProvider> configurationValueProviders;
     private final static SortedSet<ConfigurationDefinition<?>> definitions = new TreeSet<>();
     public static final String REGISTERED_VALUE_PROVIDERS_KEY = "REGISTERED_VALUE_PROVIDERS";
 
@@ -33,16 +59,7 @@ public class LiquibaseConfiguration implements SingletonObject {
     private final Map<String, String> lastLoggedKeyValues = new HashMap<>();
 
     protected LiquibaseConfiguration() {
-        configurationValueProviders = new TreeSet<>((o1, o2) -> {
-            if (o1.getPrecedence() < o2.getPrecedence()) {
-                return -1;
-            } else if (o1.getPrecedence() > o2.getPrecedence()) {
-                return 1;
-            }
-
-            return o1.getClass().getName().compareTo(o2.getClass().getName());
-        });
-
+        configurationValueProviders = new TreeSet<>(PROVIDER_ORDER);
     }
 
     /**
@@ -55,22 +72,25 @@ public class LiquibaseConfiguration implements SingletonObject {
     /**
      * Finishes configuration of this service. Called as the root scope is set up, should not be called elsewhere.
      */
-    public void init(Scope scope) {
-        configurationValueProviders.clear();
+    public synchronized void init(Scope scope) {
         ServiceLocator serviceLocator = scope.getServiceLocator();
         final List<AutoloadedConfigurations> containers = serviceLocator.findInstances(AutoloadedConfigurations.class);
         for (AutoloadedConfigurations container : containers) {
             Scope.getCurrentScope().getLog(getClass()).fine("Found ConfigurationDefinitions in " + container.getClass().getName());
         }
 
-        configurationValueProviders.addAll(serviceLocator.findInstances(ConfigurationValueProvider.class));
+        SortedSet<ConfigurationValueProvider> replacement = new TreeSet<>(PROVIDER_ORDER);
+        replacement.addAll(serviceLocator.findInstances(ConfigurationValueProvider.class));
+        this.configurationValueProviders = replacement;
     }
 
     /**
      * Adds a new {@link ConfigurationValueProvider} to the active collection of providers.
      */
-    public void registerProvider(ConfigurationValueProvider valueProvider) {
-        this.configurationValueProviders.add(valueProvider);
+    public synchronized void registerProvider(ConfigurationValueProvider valueProvider) {
+        SortedSet<ConfigurationValueProvider> replacement = new TreeSet<>(this.configurationValueProviders);
+        replacement.add(valueProvider);
+        this.configurationValueProviders = replacement;
     }
 
     /**
@@ -78,8 +98,11 @@ public class LiquibaseConfiguration implements SingletonObject {
      *
      * @return true if the given provider was previously registered.
      */
-    public boolean unregisterProvider(ConfigurationValueProvider valueProvider) {
-        return this.configurationValueProviders.remove(valueProvider);
+    public synchronized boolean unregisterProvider(ConfigurationValueProvider valueProvider) {
+        SortedSet<ConfigurationValueProvider> replacement = new TreeSet<>(this.configurationValueProviders);
+        boolean removed = replacement.remove(valueProvider);
+        this.configurationValueProviders = replacement;
+        return removed;
     }
 
     /**
@@ -87,8 +110,8 @@ public class LiquibaseConfiguration implements SingletonObject {
      *
      * @return true if the provider was removed.
      */
-    public boolean removeProvider(ConfigurationValueProvider provider) {
-        return this.configurationValueProviders.remove(provider);
+    public synchronized boolean removeProvider(ConfigurationValueProvider provider) {
+        return unregisterProvider(provider);
     }
 
     /**
@@ -102,8 +125,31 @@ public class LiquibaseConfiguration implements SingletonObject {
         }
     }
 
+    /**
+     * Returns only the globally registered providers. Callers that need everything resolution would see,
+     * including the current scope's per-execution providers, want {@link #getEffectiveProviders()}.
+     */
     public SortedSet<ConfigurationValueProvider> getProviders() {
         return Collections.unmodifiableSortedSet(this.configurationValueProviders);
+    }
+
+    /**
+     * Returns the globally registered providers merged with the current scope's ones, ordered by
+     * {@link ConfigurationValueProvider#getPrecedence()} exactly as {@link #getCurrentConfiguredValue} resolves them.
+     */
+    public List<ConfigurationValueProvider> getEffectiveProviders() {
+        List<ConfigurationValueProvider> effective = new ArrayList<>(this.configurationValueProviders);
+        List<ConfigurationValueProvider> scoped = getScopedValueProviders();
+        if (scoped != null) {
+            effective.addAll(scoped);
+            effective.sort(PROVIDER_ORDER);
+        }
+        return Collections.unmodifiableList(effective);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<ConfigurationValueProvider> getScopedValueProviders() {
+        return Scope.getCurrentScope().get(SCOPED_VALUE_PROVIDERS_KEY, List.class);
     }
 
     public ConfigurationValueProvider getProvider(ConfigurationValueProvider provider) {
@@ -135,7 +181,7 @@ public class LiquibaseConfiguration implements SingletonObject {
 
         ConfiguredValue<DataType> details = new ConfiguredValue<>(keyAndAliases[0], converter, obfuscator);
 
-        List<ConfigurationValueProvider> finalValueProviders = new ArrayList<>(configurationValueProviders);
+        List<ConfigurationValueProvider> finalValueProviders = new ArrayList<>(getEffectiveProviders());
         if (additionalValueProviders != null) {
             finalValueProviders.addAll(Arrays.asList(additionalValueProviders));
         }

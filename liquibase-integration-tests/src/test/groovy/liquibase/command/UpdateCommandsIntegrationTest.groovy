@@ -145,4 +145,36 @@ class UpdateCommandsIntegrationTest extends Specification {
         cleanup:
         outputFile.delete()
     }
+
+    @Unroll
+    def "run UpdateSql with outputDefaultSchema=#outputDefaultSchema qualifies objects in the default schema accordingly"() {
+        given:
+        def outputStream = new ByteArrayOutputStream()
+        def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()): resourceAccessor
+        ]
+
+        when:
+        Scope.child(scopeSettings, {
+            CommandScope commandScope = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME)
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
+            commandScope.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, "liquibase/update-tests.yml")
+            commandScope.addArgumentValue(UpdateSqlCommandStep.OUTPUT_DEFAULT_SCHEMA_ARG, outputDefaultSchema)
+            commandScope.addArgumentValue(UpdateSqlCommandStep.OUTPUT_DEFAULT_CATALOG_ARG, outputDefaultSchema)
+            commandScope.setOutput(outputStream)
+
+            commandScope.execute()
+        } as Scope.ScopedRunner)
+
+        then:
+        def output = outputStream.toString().toLowerCase()
+        output.contains("create table public.example_table") == outputDefaultSchema
+        output.contains("create table example_table") == !outputDefaultSchema
+
+        where:
+        outputDefaultSchema << [true, false]
+    }
 }

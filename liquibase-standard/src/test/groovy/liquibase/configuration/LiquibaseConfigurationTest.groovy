@@ -83,6 +83,112 @@ class LiquibaseConfigurationTest extends Specification {
         Scope.getCurrentScope().getSingleton(ConfiguredValueModifierFactory.class).unregister(higherModifier)
     }
 
+    def "scoped value provider is visible inside its scope and gone outside"() {
+        given:
+        def config = Scope.currentScope.getSingleton(LiquibaseConfiguration)
+        def provider = new TestValueProvider(["test.scopedKey": "scoped value"], 300)
+
+        when:
+        def insideValue = Scope.child([(LiquibaseConfiguration.SCOPED_VALUE_PROVIDERS_KEY): [provider]], {
+            return config.getCurrentConfiguredValue(null, null, "test.scopedKey").getValue()
+        } as Scope.ScopedRunnerWithReturn)
+
+        then:
+        insideValue == "scoped value"
+        config.getCurrentConfiguredValue(null, null, "test.scopedKey").getValue() == null
+    }
+
+    def "scoped provider ranks by its own precedence against registered providers"() {
+        given:
+        def config = Scope.currentScope.getSingleton(LiquibaseConfiguration)
+        def registered = new TestValueProvider(["test.precedenceKey": "from registered"], registeredPrecedence)
+        def scoped = new TestValueProvider(["test.precedenceKey": "from scoped"], scopedPrecedence)
+        config.registerProvider(registered)
+
+        when:
+        def value = Scope.child([(LiquibaseConfiguration.SCOPED_VALUE_PROVIDERS_KEY): [scoped]], {
+            return config.getCurrentConfiguredValue(null, null, "test.precedenceKey").getValue()
+        } as Scope.ScopedRunnerWithReturn)
+
+        then:
+        value == expected
+
+        cleanup:
+        config.unregisterProvider(registered)
+
+        where:
+        registeredPrecedence | scopedPrecedence | expected
+        400                  | 50               | "from registered"
+        50                   | 400              | "from scoped"
+    }
+
+    def "concurrent scopes only see their own scoped providers"() {
+        given:
+        def config = Scope.currentScope.getSingleton(LiquibaseConfiguration)
+        def results = Collections.synchronizedMap([:])
+        def gate = new java.util.concurrent.CountDownLatch(1)
+
+        when:
+        def threads = (1..2).collect { n ->
+            Thread.start {
+                def provider = new TestValueProvider(["test.concurrentKey": "value" + n], 300)
+                Scope.child([(LiquibaseConfiguration.SCOPED_VALUE_PROVIDERS_KEY): [provider]], {
+                    gate.await()
+                    50.times {
+                        results.put(n + "-" + it, config.getCurrentConfiguredValue(null, null, "test.concurrentKey").getValue())
+                    }
+                } as Scope.ScopedRunner)
+            }
+        }
+        gate.countDown()
+        threads*.join()
+
+        then:
+        (1..2).every { n -> (0..49).every { results[n + "-" + it] == "value" + n } }
+    }
+
+    def "getEffectiveProviders merges the scoped providers into the registered ones"() {
+        given:
+        def config = Scope.currentScope.getSingleton(LiquibaseConfiguration)
+        def registered = new TestValueProvider([:], 400)
+        def scoped = new TestValueProvider([:], 50)
+        config.registerProvider(registered)
+
+        when:
+        def inside = Scope.child([(LiquibaseConfiguration.SCOPED_VALUE_PROVIDERS_KEY): [scoped]], {
+            return config.getEffectiveProviders()
+        } as Scope.ScopedRunnerWithReturn)
+
+        then:
+        inside.contains(scoped)
+        inside.contains(registered)
+        inside.indexOf(scoped) < inside.indexOf(registered)   // sorted by precedence, not appended
+        !config.getEffectiveProviders().contains(scoped)
+        !config.getProviders().contains(scoped)               // getProviders stays registered-only
+
+        cleanup:
+        config.unregisterProvider(registered)
+    }
+
+    class TestValueProvider extends liquibase.configuration.AbstractMapConfigurationValueProvider {
+        private final Map<String, Object> values
+        private final int precedence
+
+        TestValueProvider(Map<String, Object> values, int precedence) {
+            this.values = values
+            this.precedence = precedence
+        }
+
+        @Override
+        protected Map<?, ?> getMap() { return values }
+
+        @Override
+        protected String getSourceDescription() { return "Test provider" }
+
+        @Override
+        int getPrecedence() { return precedence }
+    }
+
     def "autoRegisters and sorts providers"() {
         expect:
         Scope.getCurrentScope().getSingleton(LiquibaseConfiguration).configurationValueProviders*.getClass()*.getName().contains("liquibase.configuration.core.SystemPropertyValueProvider")

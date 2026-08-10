@@ -573,6 +573,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         if (database instanceof MySQLDatabase) {
             readDefaultValueForMysqlDatabase(columnMetadataResultSet, columnInfo, database);
+            Object defaultValue = columnMetadataResultSet.get(COLUMN_DEF_COL);
+            if ((defaultValue instanceof String)
+                    && isMySqlEnumType(columnInfo)
+                    && StringUtil.equalsWordNull((String) defaultValue)) {
+                columnMetadataResultSet.set(COLUMN_DEF_COL, null);
+            }
         }
 
         if ((database instanceof AbstractDb2Database)
@@ -607,6 +613,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         return SqlUtil.parseValue(database, columnMetadataResultSet.get(COLUMN_DEF_COL), columnInfo.getType());
+    }
+
+    private boolean isMySqlEnumType(Column columnInfo) {
+        if ((columnInfo == null) || (columnInfo.getType() == null) || (columnInfo.getType().getTypeName() == null)) {
+            return false;
+        }
+        return columnInfo.getType().getTypeName().toLowerCase(Locale.ENGLISH).startsWith("enum");
     }
 
     private void readDefaultValueForMysqlDatabase(CachedRow columnMetadataResultSet, Column column, Database database) {

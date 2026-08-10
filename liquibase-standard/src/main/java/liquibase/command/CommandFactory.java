@@ -45,15 +45,19 @@ public class CommandFactory implements SingletonObject {
      */
     public CommandDefinition getCommandDefinition(String... commandName) throws IllegalArgumentException{
         String commandNameKey = StringUtil.join(commandName, " ");
-        CommandDefinition commandDefinition = COMMAND_DEFINITIONS.get(commandNameKey);
-        if (commandDefinition == null) { //Check if we have already computed arguments, dependencies, pipeline and adjusted definition
-            commandDefinition = new CommandDefinition(commandName);
-            computePipelineForCommandDefinition(commandDefinition);
-            consolidateCommandArgumentsForCommand(commandDefinition);
-            adjustCommandDefinitionForSteps(commandDefinition);
-            COMMAND_DEFINITIONS.put(commandNameKey, commandDefinition);
-        }
-        return commandDefinition;
+        // computeIfAbsent so two threads asking for the same command on first use do not build it
+        // concurrently: the plain get/put idiom let one thread consolidate arguments while the other
+        // was still registering them through the step classes' static initializers (#6927)
+        CommandDefinition commandDefinition = COMMAND_DEFINITIONS.computeIfAbsent(commandNameKey, key -> {
+            CommandDefinition template = new CommandDefinition(commandName);
+            computePipelineForCommandDefinition(template);
+            consolidateCommandArgumentsForCommand(template);
+            adjustCommandDefinitionForSteps(template);
+            return template;
+        });
+        // Return a copy with fresh CommandStep instances: the cached definition is a shared template,
+        // and handing out its steps would let concurrent executions interfere with each other (#6927)
+        return new CommandDefinition(commandDefinition);
     }
 
     /**
@@ -276,7 +280,7 @@ public class CommandFactory implements SingletonObject {
      * @return a map with key of the CommandStep intended to override and value of the valid overriding command step
      * @throws RuntimeException if more than one command step overrides another command step
      */
-    private Map<Class<? extends CommandStep>, CommandStep> findAllOverrides(Collection<CommandStep> allCommandSteps) throws RuntimeException {
+    private synchronized Map<Class<? extends CommandStep>, CommandStep> findAllOverrides(Collection<CommandStep> allCommandSteps) throws RuntimeException {
         if (commandOverrides == null) { //If we have not already found any overrides
             Map<Class<? extends CommandStep>, List<CommandStep>> overrides = new HashMap<>();
             allCommandSteps.stream()
