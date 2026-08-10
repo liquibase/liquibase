@@ -269,7 +269,7 @@ public abstract class SqlUtil {
                 }
                 if ((database instanceof PostgresDatabase)
                         && ("json".equalsIgnoreCase(typeName) || "jsonb".equalsIgnoreCase(typeName))) {
-                    return stringVal;
+                    return strippedSingleQuotes ? stringVal : new DatabaseFunction(stringVal);
                 }
                 return new DatabaseFunction(stringVal);
             } else if (typeId == Types.REAL) {

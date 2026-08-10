@@ -109,19 +109,22 @@ class ColumnSnapshotGeneratorTest extends Specification {
         columnSnapshotGenerator.readDefaultValue(new CachedRow(["COLUMN_DEF": columnValue]), column(datatype), db) == expected
 
         where:
-        columnValue          | datatype  | db                     | expected
-        null                 | "varchar" | new MSSQLDatabase()    | null
-        "(NULL)"             | "varchar" | new MSSQLDatabase()    | new DatabaseFunction("null")
-        "3"                  | "int"     | new PostgresDatabase() | 3
-        3                    | "int"     | new PostgresDatabase() | 3
-        "(3)::real"          | "float"   | new PostgresDatabase() | 3
-        "3::real"            | "float"   | new PostgresDatabase() | 3
-        "'a value'::varchar" | "varchar" | new PostgresDatabase() | "a value"
-        "'{}'::jsonb"        | "jsonb"   | new PostgresDatabase() | "{}"
-        "'[]'::json"         | "json"    | new PostgresDatabase() | "[]"
-        "NULL"               | "enum"    | new MySQLDatabase()    | null
-        "NULL"               | "varchar" | new MySQLDatabase()    | "NULL"
-        3                    | "enum"    | new MySQLDatabase()    | 3
+        columnValue                         | datatype  | db                     | expected
+        null                                | "varchar" | new MSSQLDatabase()    | null
+        "(NULL)"                            | "varchar" | new MSSQLDatabase()    | new DatabaseFunction("null")
+        "3"                                 | "int"     | new PostgresDatabase() | 3
+        3                                   | "int"     | new PostgresDatabase() | 3
+        "(3)::real"                         | "float"   | new PostgresDatabase() | 3
+        "3::real"                           | "float"   | new PostgresDatabase() | 3
+        "'a value'::varchar"                | "varchar" | new PostgresDatabase() | "a value"
+        "'{}'::jsonb"                       | "jsonb"   | new PostgresDatabase() | "{}"
+        "'[]'::json"                        | "json"    | new PostgresDatabase() | "[]"
+        "jsonb_build_object('key', 'value')" | "jsonb"   | new PostgresDatabase() | new DatabaseFunction("jsonb_build_object('key', 'value')")
+        "NULL::jsonb"                       | "jsonb"   | new PostgresDatabase() | new DatabaseFunction("NULL::jsonb")
+        "NULL::json"                        | "json"    | new PostgresDatabase() | new DatabaseFunction("NULL::json")
+        "NULL"                              | "enum"    | new MySQLDatabase()    | null
+        "NULL"                              | "varchar" | new MySQLDatabase()    | "NULL"
+        3                                   | "enum"    | new MySQLDatabase()    | 3
     }
 
     private static Column column(String datatype) {
