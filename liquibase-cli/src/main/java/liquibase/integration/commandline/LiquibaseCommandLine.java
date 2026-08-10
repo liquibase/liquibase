@@ -767,9 +767,7 @@ public class LiquibaseCommandLine {
             for (Resource res : resources) {
                 if (res.exists() && !res.equals(resource)) {
                     try (InputStream defaultsStream = res.openInputStream()) {
-                        final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File in classpath " + res.getUri(), returnList.size());
-                        liquibaseConfiguration.registerProvider(fileProvider);
-                        returnList.add(fileProvider);
+                        returnList.add(new DefaultsFileValueProvider(defaultsStream, "File in classpath " + res.getUri(), returnList.size()));
                         found = true;
                     }
                 }
@@ -792,9 +790,7 @@ public class LiquibaseCommandLine {
         final File defaultsFile = new File(defaultsFileConfigValue);
         File localDefaultsFile = new File(defaultsFile.getAbsolutePath().replaceFirst(".properties$", ".local.properties"));
         if (localDefaultsFile.exists()) {
-            final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(localDefaultsFile, -1);
-            liquibaseConfiguration.registerProvider(fileProvider);
-            returnList.add(fileProvider);
+            returnList.add(new DefaultsFileValueProvider(localDefaultsFile, -1));
         } else {
             Scope.getCurrentScope().getLog(getClass()).fine("Cannot find local defaultsFile " + defaultsFile.getAbsolutePath());
         }
