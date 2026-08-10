@@ -109,7 +109,7 @@ class LockServiceCommandStepTest extends Specification {
         def releasedCount = new AtomicInteger(0)
 
         and: "mock lock services — one per thread to verify independent release"
-        def mockLockServices = (1..threadCount).collect { Mock(LockService) }
+        def mockLockServices = (1..threadCount).collect { Mock(LockService) { hasChangeLogLock() >> true } }
         def mockDatabases = (1..threadCount).collect { Mock(Database) }
         def lockServiceIndex = new AtomicInteger(0)
 
@@ -161,7 +161,7 @@ class LockServiceCommandStepTest extends Specification {
     def "cleanUp after successful run releases the lock"() {
         given:
         def step = new LockServiceCommandStep()
-        def mockLockService = Mock(LockService)
+        def mockLockService = Mock(LockService) { hasChangeLogLock() >> true }
         def mockDatabase = Mock(Database)
         def mockFactory = Mock(LockServiceFactory) {
             getLockService(mockDatabase) >> mockLockService
@@ -199,6 +199,29 @@ class LockServiceCommandStepTest extends Specification {
         step.cleanUp(resultsBuilder)
 
         then:
+        0 * mockLockService.releaseLock()
+    }
+
+    def "cleanUp does not release a lock that was already released elsewhere (#5438)"() {
+        given: "a command step (e.g. an AbstractUpdateCommandStep subclass) already released the lock during its own run()"
+        def step = new LockServiceCommandStep()
+        def mockLockService = Mock(LockService) { hasChangeLogLock() >> false }
+        def mockDatabase = Mock(Database)
+        def mockFactory = Mock(LockServiceFactory) {
+            getLockService(mockDatabase) >> mockLockService
+        }
+        LockServiceFactory.setInstance(mockFactory)
+
+        def command = new CommandScope(LockServiceCommandStep.COMMAND_NAME)
+                .provideDependency(Database.class, mockDatabase)
+        def resultsBuilder = new CommandResultsBuilder(command, new ByteArrayOutputStream())
+
+        when: "this step's own run() acquired the lock, but by cleanUp() time it's already unlocked"
+        step.run(resultsBuilder)
+        step.cleanUp(resultsBuilder)
+
+        then: "cleanUp must not attempt a second release against an already-unlocked row"
+        1 * mockLockService.waitForLock()
         0 * mockLockService.releaseLock()
     }
 }

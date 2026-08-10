@@ -89,4 +89,30 @@ class AbstractUpdateCommandStepTest extends Specification {
         0 * mockLockService.waitForLock()
         0 * mockLockService.releaseLock()
     }
+
+    def "run() releases the lock exactly once when it is genuinely held, even via a pipeline-managed acquire (#5438)"() {
+        given: "the lock is already held (as it would be if LockServiceCommandStep acquired it in the pipeline)"
+        def step = new FastCheckUpToDateCommandStep()
+        def mockLockService = Mock(LockService) { hasChangeLogLock() >> true }
+        def mockDatabase = Mock(Database) {
+            getConnection() >> Mock(DatabaseConnection) {
+                getVisibleUrl() >> "jdbc:test"
+                getURL() >> "jdbc:test"
+            }
+        }
+        def mockFactory = Mock(LockServiceFactory) {
+            getLockService(mockDatabase) >> mockLockService
+        }
+        LockServiceFactory.setInstance(mockFactory)
+
+        def commandScope = buildCommandScope(mockDatabase)
+        def resultsBuilder = new CommandResultsBuilder(commandScope, new ByteArrayOutputStream())
+
+        when: "run() takes the fast-check early-return path, same as above, but the lock is actually held"
+        step.run(resultsBuilder)
+
+        then: "the genuinely-held lock is still released here (not left for LockServiceCommandStep alone), so Sql-output commands still capture the release statement"
+        0 * mockLockService.waitForLock()
+        1 * mockLockService.releaseLock()
+    }
 }

@@ -44,14 +44,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
 
     private final ThreadLocal<Boolean> isDBLocked = ThreadLocal.withInitial(() -> true);
 
-    /**
-     * Tracks whether *this* method call acquired the changelog lock itself, as opposed to the lock
-     * already being held on behalf of this command by the CommandFramework pipeline's
-     * {@code LockServiceCommandStep} (wired in via {@code LockService} being a required dependency).
-     * Only a lock acquired here should be released here -- see #5438.
-     */
-    private final ThreadLocal<Boolean> lockAcquiredHere = ThreadLocal.withInitial(() -> false);
-
     public abstract String getChangelogFileArg(CommandScope commandScope);
 
     public abstract String getContextsArg(CommandScope commandScope);
@@ -113,7 +105,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             if (!isDBLocked.get()) {
                 LockServiceFactory.getInstance().getLockService(database).waitForLock();
                 isDBLocked.set(true);
-                lockAcquiredHere.set(true);
             }
 
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, scope.getDeploymentId());
@@ -154,14 +145,21 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             resultsBuilder.addResult("statusCode", 1);
             throw e;
         } finally {
-            //TODO: We should be able to remove this once we get the rest of the update family
-            // set up with the CommandFramework
-            if (lockAcquiredHere.get()) {
-                try {
-                    LockServiceFactory.getInstance().getLockService(database).releaseLock();
-                } catch (LockException e) {
-                    Scope.getCurrentScope().getLog(getClass()).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
+            // Check the lock's actual live state rather than trusting isDBLocked's bookkeeping: for
+            // UpdateCommandStep (the one subclass with no pipeline-managed LockServiceCommandStep,
+            // see requiredDependencies() below) isDBLocked is only true once this method has actually
+            // acquired the lock above. For the other subclasses, the pipeline already acquired the lock
+            // before this method ran, so isDBLocked's true default doesn't reflect whether *this* call
+            // should release it -- hasChangeLogLock() does. This also keeps releasing here (rather than
+            // only in LockServiceCommandStep#cleanUp) so that Sql-output commands still capture the
+            // "Release Database Lock" statement while their LoggingExecutor is still active; see #5438.
+            try {
+                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                if (lockService.hasChangeLogLock()) {
+                    lockService.releaseLock();
                 }
+            } catch (LockException e) {
+                Scope.getCurrentScope().getLog(getClass()).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
             }
         }
     }
@@ -210,7 +208,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         isDBLocked.remove();
-        lockAcquiredHere.remove();
         LockServiceFactory.getInstance().resetAll();
         Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
