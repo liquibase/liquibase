@@ -802,10 +802,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 throw new UnexpectedLiquibaseException(e);
             }
             try (InputStreamList isl = handlePropertyFileInputStreams(this.propertyFile)) {
-                if (isl == null) {
-                    throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(this.propertyFile));
-                }
-
                 LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
                 int precedenceOffset = 0;
                 for (Map.Entry<URI,InputStream> entry : isl.iterableWithURI()) {

@@ -16,6 +16,8 @@ import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
+
 @LiquibaseService(skip = true)
 public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProvider {
 
@@ -143,7 +145,7 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
     private static void trimAllProperties(Properties properties) {
         properties.forEach((key, value) -> {
             if (value instanceof String) {
-                properties.put(key, StringUtil.trimToEmpty((String) value));
+                properties.put(key, StringUtils.trimToEmpty((String) value));
             }
         });
     }
