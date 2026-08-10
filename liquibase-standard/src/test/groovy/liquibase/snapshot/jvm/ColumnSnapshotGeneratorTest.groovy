@@ -14,6 +14,8 @@ import liquibase.structure.core.Table
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.sql.Types
+
 class ColumnSnapshotGeneratorTest extends Specification {
     private ColumnSnapshotGenerator columnSnapshotGenerator
 
@@ -115,12 +117,18 @@ class ColumnSnapshotGeneratorTest extends Specification {
         "(3)::real"          | "float"   | new PostgresDatabase() | 3
         "3::real"            | "float"   | new PostgresDatabase() | 3
         "'a value'::varchar" | "varchar" | new PostgresDatabase() | "a value"
+        "'{}'::jsonb"        | "jsonb"   | new PostgresDatabase() | "{}"
+        "'[]'::json"         | "json"    | new PostgresDatabase() | "[]"
         "NULL"               | "enum"    | new MySQLDatabase()    | null
         "NULL"               | "varchar" | new MySQLDatabase()    | "NULL"
         3                    | "enum"    | new MySQLDatabase()    | 3
     }
 
     private static Column column(String datatype) {
-        new Column(Table, "catalog", "schema", "table", "col").setType(new DataType(datatype))
+        def type = new DataType(datatype)
+        if ((datatype == "json") || (datatype == "jsonb")) {
+            type.setDataTypeId(Types.OTHER)
+        }
+        new Column(Table, "catalog", "schema", "table", "col").setType(type)
     }
 }

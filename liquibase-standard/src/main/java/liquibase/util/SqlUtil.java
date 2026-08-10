@@ -267,6 +267,10 @@ public abstract class SqlUtil {
                 if (database instanceof AbstractDb2Database && typeName.equalsIgnoreCase("DECFLOAT")) {
                     return new BigDecimal(stringVal);
                 }
+                if ((database instanceof PostgresDatabase)
+                        && ("json".equalsIgnoreCase(typeName) || "jsonb".equalsIgnoreCase(typeName))) {
+                    return stringVal;
+                }
                 return new DatabaseFunction(stringVal);
             } else if (typeId == Types.REAL) {
                 return new BigDecimal(stringVal.trim());
