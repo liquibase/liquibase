@@ -8,7 +8,7 @@ import liquibase.database.*;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MariaDBDatabase;
 import liquibase.database.core.MockDatabase;
-import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.AbstractPostgresDatabase;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -171,7 +171,7 @@ public class SnapshotGeneratorFactory {
                                         database.getLiquibaseSchemaName(), example.getName(), Table.class))));
                 return true;
             } catch (DatabaseException e) {
-                if (database instanceof PostgresDatabase) {
+                if (database instanceof AbstractPostgresDatabase) {
                     database.rollback(); // throws "current transaction is aborted" unless we roll back the connection
                 }
                 return false;

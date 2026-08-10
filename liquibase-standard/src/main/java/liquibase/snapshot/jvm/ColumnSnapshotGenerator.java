@@ -92,7 +92,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
             example.setAttribute(LIQUIBASE_COMPLETE, null);
 
-            if (column == null && database instanceof PostgresDatabase && looksLikeFunction(example.getName())) {
+            if (column == null && database instanceof AbstractPostgresDatabase && looksLikeFunction(example.getName())) {
                 ((Column) example).setComputed(true);
                 return example;
             }
@@ -378,7 +378,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 // NOTE:  I am commenting this line out currently to fix an issue with older snapshots
                 // columnMetadataResultSet.set("COLUMN_SIZE", null);
             }
-        } else if (database instanceof PostgresDatabase) {
+        } else if (database instanceof AbstractPostgresDatabase) {
             columnTypeName = database.unescapeDataTypeName(columnTypeName);
             // https://www.postgresql.org/message-id/20061016193942.GF23302%40svana.org says that internally array datatypes are defined with an underscore prefix.
             if (columnTypeName.startsWith("_")) {
@@ -437,7 +437,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             columnSize = columnMetadataResultSet.getInt("COLUMN_SIZE");
             decimalDigits = columnMetadataResultSet.getInt("DECIMAL_DIGITS");
             if ((decimalDigits != null) && decimalDigits.equals(0)) {
-                if (dataType == Types.TIME && database instanceof PostgresDatabase) {
+                if (dataType == Types.TIME && database instanceof AbstractPostgresDatabase) {
                     //that is allowed
                 } else {
                     decimalDigits = null;
@@ -463,7 +463,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
-        if ((database instanceof PostgresDatabase) && columnSize != null) {
+        if ((database instanceof AbstractPostgresDatabase) && columnSize != null) {
             if (columnSize.equals(Integer.MAX_VALUE)) {
                 columnSize = null;
             } else if (columnTypeName.equalsIgnoreCase("numeric") && columnSize.equals(0)) {
@@ -567,7 +567,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
-        if (database instanceof PostgresDatabase) {
+        if (database instanceof AbstractPostgresDatabase) {
             readDefaultValueForPostgresDatabase(columnMetadataResultSet, columnInfo);
         }
 
