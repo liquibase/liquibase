@@ -809,16 +809,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             } catch (IOException | MojoFailureException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
-            try (InputStreamList isl = handlePropertyFileInputStreams(this.propertyFile)) {
-                LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
-                int precedenceOffset = 0;
-                for (Map.Entry<URI,InputStream> entry : isl.iterableWithURI()) {
-                    final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(entry.getValue(), entry.getKey().toString(), ++precedenceOffset);
-                    liquibaseConfiguration.registerProvider(fileProvider);
-                }
-            } catch (IOException | MojoFailureException e) {
-                throw new UnexpectedLiquibaseException(e);
-            }
         }
     }
 
