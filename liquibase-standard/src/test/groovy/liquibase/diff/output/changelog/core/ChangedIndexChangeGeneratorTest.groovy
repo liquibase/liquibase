@@ -153,33 +153,40 @@ class ChangedIndexChangeGeneratorTest extends Specification {
         createChange.getSchemaName() == "ref_schema"
     }
 
-    def "fixChanged does not throw ClassCastException when a backing Index of a swapped-column PrimaryKey is delegated (issue #7846)"() {
-        given: "Reference PK backed by an Index with column order [a, b]"
+    def "fixChanged delegates a PK backing Index and drops the target PK name (issues #7500/#7846)"() {
+        given: "Reference PK 'PK_REF' backed by an Index with column order [a, b]"
         def referenceTable = new Table(null, "public", "test_table")
         def refColA = new Column("a")
         def refColB = new Column("b")
         def referenceIndex = new Index()
-        referenceIndex.setName("PRIMARY")
+        referenceIndex.setName("IDX_REF")
         referenceIndex.setRelation(referenceTable)
         referenceIndex.setColumns([refColA, refColB])
         referenceIndex.setUnique(true)
         def referencePk = new PrimaryKey()
-        referencePk.setName("PRIMARY")
+        referencePk.setName("PK_REF")
         referencePk.setTable(referenceTable)
         referencePk.addColumn(0, refColA)
         referencePk.addColumn(1, refColB)
         referencePk.setBackingIndex(referenceIndex)
         referenceTable.setPrimaryKey(referencePk)
 
-        and: "Comparison Index (target database) with swapped column order [b, a]"
+        and: "Target PK 'PK_TARGET' backed by an Index with swapped column order [b, a]"
         def comparisonTable = new Table(null, "public", "test_table")
         def compColA = new Column("a")
         def compColB = new Column("b")
         def comparisonIndex = new Index()
-        comparisonIndex.setName("PRIMARY")
+        comparisonIndex.setName("IDX_TARGET")
         comparisonIndex.setRelation(comparisonTable)
         comparisonIndex.setColumns([compColB, compColA])
         comparisonIndex.setUnique(true)
+        def comparisonPk = new PrimaryKey()
+        comparisonPk.setName("PK_TARGET")
+        comparisonPk.setTable(comparisonTable)
+        comparisonPk.addColumn(0, compColB)
+        comparisonPk.addColumn(1, compColA)
+        comparisonPk.setBackingIndex(comparisonIndex)
+        comparisonTable.setPrimaryKey(comparisonPk)
 
         and: "ObjectDifferences describing the backing Index change (comparison object is the Index, not a PrimaryKey)"
         def compareControl = new CompareControl()
@@ -195,11 +202,15 @@ class ChangedIndexChangeGeneratorTest extends Specification {
         when: "fixChanged on the backing Index delegates to the PrimaryKey change generator"
         def changes = generator.fixChanged(referenceIndex, differences, outputControl, referenceDatabase, comparisonDatabase, null)
 
-        then: "No ClassCastException (issue #7846); produces drop + add PrimaryKey changes"
+        then: "No ClassCastException (#7846); produces drop + add PrimaryKey changes"
         noExceptionThrown()
         changes != null
         changes.length == 2
         changes[0] instanceof DropPrimaryKeyChange
         changes[1] instanceof AddPrimaryKeyChange
+
+        and: "Drop uses the target PK name, add uses the reference PK name (#7500 preserved on the delegation path)"
+        ((DropPrimaryKeyChange) changes[0]).getConstraintName() == "PK_TARGET"
+        ((AddPrimaryKeyChange) changes[1]).getConstraintName() == "PK_REF"
     }
 }
