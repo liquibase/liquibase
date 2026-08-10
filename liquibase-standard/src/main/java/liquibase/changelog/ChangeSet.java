@@ -396,7 +396,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     public CheckSum generateCheckSum(ChecksumVersion version) {
         try {
             return Scope.child(Collections.singletonMap(Scope.Attr.checksumVersion.name(), version), () -> {
-                if (checkSum == null) {
+                // The cached value can only be reused when it was calculated with the checksum version that is
+                // in effect now. Otherwise a caller asking for a different version would silently get back a
+                // checksum belonging to the previously requested one, including its version number.
+                if (checkSum == null || checkSum.getVersion() != getCurrentScope().getChecksumVersion().getVersion()) {
                     StringBuilder stringToMD5 = new StringBuilder();
                     for (Change change : this.getChanges()) {
                         // checksum v8 requires changes that are applied even to other databases to be calculated

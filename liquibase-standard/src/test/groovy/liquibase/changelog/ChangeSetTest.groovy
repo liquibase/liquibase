@@ -1,6 +1,7 @@
 package liquibase.changelog
 
 
+import liquibase.ChecksumVersion
 import liquibase.Scope
 import liquibase.change.CheckSum
 import liquibase.change.ColumnConfig
@@ -91,6 +92,64 @@ class ChangeSetTest extends Specification {
         assert !md5Sum1.equals(md5Sum2)
     }
 
+    @Unroll
+    def "generateCheckSum honors the requested version after another version was already calculated"() {
+        when:
+        def changeSet = new ChangeSet("testId", "testAuthor", false, false, "com/example/test.xml", null, null, null)
+        changeSet.addChange(createTableChangeWithPartitionBy())
+
+        def firstCheckSum = changeSet.generateCheckSum(firstVersion)
+        def secondCheckSum = changeSet.generateCheckSum(secondVersion)
+
+        then:
+        firstCheckSum.getVersion() == firstVersion.getVersion()
+        secondCheckSum.getVersion() == secondVersion.getVersion()
+        firstCheckSum != secondCheckSum
+
+        where:
+        firstVersion          | secondVersion
+        ChecksumVersion.V8    | ChecksumVersion.V9
+        ChecksumVersion.V9    | ChecksumVersion.V8
+    }
+
+    def "generateCheckSum keeps caching the result when the same version is requested again"() {
+        when:
+        def changeSet = new ChangeSet("testId", "testAuthor", false, false, "com/example/test.xml", null, null, null)
+        changeSet.addChange(createTableChangeWithPartitionBy())
+
+        def firstCall = changeSet.generateCheckSum(ChecksumVersion.V9)
+        def secondCall = changeSet.generateCheckSum(ChecksumVersion.V9)
+
+        then:
+        firstCall.is(secondCall)
+    }
+
+    def "isCheckSumValid compares against the stored version even when a newer checksum was calculated first"() {
+        when:
+        def storedChangeSet = new ChangeSet("testId", "testAuthor", false, false, "com/example/test.xml", null, null, null)
+        storedChangeSet.addChange(createTableChangeWithPartitionBy())
+        def storedCheckSum = storedChangeSet.generateCheckSum(ChecksumVersion.V8)
+
+        // mimics the runtime order of ChangeSetStatus/RanChangeSet/MarkChangeSetRanGenerator, which
+        // materialize the checksum at the latest version before validation reaches the stored one
+        def changeSet = new ChangeSet("testId", "testAuthor", false, false, "com/example/test.xml", null, null, null)
+        changeSet.addChange(createTableChangeWithPartitionBy())
+        changeSet.generateCheckSum(ChecksumVersion.V9)
+
+        then:
+        changeSet.isCheckSumValid(storedCheckSum)
+    }
+
+    private static CreateTableChange createTableChangeWithPartitionBy() {
+        def change = new CreateTableChange()
+        change.setTableName("TABLE_NAME")
+        // partitionBy is excluded from the checksum up to V8 and included from V9 on, so the two
+        // versions produce different checksums for the very same change
+        change.setPartitionBy("RANGE (created_at)")
+        change.addColumn(new ColumnConfig().setName("COLUMN_NAME").setType("INT"))
+        return change
+    }
+
     def isCheckSumValid_validCheckSum() {
         when:
         def changeSet = new ChangeSet("1", "2", false, false, "/test.xml", null, null, null)
@@ -113,7 +172,9 @@ class ChangeSetTest extends Specification {
         CheckSum checkSum = CheckSum.parse("8:asdf")
 
         ChangeSet changeSet = new ChangeSet("1", "2", false, false, "/test.xml", null, null, null)
-        changeSet.addValidCheckSum(changeSet.generateCheckSum().toString())
+        // isCheckSumValid calculates the current checksum with the version of the stored one, so the
+        // valid checksum has to be registered for that same version to be comparable
+        changeSet.addValidCheckSum(changeSet.generateCheckSum(ChecksumVersion.V8).toString())
 
         then:
         assert changeSet.isCheckSumValid(checkSum)

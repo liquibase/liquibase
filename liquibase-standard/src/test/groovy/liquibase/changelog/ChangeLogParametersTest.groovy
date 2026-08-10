@@ -4,6 +4,8 @@ import liquibase.*
 import liquibase.database.core.MockDatabase
 import liquibase.database.core.MySQLDatabase
 import liquibase.exception.UnknownChangeLogParameterException
+import liquibase.configuration.LiquibaseConfiguration
+import liquibase.configuration.core.DefaultsFileValueProvider
 import liquibase.parser.ChangeLogParserConfiguration
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -158,5 +160,22 @@ class ChangeLogParametersTest extends Specification {
 
         cleanup:
         System.clearProperty("SOME_PROPERTY")
+    }
+
+    def "parameter entries of a scoped defaults file provider become changelog parameters"() {
+        given:
+        // integrations keep the defaults file provider in the scope rather than registering it (#6927),
+        // so reading only the registered providers here silently dropped every parameter.* entry
+        def provider = new DefaultsFileValueProvider(
+                new ByteArrayInputStream("parameter.mytable=CUSTOM_TABLE_NAME".getBytes()), "test defaults")
+        def changeLogParameters = new ChangeLogParameters()
+
+        when:
+        Scope.child([(LiquibaseConfiguration.SCOPED_VALUE_PROVIDERS_KEY): [provider]], {
+            changeLogParameters.addDefaultFileProperties()
+        } as Scope.ScopedRunner)
+
+        then:
+        changeLogParameters.getValue("mytable", null) == "CUSTOM_TABLE_NAME"
     }
 }

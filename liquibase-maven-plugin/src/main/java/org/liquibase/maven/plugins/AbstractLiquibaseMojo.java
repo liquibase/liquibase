@@ -8,6 +8,7 @@ import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.CommandScope;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.configuration.ConfigurationValueProvider;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.database.Database;
@@ -588,95 +589,102 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                     configureFieldsAndValues();
 
-                    if (showBanner) {
-                        getLog().info(CommandLineUtils.getBanner());
-                    }
+                    // The property-file provider is visible only to this execution's scope: registering it
+                    // on the shared LiquibaseConfiguration leaked one module's properties into other goals
+                    // and into parallel executions (#6927)
+                    List<ConfigurationValueProvider> mojoValueProviders = buildPropertyFileValueProviders();
+                    Scope.child(Collections.singletonMap(LiquibaseConfiguration.SCOPED_VALUE_PROVIDERS_KEY, mojoValueProviders), () -> {
 
-                    // Displays the settings for the Mojo depending on verbosity mode.
-                    displayMojoSettings();
+                        if (showBanner) {
+                            getLog().info(CommandLineUtils.getBanner());
+                        }
 
-                    // Check that all the parameters that must be specified have been by the user.
-                    checkRequiredParametersAreSpecified();
+                        // Displays the settings for the Mojo depending on verbosity mode.
+                        displayMojoSettings();
 
-                    Database database = null;
-                    try {
-                        if (databaseConnectionRequired()) {
-                            String dbPassword = (emptyPassword || (password == null)) ? "" : password;
-                            String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
-                            database = CommandLineUtils.createDatabaseObject(mavenClassLoader,
-                                    url,
-                                    username,
-                                    dbPassword,
-                                    driver,
-                                    defaultCatalogName,
-                                    defaultSchemaName,
-                                    outputDefaultCatalog,
-                                    outputDefaultSchema,
-                                    databaseClass,
-                                    driverPropsFile,
-                                    propertyProviderClass,
-                                    changelogCatalogName,
-                                    changelogSchemaName,
-                                    databaseChangeLogTableName,
-                                    databaseChangeLogLockTableName);
-                            DbUrlConnectionCommandStep.logMdc(url, database);
-                            liquibase = createLiquibase(database);
+                        // Check that all the parameters that must be specified have been by the user.
+                        checkRequiredParametersAreSpecified();
 
-                            configureChangeLogProperties();
+                        Database database = null;
+                        try {
+                            if (databaseConnectionRequired()) {
+                                String dbPassword = (emptyPassword || (password == null)) ? "" : password;
+                                String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
+                                database = CommandLineUtils.createDatabaseObject(mavenClassLoader,
+                                        url,
+                                        username,
+                                        dbPassword,
+                                        driver,
+                                        defaultCatalogName,
+                                        defaultSchemaName,
+                                        outputDefaultCatalog,
+                                        outputDefaultSchema,
+                                        databaseClass,
+                                        driverPropsFile,
+                                        propertyProviderClass,
+                                        changelogCatalogName,
+                                        changelogSchemaName,
+                                        databaseChangeLogTableName,
+                                        databaseChangeLogLockTableName);
+                                DbUrlConnectionCommandStep.logMdc(url, database);
+                                liquibase = createLiquibase(database);
 
-                            ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
-                                    liquibase.getDatabase(), liquibase.getResourceAccessor(),
-                                    changeExecListenerClass, changeExecListenerPropertiesFile);
-                            defaultChangeExecListener = new DefaultChangeExecListener(listener);
-                            liquibase.setChangeExecListener(defaultChangeExecListener);
+                                configureChangeLogProperties();
 
-                            getLog().debug("expressionVars = " + expressionVars);
+                                ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
+                                        liquibase.getDatabase(), liquibase.getResourceAccessor(),
+                                        changeExecListenerClass, changeExecListenerPropertiesFile);
+                                defaultChangeExecListener = new DefaultChangeExecListener(listener);
+                                liquibase.setChangeExecListener(defaultChangeExecListener);
 
-                            if (expressionVars != null) {
-                                for (Map.Entry<Object, Object> var : expressionVars.entrySet()) {
-                                    this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
-                                }
-                            }
+                                getLog().debug("expressionVars = " + expressionVars);
 
-                            getLog().debug("expressionVariables = " + expressionVariables);
-                            if (expressionVariables != null) {
-                                for (Map.Entry var : (Set<Map.Entry>) expressionVariables.entrySet()) {
-                                    if (var.getValue() != null) {
+                                if (expressionVars != null) {
+                                    for (Map.Entry<Object, Object> var : expressionVars.entrySet()) {
                                         this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
                                     }
                                 }
-                            }
 
-                            if (clearCheckSums) {
-                                getLog().info("Clearing the Liquibase checksums on the database");
-                                liquibase.clearCheckSums();
-                            }
+                                getLog().debug("expressionVariables = " + expressionVariables);
+                                if (expressionVariables != null) {
+                                    for (Map.Entry var : (Set<Map.Entry>) expressionVariables.entrySet()) {
+                                        if (var.getValue() != null) {
+                                            this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
+                                        }
+                                    }
+                                }
 
-                            getLog().info("Executing on Database: " + url);
+                                if (clearCheckSums) {
+                                    getLog().info("Clearing the Liquibase checksums on the database");
+                                    liquibase.clearCheckSums();
+                                }
 
-                            if (isPromptOnNonLocalDatabase()) {
-                                getLog().info("NOTE: The promptOnLocalDatabase functionality has been removed");
+                                getLog().info("Executing on Database: " + url);
+
+                                if (isPromptOnNonLocalDatabase()) {
+                                    getLog().info("NOTE: The promptOnLocalDatabase functionality has been removed");
+                                }
                             }
+                            setupBindInfoPackage();
+
+                            //
+                            // Add another scope child with a map so that
+                            // we can set the preserveSchemaCase property,
+                            // which might have been specified in a defaults file
+                            //
+                            Map<String, Object> innerScopeValues = new HashMap<>();
+                            innerScopeValues.put(key, preserveSchemaCase);
+                            innerScopeValues.put(LiquibaseCommandLineConfiguration.SUPPRESS_LIQUIBASE_SQL.getKey(), suppressLiquibaseSql);
+                            Scope.child(innerScopeValues, () -> performLiquibaseTask(liquibase));
+                        } catch (LiquibaseException e) {
+                            cleanup(database);
+                            throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
                         }
-                        setupBindInfoPackage();
 
-                        //
-                        // Add another scope child with a map so that
-                        // we can set the preserveSchemaCase property,
-                        // which might have been specified in a defaults file
-                        //
-                        Map<String, Object> innerScopeValues = new HashMap<>();
-                        innerScopeValues.put(key, preserveSchemaCase);
-                        innerScopeValues.put(LiquibaseCommandLineConfiguration.SUPPRESS_LIQUIBASE_SQL.getKey(), suppressLiquibaseSql);
-                        Scope.child(innerScopeValues, () -> performLiquibaseTask(liquibase));
-                    } catch (LiquibaseException e) {
                         cleanup(database);
-                        throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
-                    }
-
-                    cleanup(database);
-                    getLog().info(MavenUtils.LOG_SEPARATOR);
-                    getLog().info("");
+                        getLog().info(MavenUtils.LOG_SEPARATOR);
+                        getLog().info("");
+                    });
                 });
             });
         } catch (Exception e) {
@@ -814,6 +822,27 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
     }
 
+    /**
+     * Builds the value providers backed by the configured property file, if any. They are exposed through
+     * {@link LiquibaseConfiguration#SCOPED_VALUE_PROVIDERS_KEY} for this execution only instead of being
+     * registered on the shared {@link LiquibaseConfiguration}.
+     */
+    private List<ConfigurationValueProvider> buildPropertyFileValueProviders() throws MojoExecutionException {
+        List<ConfigurationValueProvider> propertyFileValueProviders = new ArrayList<>();
+        if (propertyFile == null) {
+            return propertyFileValueProviders;
+        }
+        try (InputStreamList isl = handlePropertyFileInputStreams(propertyFile)) {
+            int precedenceOffset = 0;
+            for (Map.Entry<URI,InputStream> entry : isl.iterableWithURI()) {
+                propertyFileValueProviders.add(new DefaultsFileValueProvider(entry.getValue(), entry.getKey().toString(), ++precedenceOffset));
+            }
+            return propertyFileValueProviders;
+        } catch (IOException | MojoFailureException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
     protected void configureChangeLogProperties() throws MojoFailureException, MojoExecutionException {
         if (propertyFile != null) {
             getLog().info("Parsing Liquibase Properties File " + propertyFile + " for changeLog parameters");
@@ -822,6 +851,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 for (Map.Entry<Object,Object> entry : props.entrySet()) {
                     String key = (String) entry.getKey();
                     if (key.startsWith("parameter.")) {
+
                         getLog().debug("Setting changeLog parameter " + key);
                         liquibase.setChangeLogParameter(key.replaceFirst("^parameter.", ""), entry.getValue());
                     }

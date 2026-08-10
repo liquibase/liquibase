@@ -53,7 +53,7 @@ public class Contexts {
         if (contexts == null) {
             return;
         }
-        for (String context : StringUtil.splitAndTrim(contexts, ",")) {
+        for (String context : ContextExpression.splitAndTrimContextExpressions(contexts)) {
             this.contextStore.add(context.toLowerCase());
         }
 
