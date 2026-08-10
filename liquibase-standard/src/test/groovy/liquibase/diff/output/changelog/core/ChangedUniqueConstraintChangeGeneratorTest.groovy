@@ -5,6 +5,7 @@ import liquibase.change.core.DropUniqueConstraintChange
 import liquibase.database.core.H2Database
 import liquibase.diff.ObjectDifferences
 import liquibase.diff.compare.CompareControl
+import liquibase.diff.compare.DatabaseObjectComparatorFactory
 import liquibase.diff.output.DiffOutputControl
 import liquibase.structure.core.Column
 import liquibase.structure.core.Index
@@ -147,12 +148,12 @@ class ChangedUniqueConstraintChangeGeneratorTest extends Specification {
     }
 
     def "fixChanged delegates a UniqueConstraint backing Index and drops the target UC name (issues #7500/#7846)"() {
-        given: "Reference UniqueConstraint 'UC_REF' backed by an Index with column order [a, b]"
+        given: "Reference UniqueConstraint 'UC_REF' backed by an Index named UC_IDX with column order [a, b]"
         def referenceTable = new Table(null, "public", "test_table")
         def refColA = new Column("a")
         def refColB = new Column("b")
         def referenceIndex = new Index()
-        referenceIndex.setName("IDX_REF")
+        referenceIndex.setName("UC_IDX")
         referenceIndex.setRelation(referenceTable)
         referenceIndex.setColumns([refColA, refColB])
         referenceIndex.setUnique(true)
@@ -163,12 +164,12 @@ class ChangedUniqueConstraintChangeGeneratorTest extends Specification {
         referenceUc.setBackingIndex(referenceIndex)
         referenceTable.getUniqueConstraints().add(referenceUc)
 
-        and: "Target UniqueConstraint 'UC_TARGET' backed by an Index with swapped column order [b, a]"
+        and: "Target UniqueConstraint 'UC_TARGET' backed by an Index also named UC_IDX with swapped column order [b, a]"
         def comparisonTable = new Table(null, "public", "test_table")
         def compColA = new Column("a")
         def compColB = new Column("b")
         def comparisonIndex = new Index()
-        comparisonIndex.setName("IDX_TARGET")
+        comparisonIndex.setName("UC_IDX")
         comparisonIndex.setRelation(comparisonTable)
         comparisonIndex.setColumns([compColB, compColA])
         comparisonIndex.setUnique(true)
@@ -189,6 +190,9 @@ class ChangedUniqueConstraintChangeGeneratorTest extends Specification {
         def outputControl = new DiffOutputControl()
         def referenceDatabase = new H2Database()
         def comparisonDatabase = new H2Database()
+
+        and: "Both backing indexes are the same logical object (same name, swapped columns), as the diff pipeline would pair them"
+        DatabaseObjectComparatorFactory.getInstance().isSameObject(referenceIndex, comparisonIndex, differences.getSchemaComparisons(), comparisonDatabase)
 
         when: "fixChanged on the backing Index delegates to the UniqueConstraint change generator"
         def changes = generator.fixChanged(referenceIndex, differences, outputControl, referenceDatabase, comparisonDatabase, null)

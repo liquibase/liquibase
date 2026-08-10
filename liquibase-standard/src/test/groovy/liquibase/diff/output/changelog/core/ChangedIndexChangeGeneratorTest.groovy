@@ -7,6 +7,7 @@ import liquibase.change.core.DropPrimaryKeyChange
 import liquibase.database.core.H2Database
 import liquibase.diff.ObjectDifferences
 import liquibase.diff.compare.CompareControl
+import liquibase.diff.compare.DatabaseObjectComparatorFactory
 import liquibase.diff.output.DiffOutputControl
 import liquibase.structure.core.Column
 import liquibase.structure.core.Index
@@ -154,12 +155,12 @@ class ChangedIndexChangeGeneratorTest extends Specification {
     }
 
     def "fixChanged delegates a PK backing Index and drops the target PK name (issues #7500/#7846)"() {
-        given: "Reference PK 'PK_REF' backed by an Index with column order [a, b]"
+        given: "Reference PK 'PK_REF' backed by an Index named PRIMARY with column order [a, b]"
         def referenceTable = new Table(null, "public", "test_table")
         def refColA = new Column("a")
         def refColB = new Column("b")
         def referenceIndex = new Index()
-        referenceIndex.setName("IDX_REF")
+        referenceIndex.setName("PRIMARY")
         referenceIndex.setRelation(referenceTable)
         referenceIndex.setColumns([refColA, refColB])
         referenceIndex.setUnique(true)
@@ -171,12 +172,12 @@ class ChangedIndexChangeGeneratorTest extends Specification {
         referencePk.setBackingIndex(referenceIndex)
         referenceTable.setPrimaryKey(referencePk)
 
-        and: "Target PK 'PK_TARGET' backed by an Index with swapped column order [b, a]"
+        and: "Target PK 'PK_TARGET' backed by an Index also named PRIMARY with swapped column order [b, a]"
         def comparisonTable = new Table(null, "public", "test_table")
         def compColA = new Column("a")
         def compColB = new Column("b")
         def comparisonIndex = new Index()
-        comparisonIndex.setName("IDX_TARGET")
+        comparisonIndex.setName("PRIMARY")
         comparisonIndex.setRelation(comparisonTable)
         comparisonIndex.setColumns([compColB, compColA])
         comparisonIndex.setUnique(true)
@@ -198,6 +199,9 @@ class ChangedIndexChangeGeneratorTest extends Specification {
         def outputControl = new DiffOutputControl()
         def referenceDatabase = new H2Database()
         def comparisonDatabase = new H2Database()
+
+        and: "Both backing indexes are the same logical object (same name, swapped columns), as the diff pipeline would pair them"
+        DatabaseObjectComparatorFactory.getInstance().isSameObject(referenceIndex, comparisonIndex, differences.getSchemaComparisons(), comparisonDatabase)
 
         when: "fixChanged on the backing Index delegates to the PrimaryKey change generator"
         def changes = generator.fixChanged(referenceIndex, differences, outputControl, referenceDatabase, comparisonDatabase, null)
