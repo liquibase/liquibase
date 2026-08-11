@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Map;
 
 @DatabaseChange(name = "createProcedure", description = "Defines a stored procedure.", priority = ChangeMetaData.PRIORITY_DEFAULT)
@@ -414,6 +415,10 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
 
         if ("procedureText".equals(parameterName) || "procedureBody".equals(parameterName)) {
             Map<String, Object> returnMap = super.createExampleValueMetaData(parameterName, changePropertyAnnotation);
+            if (returnMap == null) {
+                // The parent returns null when there is no DatabaseChangeProperty annotation to read defaults from.
+                returnMap = new HashMap<>();
+            }
             returnMap.put(
                 new HsqlDatabase().getShortName(),
                 "CREATE PROCEDURE new_customer(firstname VARCHAR(50), lastname VARCHAR(50))\n" +

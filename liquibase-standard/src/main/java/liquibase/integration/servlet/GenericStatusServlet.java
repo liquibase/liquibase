@@ -49,13 +49,13 @@ class GenericStatusServlet {
             if (liquibaseRunLog.isEmpty()) {
                 writer.println("<b>Liquibase did not run</b>");
             } else {
-                writer.println("<b>View level: " + getLevelLink(Level.SEVERE, currentLevel, httpServletRequest)
-                        + " " + getLevelLink(Level.WARNING, currentLevel, httpServletRequest)
-                        + " " + getLevelLink(Level.INFO, currentLevel, httpServletRequest)
-                        + " " + getLevelLink(Level.CONFIG, currentLevel, httpServletRequest)
-                        + " " + getLevelLink(Level.FINE, currentLevel, httpServletRequest)
-                        + " " + getLevelLink(Level.FINER, currentLevel, httpServletRequest)
-                        + " " + getLevelLink(Level.FINEST, currentLevel, httpServletRequest)
+                writer.println("<b>View level: " + getLevelLink(Level.SEVERE, currentLevel)
+                        + " " + getLevelLink(Level.WARNING, currentLevel)
+                        + " " + getLevelLink(Level.INFO, currentLevel)
+                        + " " + getLevelLink(Level.CONFIG, currentLevel)
+                        + " " + getLevelLink(Level.FINE, currentLevel)
+                        + " " + getLevelLink(Level.FINER, currentLevel)
+                        + " " + getLevelLink(Level.FINEST, currentLevel)
                         + "</b>");
 
                 writer.println("<hr>");
@@ -65,9 +65,13 @@ class GenericStatusServlet {
                 writer.println("<pre>");
                 for (LogRecord record : liquibaseRunLog) {
                     if (record.getLevel().intValue() >= currentLevel.intValue()) {
-                        writer.println(record.getLevel() + ": " + record.getMessage());
+                        writer.println(record.getLevel() + ": " + escapeHtml(record.getMessage()));
                         if (record.getThrown() != null) {
-                            record.getThrown().printStackTrace(writer);
+                            Throwable thrown = record.getThrown();
+                            // The stack trace goes to the server log rather than the response, so that paths,
+                            // internal class structure and dependency versions are not disclosed to the caller.
+                            Scope.getCurrentScope().getLog(getClass()).severe("Liquibase run error", thrown);
+                            writer.println(escapeHtml(thrown.getClass().getSimpleName() + ": " + thrown.getMessage()));
                         }
                     }
                 }
@@ -87,11 +91,50 @@ class GenericStatusServlet {
         }
     }
 
-    private String getLevelLink(Level level, Level currentLevel, GenericServletWrapper.HttpServletRequest request) {
+    /**
+     * Escapes text that is written into this page. Deliberately dependency-free: this servlet ships inside
+     * liquibase-core, which cannot assume that jars beyond the ones in the distribution's internal/lib are on the
+     * classpath. Covers the characters that matter both in element text and inside a quoted attribute.
+     */
+    private static String escapeHtml(String text) {
+        if (text == null) {
+            return null;
+        }
+        StringBuilder escaped = new StringBuilder(text.length());
+        for (int i = 0; i < text.length(); i++) {
+            char character = text.charAt(i);
+            switch (character) {
+                case '&':
+                    escaped.append("&amp;");
+                    break;
+                case '<':
+                    escaped.append("&lt;");
+                    break;
+                case '>':
+                    escaped.append("&gt;");
+                    break;
+                case '"':
+                    escaped.append("&quot;");
+                    break;
+                case '\'':
+                    escaped.append("&#39;");
+                    break;
+                default:
+                    escaped.append(character);
+            }
+        }
+        return escaped.toString();
+    }
+
+    /**
+     * Builds the link used to switch the displayed log level. The link is deliberately relative (query string only) so
+     * that no part of the incoming request is reflected back into the response.
+     */
+    private String getLevelLink(Level level, Level currentLevel) {
         if (currentLevel.equals(level)) {
             return level.getName();
         } else {
-            return "<a href=" + request.getRequestURI() + "?logLevel=" + level.getName() + ">" + level.getName() + "</a>";
+            return "<a href=\"?logLevel=" + level.getName() + "\">" + level.getName() + "</a>";
         }
     }
 }

@@ -167,6 +167,15 @@ class ChangeSetTest extends Specification {
         assert !changeSet.isCheckSumValid(checkSum)
     }
 
+    def isCheckSumValid_nullCheckSum() {
+        when:
+        def changeSet = new ChangeSet("1", "2", false, false, "/test.xml", null, null, null)
+
+        then:
+        // Nothing was stored to compare against, so there is nothing to invalidate.
+        assert changeSet.isCheckSumValid(null)
+    }
+
     def isCheckSumValid_differentButValidCheckSum() {
         when:
         CheckSum checkSum = CheckSum.parse("8:asdf")

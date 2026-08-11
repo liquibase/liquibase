@@ -2,6 +2,7 @@ package liquibase.database;
 
 import liquibase.exception.ValidationErrors;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -69,12 +70,13 @@ public class DatabaseList {
     }
 
     public static Set<String> toDbmsSet(String dbmsList) {
-        Set<String> dbmsSet = null;
-        if (StringUtil.trimToNull(dbmsList) != null) {
-            dbmsSet = new HashSet<>();
-            for (String string : dbmsList.toLowerCase().split(",")) {
-                dbmsSet.add(string.trim());
-            }
+        String trimmedDbmsList = StringUtils.trimToNull(dbmsList);
+        if (trimmedDbmsList == null) {
+            return null;
+        }
+        Set<String> dbmsSet = new HashSet<>();
+        for (String string : trimmedDbmsList.toLowerCase().split(",")) {
+            dbmsSet.add(string.trim());
         }
         return dbmsSet;
     }
