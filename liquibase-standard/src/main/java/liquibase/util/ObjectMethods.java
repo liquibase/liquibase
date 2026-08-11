@@ -1,8 +1,8 @@
 package liquibase.util;
 
-import static java.util.Locale.ROOT;
 import static java.util.stream.Collectors.toMap;
 
+import java.beans.Introspector;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,8 +34,7 @@ final class ObjectMethods {
   }
 
   private String propertyName(String methodName, String prefix) {
-    int length = prefix.length();
-    return methodName.substring(length, length + 1).toLowerCase(ROOT) + methodName.substring(length + 1);
+    return Introspector.decapitalize(methodName.substring(prefix.length()));
   }
 
   Method getReadMethod(String propertyName) {
