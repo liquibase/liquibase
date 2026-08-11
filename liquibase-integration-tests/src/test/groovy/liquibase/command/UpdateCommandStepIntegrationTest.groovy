@@ -49,6 +49,38 @@ class UpdateCommandStepIntegrationTest extends Specification {
         Scope.currentScope.getSingleton(FastCheckService.class).isUpToDateFastCheck(null, h2.getDatabaseFromFactory(), liquibase.getDatabaseChangeLog(), context, label)
     }
 
+    def "rollback invalidates the fast check cache before a subsequent update"() {
+        given:
+        def database = h2.getDatabaseFromFactory()
+        def liquibase = new Liquibase("liquibase/update-tests.yml", new ClassLoaderResourceAccessor(), database)
+        def contexts = new Contexts()
+        def labels = new LabelExpression()
+        def fastCheckService = Scope.currentScope.getSingleton(FastCheckService.class)
+        def executor = Scope.currentScope.getSingleton(ExecutorService.class).getExecutor("jdbc", database)
+        fastCheckService.clearCache()
+        liquibase.update(contexts, labels)
+        assert fastCheckService.isUpToDateFastCheck(null, database, liquibase.getDatabaseChangeLog(), contexts, labels)
+
+        when:
+        liquibase.rollback(1, contexts, labels)
+
+        then:
+        executor.queryForInt(new RawParameterizedSqlStatement(
+                "select count(1) from databasechangelog where id = ? and author = ? and filename = ?",
+                "1", "Liquibase User", "liquibase/update-tests.yml")) == 0
+
+        when:
+        liquibase.update(contexts, labels)
+
+        then:
+        executor.queryForInt(new RawParameterizedSqlStatement(
+                "select count(1) from databasechangelog where id = ? and author = ? and filename = ?",
+                "1", "Liquibase User", "liquibase/update-tests.yml")) == 1
+
+        cleanup:
+        fastCheckService.clearCache()
+    }
+
     def "validate update is successfully executed even when there is by a context mismatch and a non-existent file is referenced in a changeSet"() {
         when:
         def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
