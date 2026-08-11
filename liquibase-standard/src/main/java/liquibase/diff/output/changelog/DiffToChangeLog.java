@@ -494,6 +494,9 @@ public class DiffToChangeLog {
      * The one exception is a column referenced by a sorted {@link ForeignKey}. The foreign key constraint cannot be
      * added before the column it constrains exists, so those specific columns are hoisted ahead of the sorted block
      * while every other unsortable object keeps its position after it.
+     * A column is only hoisted when its own table is not being created by this same changelog. When the table is
+     * also missing it has to be created first, otherwise the hoisted column turns into an ALTER TABLE against a
+     * table that does not exist yet. The table can sit in either list, so both are checked.
      */
     private List<DatabaseObject> mergeSortedObjectsHoistingForeignKeyColumns(List<DatabaseObject> toSort, List<DatabaseObject> toNotSort) {
         Set<String> foreignKeyColumnNames = new HashSet<>();
@@ -511,11 +514,24 @@ public class DiffToChangeLog {
             return mergedObjects;
         }
 
+        Set<String> tablesBeingCreated = new HashSet<>();
+        for (DatabaseObject object : toSort) {
+            if (object instanceof Relation) {
+                tablesBeingCreated.add(relationIdentifier((Relation) object));
+            }
+        }
+        for (DatabaseObject object : toNotSort) {
+            if (object instanceof Relation) {
+                tablesBeingCreated.add(relationIdentifier((Relation) object));
+            }
+        }
+
         List<DatabaseObject> hoistedColumns = new ArrayList<>();
         List<DatabaseObject> remainingObjects = new ArrayList<>(toNotSort.size());
         for (DatabaseObject unsortedObject : toNotSort) {
             if (unsortedObject instanceof Column
-                    && foreignKeyColumnNames.contains(foreignKeyColumnIdentifier(((Column) unsortedObject).getRelation(), (Column) unsortedObject))) {
+                    && foreignKeyColumnNames.contains(foreignKeyColumnIdentifier(((Column) unsortedObject).getRelation(), (Column) unsortedObject))
+                    && !tablesBeingCreated.contains(relationIdentifier(((Column) unsortedObject).getRelation()))) {
                 hoistedColumns.add(unsortedObject);
             } else {
                 remainingObjects.add(unsortedObject);
@@ -530,12 +546,16 @@ public class DiffToChangeLog {
     }
 
     private static String foreignKeyColumnIdentifier(Relation table, Column column) {
+        return relationIdentifier(table) + "." + column.getName();
+    }
+
+    private static String relationIdentifier(Relation table) {
         String schemaName = null;
         if (table != null && table.getSchema() != null) {
             schemaName = table.getSchema().getName();
         }
         String tableName = (table == null) ? null : table.getName();
-        return schemaName + "." + tableName + "." + column.getName();
+        return schemaName + "." + tableName;
     }
 
     private static Integer determineOrderingForTablesAndStoredLogic(DatabaseObject o1, DatabaseObject o2) {

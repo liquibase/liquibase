@@ -239,4 +239,70 @@ public class DiffToChangeLogTest {
         assertThat(firstChange, instanceOf(AddColumnChange.class));
         assertThat(secondChange, instanceOf(AddForeignKeyConstraintChange.class));
     }
+
+    @Test
+    public void generateChangeSets_doesNotHoistAForeignKeyColumnAheadOfItsOwnTableCreation() throws Exception {
+        MSSQLDatabase referenceDatabase = new MSSQLDatabase();
+        referenceDatabase.setConnection(new MockDatabaseConnection());
+
+        MSSQLDatabase comparisonDatabase = new MSSQLDatabase();
+        comparisonDatabase.setConnection(new MockDatabaseConnection());
+
+        SnapshotControl control = new SnapshotControl(referenceDatabase, Table.class, Column.class, PrimaryKey.class, Index.class, UniqueConstraint.class, ForeignKey.class);
+        EmptyDatabaseSnapshot referenceSnapshot = new EmptyDatabaseSnapshot(referenceDatabase, control);
+        EmptyDatabaseSnapshot comparisonSnapshot = new EmptyDatabaseSnapshot(comparisonDatabase, control);
+
+        DiffResult diffResult = new DiffResult(referenceSnapshot, comparisonSnapshot, new CompareControl());
+
+        Table baseTable = new Table(null, "dbo", "Test");
+        baseTable.setSnapshotId(SnapshotIdService.getInstance().generateId());
+        Table foreignKeyTable = new Table(null, "dbo", "Test2");
+        foreignKeyTable.setSnapshotId(SnapshotIdService.getInstance().generateId());
+
+        Column missingColumn = new Column("testID")
+                .setRelation(foreignKeyTable)
+                .setType(new DataType("bigint"))
+                .setNullable(false);
+
+        ForeignKey missingForeignKey = new ForeignKey("FK__Test2__testID__267ABA7A");
+        missingForeignKey.setForeignKeyTable(foreignKeyTable);
+        missingForeignKey.addForeignKeyColumn(new Column("testID"));
+        missingForeignKey.setPrimaryKeyTable(baseTable);
+        missingForeignKey.addPrimaryKeyColumn(new Column("ID"));
+
+        // Unlike the test above, the table holding the foreign key column is missing too, so it is created by this
+        // same changelog. Hoisting the column ahead of the sorted block would emit ALTER TABLE before CREATE TABLE.
+        diffResult.addMissingObject(foreignKeyTable);
+        diffResult.addMissingObject(missingColumn);
+        diffResult.addMissingObject(missingForeignKey);
+
+        DiffToChangeLog diffToChangeLog = new DiffToChangeLog(diffResult, new DiffOutputControl()) {
+            @Override
+            protected void addDependencies(DependencyUtil.DependencyGraph<String> graph, List<String> schemas, liquibase.database.Database database) {
+                graph.add("dbo.Test", "dbo.FK__Test2__testID__267ABA7A");
+            }
+        };
+
+        List<ChangeSet> changeSets = diffToChangeLog.generateChangeSets();
+
+        int createTableIndex = indexOfFirstChange(changeSets, CreateTableChange.class);
+        int addColumnIndex = indexOfFirstChange(changeSets, AddColumnChange.class);
+
+        assertThat("the table must be created by this changelog", createTableIndex, greaterThanOrEqualTo(0));
+        if (addColumnIndex >= 0) {
+            assertThat("a column cannot be added before its own table is created",
+                    addColumnIndex, greaterThan(createTableIndex));
+        }
+    }
+
+    private static int indexOfFirstChange(List<ChangeSet> changeSets, Class<? extends Change> changeType) {
+        for (int i = 0; i < changeSets.size(); i++) {
+            for (Change change : changeSets.get(i).getChanges()) {
+                if (changeType.isInstance(change)) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
 }
