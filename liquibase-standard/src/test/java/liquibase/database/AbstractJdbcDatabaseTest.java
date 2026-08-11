@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -328,5 +329,19 @@ public abstract class AbstractJdbcDatabaseTest {
 
     protected List<SqlVisitor> getExpectedSqlVisitors(Database database) {
         return new ArrayList<>();
+    }
+
+    @Test
+    public void getDateLiteral_nullDateReportsTheProblemInsteadOfThrowingNullPointerException() {
+        final Database database = getDatabase();
+
+        final IllegalArgumentException exception =
+            assertThrows(IllegalArgumentException.class, () -> database.getDateLiteral((Date) null));
+        assertEquals("Cannot generate a date literal for a null date", exception.getMessage());
+    }
+
+    @Test
+    public void escapeColumnNameList_nullListIsEmpty() {
+        assertEquals("", getDatabase().escapeColumnNameList(null));
     }
 }

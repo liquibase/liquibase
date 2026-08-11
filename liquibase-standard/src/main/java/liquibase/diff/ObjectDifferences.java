@@ -125,6 +125,13 @@ public class ObjectDifferences {
     }
 
     /**
+     * Returns the {@link CompareControl} backing this comparison.
+     */
+    public CompareControl getCompareControl() {
+        return compareControl;
+    }
+
+    /**
      * Returns the reference database object being compared.
      * @return the reference object, or null if not set
      */

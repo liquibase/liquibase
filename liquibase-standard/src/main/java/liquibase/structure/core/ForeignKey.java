@@ -236,20 +236,25 @@ public class ForeignKey extends AbstractDatabaseObject{
     public int hashCode() {
         StringUtil.StringUtilFormatter<Column> formatter = obj -> obj.toString(false);
 
+        Table primaryKeyTable = getPrimaryKeyTable();
+        List<Column> primaryKeyColumns = getPrimaryKeyColumns();
+        Table foreignKeyTable = getForeignKeyTable();
+        List<Column> foreignKeyColumns = getForeignKeyColumns();
+
         int result = 0;
-        if (getPrimaryKeyTable() != null) {
-            result = getPrimaryKeyTable().hashCode();
+        if (primaryKeyTable != null) {
+            result = primaryKeyTable.hashCode();
         }
-        if (getPrimaryKeyColumns() != null) {
-            result = (31 * result) + StringUtil.join(getPrimaryKeyColumns(), ",", formatter).toUpperCase().hashCode();
-        }
-
-        if (getForeignKeyTable() != null) {
-            result = (31 * result) + getForeignKeyTable().hashCode();
+        if (primaryKeyColumns != null) {
+            result = (31 * result) + StringUtil.join(primaryKeyColumns, ",", formatter).toUpperCase().hashCode();
         }
 
-        if (getForeignKeyColumns() != null) {
-            result = (31 * result) + StringUtil.join(getForeignKeyColumns(), ",", formatter).toUpperCase().hashCode();
+        if (foreignKeyTable != null) {
+            result = (31 * result) + foreignKeyTable.hashCode();
+        }
+
+        if (foreignKeyColumns != null) {
+            result = (31 * result) + StringUtil.join(foreignKeyColumns, ",", formatter).toUpperCase().hashCode();
         }
 
         return result;

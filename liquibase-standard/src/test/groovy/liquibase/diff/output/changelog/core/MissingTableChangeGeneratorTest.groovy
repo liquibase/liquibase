@@ -82,4 +82,22 @@ class MissingTableChangeGeneratorTest extends Specification {
         then:
         ((CreateTableChange) changes[0]).getPartitionBy() == null
     }
+
+    def "fixMissing handles a Table whose unique constraint collection is absent"() {
+        when:
+        def generator = new MissingTableChangeGenerator()
+        def control = new DiffOutputControl(false, false, false, null)
+
+        def table = new Table(null, "public", "no_uq_tbl")
+        table.addColumn(new Column("id").setType(new DataType("int")))
+        // setAttribute(name, null) removes the attribute, so getUniqueConstraints() returns null
+        table.setAttribute("uniqueConstraints", null)
+
+        def changes = generator.fixMissing(table, control, new PostgresDatabase(), new PostgresDatabase(), new ChangeGeneratorChain(null))
+
+        then:
+        table.getUniqueConstraints() == null
+        changes.length == 1
+        ((CreateTableChange) changes[0]).getTableName() == "no_uq_tbl"
+    }
 }

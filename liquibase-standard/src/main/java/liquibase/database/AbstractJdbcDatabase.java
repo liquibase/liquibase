@@ -464,10 +464,11 @@ public abstract class AbstractJdbcDatabase implements Database {
             return getTimeLiteral(((java.sql.Time) date));
         } else if (date instanceof java.sql.Timestamp) {
             return getDateTimeLiteral(((java.sql.Timestamp) date));
-        } else if (date instanceof java.util.Date) {
+        } else if (date != null) {
+            // Date is declared as java.util.Date, so any non-null value that got this far is one.
             return getDateTimeLiteral(new java.sql.Timestamp(date.getTime()));
         } else {
-            throw new RuntimeException("Unexpected type: " + date.getClass().getName());
+            throw new IllegalArgumentException("Cannot generate a date literal for a null date");
         }
     }
 
@@ -1015,8 +1016,12 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String escapeColumnNameList(final String columnNames) {
+        List<String> columnNameList = StringUtil.splitAndTrim(columnNames, ",");
+        if (columnNameList == null) {
+            return "";
+        }
         StringBuilder sb = new StringBuilder();
-        for (String columnName : StringUtil.splitAndTrim(columnNames, ",")) {
+        for (String columnName : columnNameList) {
             if (sb.length() > 0) {
                 sb.append(", ");
             }

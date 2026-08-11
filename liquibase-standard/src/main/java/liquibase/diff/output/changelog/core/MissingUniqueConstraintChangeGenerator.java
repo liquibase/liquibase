@@ -119,16 +119,21 @@ public class MissingUniqueConstraintChangeGenerator extends AbstractChangeGenera
     private boolean alreadyExists(Index backingIndex, Database comparisonDatabase, DiffOutputControl control) {
         boolean found = false;
         try {
+            Relation backingIndexRelation = backingIndex.getRelation();
+            // Index.getSchema() already resolves the relation null-safely
+            Schema backingIndexSchema = backingIndex.getSchema();
+
             String catalogName = null;
             String schemaName = null;
-            if (control.getIncludeCatalog()) {
-                catalogName = backingIndex.getTable().getSchema().getCatalogName();
+            if (control.getIncludeCatalog() && backingIndexSchema != null) {
+                catalogName = backingIndexSchema.getCatalogName();
             }
-            if (control.getIncludeSchema()) {
-                schemaName = backingIndex.getTable().getSchema().getName();
+            if (control.getIncludeSchema() && backingIndexSchema != null) {
+                schemaName = backingIndexSchema.getName();
             }
 
-            Index backingIndexCopy = new Index(backingIndex.getName(), catalogName, schemaName, backingIndex.getTable().getName());
+            Index backingIndexCopy = new Index(backingIndex.getName(), catalogName, schemaName,
+                    backingIndexRelation == null ? null : backingIndexRelation.getName());
             for (Column column : backingIndex.getColumns()) {
                 backingIndexCopy.addColumn(column);
             }
