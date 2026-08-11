@@ -22,6 +22,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +33,43 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class DiffToChangeLogTest {
+
+    /**
+     * convertStoredLogicObjectName is private static, so reflection is the only way to cover it directly. It is
+     * reached from getOrderedOutputTypes' dependency ordering, which needs a live Postgres connection.
+     */
+    private static String convertStoredLogicObjectName(String schemaName, String objectName, Database database)
+            throws Exception {
+        Method method = DiffToChangeLog.class.getDeclaredMethod(
+                "convertStoredLogicObjectName", String.class, String.class, Database.class);
+        method.setAccessible(true);
+        return (String) method.invoke(null, schemaName, objectName, database);
+    }
+
+    @Test
+    public void convertStoredLogicObjectName_rewritesParameterListsToTypesOnly() throws Exception {
+        final PostgresDatabase database = new PostgresDatabase();
+
+        assertThat(convertStoredLogicObjectName("public", "calculate_bonus(emp_salary numeric, emp_name character varying)", database),
+                is("public.calculate_bonus(numeric,character varying)"));
+        assertThat(convertStoredLogicObjectName("public", "one_arg(x integer)", database),
+                is("public.one_arg(integer)"));
+    }
+
+    @Test
+    public void convertStoredLogicObjectName_leavesNoArgumentSignaturesAlone() throws Exception {
+        final PostgresDatabase database = new PostgresDatabase();
+
+        // Nothing to rewrite between the parentheses, so the name is only schema-qualified
+        assertThat(convertStoredLogicObjectName("public", "no_args()", database), is("public.no_args()"));
+        assertThat(convertStoredLogicObjectName("public", "spaced( )", database), is("public.spaced( )"));
+    }
+
+    @Test
+    public void convertStoredLogicObjectName_onlyAppliesToPostgres() throws Exception {
+        assertThat(convertStoredLogicObjectName("public", "calculate_bonus(emp_salary numeric)", new MySQLDatabase()),
+                is("public.calculate_bonus(emp_salary numeric)"));
+    }
 
     @Test
     @SuppressWarnings("unchecked")

@@ -1,7 +1,6 @@
 package liquibase.integration.servlet;
 
 import liquibase.Scope;
-import org.apache.commons.text.StringEscapeUtils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -67,9 +66,9 @@ class GenericStatusServlet {
                 writer.println("<pre>");
                 for (LogRecord record : liquibaseRunLog) {
                     if (record.getLevel().intValue() >= currentLevel.intValue()) {
-                        writer.println(record.getLevel() + ": " + StringEscapeUtils.escapeHtml4(record.getMessage()));
+                        writer.println(record.getLevel() + ": " + escapeHtml(record.getMessage()));
                         if (record.getThrown() != null) {
-                            writer.println(StringEscapeUtils.escapeHtml4(asString(record.getThrown())));
+                            writer.println(escapeHtml(asString(record.getThrown())));
                         }
                     }
                 }
@@ -87,6 +86,41 @@ class GenericStatusServlet {
             Scope.getCurrentScope().getLog(getClass()).severe("Error in doGet: "+e.getMessage(), e);
             httpServletResponse.setStatus(500);
         }
+    }
+
+    /**
+     * Escapes text that is written into this page. Deliberately dependency-free: this servlet ships inside
+     * liquibase-core, which cannot assume that jars beyond the ones in the distribution's internal/lib are on the
+     * classpath. Covers the characters that matter both in element text and inside a quoted attribute.
+     */
+    private static String escapeHtml(String text) {
+        if (text == null) {
+            return null;
+        }
+        StringBuilder escaped = new StringBuilder(text.length());
+        for (int i = 0; i < text.length(); i++) {
+            char character = text.charAt(i);
+            switch (character) {
+                case '&':
+                    escaped.append("&amp;");
+                    break;
+                case '<':
+                    escaped.append("&lt;");
+                    break;
+                case '>':
+                    escaped.append("&gt;");
+                    break;
+                case '"':
+                    escaped.append("&quot;");
+                    break;
+                case '\'':
+                    escaped.append("&#39;");
+                    break;
+                default:
+                    escaped.append(character);
+            }
+        }
+        return escaped.toString();
     }
 
     private static String asString(Throwable thrown) {
