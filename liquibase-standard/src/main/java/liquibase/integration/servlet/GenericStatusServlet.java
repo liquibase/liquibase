@@ -1,9 +1,11 @@
 package liquibase.integration.servlet;
 
 import liquibase.Scope;
+import org.apache.commons.text.StringEscapeUtils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,13 +51,13 @@ class GenericStatusServlet {
             if (liquibaseRunLog.isEmpty()) {
                 writer.println("<b>Liquibase did not run</b>");
             } else {
-                writer.println("<b>View level: " + getLevelLink(Level.SEVERE, currentLevel, httpServletRequest)
-                        + " " + getLevelLink(Level.WARNING, currentLevel, httpServletRequest)
-                        + " " + getLevelLink(Level.INFO, currentLevel, httpServletRequest)
-                        + " " + getLevelLink(Level.CONFIG, currentLevel, httpServletRequest)
-                        + " " + getLevelLink(Level.FINE, currentLevel, httpServletRequest)
-                        + " " + getLevelLink(Level.FINER, currentLevel, httpServletRequest)
-                        + " " + getLevelLink(Level.FINEST, currentLevel, httpServletRequest)
+                writer.println("<b>View level: " + getLevelLink(Level.SEVERE, currentLevel)
+                        + " " + getLevelLink(Level.WARNING, currentLevel)
+                        + " " + getLevelLink(Level.INFO, currentLevel)
+                        + " " + getLevelLink(Level.CONFIG, currentLevel)
+                        + " " + getLevelLink(Level.FINE, currentLevel)
+                        + " " + getLevelLink(Level.FINER, currentLevel)
+                        + " " + getLevelLink(Level.FINEST, currentLevel)
                         + "</b>");
 
                 writer.println("<hr>");
@@ -65,9 +67,9 @@ class GenericStatusServlet {
                 writer.println("<pre>");
                 for (LogRecord record : liquibaseRunLog) {
                     if (record.getLevel().intValue() >= currentLevel.intValue()) {
-                        writer.println(record.getLevel() + ": " + record.getMessage());
+                        writer.println(record.getLevel() + ": " + StringEscapeUtils.escapeHtml4(record.getMessage()));
                         if (record.getThrown() != null) {
-                            record.getThrown().printStackTrace(writer);
+                            writer.println(StringEscapeUtils.escapeHtml4(asString(record.getThrown())));
                         }
                     }
                 }
@@ -87,11 +89,23 @@ class GenericStatusServlet {
         }
     }
 
-    private String getLevelLink(Level level, Level currentLevel, GenericServletWrapper.HttpServletRequest request) {
+    private static String asString(Throwable thrown) {
+        StringWriter stackTrace = new StringWriter();
+        try (PrintWriter stackTraceWriter = new PrintWriter(stackTrace)) {
+            thrown.printStackTrace(stackTraceWriter);
+        }
+        return stackTrace.toString();
+    }
+
+    /**
+     * Builds the link used to switch the displayed log level. The link is deliberately relative (query string only) so
+     * that no part of the incoming request is reflected back into the response.
+     */
+    private String getLevelLink(Level level, Level currentLevel) {
         if (currentLevel.equals(level)) {
             return level.getName();
         } else {
-            return "<a href=" + request.getRequestURI() + "?logLevel=" + level.getName() + ">" + level.getName() + "</a>";
+            return "<a href=\"?logLevel=" + level.getName() + "\">" + level.getName() + "</a>";
         }
     }
 }

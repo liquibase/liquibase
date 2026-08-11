@@ -514,7 +514,7 @@ public class DiffToChangeLog {
         if (! (database instanceof AbstractPostgresDatabase) || ! (objectName.contains("(") && objectName.contains(")"))) {
             return name;
         }
-        Pattern p = Pattern.compile(".*?[(]+(.*)?[)]+[\\s]*?$");
+        Pattern p = Pattern.compile(".*?[(]+(.*)[)]+[\\s]*?$");
         Matcher m = p.matcher(objectName);
         if (m.matches()) {
             String originalParameters = m.group(1);

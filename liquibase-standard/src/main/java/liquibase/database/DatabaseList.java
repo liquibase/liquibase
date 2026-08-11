@@ -69,12 +69,13 @@ public class DatabaseList {
     }
 
     public static Set<String> toDbmsSet(String dbmsList) {
-        Set<String> dbmsSet = null;
-        if (StringUtil.trimToNull(dbmsList) != null) {
-            dbmsSet = new HashSet<>();
-            for (String string : dbmsList.toLowerCase().split(",")) {
-                dbmsSet.add(string.trim());
-            }
+        String trimmedDbmsList = StringUtil.trimToNull(dbmsList);
+        if (trimmedDbmsList == null) {
+            return null;
+        }
+        Set<String> dbmsSet = new HashSet<>();
+        for (String string : trimmedDbmsList.toLowerCase().split(",")) {
+            dbmsSet.add(string.trim());
         }
         return dbmsSet;
     }

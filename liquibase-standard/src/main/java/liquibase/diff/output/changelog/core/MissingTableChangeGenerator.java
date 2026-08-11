@@ -292,7 +292,10 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
 
     private Map<Column, UniqueConstraint> getSingleColumnUniqueConstraints(Table missingTable) {
         Map<Column, UniqueConstraint> map = new HashMap<>();
-        List<UniqueConstraint> constraints = missingTable.getUniqueConstraints() == null ? null : missingTable.getUniqueConstraints();
+        List<UniqueConstraint> constraints = missingTable.getUniqueConstraints();
+        if (constraints == null) {
+            return map;
+        }
         for (UniqueConstraint constraint : constraints) {
             if (constraint.getColumns().size() == 1) {
                 map.put(constraint.getColumns().get(0), constraint);
