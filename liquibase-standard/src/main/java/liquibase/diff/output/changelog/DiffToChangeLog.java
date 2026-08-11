@@ -34,6 +34,8 @@ import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.Relation;
 import liquibase.structure.core.StoredDatabaseLogic;
 import liquibase.structure.core.Table;
 import liquibase.util.DependencyUtil;
@@ -472,8 +474,7 @@ public class DiffToChangeLog {
                         return order;
                     });
 
-                    toSort.addAll(toNotSort);
-                    return toSort;
+                    return mergeSortedObjectsHoistingForeignKeyColumns(toSort, toNotSort);
                 }
             } catch (DatabaseException e) {
                 Scope.getCurrentScope().getLog(getClass()).fine("Cannot get object dependencies: " + e.getMessage());
@@ -484,6 +485,57 @@ public class DiffToChangeLog {
             }
         }
         return new ArrayList<>(objects);
+    }
+
+    /**
+     * Appends the unsortable objects after the dependency-sorted ones, which is the ordering the rest of the
+     * generation logic relies on: tables are dependency-sorted and must be created before the columns, primary keys
+     * and other objects that hang off them.
+     * The one exception is a column referenced by a sorted {@link ForeignKey}. The foreign key constraint cannot be
+     * added before the column it constrains exists, so those specific columns are hoisted ahead of the sorted block
+     * while every other unsortable object keeps its position after it.
+     */
+    private List<DatabaseObject> mergeSortedObjectsHoistingForeignKeyColumns(List<DatabaseObject> toSort, List<DatabaseObject> toNotSort) {
+        Set<String> foreignKeyColumnNames = new HashSet<>();
+        for (DatabaseObject sortedObject : toSort) {
+            if (sortedObject instanceof ForeignKey) {
+                for (Column foreignKeyColumn : ((ForeignKey) sortedObject).getForeignKeyColumns()) {
+                    foreignKeyColumnNames.add(foreignKeyColumnIdentifier(((ForeignKey) sortedObject).getForeignKeyTable(), foreignKeyColumn));
+                }
+            }
+        }
+
+        if (foreignKeyColumnNames.isEmpty()) {
+            List<DatabaseObject> mergedObjects = new ArrayList<>(toSort);
+            mergedObjects.addAll(toNotSort);
+            return mergedObjects;
+        }
+
+        List<DatabaseObject> hoistedColumns = new ArrayList<>();
+        List<DatabaseObject> remainingObjects = new ArrayList<>(toNotSort.size());
+        for (DatabaseObject unsortedObject : toNotSort) {
+            if (unsortedObject instanceof Column
+                    && foreignKeyColumnNames.contains(foreignKeyColumnIdentifier(((Column) unsortedObject).getRelation(), (Column) unsortedObject))) {
+                hoistedColumns.add(unsortedObject);
+            } else {
+                remainingObjects.add(unsortedObject);
+            }
+        }
+
+        List<DatabaseObject> mergedObjects = new ArrayList<>(toSort.size() + toNotSort.size());
+        mergedObjects.addAll(hoistedColumns);
+        mergedObjects.addAll(toSort);
+        mergedObjects.addAll(remainingObjects);
+        return mergedObjects;
+    }
+
+    private static String foreignKeyColumnIdentifier(Relation table, Column column) {
+        String schemaName = null;
+        if (table != null && table.getSchema() != null) {
+            schemaName = table.getSchema().getName();
+        }
+        String tableName = (table == null) ? null : table.getName();
+        return schemaName + "." + tableName + "." + column.getName();
     }
 
     private static Integer determineOrderingForTablesAndStoredLogic(DatabaseObject o1, DatabaseObject o2) {
