@@ -4,7 +4,6 @@ import liquibase.Scope;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -68,7 +67,11 @@ class GenericStatusServlet {
                     if (record.getLevel().intValue() >= currentLevel.intValue()) {
                         writer.println(record.getLevel() + ": " + escapeHtml(record.getMessage()));
                         if (record.getThrown() != null) {
-                            writer.println(escapeHtml(asString(record.getThrown())));
+                            Throwable thrown = record.getThrown();
+                            // The stack trace goes to the server log rather than the response, so that paths,
+                            // internal class structure and dependency versions are not disclosed to the caller.
+                            Scope.getCurrentScope().getLog(getClass()).severe("Liquibase run error", thrown);
+                            writer.println(escapeHtml(thrown.getClass().getSimpleName() + ": " + thrown.getMessage()));
                         }
                     }
                 }
@@ -121,14 +124,6 @@ class GenericStatusServlet {
             }
         }
         return escaped.toString();
-    }
-
-    private static String asString(Throwable thrown) {
-        StringWriter stackTrace = new StringWriter();
-        try (PrintWriter stackTraceWriter = new PrintWriter(stackTrace)) {
-            thrown.printStackTrace(stackTraceWriter);
-        }
-        return stackTrace.toString();
     }
 
     /**

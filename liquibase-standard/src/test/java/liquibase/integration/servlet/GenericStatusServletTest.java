@@ -39,17 +39,25 @@ class GenericStatusServletTest {
     }
 
     @Test
-    void doGetEscapesStackTraces() {
+    void doGetReportsExceptionsWithoutExposingTheStackTrace() {
         LogRecord record = new LogRecord(Level.SEVERE, "failed");
-        record.setThrown(new RuntimeException("<img src=x onerror=alert(3)>"));
+        record.setThrown(new IllegalStateException("<img src=x onerror=alert(3)>"));
         GenericStatusServlet.logMessage(record);
 
         RecordingResponse response = new RecordingResponse();
         new GenericStatusServlet().doGet(new StubRequest("/status"), response);
 
         String html = response.getBody();
-        assertFalse(html.contains("<img src=x"), "stack trace must be escaped");
-        assertTrue(html.contains("&lt;img src=x onerror=alert(3)&gt;"), "stack trace must be escaped");
+
+        // The type and message are reported, escaped, so the page still says what went wrong.
+        assertTrue(html.contains("IllegalStateException: &lt;img src=x onerror=alert(3)&gt;"),
+                "expected an escaped exception type and message: " + html);
+        assertFalse(html.contains("<img src=x"), "exception message must be escaped");
+
+        // The stack trace itself stays out of the response - it goes to the server log instead.
+        assertFalse(html.contains("at liquibase."), "stack trace must not be written to the response");
+        assertFalse(html.contains(GenericStatusServletTest.class.getName()),
+                "stack trace must not be written to the response");
     }
 
     private static class StubRequest extends GenericServletWrapper.HttpServletRequest {
