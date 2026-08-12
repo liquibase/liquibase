@@ -434,7 +434,7 @@ public class InitProjectCommandStep extends AbstractCommandStep {
      * @return true if skipped
      */
     private boolean isSkipped(ConfiguredValue<String> promptedValue) {
-        return promptedValue.getValue().equalsIgnoreCase("s");
+        return "s".equalsIgnoreCase(promptedValue.getValue());
     }
 
     private String findLatestChangelogFilename(ConfiguredValue<String> projectDirConfig) {

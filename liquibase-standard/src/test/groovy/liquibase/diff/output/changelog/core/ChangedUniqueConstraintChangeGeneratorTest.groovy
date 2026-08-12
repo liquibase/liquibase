@@ -5,8 +5,10 @@ import liquibase.change.core.DropUniqueConstraintChange
 import liquibase.database.core.H2Database
 import liquibase.diff.ObjectDifferences
 import liquibase.diff.compare.CompareControl
+import liquibase.diff.compare.DatabaseObjectComparatorFactory
 import liquibase.diff.output.DiffOutputControl
 import liquibase.structure.core.Column
+import liquibase.structure.core.Index
 import liquibase.structure.core.Table
 import liquibase.structure.core.UniqueConstraint
 import spock.lang.Specification
@@ -143,5 +145,67 @@ class ChangedUniqueConstraintChangeGeneratorTest extends Specification {
         def addChange = (AddUniqueConstraintChange) changes[1]
         addChange.getCatalogName() == "ref_catalog"
         addChange.getSchemaName() == "ref_schema"
+    }
+
+    def "fixChanged delegates a UniqueConstraint backing Index and drops the target UC name (issues #7500/#7846)"() {
+        given: "Reference UniqueConstraint 'UC_REF' backed by an Index named UC_IDX with column order [a, b]"
+        def referenceTable = new Table(null, "public", "test_table")
+        def refColA = new Column("a")
+        def refColB = new Column("b")
+        def referenceIndex = new Index()
+        referenceIndex.setName("UC_IDX")
+        referenceIndex.setRelation(referenceTable)
+        referenceIndex.setColumns([refColA, refColB])
+        referenceIndex.setUnique(true)
+        def referenceUc = new UniqueConstraint()
+        referenceUc.setName("UC_REF")
+        referenceUc.setRelation(referenceTable)
+        referenceUc.setColumns([refColA, refColB])
+        referenceUc.setBackingIndex(referenceIndex)
+        referenceTable.getUniqueConstraints().add(referenceUc)
+
+        and: "Target UniqueConstraint 'UC_TARGET' backed by an Index also named UC_IDX with swapped column order [b, a]"
+        def comparisonTable = new Table(null, "public", "test_table")
+        def compColA = new Column("a")
+        def compColB = new Column("b")
+        def comparisonIndex = new Index()
+        comparisonIndex.setName("UC_IDX")
+        comparisonIndex.setRelation(comparisonTable)
+        comparisonIndex.setColumns([compColB, compColA])
+        comparisonIndex.setUnique(true)
+        def comparisonUc = new UniqueConstraint()
+        comparisonUc.setName("UC_TARGET")
+        comparisonUc.setRelation(comparisonTable)
+        comparisonUc.setColumns([compColB, compColA])
+        comparisonUc.setBackingIndex(comparisonIndex)
+        comparisonTable.getUniqueConstraints().add(comparisonUc)
+
+        and: "ObjectDifferences describing the backing Index change (comparison object is the Index, not a UniqueConstraint)"
+        def compareControl = new CompareControl()
+        def differences = new ObjectDifferences(compareControl, referenceIndex, comparisonIndex)
+        differences.addDifference("columns", [refColA, refColB], [compColB, compColA])
+
+        and: "Generator and databases"
+        def generator = new ChangedIndexChangeGenerator()
+        def outputControl = new DiffOutputControl()
+        def referenceDatabase = new H2Database()
+        def comparisonDatabase = new H2Database()
+
+        and: "Both backing indexes are the same logical object (same name, swapped columns), as the diff pipeline would pair them"
+        DatabaseObjectComparatorFactory.getInstance().isSameObject(referenceIndex, comparisonIndex, differences.getSchemaComparisons(), comparisonDatabase)
+
+        when: "fixChanged on the backing Index delegates to the UniqueConstraint change generator"
+        def changes = generator.fixChanged(referenceIndex, differences, outputControl, referenceDatabase, comparisonDatabase, null)
+
+        then: "No ClassCastException (#7846); produces drop + add UniqueConstraint changes"
+        noExceptionThrown()
+        changes != null
+        changes.length == 2
+        changes[0] instanceof DropUniqueConstraintChange
+        changes[1] instanceof AddUniqueConstraintChange
+
+        and: "Drop uses the target UC name, add uses the reference UC name (#7500 preserved on the delegation path)"
+        ((DropUniqueConstraintChange) changes[0]).getConstraintName() == "UC_TARGET"
+        ((AddUniqueConstraintChange) changes[1]).getConstraintName() == "UC_REF"
     }
 }

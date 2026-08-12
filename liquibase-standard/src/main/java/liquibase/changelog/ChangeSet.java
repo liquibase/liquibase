@@ -15,6 +15,7 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -926,6 +927,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             // restore auto-commit to false if this ChangeSet was not run in a transaction,
             // but only if the database supports DDL in transactions
             if (!runInTransaction && database.supportsDDLInTransaction()) {
+                restoreSearchPath(database);
                 try {
                     database.setAutoCommit(false);
                 } catch (DatabaseException e) {
@@ -1092,6 +1094,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             // but only if the database supports DDL in transactions
             getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, originalExecutor);
             if (!runInTransaction && database.supportsDDLInTransaction()) {
+                restoreSearchPath(database);
                 try {
                     database.setAutoCommit(false);
                 } catch (DatabaseException e) {
@@ -1100,6 +1103,16 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
 
+    }
+
+    private void restoreSearchPath(Database database) {
+        if (database instanceof PostgresDatabase pgDatabase) {
+            try {
+                pgDatabase.restoreSearchPath();
+            } catch (DatabaseException e) {
+                getCurrentScope().getLog(getClass()).warning("Could not restore search_path", e);
+            }
+        }
     }
 
     private void addSqlFileMdc(SQLFileChange change) {
@@ -1423,10 +1436,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
         CheckSum currentMd5Sum = storedCheckSum != null ? generateCheckSum(ChecksumVersion.enumFromChecksumVersion(storedCheckSum.getVersion())) : null;
+        // A null current checksum also covers a null stored checksum, since the two are computed together above.
         if (currentMd5Sum == null) {
-            return true;
-        }
-        if (storedCheckSum == null) {
             return true;
         }
         if (currentMd5Sum.equals(storedCheckSum)) {

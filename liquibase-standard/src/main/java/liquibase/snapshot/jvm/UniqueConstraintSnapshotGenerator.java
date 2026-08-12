@@ -141,12 +141,16 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         Relation table = example.getRelation();
         Schema schema = example.getSchema();
         String name = example.getName();
+        if (schema == null) {
+            // getSchema() is derived from the relation, and every query below is scoped by schema.
+            throw new UnexpectedLiquibaseException("Cannot list columns for unique constraint " + name + ": no schema is set");
+        }
 
         boolean bulkQuery;
         String rawSql;
         List<String> parameters = new ArrayList<>();
 
-        String cacheKey = "uniqueConstraints-" + example.getClass().getSimpleName() + "-" + example.getSchema().toCatalogAndSchema().customize(database).toString();
+        String cacheKey = "uniqueConstraints-" + example.getClass().getSimpleName() + "-" + schema.toCatalogAndSchema().customize(database).toString();
         String queryCountKey = "uniqueConstraints-" + example.getClass().getSimpleName() + "-queryCount";
 
         Map<String, List<Map<String, ?>>> columnCache = (ConcurrentHashMap<String, List<Map<String, ?>>>) snapshot.getScratchData(cacheKey);
@@ -444,10 +448,12 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
      * Default implementation uses {@link #includeTableNameInCacheKey(Database)} to determine if the table name should be included in the key or not.
      */
     protected String getCacheKey(UniqueConstraint example, Database database) {
+        Schema schema = example.getSchema();
+        String schemaName = schema == null ? null : schema.getName();
         if (includeTableNameInCacheKey(database)) {
-            return example.getSchema().getName() + "_" + example.getRelation() + "_" + example.getName();
+            return schemaName + "_" + example.getRelation() + "_" + example.getName();
         } else {
-            return example.getSchema().getName() + "_" + example.getName();
+            return schemaName + "_" + example.getName();
         }
     }
 

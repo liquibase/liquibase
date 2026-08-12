@@ -239,15 +239,19 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 
     @Override
 	public int hashCode() {
+		Relation relation = this.getRelation();
+		String name = this.getName();
+		String columnNames = getColumnNames();
+
 		int result = 0;
-		if (this.getRelation() != null) {
-			result = this.getRelation().hashCode();
+		if (relation != null) {
+			result = relation.hashCode();
 		}
-		if (this.getName() != null) {
-            result = (31 * result) + this.getName().toUpperCase().hashCode();
+		if (name != null) {
+            result = (31 * result) + name.toUpperCase().hashCode();
 		}
-		if (getColumnNames() != null) {
-            result = (31 * result) + getColumnNames().hashCode();
+		if (columnNames != null) {
+            result = (31 * result) + columnNames.hashCode();
 		}
 		return result;
 	}

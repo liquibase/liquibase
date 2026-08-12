@@ -327,6 +327,21 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         ChecksumVersion.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 
+    @Unroll
+    def "createExampleValueMetaData still returns the hsqldb example when there is no annotation to inherit from"() {
+        when:
+        CreateProcedureChange change = new CreateProcedureChange()
+        // AbstractChange returns null for a null annotation, which the override has to cope with
+        def exampleValues = change.createExampleValueMetaData(parameterName, null)
+
+        then:
+        exampleValues != null
+        exampleValues.containsKey(new liquibase.database.core.HsqlDatabase().getShortName())
+
+        where:
+        parameterName << ["procedureText", "procedureBody"]
+    }
+
     def "v8 checksum generation"() {
         when:
         CreateProcedureChange change = new CreateProcedureChange()

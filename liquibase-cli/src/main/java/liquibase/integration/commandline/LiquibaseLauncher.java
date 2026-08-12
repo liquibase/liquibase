@@ -203,7 +203,7 @@ public class LiquibaseLauncher {
                     "extension is present. To suppress this message, remove the following stand-alone AWS extension" +
                     plural + " from the classpath: " + StringUtil.join(removedJars, ", ")
                     + ". Learn more at https://docs.liquibase.com/pro-extensions";
-            System.out.println(message);
+            System.err.println(message);
         }
     }
 
