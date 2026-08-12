@@ -92,6 +92,21 @@ public class Index extends AbstractDatabaseObject {
 
     public Index setRelation(Relation relation) {
     	this.setAttribute("table", relation);
+        // setColumns() only propagates the relation when the table is already known. Restoring a snapshot
+        // builds the index first and resolves its table reference afterwards, so the columns would keep a
+        // null relation and stop comparing equal to the same index read from a live database (#7895).
+        if (relation != null) {
+            List<?> columns = getAttribute("columns", List.class);
+            if (columns != null) {
+                for (Object column : columns) {
+                    // Read the raw attribute: while a snapshot is being restored a column's relation can still
+                    // be an unresolved reference String, and getRelation() would fail casting it to Relation.
+                    if ((column instanceof Column) && (((Column) column).getAttribute("relation", Object.class) == null)) {
+                        ((Column) column).setRelation(relation);
+                    }
+                }
+            }
+        }
         return this;
     }
 
