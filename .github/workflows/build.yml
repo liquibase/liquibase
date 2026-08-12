@@ -175,7 +175,7 @@ jobs:
           "-Dbuild.repository.name=liquibase" \
           "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" \
           "-Dbuild.number=${{ github.run_number }}" \
-          "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT" \
+          "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" \
           "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
 
           # Extract the tarball to allow us to upload the liquibase installation files to our
