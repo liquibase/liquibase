@@ -65,6 +65,7 @@ class UpdateCommandStepIntegrationTest extends Specification {
         liquibase.rollback(1, contexts, labels)
 
         then:
+        !fastCheckService.isUpToDateFastCheck(null, database, liquibase.getDatabaseChangeLog(), contexts, labels)
         executor.queryForInt(new RawParameterizedSqlStatement(
                 "select count(1) from databasechangelog where id = ? and author = ? and filename = ?",
                 "1", "Liquibase User", "liquibase/update-tests.yml")) == 0
