@@ -59,22 +59,29 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
 
         Index index = (Index) changedObject;
 
-        if (index.getRelation() != null  && index.getRelation() instanceof Table) {
-            if ((((Table) index.getRelation()).getPrimaryKey() != null) && DatabaseObjectComparatorFactory.getInstance()
-                .isSameObject(((Table) index.getRelation()).getPrimaryKey().getBackingIndex(), changedObject, differences
-                    .getSchemaComparisons(), comparisonDatabase)) {
-                return ChangeGeneratorFactory.getInstance().fixChanged(((Table) index.getRelation()).getPrimaryKey(), differences, control, referenceDatabase, comparisonDatabase);
+        if (index.getRelation() != null && index.getRelation() instanceof Table) {
+            Table referenceTable = (Table) index.getRelation();
+            // The comparison object is the matching Index on the comparison (target) database. Resolve the target
+            // constraint from its table so the delegated PK/UC generator builds the drop statement with the target
+            // constraint name (#7500) instead of falling back to the reference name and reintroducing #7461 (#7846).
+            Index comparisonIndex = (differences.getComparisonObject() instanceof Index) ? (Index) differences.getComparisonObject() : null;
+            Table comparisonTable = ((comparisonIndex != null) && (comparisonIndex.getRelation() instanceof Table)) ? (Table) comparisonIndex.getRelation() : null;
+
+            PrimaryKey referencePrimaryKey = referenceTable.getPrimaryKey();
+            if ((referencePrimaryKey != null) && DatabaseObjectComparatorFactory.getInstance()
+                .isSameObject(referencePrimaryKey.getBackingIndex(), changedObject, differences.getSchemaComparisons(), comparisonDatabase)) {
+                PrimaryKey comparisonPrimaryKey = (comparisonTable != null) ? comparisonTable.getPrimaryKey() : null;
+                return ChangeGeneratorFactory.getInstance().fixChanged(referencePrimaryKey, asConstraintDifferences(differences, referencePrimaryKey, comparisonPrimaryKey), control, referenceDatabase, comparisonDatabase);
             }
 
-            List<UniqueConstraint> uniqueConstraints = index.getRelation().getUniqueConstraints();
+            List<UniqueConstraint> uniqueConstraints = referenceTable.getUniqueConstraints();
             if (uniqueConstraints != null) {
                 for (UniqueConstraint constraint : uniqueConstraints) {
                     if ((constraint.getBackingIndex() != null) && DatabaseObjectComparatorFactory.getInstance()
-                        .isSameObject(constraint.getBackingIndex(), changedObject, differences.getSchemaComparisons()
-                            , comparisonDatabase)) {
-                        return ChangeGeneratorFactory.getInstance().fixChanged(constraint, differences, control, referenceDatabase, comparisonDatabase);
+                        .isSameObject(constraint.getBackingIndex(), changedObject, differences.getSchemaComparisons(), comparisonDatabase)) {
+                        UniqueConstraint comparisonUniqueConstraint = findComparisonUniqueConstraint(comparisonTable, comparisonIndex, differences, comparisonDatabase);
+                        return ChangeGeneratorFactory.getInstance().fixChanged(constraint, asConstraintDifferences(differences, constraint, comparisonUniqueConstraint), control, referenceDatabase, comparisonDatabase);
                     }
-
                 }
             }
         }
@@ -155,5 +162,35 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
 
     protected CreateIndexChange createCreateIndexChange() {
         return new CreateIndexChange();
+    }
+
+    // Rebuilds the index differences for the backing PK/UC: the comparison object becomes the matching target
+    // constraint (so the drop uses the target name, #7500), while the index field differences are carried over so the
+    // constraint generator's hasDifferences()/getDifference() behavior is unchanged (#7846).
+    private ObjectDifferences asConstraintDifferences(ObjectDifferences indexDifferences, DatabaseObject referenceConstraint, DatabaseObject comparisonConstraint) {
+        ObjectDifferences constraintDifferences = new ObjectDifferences(indexDifferences.getCompareControl(), referenceConstraint, comparisonConstraint);
+        for (Difference difference : indexDifferences.getDifferences()) {
+            constraintDifferences.addDifference(difference.getMessage(), difference.getField(), difference.getReferenceValue(), difference.getComparedValue());
+        }
+        return constraintDifferences;
+    }
+
+    // Finds the unique constraint on the comparison (target) table backed by the comparison index, mirroring the
+    // reference-side lookup that triggers delegation. Returns null when the target side is unavailable.
+    private UniqueConstraint findComparisonUniqueConstraint(Table comparisonTable, Index comparisonIndex, ObjectDifferences differences, Database comparisonDatabase) {
+        if (comparisonTable == null) {
+            return null;
+        }
+        List<UniqueConstraint> comparisonConstraints = comparisonTable.getUniqueConstraints();
+        if (comparisonConstraints == null) {
+            return null;
+        }
+        for (UniqueConstraint comparisonConstraint : comparisonConstraints) {
+            if ((comparisonConstraint.getBackingIndex() != null) && DatabaseObjectComparatorFactory.getInstance()
+                .isSameObject(comparisonConstraint.getBackingIndex(), comparisonIndex, differences.getSchemaComparisons(), comparisonDatabase)) {
+                return comparisonConstraint;
+            }
+        }
+        return null;
     }
 }

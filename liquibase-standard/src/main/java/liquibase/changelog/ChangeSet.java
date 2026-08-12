@@ -1437,10 +1437,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
         CheckSum currentMd5Sum = storedCheckSum != null ? generateCheckSum(ChecksumVersion.enumFromChecksumVersion(storedCheckSum.getVersion())) : null;
+        // A null current checksum also covers a null stored checksum, since the two are computed together above.
         if (currentMd5Sum == null) {
-            return true;
-        }
-        if (storedCheckSum == null) {
             return true;
         }
         if (currentMd5Sum.equals(storedCheckSum)) {
