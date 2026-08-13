@@ -299,6 +299,11 @@ class DataTypeFactoryTest extends Specification {
         "uuid"                                         | new MariaDBDatabase()  | "UUID"                                         | UUIDType      | false
         "timestamp"                                    | new FirebirdDatabase() | "TIMESTAMP"                                    | TimestampType | false
         "timestamp(6)"                                 | new FirebirdDatabase() | "TIMESTAMP"                                    | TimestampType | false
+        "timestamptz"                                  | new FirebirdDatabase() | "TIMESTAMP"                                    | TimestampType | false
+        "timestamp"                                    | new DerbyDatabase()    | "TIMESTAMP"                                    | TimestampType | false
+        "timestamptz"                                  | new DerbyDatabase()    | "TIMESTAMP"                                    | TimestampType | false
+        "timestamp"                                    | new HsqlDatabase()     | "TIMESTAMP"                                    | TimestampType | false
+        "timestamptz"                                  | new HsqlDatabase()     | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false
     }
 
     @Unroll("#featureName: #object for #database")

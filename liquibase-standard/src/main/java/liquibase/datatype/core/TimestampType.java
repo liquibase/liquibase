@@ -155,21 +155,15 @@ public class TimestampType extends DateTimeType {
             type = new DatabaseDataType("TIMESTAMP");
         }
 
-        if ((originalDefinition.toUpperCase().startsWith("JAVA.SQL.TYPES.TIMESTAMP_WITH_TIMEZONE")
+        if (isTimezoneAware
             && (database instanceof AbstractPostgresDatabase
             || database instanceof OracleDatabase
             || database instanceof H2Database
             || database instanceof HsqlDatabase
-            || database instanceof SybaseASADatabase)) || isTimezoneAware) {
+            || database instanceof SybaseASADatabase)) {
 
-            if (database instanceof AbstractPostgresDatabase
-                    || database instanceof H2Database
-                    || database instanceof SybaseASADatabase
-                    || database instanceof OracleDatabase) {
-                type.addAdditionalInformation("WITH TIME ZONE");
-            } else {
-                type.addAdditionalInformation("WITH TIMEZONE");
-            }
+            type.addAdditionalInformation("WITH TIME ZONE");
+
             return type;
         }
 
