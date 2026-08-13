@@ -1,5 +1,7 @@
 package liquibase.database
 
+import liquibase.Scope
+import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.resource.ResourceAccessor
 import liquibase.database.core.MockDatabase
@@ -49,6 +51,38 @@ class OfflineConnectionTest extends Specification {
     def "Attached"() {
         expect:
         offlineConnection.attached new MockDatabase()
+    }
+
+    def "Attached registers an isolated ChangeLogHistoryService per database (regression for liquibase#6927)"() {
+        // Reproduces the scenario reported at https://github.com/liquibase/liquibase/issues/6927:
+        // two OfflineConnections (as concurrently-running Maven modules would each have their own)
+        // attaching to two different databases must each get their own OfflineChangeLogHistoryService.
+        // Before the fix, attached() registered through the generic, type/priority-based register()
+        // path, and AbstractPluginFactory.getPlugins()'s TreeSet - which orders candidates by
+        // (priority, class name), identical for every OfflineChangeLogHistoryService instance -
+        // silently collapsed both registrations into one, handing the same instance to both databases.
+        given:
+        def connectionA = new OfflineConnection(
+                "offline:mock?changeLogFile=changelogA.csv", resourceAccessor)
+        def connectionB = new OfflineConnection(
+                "offline:mock?changeLogFile=changelogB.csv", resourceAccessor)
+        def databaseA = new MockDatabase()
+        databaseA.setConnection(connectionA)
+        def databaseB = new MockDatabase()
+        databaseB.setConnection(connectionB)
+
+        when:
+        connectionA.attached(databaseA)
+        connectionB.attached(databaseB)
+
+        def factory = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class)
+        def serviceA = factory.getChangeLogService(databaseA)
+        def serviceB = factory.getChangeLogService(databaseB)
+
+        then:
+        serviceA.database.is(databaseA)
+        serviceB.database.is(databaseB)
+        !serviceA.is(serviceB)
     }
 
     def "GetDatabaseMajorVersion"() {

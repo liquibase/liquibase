@@ -32,4 +32,31 @@ public class ExecutorServiceTest {
 
     }
 
+    /**
+     * Regression test for https://github.com/liquibase/liquibase/issues/6927 (comment thread):
+     * {@link ExecutorService#clearExecutor(String, liquibase.database.Database)} must only remove
+     * the given database's override, unlike {@link ExecutorService#reset()} which (correctly, by
+     * design) clears every database's entry. Command-step cleanUp() paths used to call the blanket
+     * reset() on every command completion; since this factory is a single JVM-wide singleton
+     * (since #7877), that wiped out other concurrently-running Maven modules' "jdbc"/"logging"
+     * Executor overrides (e.g. the SQL-writing LoggingExecutor installed by updateSQL) too.
+     */
+    @Test
+    public void clearExecutorOnlyAffectsGivenDatabase() {
+        PostgresDatabase databaseA = new PostgresDatabase();
+        PostgresDatabase databaseB = new PostgresDatabase();
+        Executor overrideA = new JdbcExampleExecutor();
+        Executor overrideB = new JdbcExampleExecutor();
+
+        executorService.setExecutor("jdbc", databaseA, overrideA);
+        executorService.setExecutor("jdbc", databaseB, overrideB);
+
+        executorService.clearExecutor("jdbc", databaseA);
+
+        assertThat(executorService.getExecutor("jdbc", databaseB)).isSameAs(overrideB);
+        assertThat(executorService.getExecutor("jdbc", databaseA))
+                .isNotSameAs(overrideA)
+                .isInstanceOf(JdbcExecutor.class);
+    }
+
 }
