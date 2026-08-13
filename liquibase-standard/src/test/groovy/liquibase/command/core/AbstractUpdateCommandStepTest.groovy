@@ -133,8 +133,8 @@ class AbstractUpdateCommandStepTest extends Specification {
         1 * mockLockService.releaseLock()
     }
 
-    def "cleanUp only clears the executor override and ChangeLogHistoryService for its own database (regression for liquibase#6927)"() {
-        // Reproduces bug 2 from https://github.com/liquibase/liquibase/issues/6927: updateSql's
+    def "cleanUp only clears the executor override and ChangeLogHistoryService for its own database"() {
+        // Cross-module state corruption in parallel (-T) Maven reactor builds, bug 2 of 3: updateSql's
         // cleanUp() used to call the blanket ExecutorService.reset() and
         // ChangeLogHistoryServiceFactory.resetAll() unconditionally on every command completion.
         // Since both factories are single JVM-wide singletons since #7877, one module's cleanUp()

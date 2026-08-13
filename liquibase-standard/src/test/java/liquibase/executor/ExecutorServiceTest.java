@@ -33,7 +33,7 @@ public class ExecutorServiceTest {
     }
 
     /**
-     * Regression test for https://github.com/liquibase/liquibase/issues/6927 (comment thread):
+     * Regression test for cross-module state corruption in parallel (-T) Maven reactor builds:
      * {@link ExecutorService#clearExecutor(String, liquibase.database.Database)} must only remove
      * the given database's override, unlike {@link ExecutorService#reset()} which (correctly, by
      * design) clears every database's entry. Command-step cleanUp() paths used to call the blanket

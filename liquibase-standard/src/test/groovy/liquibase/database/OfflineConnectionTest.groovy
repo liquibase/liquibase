@@ -53,8 +53,9 @@ class OfflineConnectionTest extends Specification {
         offlineConnection.attached new MockDatabase()
     }
 
-    def "Attached registers an isolated ChangeLogHistoryService per database (regression for liquibase#6927)"() {
-        // Reproduces the scenario reported at https://github.com/liquibase/liquibase/issues/6927:
+    def "Attached registers an isolated ChangeLogHistoryService per database"() {
+        // Cross-module state corruption in parallel (-T) Maven reactor builds, reproduced at
+        // https://github.com/pwielgolaski/liquibase-parallel-build-bug :
         // two OfflineConnections (as concurrently-running Maven modules would each have their own)
         // attaching to two different databases must each get their own OfflineChangeLogHistoryService.
         // Before the fix, attached() registered through the generic, type/priority-based register()

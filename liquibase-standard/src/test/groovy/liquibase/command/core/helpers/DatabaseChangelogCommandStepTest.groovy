@@ -20,8 +20,8 @@ import java.lang.reflect.Method
  */
 class DatabaseChangelogCommandStepTest extends Specification {
 
-    def "cleanUp only resets the ChangeLogHistoryService for its own database (regression for liquibase#6927)"() {
-        // Reproduces bug 3 from https://github.com/liquibase/liquibase/issues/6927: this helper
+    def "cleanUp only resets the ChangeLogHistoryService for its own database"() {
+        // Cross-module state corruption in parallel (-T) Maven reactor builds, bug 3 of 3: this helper
         // step's cleanUp() used to call the blanket ChangeLogHistoryServiceFactory.resetAll(),
         // which - since the factory is a single JVM-wide singleton since #7877 - discarded every
         // other concurrently-running Maven module's cached ChangeLogHistoryService too, not just

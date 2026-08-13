@@ -18,7 +18,7 @@ public class ChangeLogHistoryServiceFactoryTest {
     }
 
     /**
-     * Regression test for https://github.com/liquibase/liquibase/issues/6927 (comment thread):
+     * Regression test for cross-module state corruption in parallel (-T) Maven reactor builds:
      * two pre-configured services registered for two different databases must resolve back to
      * their own database, not collapse into a single shared instance. Before the fix, registering
      * through the generic {@link ChangeLogHistoryServiceFactory#register(ChangeLogHistoryService)}
