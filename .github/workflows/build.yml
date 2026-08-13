@@ -169,7 +169,15 @@ jobs:
         run: |
           ## save install4j code signing keys
           mkdir -p liquibase-dist/target/keys
-        
+
+          # temp-artifact carries these already built at 0-SNAPSHOT, which is the coordinate they
+          # get published under. The branch-versioned build below cleans those modules, so keep
+          # them now instead of renaming a branch-versioned jar afterwards: a maven plugin
+          # validates its embedded descriptor against the version it is requested at.
+          mkdir -p prebuilt
+          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT*.jar prebuilt/
+          cp liquibase-cli/target/liquibase-cli-0-SNAPSHOT*.jar prebuilt/
+
           ./mvnw -B -pl liquibase-dist,liquibase-maven-plugin,liquibase-extension-testing -am source:jar clean package failsafe:integration-test failsafe:verify \
           "-Dbuild.repository.owner=liquibase" \
           "-Dbuild.repository.name=liquibase" \
@@ -204,14 +212,10 @@ jobs:
           #cp liquibase-dist/target/liquibase-*-installer-* artifacts
 
           for i in 'liquibase-maven-plugin' 'liquibase-cli'; do
-            cp $i/target/$i-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.jar artifacts/$i-0-SNAPSHOT.jar
-            cp $i/target/$i-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-sources.jar artifacts/$i-0-SNAPSHOT-sources.jar
-            cp $i/target/$i-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-javadoc.jar artifacts/$i-0-SNAPSHOT-javadoc.jar
+            cp prebuilt/$i-0-SNAPSHOT.jar artifacts/$i-0-SNAPSHOT.jar
+            cp prebuilt/$i-0-SNAPSHOT-sources.jar artifacts/$i-0-SNAPSHOT-sources.jar
+            cp prebuilt/$i-0-SNAPSHOT-javadoc.jar artifacts/$i-0-SNAPSHOT-javadoc.jar
           done
-
-          # a maven plugin validates its own descriptor against the coordinate it is requested at,
-          # so the copy published as 0-SNAPSHOT cannot keep the branch version inside it
-          .github/util/restamp-plugin-descriptor.sh artifacts/liquibase-maven-plugin-0-SNAPSHOT.jar "${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT" 0-SNAPSHOT
 
           .github/util/sign-artifacts.sh artifacts
 
