@@ -209,8 +209,14 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         isDBLocked.remove();
         LockServiceFactory.getInstance().resetAll();
-        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
+        // Scoped to this command's own database: ChangeLogHistoryServiceFactory and ExecutorService are
+        // single JVM-wide singletons, so a blanket resetAll()/reset() here would also drop other
+        // concurrently running commands' (different database's) cached services and executor overrides.
+        Database database = (Database) resultsBuilder.getCommandScope().getDependency(Database.class);
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetDatabase(database);
+        ExecutorService executorService = Scope.getCurrentScope().getSingleton(ExecutorService.class);
+        executorService.clearExecutor("jdbc", database);
+        executorService.clearExecutor("logging", database);
     }
 
     private void logDeploymentOutcomeMdc(ChangeExecListener defaultListener, boolean success, UpdateReportParameters updateReportParameters,

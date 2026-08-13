@@ -48,6 +48,17 @@ public class ChangeLogHistoryServiceFactory extends AbstractPluginFactory<Change
     }
 
 
+    /**
+     * Registers a {@link ChangeLogHistoryService} that is already fully configured for the given database
+     * (e.g. an offline/simulated connection's history service), bypassing {@link #getPlugin(Object...)}'s
+     * generic type/priority-based lookup. That lookup can't distinguish between multiple pre-configured
+     * instances of the same class and priority registered concurrently for different databases - it only
+     * ever kept one, handing it out for every database.
+     */
+    public synchronized void registerForDatabase(Database database, ChangeLogHistoryService service) {
+        services.put(database, service);
+    }
+
     public synchronized ChangeLogHistoryService getChangeLogService(Database database) {
             if (services.containsKey(database)) {
                 return services.get(database);
@@ -81,6 +92,16 @@ public class ChangeLogHistoryServiceFactory extends AbstractPluginFactory<Change
 
     public synchronized void unregister(final ChangeLogHistoryService service) {
         removeInstance(service);
+    }
+
+    /**
+     * Clears the cached {@link ChangeLogHistoryService} for just the given database, as opposed to
+     * {@link #resetAll()} which clears every database's entry. Since this factory is a single JVM-wide
+     * singleton, resetAll() called from one execution's cleanup would otherwise drop other concurrently
+     * running executions' (different database's) cached services too.
+     */
+    public synchronized void resetDatabase(Database database) {
+        services.remove(database);
     }
 
     public synchronized void resetAll() {
