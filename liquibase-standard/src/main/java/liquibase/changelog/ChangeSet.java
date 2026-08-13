@@ -897,7 +897,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             setStopTime();
             getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, stopInstant.toString());
             getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
-            log.severe(String.format("ChangeSet %s encountered an exception.", toString(false)), e);
+            // Drop the throwable: (1) this catch block rethrows, so attaching the exception here
+            // would report the same failure twice (once here, once at the rethrow site);
+            // (2) Logback appends the full stack trace to any log record carrying a Throwable
+            // regardless of level — under quiet logging configurations this SEVERE record fires
+            // and the stack trace floods the console. Exception detail is surfaced by
+            // handleException at the appropriate verbosity level.
+            log.severe(String.format("ChangeSet %s encountered an exception.", toString(false)));
             setErrorMsg(e.getMessage());
 
             //
