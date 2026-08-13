@@ -209,6 +209,10 @@ jobs:
             cp $i/target/$i-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-javadoc.jar artifacts/$i-0-SNAPSHOT-javadoc.jar
           done
 
+          # a maven plugin validates its own descriptor against the coordinate it is requested at,
+          # so the copy published as 0-SNAPSHOT cannot keep the branch version inside it
+          .github/util/restamp-plugin-descriptor.sh artifacts/liquibase-maven-plugin-0-SNAPSHOT.jar "${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT" 0-SNAPSHOT
+
           .github/util/sign-artifacts.sh artifacts
 
           ##prepare branch-named convenience artifacts directories
