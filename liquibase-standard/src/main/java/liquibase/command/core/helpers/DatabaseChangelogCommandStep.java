@@ -231,9 +231,6 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
      */
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
-        // Scoped to this command's own database - ChangeLogHistoryServiceFactory is a single JVM-wide
-        // singleton, so a blanket resetAll() here would also drop other concurrently running commands'
-        // (different database's) cached ChangeLogHistoryService entries.
         Database database = (Database) resultsBuilder.getCommandScope().getDependency(Database.class);
         Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetDatabase(database);
     }

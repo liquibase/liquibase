@@ -88,6 +88,23 @@ public class ChangeLogHistoryServiceFactoryTest {
         assertThat(factory.getChangeLogService(database)).isSameAs(service);
     }
 
+    /**
+     * A service registered for a database never enters the plugin registry, so resetAll()'s loop over
+     * findAllInstances() does not reach it. It must still be reset before the map is cleared, or a full
+     * teardown would silently drop it without invalidating it.
+     */
+    @Test
+    public void resetAllResetsServicesRegisteredForADatabase() {
+        PostgresDatabase database = new PostgresDatabase();
+        RecordingChangeLogHistoryService registered = new RecordingChangeLogHistoryService();
+        registered.setDatabase(database);
+        factory.registerForDatabase(database, registered);
+
+        factory.resetAll();
+
+        assertThat(registered.resetCount).isEqualTo(1);
+    }
+
     private static class RecordingChangeLogHistoryService extends StandardChangeLogHistoryService {
         private int resetCount;
 

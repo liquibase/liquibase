@@ -90,6 +90,10 @@ public class ChangeLogHistoryServiceFactory extends AbstractPluginFactory<Change
             }
     }
 
+    /**
+     * Removes the given service from the plugin registry, so it is no longer a candidate for
+     * {@link #getChangeLogService(Database)} lookups that have not already been cached.
+     */
     public synchronized void unregister(final ChangeLogHistoryService service) {
         removeInstance(service);
     }
@@ -112,10 +116,19 @@ public class ChangeLogHistoryServiceFactory extends AbstractPluginFactory<Change
         }
     }
 
+    /**
+     * Resets and drops every database's {@link ChangeLogHistoryService}, discovered and
+     * {@link #registerForDatabase} registered alike. This is a full JVM-wide teardown; cleanup paths
+     * belonging to a single execution should use {@link #resetDatabase(Database)} instead, so they
+     * don't discard other concurrently running executions' services.
+     */
     public synchronized void resetAll() {
         for (ChangeLogHistoryService changeLogHistoryService : findAllInstances()) {
             changeLogHistoryService.reset();
         }
+        // Services registered for a database never enter the plugin registry, so findAllInstances()
+        // above does not cover them. reset() is idempotent, so overlap between the two is harmless.
+        services.values().forEach(ChangeLogHistoryService::reset);
         services.clear();
         // unregister all self-registered
         explicitRegistered.forEach(this::removeInstance);

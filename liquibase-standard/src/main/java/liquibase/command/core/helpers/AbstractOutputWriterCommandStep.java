@@ -64,9 +64,6 @@ public abstract class AbstractOutputWriterCommandStep extends AbstractHelperComm
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         if (outputStreamWriter != null) {
-            // Scoped to this command's own database - ExecutorService is a single JVM-wide singleton,
-            // so a blanket reset() here would also drop other concurrently running commands' (different
-            // database's) jdbc/logging executor overrides.
             ExecutorService executorService = Scope.getCurrentScope().getSingleton(ExecutorService.class);
             executorService.clearExecutor("jdbc", database);
             executorService.clearExecutor("logging", database);
