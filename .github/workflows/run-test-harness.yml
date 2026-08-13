@@ -21,13 +21,7 @@ permissions:
   
 jobs:
 
-  authorize:
-    runs-on: ubuntu-latest
-    steps:
-      - run: true
-
   test-harness-build:
-    needs: authorize
     runs-on: ubuntu-latest
     if: contains(github.event.pull_request.labels.*.name, 'runFunctional&HarnessTests') || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
     steps:

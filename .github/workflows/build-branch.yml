@@ -24,14 +24,8 @@ on:
 
 jobs:
 
-  authorize:
-    runs-on: ubuntu-latest
-    steps:
-      - run: true
-
   setup:
     name: Setup
-    needs: authorize
     runs-on: ubuntu-22.04
     outputs:
       timeStamp: ${{ steps.get-timestamp.outputs.timestamp }}
