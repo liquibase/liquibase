@@ -150,9 +150,14 @@ class AbstractUpdateCommandStepTest extends Specification {
         executorService.setExecutor("jdbc", databaseA, overrideA)
         executorService.setExecutor("jdbc", databaseB, overrideB)
 
-        def serviceA = new StandardChangeLogHistoryService()
+        def resets = [:].withDefault { 0 }
+        def serviceA = new StandardChangeLogHistoryService() {
+            @Override void reset() { resets["A"]++; super.reset() }
+        }
         serviceA.setDatabase(databaseA)
-        def serviceB = new StandardChangeLogHistoryService()
+        def serviceB = new StandardChangeLogHistoryService() {
+            @Override void reset() { resets["B"]++; super.reset() }
+        }
         serviceB.setDatabase(databaseB)
         changeLogHistoryServiceFactory.registerForDatabase(databaseA, serviceA)
         changeLogHistoryServiceFactory.registerForDatabase(databaseB, serviceB)
@@ -164,12 +169,12 @@ class AbstractUpdateCommandStepTest extends Specification {
         when: "module A finishes and cleans up while module B is still in flight"
         new UpdateSqlCommandStep().cleanUp(resultsBuilderA)
 
-        then: "module B's executor override and cached history service both survive module A's cleanup"
+        then: "module B's executor override and history service are untouched by module A's cleanup"
         executorService.getExecutor("jdbc", databaseB).is(overrideB)
-        changeLogHistoryServiceFactory.getChangeLogService(databaseB).is(serviceB)
+        resets["B"] == 0
 
-        and: "module A's own state was cleared, as expected"
+        and: "module A's own executor override was dropped and its history service invalidated"
         !executorService.getExecutor("jdbc", databaseA).is(overrideA)
-        !changeLogHistoryServiceFactory.getChangeLogService(databaseA).is(serviceA)
+        resets["A"] == 1
     }
 }

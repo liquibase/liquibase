@@ -95,13 +95,21 @@ public class ChangeLogHistoryServiceFactory extends AbstractPluginFactory<Change
     }
 
     /**
-     * Clears the cached {@link ChangeLogHistoryService} for just the given database, as opposed to
-     * {@link #resetAll()} which clears every database's entry. Since this factory is a single JVM-wide
-     * singleton, resetAll() called from one execution's cleanup would otherwise drop other concurrently
-     * running executions' (different database's) cached services too.
+     * Invalidates the {@link ChangeLogHistoryService} cached for just the given database, as opposed to
+     * {@link #resetAll()} which invalidates and drops every database's entry. Since this factory is a
+     * single JVM-wide singleton, resetAll() called from one execution's cleanup would otherwise discard
+     * other concurrently running executions' (different database's) services too.
+     * <p>
+     * The entry is reset in place rather than removed: the service is bound to the database for that
+     * database's lifetime - {@link liquibase.database.OfflineConnection} registers one that
+     * {@link #getPlugin} cannot rebuild - whereas the stale data a finishing command wants dropped is
+     * exactly what {@link ChangeLogHistoryService#reset()} clears.
      */
     public synchronized void resetDatabase(Database database) {
-        services.remove(database);
+        ChangeLogHistoryService service = services.get(database);
+        if (service != null) {
+            service.reset();
+        }
     }
 
     public synchronized void resetAll() {
