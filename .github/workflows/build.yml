@@ -170,10 +170,7 @@ jobs:
           ## save install4j code signing keys
           mkdir -p liquibase-dist/target/keys
 
-          # temp-artifact carries these already built at 0-SNAPSHOT, which is the coordinate they
-          # get published under. The branch-versioned build below cleans those modules, so keep
-          # them now instead of renaming a branch-versioned jar afterwards: a maven plugin
-          # validates its embedded descriptor against the version it is requested at.
+          # keep temp-artifact's 0-SNAPSHOT jars, the build below cleans these modules
           mkdir -p prebuilt
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT*.jar prebuilt/
           cp liquibase-cli/target/liquibase-cli-0-SNAPSHOT*.jar prebuilt/
