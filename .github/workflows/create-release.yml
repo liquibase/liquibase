@@ -242,10 +242,12 @@ jobs:
           GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
 
       - name: Decode Client Authentication Certificate
+        if: ${{ inputs.dry_run == false }}
         run: |
           echo "${{ env.SM_CLIENT_CERT_FILE_B64 }}" | base64 --decode > /tmp/client-auth.p12
 
       - name: Set Environment Variables for Signing
+        if: ${{ inputs.dry_run == false }}
         run: |
           echo "SM_HOST=${{ env.SM_HOST }}" >> "$GITHUB_ENV"
           echo "SM_API_KEY=${{ env.SM_API_KEY }}" >> "$GITHUB_ENV"
@@ -255,12 +257,14 @@ jobs:
           echo "SM_KEY_PAIR_ALIAS=${{ env.SM_KEY_PAIR_ALIAS }}" >> "$GITHUB_ENV"
 
       - name: Install jsign and osslsigncode
+        if: ${{ inputs.dry_run == false }}
         run: |
           curl -fSslL https://github.com/ebourg/jsign/releases/download/3.1/jsign_3.1_all.deb -o jsign_3.1_all.deb
           sudo dpkg --install jsign_3.1_all.deb
           sudo apt-get install osslsigncode
-          
+
       - name: Create pkcs11properties.cfg
+        if: ${{ inputs.dry_run == false }}
         run: |
           cat << EOF > pkcs11properties.cfg
           name=signingmanager
@@ -292,6 +296,7 @@ jobs:
           echo "$ANDROID_SDK_ROOT/build-tools/30.0.2" >> $GITHUB_PATH
           
       - name: Install DigiCert KeyLocker Client Tools
+        if: ${{ inputs.dry_run == false }}
         uses: digicert/code-signing-software-trust-action@fae23a455ba4bde62b64fd7cb2f81ade788f5a95 # v1.2.1
 
       - name: Build Unsigned Windows Installer
@@ -319,6 +324,7 @@ jobs:
           echo "INSTALLER_PATH=$INSTALLER_PATH" >> $GITHUB_ENV
 
       - name: Sign Windows Installer using KeyLocker
+        if: ${{ inputs.dry_run == false }}
         run: |
           smctl sign -v --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" \
           --keypair-alias $SM_KEY_PAIR_ALIAS \
@@ -327,6 +333,7 @@ jobs:
           --input "$INSTALLER_PATH" --tool jsign
 
       - name: Verify Windows Installer Signature
+        if: ${{ inputs.dry_run == false }}
         run: osslsigncode verify -CAfile /etc/ssl/certs/ca-certificates.crt -in "$INSTALLER_PATH"
         
       - name: Re-version Installers
