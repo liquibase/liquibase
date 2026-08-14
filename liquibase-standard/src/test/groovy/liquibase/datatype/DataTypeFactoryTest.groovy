@@ -239,6 +239,9 @@ class DataTypeFactoryTest extends Specification {
         "timestamp(6)"                                 | new OracleDatabase()   | "TIMESTAMP(6)"                                 | TimestampType | false
         "TIMESTAMP WITH TIMEZONE"                      | new OracleDatabase()   | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false
         "TIMESTAMP(6) WITH TIMEZONE"                   | new OracleDatabase()   | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false
+        "TIMESTAMP WITH TIME ZONE"                     | new OracleDatabase()   | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false
+        "TIMESTAMP(6) WITH TIME ZONE"                  | new OracleDatabase()   | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false
+        "TIMESTAMP(6) WITH TIME ZONE(13)"              | new OracleDatabase()   | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false
         "timestamp without timezone"                   | new OracleDatabase()   | "TIMESTAMP"                                    | TimestampType | false
         "timestamp(6) without timezone"                | new OracleDatabase()   | "TIMESTAMP(6)"                                 | TimestampType | false
         "timestamptz"                                  | new OracleDatabase()   | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false
@@ -296,6 +299,13 @@ class DataTypeFactoryTest extends Specification {
         "uuid"                                         | new MariaDBDatabase()  | "UUID"                                         | UUIDType      | false
         "timestamp"                                    | new FirebirdDatabase() | "TIMESTAMP"                                    | TimestampType | false
         "timestamp(6)"                                 | new FirebirdDatabase() | "TIMESTAMP"                                    | TimestampType | false
+        "timestamptz"                                  | new FirebirdDatabase() | "TIMESTAMP"                                    | TimestampType | false
+        "timestamp"                                    | new DerbyDatabase()    | "TIMESTAMP"                                    | TimestampType | false
+        "timestamptz"                                  | new DerbyDatabase()    | "TIMESTAMP"                                    | TimestampType | false
+        "timestamp"                                    | new HsqlDatabase()     | "TIMESTAMP"                                    | TimestampType | false
+        "timestamptz"                                  | new HsqlDatabase()     | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false
+        "TIMESTAMP WITH TIMEZONE"                      | new HsqlDatabase()     | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false
+        "timestamptz"                                  | new InformixDatabase() | "DATETIME YEAR TO FRACTION(5)"                 | TimestampType | false
     }
 
     @Unroll("#featureName: #object for #database")
