@@ -11,64 +11,67 @@ import liquibase.changelog.visitor.DefaultChangeExecListener
 import liquibase.command.CommandResultsBuilder
 import liquibase.command.CommandScope
 import liquibase.database.Database
-import liquibase.database.DatabaseConnection
+import liquibase.database.DatabaseFactory
+import liquibase.database.jvm.JdbcConnection
 import liquibase.executor.ExecutorService
 import liquibase.executor.LoggingExecutor
 import liquibase.lockservice.LockService
 import liquibase.lockservice.LockServiceFactory
 import spock.lang.Specification
 
+import java.sql.DriverManager
+
 class UpdateSqlCommandStepTest extends Specification {
+
+    private java.sql.Connection jdbcConnection
 
     def cleanup() {
         LockServiceFactory.reset()
+        jdbcConnection?.close()
     }
 
     /**
-     * Bypasses the real FastCheckService/DB round-trip, standing in for the case where the fast-check finds nothing pending.
+     * Bypasses the real FastCheckService/DB round-trip, standing in for the case where the fast-check finds pending changes.
      */
-    private static class FastCheckUpToDateUpdateSqlCommandStep extends UpdateSqlCommandStep {
+    private static class FastCheckPendingUpdateSqlCommandStep extends UpdateSqlCommandStep {
         @Override
         boolean isUpToDate(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog,
                             Contexts contexts, LabelExpression labelExpression, OutputStream outputStream) {
-            return true
+            return false
         }
     }
 
-    def "run() must not touch the changelog lock when the fast-check finds nothing pending (#6102)"() {
-        given: "updateSql, like update, now acquires the lock lazily instead of via the pipeline"
-        def step = new FastCheckUpToDateUpdateSqlCommandStep()
+    def "run() acquires the changelog lock itself exactly once when the fast-check finds pending changes (#6102)"() {
+        given: "updateSql now owns lock acquisition instead of relying on a pipeline-managed LockServiceCommandStep"
+        def step = new FastCheckPendingUpdateSqlCommandStep()
+
+        // A real (fresh, empty) H2 database: run() queries the changelog history/snapshot tables as
+        // part of building the status summary, which a plain mock Database can't satisfy.
+        jdbcConnection = DriverManager.getConnection("jdbc:h2:mem:" + UUID.randomUUID(), "sa", "")
+        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(jdbcConnection))
+
         def mockLockService = Mock(LockService)
-        def mockDatabase = Mock(Database) {
-            getConnection() >> Mock(DatabaseConnection) {
-                getVisibleUrl() >> "jdbc:test"
-                getURL() >> "jdbc:test"
-                getConnectionUserName() >> "test"
-            }
-            getLineComment() >> "--"
-        }
         def mockFactory = Mock(LockServiceFactory) {
-            getLockService(mockDatabase) >> mockLockService
+            getLockService(database) >> mockLockService
         }
         LockServiceFactory.setInstance(mockFactory)
 
         def commandScope = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME)
                 .addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, "changelog.xml")
-                .provideDependency(Database.class, mockDatabase)
+                .provideDependency(Database.class, database)
                 .provideDependency(DatabaseChangeLog.class, new DatabaseChangeLog("changelog.xml"))
                 .provideDependency(ChangeExecListener.class, new DefaultChangeExecListener())
                 .provideDependency(ChangeLogParameters.class, new ChangeLogParameters())
         def resultsBuilder = new CommandResultsBuilder(commandScope, new ByteArrayOutputStream())
 
         // In the real pipeline, AbstractOutputWriterCommandStep sets this up before UpdateSqlCommandStep runs.
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("logging", mockDatabase,
-                new LoggingExecutor(null, new OutputStreamWriter(resultsBuilder.getOutputStream()), mockDatabase))
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("logging", database,
+                new LoggingExecutor(null, new OutputStreamWriter(resultsBuilder.getOutputStream()), database))
 
-        when: "run() takes the fast-check early-return path"
+        when: "run() proceeds past the fast-check since there are pending changes"
         step.run(resultsBuilder)
 
-        then: "in SQL-output mode waitForLock() is what writes the lock statements, so 0 calls means none were written"
-        0 * mockLockService.waitForLock()
-        0 * mockLockService.releaseLock()
+        then: "the lock is acquired here, not by a LockServiceCommandStep that was never wired into the pipeline"
+        1 * mockLockService.waitForLock()
     }
 }
