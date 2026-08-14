@@ -103,7 +103,12 @@ public class Scope {
      * threads created before Liquibase initialized, or from another thread lineage) adopt this root
      * instead of bootstrapping a second one with their own context classloader, which produced
      * "not a subtype" ServiceLoader failures and split-brain singletons (#6880).
+     * <p>
+     * S3077: volatile is the right guarantee here rather than an insufficient one. The scope is fully
+     * populated as a local before this field is assigned, and its {@code values} map is never mutated
+     * afterwards, so the volatile write safely publishes an effectively immutable object.
      */
+    @SuppressWarnings("java:S3077")
     private static volatile Scope rootScope;
 
     /**
