@@ -349,7 +349,7 @@ public class StandardLockService implements LockService {
 
                 hasChangeLogLock = true;
 
-                Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
+                Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetDatabase(database);
                 database.setCanCacheLiquibaseTableInfo(true);
                 return true;
             }
