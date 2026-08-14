@@ -304,6 +304,8 @@ class DataTypeFactoryTest extends Specification {
         "timestamptz"                                  | new DerbyDatabase()    | "TIMESTAMP"                                    | TimestampType | false
         "timestamp"                                    | new HsqlDatabase()     | "TIMESTAMP"                                    | TimestampType | false
         "timestamptz"                                  | new HsqlDatabase()     | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false
+        "TIMESTAMP WITH TIMEZONE"                      | new HsqlDatabase()     | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false
+        "timestamptz"                                  | new InformixDatabase() | "DATETIME YEAR TO FRACTION(5)"                 | TimestampType | false
     }
 
     @Unroll("#featureName: #object for #database")
