@@ -24,19 +24,27 @@ import java.sql.DriverManager
 class UpdateSqlCommandStepTest extends Specification {
 
     private java.sql.Connection jdbcConnection
+    private Database database
 
     def cleanup() {
         LockServiceFactory.reset()
+        if (database != null) {
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).clearExecutor("logging", database)
+        }
         jdbcConnection?.close()
     }
 
     /**
      * Bypasses the real FastCheckService/DB round-trip, standing in for the case where the fast-check finds pending changes.
+     * Records completion so the test can assert the lock is acquired only after the fast-check runs, not before it.
      */
     private static class FastCheckPendingUpdateSqlCommandStep extends UpdateSqlCommandStep {
+        boolean fastCheckCompleted = false
+
         @Override
         boolean isUpToDate(CommandScope commandScope, Database database, DatabaseChangeLog databaseChangeLog,
                             Contexts contexts, LabelExpression labelExpression, OutputStream outputStream) {
+            fastCheckCompleted = true
             return false
         }
     }
@@ -48,9 +56,11 @@ class UpdateSqlCommandStepTest extends Specification {
         // A real (fresh, empty) H2 database: run() queries the changelog history/snapshot tables as
         // part of building the status summary, which a plain mock Database can't satisfy.
         jdbcConnection = DriverManager.getConnection("jdbc:h2:mem:" + UUID.randomUUID(), "sa", "")
-        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(jdbcConnection))
+        database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(jdbcConnection))
 
-        def mockLockService = Mock(LockService)
+        def mockLockService = Mock(LockService) {
+            hasChangeLogLock() >> true
+        }
         def mockFactory = Mock(LockServiceFactory) {
             getLockService(database) >> mockLockService
         }
@@ -71,7 +81,10 @@ class UpdateSqlCommandStepTest extends Specification {
         when: "run() proceeds past the fast-check since there are pending changes"
         step.run(resultsBuilder)
 
-        then: "the lock is acquired here, not by a LockServiceCommandStep that was never wired into the pipeline"
-        1 * mockLockService.waitForLock()
+        then: "the lock is acquired only after the fast-check completes, not by a pipeline-managed LockServiceCommandStep beforehand"
+        1 * mockLockService.waitForLock() >> { assert step.fastCheckCompleted }
+
+        and: "the lock this call acquired is also released before run() returns"
+        1 * mockLockService.releaseLock()
     }
 }
