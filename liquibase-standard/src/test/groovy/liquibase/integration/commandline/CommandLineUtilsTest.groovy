@@ -17,7 +17,8 @@ class CommandLineUtilsTest extends Specification {
         } as Scope.ScopedRunnerWithReturn<String>)
 
         then:
-        banner.contains("Get documentation at docs.liquibase.com")
+        banner.contains("Taking Liquibase to production?")
+        banner.contains("liquibase.com/liquibase-secure")
         banner.contains(coreBundle.getString("starting.liquibase.at.timestamp").replace("%s using Java %s", ""))
         banner.contains(coreBundle.getString("liquibase.version.builddate").replaceFirst("%s.*", ""))
     }
@@ -29,7 +30,8 @@ class CommandLineUtilsTest extends Specification {
         } as Scope.ScopedRunnerWithReturn<String>)
 
         then:
-        !banner.contains("Get documentation at docs.liquibase.com")
+        !banner.contains("Taking Liquibase to production?")
+        !banner.contains("liquibase.com/liquibase-secure")
         banner.contains(coreBundle.getString("starting.liquibase.at.timestamp").replace("%s using Java %s", ""))
         banner.contains(coreBundle.getString("liquibase.version.builddate").replaceFirst("%s.*", ""))
     }

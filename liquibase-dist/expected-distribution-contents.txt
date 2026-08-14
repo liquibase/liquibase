@@ -37,8 +37,9 @@ lib/liquibase_autocomplete.zsh
 lib/liquibase_autocomplete_mac.bash
 licenses/oss/README.txt
 licenses/oss/apache-2.0.txt
-licenses/oss/epl-1.0.txt
 licenses/oss/epl-2.0.txt
+licenses/oss/FSL-1.1-ALv2.txt
+licenses/oss/gpl-2.0-classpath-exception.txt
 licenses/oss/usage-data.txt
 liquibase
 liquibase.bat

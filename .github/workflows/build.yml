@@ -169,13 +169,19 @@ jobs:
         run: |
           ## save install4j code signing keys
           mkdir -p liquibase-dist/target/keys
-        
+
+          # keep temp-artifact's 0-SNAPSHOT jars, the build below cleans these modules
+          mkdir -p prebuilt
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-extension-testing'; do
+            cp $i/target/$i-0-SNAPSHOT*.jar prebuilt/
+          done
+
           ./mvnw -B -pl liquibase-dist,liquibase-maven-plugin,liquibase-extension-testing -am source:jar clean package failsafe:integration-test failsafe:verify \
           "-Dbuild.repository.owner=liquibase" \
           "-Dbuild.repository.name=liquibase" \
           "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" \
           "-Dbuild.number=${{ github.run_number }}" \
-          "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT" \
+          "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" \
           "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
 
           # Extract the tarball to allow us to upload the liquibase installation files to our
@@ -204,9 +210,9 @@ jobs:
           #cp liquibase-dist/target/liquibase-*-installer-* artifacts
 
           for i in 'liquibase-maven-plugin' 'liquibase-cli'; do
-            cp $i/target/$i-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.jar artifacts/$i-0-SNAPSHOT.jar
-            cp $i/target/$i-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-sources.jar artifacts/$i-0-SNAPSHOT-sources.jar
-            cp $i/target/$i-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-javadoc.jar artifacts/$i-0-SNAPSHOT-javadoc.jar
+            cp prebuilt/$i-0-SNAPSHOT.jar artifacts/$i-0-SNAPSHOT.jar
+            cp prebuilt/$i-0-SNAPSHOT-sources.jar artifacts/$i-0-SNAPSHOT-sources.jar
+            cp prebuilt/$i-0-SNAPSHOT-javadoc.jar artifacts/$i-0-SNAPSHOT-javadoc.jar
           done
 
           .github/util/sign-artifacts.sh artifacts
@@ -215,10 +221,12 @@ jobs:
           mkdir artifacts-named
 
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.tar.gz
-          cp liquibase-extension-testing/target/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-deps.jar
 
+          # liquibase-sdk:install-snapshot runs install-file over these without coordinates, so maven
+          # reads the embedded pom: they need 0-SNAPSHOT inside even though the file name says the branch
+          cp prebuilt/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-deps.jar
           for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-extension-testing'; do
-            cp $i/target/$i-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.jar artifacts-named/$i-${{ needs.setup.outputs.thisBranchName }}.jar
+            cp prebuilt/$i-0-SNAPSHOT.jar artifacts-named/$i-${{ needs.setup.outputs.thisBranchName }}.jar
           done
 
       - name: Archive Packages

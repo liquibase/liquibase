@@ -18,6 +18,7 @@ import java.util.List;
 public abstract class AbstractOutputWriterCommandStep extends AbstractHelperCommandStep implements CleanUpCommandStep {
 
     private OutputStreamWriter outputStreamWriter;
+    private Database database;
 
     @Override
     public List<Class<?>> providedDependencies() {
@@ -45,7 +46,7 @@ public abstract class AbstractOutputWriterCommandStep extends AbstractHelperComm
         CommandScope commandScope = resultsBuilder.getCommandScope();
         String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
         outputStreamWriter = new OutputStreamWriter(resultsBuilder.getOutputStream(), charsetName);
-        Database database = (Database) commandScope.getDependency(Database.class);
+        database = (Database) commandScope.getDependency(Database.class);
         Executor databaseExecutor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         LoggingExecutor loggingExecutor = new LoggingExecutor(databaseExecutor, outputStreamWriter, database);
         Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, loggingExecutor);
@@ -63,7 +64,9 @@ public abstract class AbstractOutputWriterCommandStep extends AbstractHelperComm
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         if (outputStreamWriter != null) {
-            Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
+            ExecutorService executorService = Scope.getCurrentScope().getSingleton(ExecutorService.class);
+            executorService.clearExecutor("jdbc", database);
+            executorService.clearExecutor("logging", database);
             try {
                 outputStreamWriter.close();
             } catch (IOException e) {

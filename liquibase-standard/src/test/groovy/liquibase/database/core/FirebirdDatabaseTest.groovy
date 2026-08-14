@@ -1,5 +1,6 @@
 package liquibase.database.core
 
+import liquibase.database.DatabaseConnection
 import liquibase.structure.core.Column
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -8,6 +9,26 @@ import static liquibase.database.ObjectQuotingStrategy.QUOTE_ALL_OBJECTS
 import static liquibase.database.ObjectQuotingStrategy.QUOTE_ONLY_RESERVED_WORDS
 
 class FirebirdDatabaseTest extends Specification {
+
+    @Unroll
+    def "isCorrectDatabaseImplementation for #productName"() {
+        given:
+        def connection = Mock(DatabaseConnection) {
+            getDatabaseProductName() >> productName
+        }
+
+        expect:
+        new FirebirdDatabase().isCorrectDatabaseImplementation(connection) == expected
+
+        where:
+        productName                    || expected
+        'Firebird'                     || true
+        'Firebird 5.0'                 || true
+        'RedDatabase'                  || true
+        'RedDatabase 5.1 (abcdef01)'   || true
+        'PostgreSQL'                   || false
+        'H2'                           || false
+    }
 
     @Unroll("#featureName [#quotingStrategy], [#objectName, #objectType], [#expectedCorrect, #expectedEscape]")
     def "correctObjectName, escapeObjectName"() {
