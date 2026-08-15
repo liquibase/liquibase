@@ -48,6 +48,17 @@ public class ChangeLogHistoryServiceFactory extends AbstractPluginFactory<Change
     }
 
 
+    /**
+     * Registers a {@link ChangeLogHistoryService} that is already fully configured for the given database
+     * (e.g. an offline/simulated connection's history service), bypassing {@link #getPlugin(Object...)}'s
+     * generic type/priority-based lookup. That lookup can't distinguish between multiple pre-configured
+     * instances of the same class and priority registered concurrently for different databases - it only
+     * ever kept one, handing it out for every database.
+     */
+    public synchronized void registerForDatabase(Database database, ChangeLogHistoryService service) {
+        services.put(database, service);
+    }
+
     public synchronized ChangeLogHistoryService getChangeLogService(Database database) {
             if (services.containsKey(database)) {
                 return services.get(database);
@@ -79,14 +90,45 @@ public class ChangeLogHistoryServiceFactory extends AbstractPluginFactory<Change
             }
     }
 
+    /**
+     * Removes the given service from the plugin registry, so it is no longer a candidate for
+     * {@link #getChangeLogService(Database)} lookups that have not already been cached.
+     */
     public synchronized void unregister(final ChangeLogHistoryService service) {
         removeInstance(service);
     }
 
+    /**
+     * Invalidates the {@link ChangeLogHistoryService} cached for just the given database, as opposed to
+     * {@link #resetAll()} which invalidates and drops every database's entry. Since this factory is a
+     * single JVM-wide singleton, resetAll() called from one execution's cleanup would otherwise discard
+     * other concurrently running executions' (different database's) services too.
+     * <p>
+     * The entry is reset in place rather than removed: the service is bound to the database for that
+     * database's lifetime - {@link liquibase.database.OfflineConnection} registers one that
+     * {@link #getPlugin} cannot rebuild - whereas the stale data a finishing command wants dropped is
+     * exactly what {@link ChangeLogHistoryService#reset()} clears.
+     */
+    public synchronized void resetDatabase(Database database) {
+        ChangeLogHistoryService service = services.get(database);
+        if (service != null) {
+            service.reset();
+        }
+    }
+
+    /**
+     * Resets and drops every database's {@link ChangeLogHistoryService}, discovered and
+     * {@link #registerForDatabase} registered alike. This is a full JVM-wide teardown; cleanup paths
+     * belonging to a single execution should use {@link #resetDatabase(Database)} instead, so they
+     * don't discard other concurrently running executions' services.
+     */
     public synchronized void resetAll() {
         for (ChangeLogHistoryService changeLogHistoryService : findAllInstances()) {
             changeLogHistoryService.reset();
         }
+        // Services registered for a database never enter the plugin registry, so findAllInstances()
+        // above does not cover them. reset() is idempotent, so overlap between the two is harmless.
+        services.values().forEach(ChangeLogHistoryService::reset);
         services.clear();
         // unregister all self-registered
         explicitRegistered.forEach(this::removeInstance);
