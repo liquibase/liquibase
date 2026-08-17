@@ -243,7 +243,14 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                 throw new UnexpectedLiquibaseException("Unable to read file " + this.getFile());
             }
 
-            String[] headers = reader.readNext();
+            boolean isCommentingEnabled = StringUtils.isNotEmpty(commentLineStartsWith);
+
+            // Skip any blank or commented lines preceding the header, so a leading comment (e.g. a "#"
+            // line describing the file) isn't mistaken for the header row -- see #4434.
+            String[] headers;
+            do {
+                headers = reader.readNext();
+            } while ((headers != null) && isSkippableLine(headers, isCommentingEnabled));
             if (headers == null) {
                 throw new UnexpectedLiquibaseException("Data file " + getFile() + " was empty");
             }
@@ -262,15 +269,10 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             // Start at '1' to take into account the header (already processed):
             int lineNumber = 1;
 
-            boolean isCommentingEnabled = StringUtils.isNotEmpty(commentLineStartsWith);
-
             List<LoadDataRowConfig> rows = new ArrayList<>();
             while ((line = reader.readNext()) != null) {
                 lineNumber++;
-                if
-                ((line.length == 0) || ((line.length == 1) && (StringUtils.trimToNull(line[0]) == null)) ||
-                        (isCommentingEnabled && isLineCommented(line))
-                ) {
+                if (isSkippableLine(line, isCommentingEnabled)) {
                     //nothing interesting on this line
                     continue;
                 }
@@ -704,6 +706,11 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
     private boolean isLineCommented(String[] line) {
         return StringUtils.startsWith(line[0], commentLineStartsWith);
+    }
+
+    private boolean isSkippableLine(String[] line, boolean isCommentingEnabled) {
+        return (line.length == 0) || ((line.length == 1) && (StringUtils.trimToNull(line[0]) == null)) ||
+                (isCommentingEnabled && isLineCommented(line));
     }
 
     @Override
