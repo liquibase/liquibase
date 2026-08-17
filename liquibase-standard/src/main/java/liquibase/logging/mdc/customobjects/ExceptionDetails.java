@@ -38,8 +38,12 @@ public class ExceptionDetails implements CustomMdcObject {
             this.primaryExceptionReason = primaryException.getMessage();
             this.primaryExceptionSource = source;
             StringWriter stringWriter = new StringWriter();
-            PrintWriter printWriter = new PrintWriter(stringWriter);
-            exception.printStackTrace(printWriter);
+            try (PrintWriter printWriter = new PrintWriter(stringWriter)) {
+                // Leading newline matches StructuredLogFormatter / LogbackStructuredJsonEncoder.formatThrowable()
+                // so all "exception" fields in structured JSON output are consistent.
+                printWriter.println();
+                exception.printStackTrace(printWriter);
+            }
             this.exception = stringWriter.toString();
         }
     }
