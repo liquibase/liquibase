@@ -80,6 +80,11 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         this.ranChangeSetList = null;
         this.serviceInitialized = false;
         this.hasDatabaseChangeLogTable = null;
+        // Cached MAX(ORDEREXECUTED), incremented in memory by getNextSequenceValue(). Unlike
+        // databaseChecksumsCompatible it is not recomputed by init(), so it has to be dropped here or
+        // it would survive a reset and hand out sequence values based on a stale read - notably after
+        // acquiring the changelog lock, where another process may have written in the meantime.
+        this.lastChangeSetSequenceValue = null;
     }
 
     public boolean hasDatabaseChangeLogTable() {

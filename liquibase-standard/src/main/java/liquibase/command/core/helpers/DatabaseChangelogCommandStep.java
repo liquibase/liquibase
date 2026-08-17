@@ -231,7 +231,8 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
      */
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
-        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
+        Database database = (Database) resultsBuilder.getCommandScope().getDependency(Database.class);
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetDatabase(database);
     }
 
     /**
