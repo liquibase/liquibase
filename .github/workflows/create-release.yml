@@ -244,7 +244,11 @@ jobs:
       - name: Decode Client Authentication Certificate
         if: ${{ inputs.dry_run == false }}
         run: |
-          echo "${{ env.SM_CLIENT_CERT_FILE_B64 }}" | base64 --decode > /tmp/client-auth.p12
+          # Read the secret from the shell environment rather than expanding
+          # ${{ env.SM_CLIENT_CERT_FILE_B64 }} into the generated script (zizmor
+          # template-injection). "Get secrets from vault" above already exports it
+          # into the job env via parse-json-secrets, so the value is identical.
+          printf '%s' "$SM_CLIENT_CERT_FILE_B64" | base64 --decode > /tmp/client-auth.p12
 
       - name: Set Environment Variables for Signing
         if: ${{ inputs.dry_run == false }}
