@@ -31,6 +31,17 @@ jobs:
             ,/vault/liquibase
           parse-json-secrets: true
 
+      # TECHOPS-1048: this workflow checks that the installer *builds*; the KeyLocker
+      # signing steps were removed from it, so it now needs GPG only. /vault/liquibase is
+      # one shared secret the action can only load whole, so blank the signing credentials
+      # rather than leave them in the environment of a workflow that never signs.
+      - name: Drop unused KeyLocker credentials from the job environment
+        run: |
+          for name in ${!SM_@}; do
+            echo "$name=" >> "$GITHUB_ENV"
+            echo "Cleared $name"
+          done
+
       - name: Convert escaped newlines and set GPG key
         run: |
           {

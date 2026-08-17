@@ -107,6 +107,20 @@ jobs:
             ,/vault/liquibase
           parse-json-secrets: true
 
+      # TECHOPS-1048: /vault/liquibase is one shared secret and the action can only load
+      # it whole (parse-json-secrets), so this job gets the DigiCert KeyLocker signing
+      # credentials even though it only needs GPG — nothing in `reversion` signs anything.
+      # Blank them so they are not in the environment of any later step in this job.
+      # aws-actions/aws-secretsmanager-get-secrets#264 would let us request a subset of
+      # keys, but it has been open since Sep 2025 and is in no release; the complete fix
+      # is a separate GPG-only secret in Secrets Manager.
+      - name: Drop unused KeyLocker credentials from the job environment
+        run: |
+          for name in ${!SM_@}; do
+            echo "$name=" >> "$GITHUB_ENV"
+            echo "Cleared $name"
+          done
+
       - name: Download liquibase-artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -213,6 +227,17 @@ jobs:
             ,/vault/liquibase
           parse-json-secrets: true
 
+      # TECHOPS-1048: a dry run never reaches the signing steps below, so the KeyLocker
+      # credentials this job loaded are dead weight in its environment. Blank them on that
+      # path. See the same step in `reversion` for why a subset can't just be requested.
+      - name: Drop unused KeyLocker credentials from the job environment
+        if: ${{ inputs.dry_run == true }}
+        run: |
+          for name in ${!SM_@}; do
+            echo "$name=" >> "$GITHUB_ENV"
+            echo "Cleared $name"
+          done
+
       - name: Convert escaped newlines and set GPG key
         run: |
           {
@@ -253,12 +278,13 @@ jobs:
       - name: Set Environment Variables for Signing
         if: ${{ inputs.dry_run == false }}
         run: |
-          echo "SM_HOST=${{ env.SM_HOST }}" >> "$GITHUB_ENV"
-          echo "SM_API_KEY=${{ env.SM_API_KEY }}" >> "$GITHUB_ENV"
+          # SM_HOST, SM_API_KEY, SM_CLIENT_CERT_PASSWORD, SM_CODE_SIGNING_CERT_SHA1_HASH
+          # and SM_KEY_PAIR_ALIAS are already in the job environment — "Get secrets from
+          # vault" exports every field of /vault/liquibase via parse-json-secrets. Copying
+          # them onto themselves through ${{ env.X }} only re-expanded five more secrets
+          # into a generated shell script (TECHOPS-1048). SM_CLIENT_CERT_FILE is the one
+          # value the vault can't supply: it points at the cert decoded in the step above.
           echo "SM_CLIENT_CERT_FILE=/tmp/client-auth.p12" >> "$GITHUB_ENV"
-          echo "SM_CLIENT_CERT_PASSWORD=${{ env.SM_CLIENT_CERT_PASSWORD }}" >> "$GITHUB_ENV"
-          echo "SM_CODE_SIGNING_CERT_SHA1_HASH=${{ env.SM_CODE_SIGNING_CERT_SHA1_HASH }}" >> "$GITHUB_ENV"
-          echo "SM_KEY_PAIR_ALIAS=${{ env.SM_KEY_PAIR_ALIAS }}" >> "$GITHUB_ENV"
 
       - name: Install jsign and osslsigncode
         if: ${{ inputs.dry_run == false }}
