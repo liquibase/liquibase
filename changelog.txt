@@ -4,7 +4,7 @@ Liquibase Core Changelog
 Changes in version 5.0.4 (2026.08.19)
 
 # Liquibase Community 5.0.4 is a minor patch release
-See the [Liquibase Community 5.0.4 Release Notes](https://docs.liquibase.com/community/community-release-notes/liquibase-community-504-release-notes) for the complete set of release information.
+See the [Liquibase Community 5.0.4 Release Notes](https://docs.liquibase.com/community/release-notes/liquibase-community-5-0-4-release-notes) for the complete set of release information.
 
 
 ## New Features
@@ -80,8 +80,6 @@ See the [Liquibase Community 5.0.4 Release Notes](https://docs.liquibase.com/com
 * CWE-470: opt-in restricted mode for customChange changelog change by @v-petrovych in https://github.com/liquibase/liquibase/pull/7748
 * CWE-22 deprecation flag: opt-in path containment via liquibase.allowParentDirectoryReferences by @v-petrovych in https://github.com/liquibase/liquibase/pull/7750
 * feat(ci): auto-create Jira ticket on Community PR merge [TECHOPS-497] by @jandroav in https://github.com/liquibase/liquibase/pull/7745
-* test(ci): TECHOPS-497 smoke test — please ignore by @jandroav in https://github.com/liquibase/liquibase/pull/7751
-* Revert: TECHOPS-497 smoke test marker by @jandroav in https://github.com/liquibase/liquibase/pull/7752
 * CWE-693 follow-up: scope generic JDBC userinfo matcher to authority-position only by @v-petrovych in https://github.com/liquibase/liquibase/pull/7756
 * Update LiquibaseCommandLineTest expectedHelpOutput for the three new ALLOW_* audit flags by @v-petrovych in https://github.com/liquibase/liquibase/pull/7760
 * ci: add release-notes aggregator caller workflow [TECHOPS-498] by @jandroav in https://github.com/liquibase/liquibase/pull/7771
@@ -183,7 +181,7 @@ See the [Liquibase Community 5.0.4 Release Notes](https://docs.liquibase.com/com
 Changes in version 5.0.3 (2026.05.15)
 
 # Liquibase Community 5.0.3 is a minor patch release
-See the [Liquibase Community 5.0.3 Release Notes](https://docs.liquibase.com/community/community-release-notes/liquibase-community-503-release-notes) for the complete set of release information.
+See the [Liquibase Community 5.0.3 Release Notes](https://docs.liquibase.com/community/release-notes/liquibase-community-5-0-3-release-notes) for the complete set of release information.
 
 ## New Features
 - (#7674) perf: cache ranChangeSets lookup in SqlChangeLogParser.generateId @andrewcedgar
