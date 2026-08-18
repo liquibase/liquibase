@@ -95,8 +95,15 @@ jobs:
           fi
           ls -la "$ART_DIR"
 
+      - name: Checkout build-logic
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: liquibase/build-logic
+          path: build-logic
+
       - name: Persist to scan-results branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          scripts/persist-scan-results.sh scan-artifacts
+          chmod +x build-logic/scripts/vulnerability-scanning/persist-scan-results.sh
+          build-logic/scripts/vulnerability-scanning/persist-scan-results.sh scan-artifacts
