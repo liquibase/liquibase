@@ -137,12 +137,17 @@ jobs:
 
       - name: Convert escaped newlines and set GPG key
         run: |
+          GPG_KEY_CONTENT="$(printf '%b' "${{ env.GPG_SECRET }}")"
           {
             echo "GPG_KEY_CONTENT<<GPG_EOF"
-            printf '%b' "${{ env.GPG_SECRET }}"
+            echo "$GPG_KEY_CONTENT"
             echo
             echo "GPG_EOF"
           } >> $GITHUB_ENV
+          GPG_KEY_CONTENT="${GPG_KEY_CONTENT//%/%25}"
+          GPG_KEY_CONTENT="${GPG_KEY_CONTENT//$'\r'/%0D}"
+          GPG_KEY_CONTENT="${GPG_KEY_CONTENT//$'\n'/%0A}"
+          echo "::add-mask::${GPG_KEY_CONTENT}"
 
       - name: Set up JDK
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
@@ -240,12 +245,17 @@ jobs:
 
       - name: Convert escaped newlines and set GPG key
         run: |
+          GPG_KEY_CONTENT="$(printf '%b' "${{ env.GPG_SECRET }}")"
           {
             echo "GPG_KEY_CONTENT<<GPG_EOF"
-            printf '%b' "${{ env.GPG_SECRET }}"
+            echo "$GPG_KEY_CONTENT"
             echo
             echo "GPG_EOF"
           } >> $GITHUB_ENV
+          GPG_KEY_CONTENT="${GPG_KEY_CONTENT//%/%25}"
+          GPG_KEY_CONTENT="${GPG_KEY_CONTENT//$'\r'/%0D}"
+          GPG_KEY_CONTENT="${GPG_KEY_CONTENT//$'\n'/%0A}"
+          echo "::add-mask::${GPG_KEY_CONTENT}"
 
       - name: Download Completed Artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
