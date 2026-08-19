@@ -139,11 +139,44 @@ public abstract class SessionLockService implements LockService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <b>Limitation.</b> A session lock can only be released by the session that holds it
+     * ({@code pg_advisory_unlock} and its equivalents are no-ops when another backend holds the
+     * lock). So unlike {@link StandardLockService#forceReleaseLock()}, which deletes a row any
+     * session can see, this cannot break a lock held by a different live session. It does not need
+     * to either: that lock is released on its own the moment that session ends, which is the whole
+     * point of a session lock. This therefore releases only a lock held by <i>this</i> connection,
+     * and logs a warning if the changelog is still locked afterwards, so {@code releaseLocks} does
+     * not quietly report success while the holder keeps the lock.
+     */
     @Override
     public void forceReleaseLock() throws LockException {
         releaseLock(getConnection());
         endTransaction();
         hasChangeLogLock = false;
+        warnIfStillLockedByAnotherSession();
+    }
+
+    /**
+     * Reports a lock still held after {@link #forceReleaseLock()} ran, which means it belongs to
+     * another live session and this one cannot release it.
+     */
+    private void warnIfStillLockedByAnotherSession() {
+        try {
+            DatabaseChangeLogLock[] remainingLocks = listLocks();
+            if (remainingLocks.length > 0) {
+                Scope.getCurrentScope().getLog(getClass()).warning(
+                        "The change log is still locked by " + remainingLocks[0].getLockedBy()
+                                + ". A session lock can only be released by the session that holds it, so it was not"
+                                + " released here; it will be released automatically when that session ends.");
+            }
+        } catch (LockException e) {
+            // Diagnostics only. The release itself already succeeded, so a failed follow-up read
+            // must not turn it into a reported failure.
+            Scope.getCurrentScope().getLog(getClass()).warning("Could not check whether the change log is still locked", e);
+        }
     }
 
     @Override
