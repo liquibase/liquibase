@@ -87,12 +87,7 @@ public class PostgreSQLSessionLockServiceTest {
         // not the connection's current_schema(). A deployment that sets liquibase.liquibaseSchemaName
         // explicitly relies on this to keep mutual exclusion aligned with the table's location.
         Connection connection = mock(Connection.class);
-        PreparedStatement tryLock = mock(PreparedStatement.class);
-        ResultSet resultSet = mock(ResultSet.class);
-        when(connection.prepareStatement(TRY_LOCK_SQL)).thenReturn(tryLock);
-        when(tryLock.executeQuery()).thenReturn(resultSet);
-        when(resultSet.next()).thenReturn(true);
-        when(resultSet.getObject(1)).thenReturn(Boolean.TRUE);
+        PreparedStatement tryLock = stubSuccessfulTryLock(connection);
 
         PostgresDatabase database = databaseOn(connection, "migrations", null);
         lockService.setDatabase(database);
@@ -103,6 +98,21 @@ public class PostgreSQLSessionLockServiceTest {
         // The implicit transaction is ended after the lock SQL so the migration does not start
         // mid-transaction.
         verify(database).rollback();
+    }
+
+    @Test
+    public void acquireLockKeyIncludesTheCatalogWhenSet() throws Exception {
+        // The catalog is folded into the same int4 as the schema. It is part of the advisory key,
+        // so changing how it is combined shifts the key: an old and a new Liquibase would then take
+        // two different locks against the same lock table and stop excluding each other. Pin it.
+        Connection connection = mock(Connection.class);
+        PreparedStatement tryLock = stubSuccessfulTryLock(connection);
+
+        lockService.setDatabase(databaseOn(connection, "migrations", "appdb"));
+
+        assertThat(lockService.acquireLock()).isTrue();
+        verify(tryLock).setInt(1, LOCK_TABLE.hashCode());
+        verify(tryLock).setInt(2, "appdb.migrations".hashCode());
     }
 
     @Test
@@ -212,6 +222,17 @@ public class PostgreSQLSessionLockServiceTest {
         service.setChangeLogLockRecheckTime(7);
         assertThat(service.getChangeLogLockWaitTimeMinutes()).isEqualTo(42);
         assertThat(service.getChangeLogLockRecheckTimeSeconds()).isEqualTo(7);
+    }
+
+    /** Stubs pg_try_advisory_lock to grant the lock, and returns the statement to verify keys on. */
+    private static PreparedStatement stubSuccessfulTryLock(Connection connection) throws Exception {
+        PreparedStatement tryLock = mock(PreparedStatement.class);
+        ResultSet resultSet = mock(ResultSet.class);
+        when(connection.prepareStatement(TRY_LOCK_SQL)).thenReturn(tryLock);
+        when(tryLock.executeQuery()).thenReturn(resultSet);
+        when(resultSet.next()).thenReturn(true);
+        when(resultSet.getObject(1)).thenReturn(Boolean.TRUE);
+        return tryLock;
     }
 
     /** Stubs the pg_locks lookup used by listLocks(), optionally reporting one holder. */
