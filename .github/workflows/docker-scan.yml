@@ -105,5 +105,10 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          chmod +x build-logic/scripts/vulnerability-scanning/persist-scan-results.sh
-          build-logic/scripts/vulnerability-scanning/persist-scan-results.sh scan-artifacts
+          SCRIPT=build-logic/scripts/vulnerability-scanning/persist-scan-results.sh
+          if [ ! -f "$SCRIPT" ]; then
+            echo "::error::$SCRIPT is missing. This repo uses the shared copy from liquibase/build-logic (build-logic#678); it must be merged first."
+            exit 1
+          fi
+          chmod +x "$SCRIPT"
+          "$SCRIPT" scan-artifacts
