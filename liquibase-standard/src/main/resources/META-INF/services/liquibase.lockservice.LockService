@@ -1,5 +1,5 @@
 liquibase.lockservice.LockServiceImpl
 liquibase.lockservice.MockLockService
 liquibase.lockservice.OfflineLockService
-liquibase.lockservice.StandardLockService
 liquibase.lockservice.PostgreSQLSessionLockService
+liquibase.lockservice.StandardLockService
