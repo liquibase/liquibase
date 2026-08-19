@@ -1,6 +1,7 @@
 package liquibase.lockservice;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,6 +18,7 @@ import liquibase.database.core.CockroachDatabase;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.LockException;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -104,7 +106,37 @@ public class PostgreSQLSessionLockServiceTest {
     }
 
     @Test
-    public void releaseLockTreatsFalseAsAlreadyReleased() throws Exception {
+    public void releaseLockFailsWhenTheSessionNoLongerHoldsTheLock() throws Exception {
+        // We acquired the lock, so pg_advisory_unlock returning false means the session lock was
+        // lost mid-run (a backend re-established behind a pool, a DISCARD ALL). The change log was
+        // unguarded for part of the run, which is precisely what this service exists to prevent,
+        // so it must fail rather than log.
+        Connection connection = mock(Connection.class);
+        PreparedStatement tryLock = mock(PreparedStatement.class);
+        ResultSet acquireResultSet = mock(ResultSet.class);
+        when(connection.prepareStatement(TRY_LOCK_SQL)).thenReturn(tryLock);
+        when(tryLock.executeQuery()).thenReturn(acquireResultSet);
+        when(acquireResultSet.next()).thenReturn(true);
+        when(acquireResultSet.getObject(1)).thenReturn(Boolean.TRUE);
+        PreparedStatement unlock = mock(PreparedStatement.class);
+        ResultSet unlockResultSet = mock(ResultSet.class);
+        when(connection.prepareStatement(UNLOCK_SQL)).thenReturn(unlock);
+        when(unlock.executeQuery()).thenReturn(unlockResultSet);
+        when(unlockResultSet.next()).thenReturn(true);
+        when(unlockResultSet.getObject(1)).thenReturn(Boolean.FALSE);
+
+        lockService.setDatabase(databaseOn(connection, "public", null));
+        assertThat(lockService.acquireLock()).isTrue();
+
+        assertThatThrownBy(lockService::releaseLock)
+                .isInstanceOf(LockException.class)
+                .hasMessageContaining("no longer held by this database session");
+        // The service must not keep claiming a lock the database says it does not hold.
+        assertThat(lockService.hasChangeLogLock()).isFalse();
+    }
+
+    @Test
+    public void forceReleaseLockTreatsFalseAsAlreadyReleased() throws Exception {
         Connection connection = mock(Connection.class);
         PreparedStatement unlock = mock(PreparedStatement.class);
         ResultSet resultSet = mock(ResultSet.class);
@@ -118,7 +150,8 @@ public class PostgreSQLSessionLockServiceTest {
 
         lockService.setDatabase(databaseOn(connection, "public", null));
 
-        // Must not throw; forceReleaseLock exercises releaseLock(Connection) without needing prior state.
+        // Must not throw: forceReleaseLock is the administrative path and runs whether or not
+        // this session holds the lock, so not holding it is normal rather than a lost lock.
         lockService.forceReleaseLock();
         assertThat(lockService.hasChangeLogLock()).isFalse();
     }

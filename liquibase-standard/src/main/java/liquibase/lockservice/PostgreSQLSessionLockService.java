@@ -71,19 +71,20 @@ public class PostgreSQLSessionLockService extends SessionLockService {
     }
 
     @Override
-    protected void releaseLock(Connection connection) throws LockException {
+    protected boolean releaseLock(Connection connection) throws LockException {
         int[] lockId = getChangeLogLockId();
         try (PreparedStatement unlockStatement = connection.prepareStatement(SQL_UNLOCK)) {
             unlockStatement.setInt(1, lockId[0]);
             unlockStatement.setInt(2, lockId[1]);
             Boolean released = queryForBoolean(unlockStatement);
             if (!Boolean.TRUE.equals(released)) {
-                // false means this session no longer holds the lock (e.g. the connection was
-                // dropped and PostgreSQL already released it). Nothing to release, and not an
-                // error: let the caller clear hasChangeLogLock so a reused instance does not keep
-                // reporting a lock it does not own.
-                Scope.getCurrentScope().getLog(getClass()).warning("pg_advisory_unlock() returned " + released + "; the session lock was already released");
+                // false means this session does not hold the lock: PostgreSQL already released it
+                // with the backend, or we never took it. Report it rather than judging it; whether
+                // that is a lost lock or the normal releaseLocks case depends on the caller.
+                Scope.getCurrentScope().getLog(getClass()).fine("pg_advisory_unlock() returned " + released + "; this session does not hold the change log lock");
+                return false;
             }
+            return true;
         } catch (SQLException e) {
             // The unlock did not run, so this session still holds the lock. It is released when the
             // backend session ends, but on a pooled connection that can be long after this run:
