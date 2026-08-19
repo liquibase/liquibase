@@ -22,6 +22,12 @@ permissions:
 jobs:
 
   authorize:
+    # Trusted context only. The run-test-harness-tests job reads /vault/liquibase
+    # and mints a GitHub App token; fork PRs must never reach this graph
+    # (GHSA-mqw2-j77g-6486, TECHOPS-1102). Allows the workflow_call path (invoked
+    # from build.yml in trusted context) and same-repo (internal) labeled PRs;
+    # skips fork PRs.
+    if: ${{ github.event_name != 'pull_request_target' || github.event.pull_request.head.repo.full_name == github.repository }}
     environment: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && 'external' || 'internal' }}
     runs-on: ubuntu-latest
     steps:
@@ -45,7 +51,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
-          allow-unsafe-pr-checkout: true
 
   run-test-harness-tests:
     runs-on: ubuntu-latest

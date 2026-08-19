@@ -32,6 +32,13 @@ on:
 
 jobs:
   authorize:
+    # Trusted context only. Fork PRs must never reach the credential-bearing jobs
+    # below (vault load, GPG signing, GPM/Maven deploy) — they are validated by
+    # test-pr.yml under the no-secrets `pull_request` event instead
+    # (GHSA-mqw2-j77g-6486, TECHOPS-1102). This condition allows push,
+    # workflow_dispatch, workflow_call and same-repo (internal) PRs, and skips the
+    # whole graph for fork PRs.
+    if: ${{ github.event_name != 'pull_request_target' || github.event.pull_request.head.repo.full_name == github.repository }}
     #concurrent runs for pull requests from forked repositories will be canceled, while runs for pull requests from the main repository won't be affected.
     #for a pull_request against main: the concurrency check will cancel commit A so that commit B check can run.
     concurrency:
@@ -56,7 +63,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
-          allow-unsafe-pr-checkout: true
 
       - name: Get current date
         id: get-date
@@ -105,7 +111,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
-          allow-unsafe-pr-checkout: true
 
       - name: Built Code Cache
         if: ${{ matrix.java == 17}}
@@ -212,7 +217,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
-          allow-unsafe-pr-checkout: true
 
       - name: Prepare
         id: prepare
