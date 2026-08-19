@@ -169,4 +169,16 @@ public class CockroachDatabase extends PostgresDatabase {
     public boolean supportsStoredLogicSnapshot() {
         return false;
     }
+
+    /**
+     * CockroachDB accepts the {@code pg_advisory_lock} family for wire compatibility but its
+     * support is partial and it does not expose them through {@code pg_locks} the way
+     * {@code PostgreSQLSessionLockService} needs, so it must not be treated as real PostgreSQL for
+     * session locking. Opts down from {@link PostgresDatabase}; the standard table-based
+     * {@code StandardLockService} stays in effect even with {@code liquibase.useSessionLock} on.
+     */
+    @Override
+    public boolean supportsAdvisoryLocks() {
+        return false;
+    }
 }
