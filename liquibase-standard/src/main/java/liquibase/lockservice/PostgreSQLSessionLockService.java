@@ -21,8 +21,17 @@ import liquibase.exception.LockException;
  * automatically by the server when the connection ends, so a process killed mid-update never leaves
  * a stale {@code DATABASECHANGELOGLOCK} row behind.
  * <p>
- * Selected only when {@code liquibase.useSessionLock} is enabled and the database is PostgreSQL 9.1
- * or newer; otherwise {@link StandardLockService} remains in effect.
+ * Selected only when {@code liquibase.useSessionLock} is enabled and the database is a PostgreSQL
+ * 9.1 or newer that reports {@link liquibase.database.core.AbstractPostgresDatabase#supportsAdvisoryLocks()};
+ * otherwise {@link StandardLockService} remains in effect.
+ * <p>
+ * <b>Pooled connections.</b> The lock is released by the server when the <i>physical</i> backend
+ * session ends. Closing a pooled {@code java.sql.Connection} only returns it to the pool and leaves
+ * that backend alive, so the automatic cleanup does not apply to a run whose connection came from a
+ * pool and survives it: there, the lock is released only by the explicit {@code pg_advisory_unlock}
+ * in {@link #releaseLock(java.sql.Connection)}. If that release fails, the lock stays held by the
+ * idle pooled connection until the pool discards it or the process exits. Prefer a dedicated,
+ * non-pooled connection for Liquibase when using this service; see {@code liquibase.useSessionLock}.
  */
 public class PostgreSQLSessionLockService extends SessionLockService {
 
@@ -43,6 +52,9 @@ public class PostgreSQLSessionLockService extends SessionLockService {
     public boolean supports(Database database) {
         return GlobalConfiguration.USE_SESSION_LOCK.getCurrentValue()
                 && (database instanceof PostgresDatabase)
+                // Variants that extend PostgresDatabase but do not really implement advisory locks
+                // (CockroachDB) opt down here and keep StandardLockService.
+                && ((PostgresDatabase) database).supportsAdvisoryLocks()
                 && isAtLeastPostgres91(database);
     }
 
@@ -73,7 +85,11 @@ public class PostgreSQLSessionLockService extends SessionLockService {
                 Scope.getCurrentScope().getLog(getClass()).warning("pg_advisory_unlock() returned " + released + "; the session lock was already released");
             }
         } catch (SQLException e) {
-            throw new LockException(e);
+            // The unlock did not run, so this session still holds the lock. It is released when the
+            // backend session ends, but on a pooled connection that can be long after this run:
+            // close() only returns the connection to the pool and leaves the backend alive. Say so
+            // rather than surfacing a bare SQL error.
+            throw new LockException("Could not release the PostgreSQL advisory changelog lock; it stays held until this database session ends", e);
         }
     }
 

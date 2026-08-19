@@ -166,7 +166,9 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                         "instead of the LOCKED row in DATABASECHANGELOGLOCK. A session lock is released automatically " +
                         "by the database when the connection drops, so a process killed mid-update (OOM, eviction, " +
                         "kill -9) does not leave a stale lock behind. Only supported databases honour this; others " +
-                        "fall back to StandardLockService.")
+                        "fall back to StandardLockService. Give Liquibase a dedicated, non-pooled connection when " +
+                        "enabling this: closing a pooled connection only returns it to the pool and leaves the " +
+                        "database session alive, so the automatic release does not apply to it.")
                 .setDefaultValue(false)
                 .build();
 
