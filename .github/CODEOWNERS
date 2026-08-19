@@ -1,1 +1,4 @@
 *       @filipelautert @wwillard7800
+
+# Last matching pattern wins, so path rules stay below the catch-all.
+/.github/workflows/     @liquibase/liquibase-devops
