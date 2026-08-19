@@ -8,10 +8,12 @@ import static org.mockito.Mockito.when;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Date;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.database.core.CockroachDatabase;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -62,6 +64,17 @@ public class PostgreSQLSessionLockServiceTest {
     }
 
     @Test
+    public void notSupportedOnPostgresVariantsWithoutAdvisoryLocks() throws Exception {
+        // CockroachDatabase extends PostgresDatabase, so instanceof alone would pick it up even
+        // though its advisory-lock support is partial. It opts down via supportsAdvisoryLocks().
+        Scope.child(GlobalConfiguration.USE_SESSION_LOCK.getKey(), true, () -> {
+            assertThat(lockService.supports(new CockroachDatabase())).isFalse();
+            assertThat(new CockroachDatabase().supportsAdvisoryLocks()).isFalse();
+            assertThat(new PostgresDatabase().supportsAdvisoryLocks()).isTrue();
+        });
+    }
+
+    @Test
     public void outranksStandardLockService() {
         assertThat(lockService.getPriority()).isGreaterThan(new StandardLockService().getPriority());
     }
@@ -100,12 +113,36 @@ public class PostgreSQLSessionLockServiceTest {
         when(resultSet.next()).thenReturn(true);
         // false: the session no longer holds the lock (e.g. the connection was dropped). Not an error.
         when(resultSet.getObject(1)).thenReturn(Boolean.FALSE);
+        // forceReleaseLock re-reads the locks afterwards; nobody else holds this one.
+        stubLockInfo(connection, false);
 
         lockService.setDatabase(databaseOn(connection, "public", null));
 
         // Must not throw; forceReleaseLock exercises releaseLock(Connection) without needing prior state.
         lockService.forceReleaseLock();
         assertThat(lockService.hasChangeLogLock()).isFalse();
+    }
+
+    @Test
+    public void forceReleaseLockCannotBreakAnotherSessionsLock() throws Exception {
+        // pg_advisory_unlock only releases locks held by the calling session, so releaseLocks
+        // cannot break a lock another live session holds. It must not claim it did: the lock is
+        // still reported as held, and it goes away by itself when that session ends.
+        Connection connection = mock(Connection.class);
+        PreparedStatement unlock = mock(PreparedStatement.class);
+        ResultSet unlockResultSet = mock(ResultSet.class);
+        when(connection.prepareStatement(UNLOCK_SQL)).thenReturn(unlock);
+        when(unlock.executeQuery()).thenReturn(unlockResultSet);
+        when(unlockResultSet.next()).thenReturn(true);
+        when(unlockResultSet.getObject(1)).thenReturn(Boolean.FALSE);
+        stubLockInfo(connection, true);
+
+        lockService.setDatabase(databaseOn(connection, "public", null));
+
+        lockService.forceReleaseLock();
+
+        assertThat(lockService.hasChangeLogLock()).isFalse();
+        assertThat(lockService.listLocks()).hasSize(1);
     }
 
     @Test
@@ -144,6 +181,18 @@ public class PostgreSQLSessionLockServiceTest {
         assertThat(service.getChangeLogLockRecheckTimeSeconds()).isEqualTo(7);
     }
 
+    /** Stubs the pg_locks lookup used by listLocks(), optionally reporting one holder. */
+    private static void stubLockInfo(Connection connection, boolean locked) throws Exception {
+        PreparedStatement lockInfo = mock(PreparedStatement.class);
+        ResultSet resultSet = mock(ResultSet.class);
+        when(connection.prepareStatement(Mockito.startsWith("SELECT l.pid"))).thenReturn(lockInfo);
+        when(lockInfo.executeQuery()).thenReturn(resultSet);
+        when(resultSet.next()).thenReturn(locked);
+        when(resultSet.getTimestamp("backend_start")).thenReturn(new Timestamp(0L));
+        when(resultSet.getString("client_hostname")).thenReturn("other.example");
+        when(resultSet.getString("state")).thenReturn("idle");
+    }
+
     private static PostgresDatabase databaseOn(Connection connection, String schemaName, String catalogName) {
         try {
             JdbcConnection jdbcConnection = mock(JdbcConnection.class);
@@ -164,6 +213,9 @@ public class PostgreSQLSessionLockServiceTest {
             PostgresDatabase database = Mockito.mock(PostgresDatabase.class);
             Mockito.when(database.getDatabaseMajorVersion()).thenReturn(majorVersion);
             Mockito.when(database.getDatabaseMinorVersion()).thenReturn(minorVersion);
+            // A mock defaults to false; real PostgreSQL reports true. The false case is covered
+            // against a real CockroachDatabase in notSupportedOnPostgresVariantsWithoutAdvisoryLocks.
+            Mockito.when(database.supportsAdvisoryLocks()).thenReturn(true);
             return database;
         } catch (Exception e) {
             throw new RuntimeException(e);
