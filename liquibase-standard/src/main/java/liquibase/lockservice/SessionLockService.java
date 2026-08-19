@@ -117,11 +117,24 @@ public abstract class SessionLockService implements LockService {
         if (!hasChangeLogLock) {
             return;
         }
-        // Only clear the flag once the unlock actually succeeds; if it throws, we still hold the
-        // session lock and must not let Liquibase think otherwise.
-        releaseLock(getConnection());
+        // If the unlock throws, the release never happened and we still hold the session lock, so
+        // the flag stays set (below is unreachable) and reset() retries it. Once the call returns,
+        // this session no longer holds the lock either way, released or lost.
+        boolean released = releaseLock(getConnection());
         endTransaction();
         hasChangeLogLock = false;
+        if (!released) {
+            // We believed we held the lock and the database says this session does not. So the
+            // session lock was lost before we released it: the backend was dropped and
+            // re-established behind a connection wrapper, or something ran DISCARD ALL /
+            // pg_advisory_unlock_all() on it. Whatever the cause, the changelog was unguarded for
+            // part of the run that just finished and another process could have migrated
+            // concurrently. That is exactly the failure this service exists to prevent, so it must
+            // not pass as a log line.
+            throw new LockException("The change log lock was no longer held by this database session when releasing it."
+                    + " The session lock was lost before the end of the run, so the change log was not guarded for all"
+                    + " of it and another process may have run concurrently. Verify the change log state.");
+        }
         Scope.getCurrentScope().getLog(getClass()).info("Successfully released change log lock");
     }
 
@@ -153,6 +166,9 @@ public abstract class SessionLockService implements LockService {
      */
     @Override
     public void forceReleaseLock() throws LockException {
+        // Unlike releaseLock(), a false return is expected here: this is the administrative path
+        // and it runs whether or not this session holds the lock. Nothing to release is not a
+        // failure.
         releaseLock(getConnection());
         endTransaction();
         hasChangeLogLock = false;
@@ -202,8 +218,15 @@ public abstract class SessionLockService implements LockService {
      */
     protected abstract boolean acquireLock(Connection connection) throws LockException;
 
-    /** Releases the session lock previously obtained by {@link #acquireLock(Connection)}. */
-    protected abstract void releaseLock(Connection connection) throws LockException;
+    /**
+     * Releases the session lock previously obtained by {@link #acquireLock(Connection)}.
+     *
+     * @return {@code true} if this session held the lock and it was released, {@code false} if this
+     * session did not hold it. The caller decides what that means: {@link #releaseLock()} treats it
+     * as a lost lock and fails, {@link #forceReleaseLock()} accepts it. Implementations throw only
+     * when the release could not be attempted at all.
+     */
+    protected abstract boolean releaseLock(Connection connection) throws LockException;
 
     protected Connection getConnection() throws LockException {
         DatabaseConnection databaseConnection = database.getConnection();
