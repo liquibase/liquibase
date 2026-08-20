@@ -71,18 +71,20 @@ jobs:
 
       - name: Get Current BranchName
         id: get-branch-name
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
           # this logic checks if the branch is from a forked repository PR or not. Where -n is the inverse of -z (not empty)
           if [ -n "${GITHUB_HEAD_REF}" ];
           then
-            branch_name=${GITHUB_HEAD_REF}
+            branch_name="${GITHUB_HEAD_REF}"
           else
-            branch_name=${{ github.ref_name }}
+            branch_name="$REF_NAME"
           fi
 
-          modified_branch_name=`(echo $branch_name | tr '/_' '-')`
+          modified_branch_name=`(echo "$branch_name" | tr '/_' '-')`
           echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT
-          echo $modified_branch_name
+          echo "$modified_branch_name"
 
   build_tests:
     name: Run Test for (Java ${{ matrix.java }} ${{ matrix.os }})
@@ -132,8 +134,11 @@ jobs:
       # getting from build results page. If we remove 0-SNAPSHOT then we will need settings.xml
 
       - name: Build & Test Java 17+
+        env:
+          BRANCH_NAME: ${{ needs.setup.outputs.thisBranchName }}
+          MERGE_SHA: ${{ needs.setup.outputs.latestMergeSha }}
         run: |
-          ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
+          ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=$BRANCH_NAME" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=$MERGE_SHA" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-latest'
