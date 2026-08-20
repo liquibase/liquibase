@@ -55,7 +55,22 @@ jobs:
   persist-main-latest:
     name: Persist main HEAD scan to scan-results
     needs: scan-community
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    # `always()` on purpose. "Check scan results" in the reusable workflow is a
+    # THRESHOLD verdict, not a scan failure: the report artifacts are uploaded
+    # before it runs. Without always(), a HIGH/CRITICAL finding skips this job,
+    # so the very CVEs the dashboard exists to show are what stop it being
+    # updated. liquibase/liquibase:latest went stale for days that way.
+    #
+    # Mirrors trivy-scan-published-images.yml, whose persist job has always
+    # been gated this way and persists successfully on runs whose scans fail
+    # the threshold. `cancelled`/`skipped` are still excluded: those produce no
+    # artifacts to persist.
+    if: |
+      always()
+      && github.event_name != 'pull_request'
+      && github.ref == 'refs/heads/main'
+      && needs.scan-community.result != 'cancelled'
+      && needs.scan-community.result != 'skipped'
     runs-on: ubuntu-22.04
     permissions:
       contents: write
@@ -95,8 +110,20 @@ jobs:
           fi
           ls -la "$ART_DIR"
 
+      - name: Checkout build-logic
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: liquibase/build-logic
+          path: build-logic
+
       - name: Persist to scan-results branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          scripts/persist-scan-results.sh scan-artifacts
+          SCRIPT=build-logic/scripts/vulnerability-scanning/persist-scan-results.sh
+          if [ ! -f "$SCRIPT" ]; then
+            echo "::error::$SCRIPT is missing. This repo uses the shared copy from liquibase/build-logic (build-logic#678); it must be merged first."
+            exit 1
+          fi
+          chmod +x "$SCRIPT"
+          "$SCRIPT" scan-artifacts

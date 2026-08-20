@@ -56,6 +56,8 @@
                 <include>com.opencsv:opencsv:</include>
                 <include>org.yaml:snakeyaml:jar:</include>
                 <include>info.picocli:picocli:jar:</include>
+                <include>org.apache.commons:commons-text:jar:</include>
+                <include>org.apache.commons:commons-collections4:jar:</include>
             </includes>
 
             <!-- some libraries lie about compile vs. runtime dependencies. Or we don't hit code that uses these. So exclude them manually. -->

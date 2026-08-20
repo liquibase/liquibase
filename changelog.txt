@@ -1,10 +1,187 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 5.0.4 (2026.08.19)
+
+# Liquibase Community 5.0.4 is a minor patch release
+See the [Liquibase Community 5.0.4 Release Notes](https://docs.liquibase.com/community/release-notes/liquibase-community-5-0-4-release-notes) for the complete set of release information.
+
+
+## New Features
+
+* Add `nocontexts` pseudo-context to allow opt-in strict context matching by @filipelautert with @Copilot in https://github.com/liquibase/liquibase/pull/7650
+* feat: Provide a listUnexpectedChangeSets() to be consistent with other methods in that class by @Vampire in https://github.com/liquibase/liquibase/pull/7522
+* INT-2211: reference-scoped configuration for two-connection commands by @SvampX in https://github.com/liquibase/liquibase/pull/7841
+* Detect Firebird-compatible RedDatabase servers as Firebird by @makssent in https://github.com/liquibase/liquibase/pull/7850
+
+## Bug Fixes
+
+* Fix #7602: Set database filter when user-provided ChangeLogParameters is passed by @mgustimz in https://github.com/liquibase/liquibase/pull/7696
+* fix(postgres): preserve PARTITION BY in diff-changelog (#6885) by @Khromushkin in https://github.com/liquibase/liquibase/pull/7759
+* Fix Redshift snapshot failure: skip pg_partitioned_table enrichment on pre-PG10 servers by @KushnirykOleh in https://github.com/liquibase/liquibase/pull/7827
+* fix(mysql): preserve timestamp column attributes in native types by @officialasishkumar in https://github.com/liquibase/liquibase/pull/7705
+* fix: use CURRENT_TIMESTAMP instead of SYSTIMESTAMP for Oracle by @filipelautert in https://github.com/liquibase/liquibase/pull/7641
+* fix: reduce misleading WARN log when CLOB value contains spaces by @jstastny in https://github.com/liquibase/liquibase/pull/7566
+* Fix MySQL TINYINT(1) snapshotted as BIT(1) causing spurious diffs by @pranithreddym in https://github.com/liquibase/liquibase/pull/7708
+* Fix #7623: Handle null URL in isCorrectDatabaseImplementation by @mgustimz in https://github.com/liquibase/liquibase/pull/7697
+* fix: use integerExp type for numeric sequence attributes in XSD by @filipelautert in https://github.com/liquibase/liquibase/pull/7643
+* fix(changelog): fall back when stored changelog path is missing by @officialasishkumar in https://github.com/liquibase/liquibase/pull/7704
+* Fix primaryKeyExists precondition ignoring PK name on Oracle by @filipelautert in https://github.com/liquibase/liquibase/pull/7645
+* INT-2215: don't silently drop same-order value modifiers / table-name generators by @SvampX in https://github.com/liquibase/liquibase/pull/7845
+* fix: Update list of reserved keywords for MySQL and MariaDB by @profiluefter in https://github.com/liquibase/liquibase/pull/7560
+* Fix Oracle statement splitting for q-quoted string literals by @Devansh-ops in https://github.com/liquibase/liquibase/pull/7834
+* Treat 'NULL' default value as null for MySQL/MariaDB enum columns by @singhvishalkr in https://github.com/liquibase/liquibase/pull/7725
+* Fix grouped context expression parsing by @Akshatsharma2205 in https://github.com/liquibase/liquibase/pull/7798
+* fix the ChangeSet checksum cache to recalculate when a different checksum version is requested by @renechoi in https://github.com/liquibase/liquibase/pull/7869
+* fix: share a single root scope across threads by @filipelautert in https://github.com/liquibase/liquibase/pull/7877
+* fix: give each command execution its own CommandStep instances by @filipelautert in https://github.com/liquibase/liquibase/pull/7876
+* Refactor: track MDC scope entries per-thread by @om7057 in https://github.com/liquibase/liquibase/pull/7825
+* Fix --output-default-schema/--output-default-catalog being ignored by update-sql and other SQL output commands by @yosimasu in https://github.com/liquibase/liquibase/pull/7831
+* Route deprecated-AWS-extension warning to System.err by @wwillard7800 in https://github.com/liquibase/liquibase/pull/7884
+* fix: default-schema-name not working when runInTransaction is false by @felhag in https://github.com/liquibase/liquibase/pull/7803
+* Fix formatted SQL precondition messages by @hutiefang76 in https://github.com/liquibase/liquibase/pull/7835
+* Fix URL loading from driver properties file by @sakshichitnis27 in https://github.com/liquibase/liquibase/pull/7866
+* fix(snapshot): close owning Statement in ResultSetCache.extract to prevent JDBC Statement leak by @seonwooj0810 in https://github.com/liquibase/liquibase/pull/7812
+* Fix service discovery aborting when a provider fails to load by @kamilkrzywanski in https://github.com/liquibase/liquibase/pull/7848
+* Fix ClassCastException in diff-changelog when a PK/UC backing index is delegated by @fudianchn in https://github.com/liquibase/liquibase/pull/7881
+* fix: preserve addColumn before foreign key in diff changelog output by @ET-TOUNANI in https://github.com/liquibase/liquibase/pull/7801
+* Fix uppercase acronym parameters being dropped in customChange by @fudianchn in https://github.com/liquibase/liquibase/pull/7882
+* Fix: don't release the changelog lock in AbstractUpdateCommandStep unless it was acquired there by @om7057 in https://github.com/liquibase/liquibase/pull/7886
+* fix: do not hoist a foreign key column ahead of its own table by @filipelautert in https://github.com/liquibase/liquibase/pull/7898
+* fix: carry the index relation down to its columns by @filipelautert in https://github.com/liquibase/liquibase/pull/7897
+* Fix fast check cache after rollback by @hutiefang76 in https://github.com/liquibase/liquibase/pull/7896
+* fix: ship commons-text and commons-collections4 in the distribution again by @filipelautert in https://github.com/liquibase/liquibase/pull/7907
+* fix: drop throwable from ChangeSet SEVERE log to prevent double-reporting by @wwillard7800 in https://github.com/liquibase/liquibase/pull/7910
+* fix: scope per-database service cleanup so parallel Maven reactor builds no longer corrupt each other's state by @pwielgolaski in https://github.com/liquibase/liquibase/pull/7909
+* fix: emit valid timestamp with time zone syntax by @marchof in https://github.com/liquibase/liquibase/pull/7808
+
+## Security, Driver and Other Updates
+
+* fix(DAT-23085): propagate packages: write to docker-release.yml top-level by @jandroav in https://github.com/liquibase/liquibase/pull/7722
+* fix(TECHOPS-451): regenerate clean .sha256 sidecars for Maven Central bundle by @jandroav in https://github.com/liquibase/liquibase/pull/7723
+* docs: bump README release dates for 5.0.3 / 5.0.4 by @filipelautert in https://github.com/liquibase/liquibase/pull/7728
+* TECHOPS-156: replace stale the-actions-org/workflow-dispatch (2 call sites) by @sayaliM0412 in https://github.com/liquibase/liquibase/pull/7701
+* docs(TECHOPS-428): document release-docker skip on dry-run by @sayaliM0412 in https://github.com/liquibase/liquibase/pull/7730
+* AbstractPathResourceAccessor: confine path resolution to configured root (CWE-22) by @v-petrovych in https://github.com/liquibase/liquibase/pull/7729
+* chore(deps): bump org.slf4j:slf4j-jdk14 from 2.0.17 to 2.0.18 by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7718
+* chore(deps): bump targetMavenVersion from 3.9.15 to 3.9.16 by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7732
+* chore(deps): bump the test-deps group with 4 updates by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7734
+* chore(deps-dev): bump org.apache.maven.plugins:maven-enforcer-plugin from 3.6.2 to 3.6.3 in the build-tools group across 1 directory by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7731
+* CWE-209: sanitize JDBC URL before embedding in DatabaseFactory exception message by @v-petrovych in https://github.com/liquibase/liquibase/pull/7737
+* CWE-209: stop leaking credentials in OfflineConnection parse-error exceptions by @v-petrovych in https://github.com/liquibase/liquibase/pull/7738
+* CWE-693: add generic JDBC userinfo fallback to sanitizeUrl coverage by @v-petrovych in https://github.com/liquibase/liquibase/pull/7740
+* CWE-200: redact credential-bearing values stored in IntegrationDetails parameters by @v-petrovych in https://github.com/liquibase/liquibase/pull/7739
+* CWE-316: clear password fields in Maven Mojo after execute() by @v-petrovych in https://github.com/liquibase/liquibase/pull/7742
+* CWE-532: obfuscate H2 example-server password before echoing to stdout by @v-petrovych in https://github.com/liquibase/liquibase/pull/7746
+* CWE-78: opt-in restricted mode for executeCommand changelog change by @v-petrovych in https://github.com/liquibase/liquibase/pull/7747
+* CWE-94: guard against future ${...} expansion in defaults-file loader by @v-petrovych in https://github.com/liquibase/liquibase/pull/7744
+* CWE-316: clear password memory after use in legacy CLI + CommandScope by @v-petrovych in https://github.com/liquibase/liquibase/pull/7741
+* CWE-316: clear Ant DatabaseType credentials at buildFinished by @v-petrovych in https://github.com/liquibase/liquibase/pull/7743
+* CWE-470: opt-in restricted mode for customChange changelog change by @v-petrovych in https://github.com/liquibase/liquibase/pull/7748
+* CWE-22 deprecation flag: opt-in path containment via liquibase.allowParentDirectoryReferences by @v-petrovych in https://github.com/liquibase/liquibase/pull/7750
+* feat(ci): auto-create Jira ticket on Community PR merge [TECHOPS-497] by @jandroav in https://github.com/liquibase/liquibase/pull/7745
+* CWE-693 follow-up: scope generic JDBC userinfo matcher to authority-position only by @v-petrovych in https://github.com/liquibase/liquibase/pull/7756
+* Update LiquibaseCommandLineTest expectedHelpOutput for the three new ALLOW_* audit flags by @v-petrovych in https://github.com/liquibase/liquibase/pull/7760
+* ci: add release-notes aggregator caller workflow [TECHOPS-498] by @jandroav in https://github.com/liquibase/liquibase/pull/7771
+* fix(release-notes): skip prereleases on auto-fire + add concurrency block [TECHOPS-498] by @jandroav in https://github.com/liquibase/liquibase/pull/7774
+* CWE-316: make CommandScope.clearCredentialArguments() opt-in (fixes #7761) by @v-petrovych in https://github.com/liquibase/liquibase/pull/7764
+* ci: add -am to Artifacts - Build & Sign so dist resolves liquibase-core on branch-versioned builds by @v-petrovych in https://github.com/liquibase/liquibase/pull/7775
+* ci: copy liquibase-core artifacts at branch version after -am rebuild by @filipelautert in https://github.com/liquibase/liquibase/pull/7776
+* chore(deps): bump the build-tools group across 1 directory with 3 updates by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7773
+* chore(deps-dev): bump the production-deps group across 1 directory with 2 updates by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7772
+* ci: copy cli/maven-plugin/extension-testing artifacts at branch version by @filipelautert in https://github.com/liquibase/liquibase/pull/7777
+* ci: build maven-plugin and extension-testing so their artifacts can be copied by @filipelautert in https://github.com/liquibase/liquibase/pull/7778
+* chore(deps): bump the github-actions group across 1 directory with 7 updates by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7762
+* CWE-22: opt-in restricted mode for absolute and classpath: paths in changelog includes by @v-petrovych in https://github.com/liquibase/liquibase/pull/7765
+* CWE-89: opt-in restricted mode for sqlCheck changelog precondition by @v-petrovych in https://github.com/liquibase/liquibase/pull/7767
+* CWE-470: opt-in restricted mode for customPrecondition changelog element by @v-petrovych in https://github.com/liquibase/liquibase/pull/7768
+* CWE-470: opt-in restricted mode for includeAll resourceFilter and resourceComparator classes by @v-petrovych in https://github.com/liquibase/liquibase/pull/7766
+* chore(deps): bump the github-actions group with 2 updates by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7787
+* chore(deps): bump spring.version from 7.0.7 to 7.0.8 by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7790
+* TECHOPS-366: Community-only Docker README + Docker section in root README by @jandroav in https://github.com/liquibase/liquibase/pull/7794
+* fix(TECHOPS-620): fix test-harness dispatch ref and harden dry-run artifact selection by @jnewton03 in https://github.com/liquibase/liquibase/pull/7793
+* TECHOPS-646: Pin step-level GitHub Actions to commit SHA by @sayaliM0412 in https://github.com/liquibase/liquibase/pull/7799
+* fix(TECHOPS-650): replace actions/cache with upload/download-artifact; simplify dry-run artifact scan by @jnewton03 in https://github.com/liquibase/liquibase/pull/7800
+* chore(deps-dev): bump the build-tools group across 1 directory with 5 updates by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7802
+* chore(deps): bump alpine from 3.23 to 3.24 in /docker by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7797
+* Update LPM to v0.3.5 by @liquibase-workflows[bot] in https://github.com/liquibase/liquibase/pull/7792
+* TECHOPS-683: Skip Claude Code Review on forked PRs by @sayaliM0412 in https://github.com/liquibase/liquibase/pull/7807
+* [DAT-23022] Unconditional XXE hardening in XMLChangeLogSAXParser by @MalloD12 in https://github.com/liquibase/liquibase/pull/7804
+* chore(deps): bump junit-jupiter.version from 6.1.0 to 6.1.1 by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7818
+* chore(deps): bump the test-deps group with 4 updates by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7817
+* chore(deps): bump the github-actions group across 1 directory with 8 updates by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7819
+* chore(deps-dev): bump org.apache.ant:ant-antunit from 1.4.1 to 1.5.0 in the production-deps group across 1 directory by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7805
+* INT-2140: extract AbstractPostgresDatabase (behavior-neutral) by @KushnirykOleh in https://github.com/liquibase/liquibase/pull/7814
+* ci: restore fork PR checkout under pull_request_target for actions/checkout v7 by @filipelautert in https://github.com/liquibase/liquibase/pull/7833
+* chore(deps): bump junit-jupiter.version from 6.1.1 to 6.1.2 by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7837
+* chore(deps): bump the test-deps group across 1 directory with 4 updates by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7839
+* chore(deps): bump the github-actions group across 1 directory with 11 updates by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7844
+* chore(deps): bump the build-tools group across 1 directory with 3 updates by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7849
+* INT-2141: add Postgres-family capability methods (behavior-neutral) by @KushnirykOleh in https://github.com/liquibase/liquibase/pull/7826
+* Widen LockService SPI throws clauses to LiquibaseException (ADR-0005 pilot) by @edu1006 in https://github.com/liquibase/liquibase/pull/7847
+* INT-2142: pull useSerialDatatypes() up to AbstractPostgresDatabase by @KushnirykOleh in https://github.com/liquibase/liquibase/pull/7856
+* INT-2142: widen Postgres-family instanceof to AbstractPostgresDatabase (core) by @KushnirykOleh in https://github.com/liquibase/liquibase/pull/7857
+* chore(deps): bump org.codehaus.mojo:flatten-maven-plugin from 1.7.3 to 1.8.0 in the build-tools group across 1 directory by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7867
+* chore(deps-dev): bump org.apache.felix:maven-bundle-plugin from 6.0.2 to 6.1.0 by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7865
+* chore(deps): bump the github-actions group with 6 updates by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7855
+* chore(deps-dev): bump org.xerial:sqlite-jdbc from 3.53.2.0 to 3.53.2.1 by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7853
+* Refactor DiffToChangeLog: honest naming, Edge record, simpler bringDropFKToTop, + tests by @KushnirykOleh in https://github.com/liquibase/liquibase/pull/7862
+* chore(deps-dev): bump org.mariadb.jdbc:mariadb-java-client from 3.5.9 to 3.5.10 in the build-tools group by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7872
+* chore(deps): bump the test-deps group with 2 updates by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7871
+* chore(deps-dev): bump com.mysql:mysql-connector-j from 9.7.0 to 26.7.0 by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7873
+* chore(deps-dev): bump org.objenesis:objenesis from 3.5 to 3.6 in the test-deps group by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7878
+* chore(deps): bump the github-actions group with 6 updates by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7874
+* chore(deps): bump org.codehaus.gmavenplus:gmavenplus-plugin from 4.3.1 to 5.1.0 by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7854
+* Update LPM to v0.3.6 by @liquibase-workflows[bot] in https://github.com/liquibase/liquibase/pull/7879
+* fix: drop the backtick expectation for description on mysql and mariadb by @filipelautert in https://github.com/liquibase/liquibase/pull/7885
+* chore(deps): bump the github-actions group with 4 updates by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7887
+* Fix SonarCloud bug and vulnerability findings, including reflected XSS in the status servlet by @SvampX in https://github.com/liquibase/liquibase/pull/7892
+* chore(deps): bump the test-deps group with 4 updates by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7890
+* chore(deps): bump org.apache.commons:commons-collections4 from 4.5.0 to 4.6.0 in the production-deps group by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7889
+* chore(deps-dev): bump com.oracle.database.jdbc:ojdbc8 from 19.31.0.0 to 19.32.0.0 in the build-tools group across 1 directory by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7880
+* DEVX-1545: Update the CLI banner to point at Liquibase Secure by @SvampX in https://github.com/liquibase/liquibase/pull/7900
+* ci: stop appending -SNAPSHOT to build.commit so releases on SHAs ending in 0 don't fail by @rberezen in https://github.com/liquibase/liquibase/pull/7901
+* ci: drop the external environment gate from fork PR workflows by @filipelautert in https://github.com/liquibase/liquibase/pull/7902
+* ci: drop the vestigial authorize job from fork PR workflows by @filipelautert in https://github.com/liquibase/liquibase/pull/7906
+* fix: publish the maven plugin jar that was already built at 0-SNAPSHOT by @filipelautert in https://github.com/liquibase/liquibase/pull/7908
+* fix: publish the branch-named artifacts at 0-SNAPSHOT too by @filipelautert in https://github.com/liquibase/liquibase/pull/7911
+* Fix the SonarCloud quality gate: suppress false-positive S3077 on two safely-published volatile fields by @SvampX in https://github.com/liquibase/liquibase/pull/7913
+* chore(deps): bump org.apache.maven.wrapper:maven-wrapper from 3.2.0 to 3.3.4 by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7915
+* chore(deps): bump org.apache.maven:apache-maven from 3.9.5 to 3.9.16 by @dependabot[bot] in https://github.com/liquibase/liquibase/pull/7914
+
+
+## New Contributors
+* @v-petrovych made their first contribution in https://github.com/liquibase/liquibase/pull/7729
+* @mgustimz made their first contribution in https://github.com/liquibase/liquibase/pull/7696
+* @Khromushkin made their first contribution in https://github.com/liquibase/liquibase/pull/7759
+* @officialasishkumar made their first contribution in https://github.com/liquibase/liquibase/pull/7705
+* @jstastny made their first contribution in https://github.com/liquibase/liquibase/pull/7566
+* @pranithreddym made their first contribution in https://github.com/liquibase/liquibase/pull/7708
+* @edu1006 made their first contribution in https://github.com/liquibase/liquibase/pull/7847
+* @profiluefter made their first contribution in https://github.com/liquibase/liquibase/pull/7560
+* @Devansh-ops made their first contribution in https://github.com/liquibase/liquibase/pull/7834
+* @singhvishalkr made their first contribution in https://github.com/liquibase/liquibase/pull/7725
+* @Akshatsharma2205 made their first contribution in https://github.com/liquibase/liquibase/pull/7798
+* @renechoi made their first contribution in https://github.com/liquibase/liquibase/pull/7869
+* @om7057 made their first contribution in https://github.com/liquibase/liquibase/pull/7825
+* @yosimasu made their first contribution in https://github.com/liquibase/liquibase/pull/7831
+* @makssent made their first contribution in https://github.com/liquibase/liquibase/pull/7850
+* @felhag made their first contribution in https://github.com/liquibase/liquibase/pull/7803
+* @hutiefang76 made their first contribution in https://github.com/liquibase/liquibase/pull/7835
+* @sakshichitnis27 made their first contribution in https://github.com/liquibase/liquibase/pull/7866
+* @seonwooj0810 made their first contribution in https://github.com/liquibase/liquibase/pull/7812
+* @kamilkrzywanski made their first contribution in https://github.com/liquibase/liquibase/pull/7848
+* @fudianchn made their first contribution in https://github.com/liquibase/liquibase/pull/7881
+* @ET-TOUNANI made their first contribution in https://github.com/liquibase/liquibase/pull/7801
+* @pwielgolaski made their first contribution in https://github.com/liquibase/liquibase/pull/7909
+
+**Full Changelog**: https://github.com/liquibase/liquibase/compare/v5.0.3...v5.0.4
+
+
 Changes in version 5.0.3 (2026.05.15)
 
 # Liquibase Community 5.0.3 is a minor patch release
-See the [Liquibase Community 5.0.3 Release Notes](https://docs.liquibase.com/community/community-release-notes/liquibase-community-503-release-notes) for the complete set of release information.
+See the [Liquibase Community 5.0.3 Release Notes](https://docs.liquibase.com/community/release-notes/liquibase-community-5-0-3-release-notes) for the complete set of release information.
 
 ## New Features
 - (#7674) perf: cache ranChangeSets lookup in SqlChangeLogParser.generateId @andrewcedgar

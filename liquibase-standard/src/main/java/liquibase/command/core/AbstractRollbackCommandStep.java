@@ -85,6 +85,7 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
             handleRollbackException(defineCommandNames()[0][0], rollbackReportParameters);
             throw t;
         } finally {
+            Scope.getCurrentScope().getSingleton(FastCheckService.class).clearCache();
             Scope.getCurrentScope().getMdcManager().remove(MdcKey.CHANGESETS_ROLLED_BACK);
         }
     }
