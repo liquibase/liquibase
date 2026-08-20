@@ -586,3 +586,130 @@ If a workflow continues to fail:
 2. Verify all secrets and credentials are correctly configured
 3. Check AWS/Maven/Docker service status
 4. Consult the team or escalate to DevOps
+
+# :package: Extension Releases
+
+Extensions are released after the core version is out and on Maven Central. They do
+not all follow the same path, and the differences are the source of most release-day
+surprises. Four paths exist today.
+
+## Path 1: the automated matrix (most extensions)
+
+`release-extensions.yml` (this repo) dispatches with a single `version` input and calls
+`extension-automated-release.yml` in build-logic, which walks a hardcoded list of repos.
+
+What it does per repo:
+
+1. **Check Security Vulnerabilities** - fails the whole run if a repo has any open
+   Dependabot alert. This gate runs first, so check it before release day.
+2. **Update pom.xml** - sets the extension version to `<version>-SNAPSHOT` and
+   `liquibase.version` to `<version>`, then commits straight to `main`.
+3. That push triggers, in the extension repo: `Create Release` (release-drafter, which
+   **rewrites the draft body** and names it after the *next* version) and
+   `Attach Artifact to Release` (builds, signs, PATCHes the draft tag to `v<version>`,
+   uploads assets).
+4. **Release Draft** - finds the draft whose `tag_name` is `v<version>`, requires an asset
+   whose name contains the version, and publishes it via PATCH `draft:false`.
+5. Publishing fires `Release Extension to Sonatype` in the extension repo, which deploys.
+
+`liquibase-parent-pom` is in the list but excluded from steps 4 and 5: it keeps its own
+1.x versioning and never has a `v<liquibase-version>` release.
+
+## Path 2: extensions missing from the matrix
+
+An extension can version in lockstep with the core and still not be in the matrix list,
+in which case the bulk release silently skips it. Releasing it means doing by hand what
+the matrix would have done: open a PR bumping the project version to
+`<version>-SNAPSHOT` and `liquibase.version` to `<version>`, merge it, wait for
+`Attach Artifact to Release`, then publish the draft.
+
+Before doing that, confirm the repo's `attach-artifact-release.yml` has a `push` trigger
+on the default branch. Without it nothing rebuilds on the merge and the draft keeps the
+previous version's assets.
+
+## Path 3: patch release for a single extension
+
+When an extension needs a fix after its release already shipped, bump only the extension
+version (`5.0.4` to `5.0.4.1`) and leave `liquibase.version` alone: the core dependency
+does not move. The rest is Path 2.
+
+## Path 4: liquibase-hibernate6 (parallel branch)
+
+The `hibernate6` branch keeps the Hibernate 6.x line alive; `main` is Hibernate 7 and
+dropped 6.x support on purpose, so **no code from main should be ported** to it. Only
+infrastructure changes travel: parent pom version, workflow permissions, action pins.
+
+Nothing chains automatically on this branch. The release is:
+
+1. PR against `hibernate6` bumping the extension version and `liquibase.version`, plus
+   any 6.x dependency updates (Dependabot only reads `dependabot.yml` from the default
+   branch, so this branch goes stale unless it has its own `target-branch` entries).
+2. Dispatch `Create Release` manually - the draft does not appear on push.
+3. Dispatch `Attach Artifact to Release` manually.
+4. **Fix the tag before publishing.** build-logic rewrites the draft tag to `v<version>`,
+   dropping the `-hibernate6` suffix, which would collide with the main line's release of
+   the same version. PATCH it back to `v<version>-hibernate6` with
+   `target_commitish: hibernate6`.
+5. Publish the draft.
+6. Dispatch `release-published.yml` with `releaseId`, `tag` and `version`. The automatic
+   path assumes `tag=v<version>` and cannot handle the suffix, which is why this branch
+   carries its own manual-publish job.
+
+## Known failure modes
+
+### One extension fails and every other one is cancelled
+
+The `Release Draft` matrix has no `fail-fast: false`, so a single failing repo cancels
+its siblings mid-flight. Extensions that already published stay published; the cancelled
+ones are left with a ready draft. Publishing those drafts by hand (PATCH `draft:false`)
+is exactly what the job would have done, and the Sonatype deploy still fires on its own.
+
+### `No asset containing <version> found in draft release`
+
+The draft was found but its assets are from an older build. Cause: the repo's
+`attach-artifact-release.yml` has no `push` trigger on the default branch, so the pom
+commit in step 2 never rebuilt anything. Dispatch that workflow manually, confirm the
+assets are renamed, then publish.
+
+### `No draft release found in the repository`
+
+`extension-attach-artifact-release` requires a pre-existing draft. On branches whose
+`Create Release` only has `workflow_dispatch`, dispatch it first.
+
+### A manual dispatch dies with `startup_failure` and zero jobs
+
+Two causes seen, both evaluated before any job starts, so there is no log to read:
+
+- a reusable workflow requires a permission the caller does not grant (`actions: read`
+  has been required by `extension-release-published` since build-logic#622)
+- a **step-level** `uses:` is not pinned to a full commit SHA. Job-level reusable
+  workflow refs (`*.yml@main`) are exempt; step-level refs are not. Long-lived branches
+  that predate the pinning sweep are the usual offenders, and the failure only appears
+  when someone dispatches the workflow, never in PR CI.
+
+### A note added to the release notes disappears
+
+release-drafter rewrites the draft body on every push to the branch it watches, and the
+release flow pushes a pom commit. Add release-note text **after** the release is
+published, and make the tooling idempotent so it survives a rewrite.
+
+### A draft loses its tag after an API edit
+
+`PATCH /releases/{id}` with only `body` makes GitHub drop the tag (`untagged-<hash>`).
+Always send `tag_name` alongside. A draft with no tag is invisible to the job that
+publishes by tag.
+
+## Verification checklist
+
+Per extension, before calling the release done:
+
+- release is published, not draft, with the expected tag
+- 16 assets, all named `<artifact>-<version>`
+- `Release Extension to Sonatype` finished green in the extension repo
+- for suffixed lines, the tag kept its suffix and points at the right branch
+
+## Central Portal approval (manual, required)
+
+Uploads use the `USER_MANAGED` publishing type, so nothing reaches Maven Central until a
+human approves the deployments at central.sonatype.com. Until then `mvn` still resolves
+the previous version and a 404 on the artifact URL is expected, not a failure.
