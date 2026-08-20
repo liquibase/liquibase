@@ -165,7 +165,7 @@ jobs:
         env:
           BRANCH_NAME: ${{ needs.setup.outputs.thisBranchName }}
         run: |
-          version="$BRANCH_NAME-SNAPSHOT"
+          version=$BRANCH_NAME-SNAPSHOT
           ./mvnw versions:set -DnewVersion="$version"
 
       - name: Artifacts - Build & Sign
@@ -197,7 +197,7 @@ jobs:
           # Extract the tarball to allow us to upload the liquibase installation files to our
           # github actions workflow so that we don't double zip the archive
           mkdir -p branch-artifacts
-          tar -xzf "liquibase-dist/target/liquibase-$BRANCH_NAME-SNAPSHOT.tar.gz" -C branch-artifacts
+          tar -xzf liquibase-dist/target/liquibase-$BRANCH_NAME-SNAPSHOT.tar.gz -C branch-artifacts
 
           ##create installer - disabled here but run as nightly job and as part of release workflow
           # (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
@@ -208,13 +208,13 @@ jobs:
           # Copy artifacts
           mkdir -p artifacts
 
-          cp "liquibase-dist/target/liquibase-$BRANCH_NAME-SNAPSHOT.tar.gz" artifacts
-          cp "liquibase-dist/target/liquibase-$BRANCH_NAME-SNAPSHOT.zip" artifacts
-          cp "liquibase-core/target/liquibase-core-$BRANCH_NAME-SNAPSHOT.jar" artifacts/liquibase-core-0-SNAPSHOT.jar
+          cp liquibase-dist/target/liquibase-$BRANCH_NAME-SNAPSHOT.tar.gz artifacts
+          cp liquibase-dist/target/liquibase-$BRANCH_NAME-SNAPSHOT.zip artifacts
+          cp liquibase-core/target/liquibase-core-$BRANCH_NAME-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
           #cp liquibase-dist/target/liquibase-$BRANCH_NAME-SNAPSHOT/internal/lib/liquibase-core.jar artifacts/liquibase-core-0-SNAPSHOT.jar
 
-          cp "liquibase-core/target/liquibase-core-$BRANCH_NAME-SNAPSHOT-sources.jar" artifacts/liquibase-core-0-SNAPSHOT-sources.jar
-          cp "target/liquibase-$BRANCH_NAME-SNAPSHOT-javadoc.jar" artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
+          cp liquibase-core/target/liquibase-core-$BRANCH_NAME-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
+          cp target/liquibase-$BRANCH_NAME-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
 
           ##create installer - disabled here but run as nightly job and as part of release workflow
           #cp liquibase-dist/target/liquibase-*-installer-* artifacts
@@ -230,13 +230,13 @@ jobs:
           ##prepare branch-named convenience artifacts directories
           mkdir artifacts-named
 
-          cp "liquibase-dist/target/liquibase-$BRANCH_NAME-SNAPSHOT.tar.gz" "artifacts-named/liquibase-$BRANCH_NAME.tar.gz"
+          cp liquibase-dist/target/liquibase-$BRANCH_NAME-SNAPSHOT.tar.gz artifacts-named/liquibase-$BRANCH_NAME.tar.gz
 
           # liquibase-sdk:install-snapshot runs install-file over these without coordinates, so maven
           # reads the embedded pom: they need 0-SNAPSHOT inside even though the file name says the branch
-          cp "prebuilt/liquibase-extension-testing-0-SNAPSHOT-deps.jar" "artifacts-named/liquibase-extension-testing-$BRANCH_NAME-deps.jar"
+          cp prebuilt/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-$BRANCH_NAME-deps.jar
           for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-extension-testing'; do
-            cp "prebuilt/$i-0-SNAPSHOT.jar" "artifacts-named/$i-$BRANCH_NAME.jar"
+            cp prebuilt/$i-0-SNAPSHOT.jar artifacts-named/$i-$BRANCH_NAME.jar
           done
 
       - name: Archive Packages
@@ -279,8 +279,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH_NAME: ${{ needs.setup.outputs.thisBranchName }}
-          MERGE_SHA: ${{ needs.setup.outputs.thisSha }}
-          BUILD_TIMESTAMP: ${{ needs.setup.outputs.timestamp }}
+          MERGE_SHA: ${{ needs.setup.outputs.latestMergeSha }}
+          BUILD_TIMESTAMP: ${{ needs.setup.outputs.timeStamp }}
 
   run-tests-harness:
     needs: [setup, build_publish_branch]

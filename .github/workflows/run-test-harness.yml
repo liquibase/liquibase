@@ -103,17 +103,13 @@ jobs:
 
       - name: Build test-harness dispatch payload
         id: build-payload
-        env:
-          RUN_TESTS_SHA: ${{ env.RUN_TESTS_SHA }}
-          RUN_TESTS_BRANCH: ${{ env.RUN_TESTS_BRANCH }}
-          OSS_WORKFLOW_URL: ${{ env.ossWorkflowUrl }}
         run: |
           payload=$(jq -nc \
             --arg commit "$RUN_TESTS_SHA" \
-            --arg desc "$OSS_WORKFLOW_URL" \
+            --arg desc "$ossWorkflowUrl" \
             --arg branch "$RUN_TESTS_BRANCH" \
             '{liquibaseCommit: $commit, runDescription: $desc, liquibaseBranch: $branch}')
-          echo "json=$payload" >> "$GITHUB_OUTPUT"
+          echo "json=$payload" >> $GITHUB_OUTPUT
 
       - name: Dispatch an action and get the run ID
         uses: codex-/return-dispatch@85e564d60eaec3cc4aca885373d510cfe4bd5b19 # v3
