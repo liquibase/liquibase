@@ -55,7 +55,22 @@ jobs:
   persist-main-latest:
     name: Persist main HEAD scan to scan-results
     needs: scan-community
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    # `always()` on purpose. "Check scan results" in the reusable workflow is a
+    # THRESHOLD verdict, not a scan failure: the report artifacts are uploaded
+    # before it runs. Without always(), a HIGH/CRITICAL finding skips this job,
+    # so the very CVEs the dashboard exists to show are what stop it being
+    # updated. liquibase/liquibase:latest went stale for days that way.
+    #
+    # Mirrors trivy-scan-published-images.yml, whose persist job has always
+    # been gated this way and persists successfully on runs whose scans fail
+    # the threshold. `cancelled`/`skipped` are still excluded: those produce no
+    # artifacts to persist.
+    if: |
+      always()
+      && github.event_name != 'pull_request'
+      && github.ref == 'refs/heads/main'
+      && needs.scan-community.result != 'cancelled'
+      && needs.scan-community.result != 'skipped'
     runs-on: ubuntu-22.04
     permissions:
       contents: write
