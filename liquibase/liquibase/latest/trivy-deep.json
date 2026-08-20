@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a01e07-891a-7a3a-b2d5-9c3989363b11",
-  "CreatedAt": "2026-08-20T07:16:45.466671212Z",
+  "ReportID": "01a02002-4790-7b9c-97da-e2c7deabd023",
+  "CreatedAt": "2026-08-20T16:30:15.440761928Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -56,10 +56,10 @@
         {
           "Name": "org.apache.commons:commons-collections4",
           "Identifier": {
-            "PURL": "pkg:maven/org.apache.commons/commons-collections4@4.5.0",
-            "UID": "48b6ebcaa3bd717a"
+            "PURL": "pkg:maven/org.apache.commons/commons-collections4@4.6.0",
+            "UID": "b150caf7f43075d1"
           },
-          "Version": "4.5.0",
+          "Version": "4.6.0",
           "FilePath": "internal-jars/lib/commons-collections4.jar",
           "AnalyzedBy": "jar"
         },
@@ -86,10 +86,10 @@
         {
           "Name": "org.liquibase:liquibase-core",
           "Identifier": {
-            "PURL": "pkg:maven/org.liquibase/liquibase-core@5.0.3",
-            "UID": "70fff2b4dfca2978"
+            "PURL": "pkg:maven/org.liquibase/liquibase-core@5.0.4",
+            "UID": "f317dc20d85f9864"
           },
-          "Version": "5.0.3",
+          "Version": "5.0.4",
           "FilePath": "internal-jars/lib/liquibase-core.jar",
           "AnalyzedBy": "jar"
         },
