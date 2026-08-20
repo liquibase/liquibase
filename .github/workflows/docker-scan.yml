@@ -95,8 +95,20 @@ jobs:
           fi
           ls -la "$ART_DIR"
 
+      - name: Checkout build-logic
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: liquibase/build-logic
+          path: build-logic
+
       - name: Persist to scan-results branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          scripts/persist-scan-results.sh scan-artifacts
+          SCRIPT=build-logic/scripts/vulnerability-scanning/persist-scan-results.sh
+          if [ ! -f "$SCRIPT" ]; then
+            echo "::error::$SCRIPT is missing. This repo uses the shared copy from liquibase/build-logic (build-logic#678); it must be merged first."
+            exit 1
+          fi
+          chmod +x "$SCRIPT"
+          "$SCRIPT" scan-artifacts
