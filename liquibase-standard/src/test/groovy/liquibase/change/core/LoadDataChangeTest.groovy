@@ -1017,6 +1017,23 @@ class LoadDataChangeTest extends StandardChangeTest {
         assert columnValue(sqlStatements[1], "username") == "jdoe"
     }
 
+    def "validate a leading comment line in a CSV file is not mistaken for the header (#4434)"() {
+        when:
+        def table = testTable("table")
+        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
+
+        LoadDataChange change = new LoadDataChange()
+        change.setFile("liquibase/change/core/sample.data.with.leading.comment.csv")
+        change.setTableName("table")
+
+        SqlStatement[] sqlStatements = change.generateStatements(mockDB)
+
+        then:
+        sqlStatements.length == 2
+        assert columnValue(sqlStatements[0], "username") == "bjohnson"
+        assert columnValue(sqlStatements[1], "username") == "jdoe"
+    }
+
 
 
     class ColDef {
