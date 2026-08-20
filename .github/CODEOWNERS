@@ -2,3 +2,4 @@
 
 # Last matching pattern wins, so path rules stay below the catch-all.
 /.github/workflows/     @liquibase/liquibase-devops
+/.github/CODEOWNERS     @liquibase/liquibase-devops
