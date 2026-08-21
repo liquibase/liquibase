@@ -133,6 +133,23 @@ public class JavaLogService extends AbstractLogService {
         return null;
     }
 
+    /**
+     * Returns the {@link Formatter} to be applied to the console (stdout/stderr) handler only.
+     * <p>
+     * Overrides the {@link liquibase.logging.LogService} interface default to return the value of
+     * {@link #getCustomFormatter()}, preserving current OSS behaviour: when no custom formatter is set
+     * both the console handler and any file handler continue to use the JUL default ({@link java.util.logging.SimpleFormatter}).
+     * <p>
+     * Pro subclasses may override this method to return a colour-capable formatter for the console
+     * while leaving {@link #getCustomFormatter()} returning {@code null} (so file handlers stay plain).
+     *
+     * @return the console-specific {@link Formatter}, or {@code null}
+     * @since 5.2
+     */
+    @Override
+    public Formatter getConsoleFormatter() {
+        return getCustomFormatter();
+    }
 
     /**
      * Set the formatter for the supplied handler if the supplied log service
@@ -140,6 +157,39 @@ public class JavaLogService extends AbstractLogService {
      */
     public static void setFormatterOnHandler(LogService logService, Handler handler) {
         if (logService instanceof JavaLogService && handler != null) {
+            Formatter customFormatter = ((JavaLogService) logService).getCustomFormatter();
+            if (customFormatter != null) {
+                handler.setFormatter(customFormatter);
+            }
+        }
+    }
+
+    /**
+     * Set the <em>console-specific</em> formatter on the supplied handler.
+     * <p>
+     * Unlike {@link #setFormatterOnHandler(LogService, Handler)} (which uses {@link #getCustomFormatter()}),
+     * this method reads {@link LogService#getConsoleFormatter()}.  When the console formatter is {@code null}
+     * it falls back to {@link #getCustomFormatter()} so that existing behaviour is preserved for any
+     * {@link LogService} implementation that does not override {@link LogService#getConsoleFormatter()}.
+     * <p>
+     * Intended to be called in {@code configureLogging()} exclusively for {@link java.util.logging.ConsoleHandler}
+     * instances, keeping file handlers on the plain formatter path.
+     *
+     * @param logService the active log service (may be any implementation)
+     * @param handler    the handler to configure (must be non-{@code null})
+     * @since 5.2
+     */
+    public static void setConsoleFormatterOnHandler(LogService logService, Handler handler) {
+        if (logService == null || handler == null) {
+            return;
+        }
+        Formatter consoleFormatter = logService.getConsoleFormatter();
+        if (consoleFormatter != null) {
+            handler.setFormatter(consoleFormatter);
+            return;
+        }
+        // Fall back to the existing custom-formatter path so existing impls are unchanged.
+        if (logService instanceof JavaLogService) {
             Formatter customFormatter = ((JavaLogService) logService).getCustomFormatter();
             if (customFormatter != null) {
                 handler.setFormatter(customFormatter);
