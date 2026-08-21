@@ -1,5 +1,9 @@
 *       @filipelautert @wwillard7800
 
 # Last matching pattern wins, so path rules stay below the catch-all.
+# Covers everything under .github/ that executes in CI, not just the workflow files.
 /.github/workflows/     @liquibase/liquibase-devops
+/.github/actions/       @liquibase/liquibase-devops
+/.github/util/          @liquibase/liquibase-devops
+/.github/dependabot.yml @liquibase/liquibase-devops
 /.github/CODEOWNERS     @liquibase/liquibase-devops
