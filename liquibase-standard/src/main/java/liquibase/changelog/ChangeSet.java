@@ -428,7 +428,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     @Override
     public void load(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         this.id = node.getChildValue(null, "id", String.class);
-        this.author = node.getChildValue(null, "author", String.class);
+        this.author = node.getChildValue(null, "author", "");
         this.alwaysRun = node.getChildValue(null, "runAlways", node.getChildValue(null, "alwaysRun", false));
         this.runOnChange = node.getChildValue(null, "runOnChange", false);
         this.runWith = node.getChildValue(null, "runWith", String.class);
@@ -529,7 +529,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     labels = new Labels(labelsString);
                 }
 
-
                 List<ParsedNode> potentialVisitors = child.getChildren();
                 for (ParsedNode node : potentialVisitors) {
                     SqlVisitor sqlVisitor = SqlVisitorFactory.getInstance().create(node.getName());
@@ -545,8 +544,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         addSqlVisitor(sqlVisitor);
                     }
                 }
-
-
                 break;
             case "preconditions":
             case "preConditions":
@@ -772,7 +769,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
             try {
                 if (preconditions != null) {
-                    preconditions.check(database, databaseChangeLog, this, listener);
+                    preconditions.check(database, this.changeLog, this, listener);
                 }
             } catch (PreconditionFailedException e) {
                 if (listener != null) {
