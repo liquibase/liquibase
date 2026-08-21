@@ -1,14 +1,17 @@
 package liquibase.configuration;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
+
 import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
-import liquibase.util.ValueHandlerUtil;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 
 /**
  * A higher-level/detailed definition to provide type-safety, metadata, default values, etc.
@@ -131,11 +134,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
             // No `.reference.` value set → fall through and inherit the primary value below.
         }
 
-        List<String> keyList = new ArrayList<>();
-        keyList.add(this.getKey());
-        keyList.addAll(this.getAliasKeys());
-
-        ConfiguredValue<?> configurationValue = liquibaseConfiguration.getCurrentConfiguredValue(valueConverter, valueObfuscator, additionalValueProviders, keyList.toArray(new String[0]));
+        ConfiguredValue<?> configurationValue = liquibaseConfiguration.getCurrentConfiguredValue(valueConverter, valueObfuscator, additionalValueProviders, getKeyAndAliases());
 
         return applyDefaultAndConvert(configurationValue);
     }
@@ -201,6 +200,18 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     }
 
     /**
+     * @return The standard configuration key and all alternate configuration keys to check for values. Used for backwards compatibility.
+     */
+    public String[] getKeyAndAliases() {
+        Set<String> aliases = getAliasKeys();
+        
+        String[] keyAndAliases = new String[aliases.size() + 1];
+        keyAndAliases[0] = getKey();
+        System.arraycopy(aliases.toArray(), 0, keyAndAliases, 1, aliases.size());
+        return keyAndAliases;
+    }
+
+    /**
      * @return the type of data this definition returns.
      */
     public Class<DataType> getDataType() {
@@ -263,8 +274,12 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ConfigurationDefinition<?> that = (ConfigurationDefinition<?>) o;
         return Objects.equals(key, that.key);
     }
@@ -313,7 +328,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         }
 
         /**
-         * Starts a new definition with the given key. Always adds the  defaultKeyPrefix.
+         * Starts a new definition with the given key. Always adds the defaultKeyPrefix.
          */
         public <T> Building<T> define(String key, Class<T> dataType) {
             final ConfigurationDefinition<T> definition = new ConfigurationDefinition<>(defaultKeyPrefix + "." + key, dataType);
@@ -501,4 +516,3 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         }
     }
 }
-
