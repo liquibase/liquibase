@@ -140,13 +140,21 @@ jobs:
             sha1sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.sha1
             sha256sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.sha256
 
-            # Generate checksums for all JAR files (main, sources, javadoc).
-            # .sha256 is regenerated here (not just inherited from
-            # liquibase-additional-*.zip) because the sidecars produced by
+            # Sign and checksum every JAR here rather than reusing the sidecars
+            # from liquibase-additional-*.zip. Those are produced when artifacts
+            # are attached to the draft release, which can be days before the
+            # release is published. If the signing key rotates in that window the
+            # baked-in .asc files are signed by a key that no longer verifies and
+            # Central rejects the whole bundle. Signing at publish time always
+            # uses the key currently in the vault.
+            #
+            # .sha256 also has to be regenerated because the sidecars produced by
             # sign-artifacts.sh carry a trailing space that Sonatype Central
             # Portal rejects as "Invalid sha256 checksum".
             for jar_file in $i-${version}.jar $i-${version}-sources.jar $i-${version}-javadoc.jar; do
               if [ -f "$jar_file" ]; then
+                rm -f "$jar_file.asc"
+                gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab "$jar_file"
                 md5sum "$jar_file" | cut -d' ' -f1 > "$jar_file.md5"
                 sha1sum "$jar_file" | cut -d' ' -f1 > "$jar_file.sha1"
                 sha256sum "$jar_file" | cut -d' ' -f1 > "$jar_file.sha256"
@@ -192,9 +200,38 @@ jobs:
             exit 1
           fi
 
-          echo "Bundle uploaded successfully to Central Portal"
+          echo "Bundle accepted by Central Portal"
           echo "Deployment ID: $DEPLOYMENT_ID"
-          echo "Automatic publishing initiated for liquibase-${version}"
+
+          # A 201 only means Central accepted the bundle for processing. Validation
+          # runs asynchronously afterwards, so poll until it resolves. Without this
+          # the job goes green on a release that Central actually rejected.
+          echo "Waiting for Central Portal validation of ${DEPLOYMENT_ID}..."
+          STATE="UNKNOWN"
+          for attempt in $(seq 1 60); do
+            STATUS_JSON=$(curl -s -X POST \
+              -H "Authorization: Bearer ${AUTH_HEADER}" \
+              "https://central.sonatype.com/api/v1/publisher/status?id=${DEPLOYMENT_ID}")
+            STATE=$(echo "$STATUS_JSON" | jq -r '.deploymentState // "UNKNOWN"')
+            echo "  [${attempt}/60] ${STATE}"
+
+            case "$STATE" in
+              PUBLISHED)
+                echo "liquibase-${version} published to Maven Central"
+                exit 0
+                ;;
+              FAILED)
+                echo "Central Portal rejected the deployment:"
+                echo "$STATUS_JSON" | jq -r '.errors // .'
+                exit 1
+                ;;
+            esac
+            sleep 30
+          done
+
+          echo "Timed out after 30m waiting for ${DEPLOYMENT_ID} (last state: ${STATE})"
+          echo "Check https://central.sonatype.com/publishing/deployments"
+          exit 1
 
   deploy-maven-dryrun:
     name: Deploy to Maven Central (Dry Run)
@@ -276,13 +313,21 @@ jobs:
             sha1sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.sha1
             sha256sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.sha256
 
-            # Generate checksums for all JAR files (main, sources, javadoc).
-            # .sha256 is regenerated here (not just inherited from
-            # liquibase-additional-*.zip) because the sidecars produced by
+            # Sign and checksum every JAR here rather than reusing the sidecars
+            # from liquibase-additional-*.zip. Those are produced when artifacts
+            # are attached to the draft release, which can be days before the
+            # release is published. If the signing key rotates in that window the
+            # baked-in .asc files are signed by a key that no longer verifies and
+            # Central rejects the whole bundle. Signing at publish time always
+            # uses the key currently in the vault.
+            #
+            # .sha256 also has to be regenerated because the sidecars produced by
             # sign-artifacts.sh carry a trailing space that Sonatype Central
             # Portal rejects as "Invalid sha256 checksum".
             for jar_file in $i-${version}.jar $i-${version}-sources.jar $i-${version}-javadoc.jar; do
               if [ -f "$jar_file" ]; then
+                rm -f "$jar_file.asc"
+                gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab "$jar_file"
                 md5sum "$jar_file" | cut -d' ' -f1 > "$jar_file.md5"
                 sha1sum "$jar_file" | cut -d' ' -f1 > "$jar_file.sha1"
                 sha256sum "$jar_file" | cut -d' ' -f1 > "$jar_file.sha256"
@@ -328,6 +373,35 @@ jobs:
             exit 1
           fi
 
-          echo "Bundle uploaded successfully to Central Portal for dry-run"
+          echo "Bundle accepted by Central Portal for dry-run"
           echo "Deployment ID: $DEPLOYMENT_ID"
-          echo "Manual publishing required - visit https://central.sonatype.com/publishing/deployments to review and publish"
+
+          # A 201 only means Central accepted the bundle for processing. Validation
+          # runs asynchronously afterwards, so poll until it resolves. Without this
+          # the job goes green on a release that Central actually rejected.
+          echo "Waiting for Central Portal validation of ${DEPLOYMENT_ID}..."
+          STATE="UNKNOWN"
+          for attempt in $(seq 1 60); do
+            STATUS_JSON=$(curl -s -X POST \
+              -H "Authorization: Bearer ${AUTH_HEADER}" \
+              "https://central.sonatype.com/api/v1/publisher/status?id=${DEPLOYMENT_ID}")
+            STATE=$(echo "$STATUS_JSON" | jq -r '.deploymentState // "UNKNOWN"')
+            echo "  [${attempt}/60] ${STATE}"
+
+            case "$STATE" in
+              VALIDATED|PUBLISHED)
+                echo "Dry-run bundle validated. Publishing is USER_MANAGED: review at https://central.sonatype.com/publishing/deployments"
+                exit 0
+                ;;
+              FAILED)
+                echo "Central Portal rejected the deployment:"
+                echo "$STATUS_JSON" | jq -r '.errors // .'
+                exit 1
+                ;;
+            esac
+            sleep 30
+          done
+
+          echo "Timed out after 30m waiting for ${DEPLOYMENT_ID} (last state: ${STATE})"
+          echo "Check https://central.sonatype.com/publishing/deployments"
+          exit 1
