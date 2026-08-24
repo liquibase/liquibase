@@ -203,6 +203,9 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
 
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                if (exc != null) {
+                    throw exc;
+                }
                 return FileVisitResult.CONTINUE;
             }
 
