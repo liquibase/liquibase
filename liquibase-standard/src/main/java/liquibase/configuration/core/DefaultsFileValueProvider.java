@@ -22,6 +22,8 @@ import org.apache.commons.lang3.StringUtils;
 public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProvider {
 
     private static final int DEFAULT_PRECEDENCE = 50;
+    // the precedence should always be higher than that of ServletConfigurationValueProvider (30)
+    private static final int MINIMUM_PRECEDENCE = 31; 
     private final Properties properties;
     private final String sourceDescription;
     private final int precedence;
@@ -29,7 +31,7 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
     protected DefaultsFileValueProvider(Properties properties, String sourceDescription, int precedenceOffset) {
         this.properties = properties;
         this.sourceDescription = sourceDescription;
-        this.precedence = DEFAULT_PRECEDENCE - precedenceOffset;
+        this.precedence = Math.max(DEFAULT_PRECEDENCE - precedenceOffset, MINIMUM_PRECEDENCE);
     }
 
     protected DefaultsFileValueProvider(Properties properties, int precedenceOffset) throws IOException {
