@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a023cb-50e3-702f-afe9-b361ebfa7129",
-  "CreatedAt": "2026-08-21T10:08:42.211013026Z",
+  "ReportID": "01a03344-45b1-7941-9765-cb40ad9462b4",
+  "CreatedAt": "2026-08-24T10:15:07.441607711Z",
   "ArtifactID": "sha256:6cfbd418093a91cac909e24718bc023de5e6825f4ae22c048f814666c2c3fdbe",
   "ArtifactName": "liquibase/liquibase:5.0.4",
   "ArtifactType": "container_image",
@@ -11030,14 +11030,17 @@
             "https://access.redhat.com/errata/RHSA-2026:56340",
             "https://access.redhat.com/errata/RHSA-2026:56431",
             "https://access.redhat.com/errata/RHSA-2026:57194",
+            "https://access.redhat.com/errata/RHSA-2026:57541",
             "https://access.redhat.com/security/cve/CVE-2026-39821",
             "https://bugzilla.redhat.com/2480756",
+            "https://bugzilla.redhat.com/2484207",
+            "https://bugzilla.redhat.com/2498152",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2480756",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2498152",
             "https://creativecommons.org/licenses/by/4.0/",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-39821",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-39822",
-            "https://errata.almalinux.org/9/ALSA-2026-37435.html",
+            "https://errata.almalinux.org/8/ALSA-2026-38995.html",
             "https://errata.rockylinux.org/RLSA-2026:37435",
             "https://github.com/golang/go/issues/78760",
             "https://go.dev/cl/767220",
@@ -11053,7 +11056,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-39821"
           ],
           "PublishedDate": "2026-05-22T16:16:20.41Z",
-          "LastModifiedDate": "2026-08-20T13:18:12.15Z"
+          "LastModifiedDate": "2026-08-21T13:17:38.087Z"
         },
         {
           "VulnerabilityID": "CVE-2026-46600",
@@ -11087,6 +11090,7 @@
             "CWE-125"
           ],
           "VendorSeverity": {
+            "azure": 2,
             "bitnami": 3,
             "redhat": 3
           },
