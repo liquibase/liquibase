@@ -8,6 +8,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.Logger;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
@@ -46,6 +47,12 @@ public class PostgresDatabase extends AbstractPostgresDatabase {
 
     private static final int PGSQL_DEFAULT_TCP_PORT_NUMBER = 5432;
     private static final Logger LOG = Scope.getCurrentScope().getLog(PostgresDatabase.class);
+
+    /**
+     * The search_path in effect before it was changed session-level for a runInTransaction="false"
+     * changeset, or null if no restore is pending. See {@link #restoreSearchPath()}.
+     */
+    private String searchPathToRestore;
 
     public PostgresDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
@@ -264,6 +271,21 @@ public class PostgresDatabase extends AbstractPostgresDatabase {
         if(executor.updatesDatabase()) {
             DatabaseUtils.initializeDatabase(this.escapeObjectName(getDefaultCatalogName(), Catalog.class), this.escapeObjectName(getDefaultSchemaName(), Schema.class), this);
         }
+    }
+
+    public void saveSearchPath(String searchPath) {
+        if (this.searchPathToRestore == null) {
+            this.searchPathToRestore = searchPath;
+        }
+    }
+
+    public void restoreSearchPath() throws DatabaseException {
+        if (searchPathToRestore == null) {
+            return;
+        }
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this);
+        executor.execute(new RawParameterizedSqlStatement(String.format("SET SEARCH_PATH TO %s", searchPathToRestore)));
+        searchPathToRestore = null;
     }
 
     @Override

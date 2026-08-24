@@ -13,6 +13,8 @@ import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtil;
 
+import java.util.List;
+
 public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUniqueConstraintStatement> {
 
     @Override
@@ -126,9 +128,12 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
         UniqueConstraint uniqueConstraint = new UniqueConstraint()
                 .setName(statement.getConstraintName())
                 .setRelation(new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
-        int i = 0;
-        for (Column column : Column.listFromNames(statement.getColumnNames())) {
-            uniqueConstraint.addColumn(i++, column);
+        List<Column> columns = Column.listFromNames(statement.getColumnNames());
+        if (columns != null) {
+            int i = 0;
+            for (Column column : columns) {
+                uniqueConstraint.addColumn(i++, column);
+            }
         }
         return uniqueConstraint;
     }

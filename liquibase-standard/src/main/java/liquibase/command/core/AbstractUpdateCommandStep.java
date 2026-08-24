@@ -145,12 +145,21 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             resultsBuilder.addResult("statusCode", 1);
             throw e;
         } finally {
-            if (isDBLocked.get()) {
-                try {
-                    LockServiceFactory.getInstance().getLockService(database).releaseLock();
-                } catch (LockException e) {
-                    Scope.getCurrentScope().getLog(getClass()).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
+            // Check the lock's actual live state rather than trusting isDBLocked's bookkeeping: for
+            // UpdateCommandStep (the one subclass with no pipeline-managed LockServiceCommandStep,
+            // see requiredDependencies() below) isDBLocked is only true once this method has actually
+            // acquired the lock above. For the other subclasses, the pipeline already acquired the lock
+            // before this method ran, so isDBLocked's true default doesn't reflect whether *this* call
+            // should release it -- hasChangeLogLock() does. This also keeps releasing here (rather than
+            // only in LockServiceCommandStep#cleanUp) so that Sql-output commands still capture the
+            // "Release Database Lock" statement while their LoggingExecutor is still active; see #5438.
+            try {
+                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                if (lockService.hasChangeLogLock()) {
+                    lockService.releaseLock();
                 }
+            } catch (LockException e) {
+                Scope.getCurrentScope().getLog(getClass()).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
             }
         }
     }
@@ -200,8 +209,11 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         isDBLocked.remove();
         LockServiceFactory.getInstance().resetAll();
-        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
+        Database database = (Database) resultsBuilder.getCommandScope().getDependency(Database.class);
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetDatabase(database);
+        ExecutorService executorService = Scope.getCurrentScope().getSingleton(ExecutorService.class);
+        executorService.clearExecutor("jdbc", database);
+        executorService.clearExecutor("logging", database);
     }
 
     private void logDeploymentOutcomeMdc(ChangeExecListener defaultListener, boolean success, UpdateReportParameters updateReportParameters,

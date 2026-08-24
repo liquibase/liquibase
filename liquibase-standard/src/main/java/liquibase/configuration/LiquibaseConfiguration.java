@@ -46,7 +46,14 @@ public class LiquibaseConfiguration implements SingletonObject {
      */
     public static final String SCOPED_VALUE_PROVIDERS_KEY = "liquibase.scopedValueProviders";
 
-    // Immutable snapshot replaced on every mutation, so resolution never sees a half-updated set.
+    /**
+     * Immutable snapshot replaced on every mutation, so resolution never sees a half-updated set.
+     * <p>
+     * S3077: the published set is never mutated in place. {@link #registerProvider} and
+     * {@link #unregisterProvider} copy into a new {@code TreeSet} and reassign, so volatile on the
+     * reference is exactly the right guarantee rather than an insufficient one.
+     */
+    @SuppressWarnings("java:S3077")
     private volatile SortedSet<ConfigurationValueProvider> configurationValueProviders;
     private final static SortedSet<ConfigurationDefinition<?>> definitions = new TreeSet<>();
     public static final String REGISTERED_VALUE_PROVIDERS_KEY = "REGISTERED_VALUE_PROVIDERS";

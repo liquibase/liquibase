@@ -7,6 +7,7 @@ import liquibase.util.StringUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class PrimaryKey extends AbstractDatabaseObject {
 
@@ -110,7 +111,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
         PrimaryKey o = (PrimaryKey) other;
         int returnValue = this.getTable().compareTo(o.getTable());
         if (returnValue == 0) {
-            returnValue = this.getColumnNames().compareTo(o.getColumnNames());
+            returnValue = Objects.toString(this.getColumnNames(), "").compareTo(Objects.toString(o.getColumnNames(), ""));
         }
 
         return returnValue;

@@ -23,6 +23,17 @@ class ObjectMethodsTest {
     assertThat(objectMethods.getWriteMethod("human")).isNull();
   }
 
+  @Test
+  void writeMethodsPreserveUppercaseAcronyms() {
+    ObjectMethods objectMethods = new ObjectMethods(Acronyms.class);
+    // Uppercase acronyms (first two chars both uppercase) must be kept as the property name so that
+    // <param name="GET">/<param name="URL"> resolve to setGET/setURL (issue #7582, regression since 4.29.0).
+    assertThat(objectMethods.getWriteMethod("GET").getName()).isEqualTo("setGET");
+    assertThat(objectMethods.getWriteMethod("URL").getName()).isEqualTo("setURL");
+    // Regular camelCase names are still lowercased as before.
+    assertThat(objectMethods.getWriteMethod("name").getName()).isEqualTo("setName");
+  }
+
   static class User {
     private final String name;
     private int age;
@@ -43,6 +54,17 @@ class ObjectMethodsTest {
 
     public boolean isHuman() {
       return true;
+    }
+  }
+
+  static class Acronyms {
+    public void setGET(String value) {
+    }
+
+    public void setURL(String value) {
+    }
+
+    public void setName(String value) {
     }
   }
 }
