@@ -1,3 +1,4 @@
+# DISABLED 2026-08-25 (TECHOPS-1099): superseded by the release-published-orchestrator dry_run input; a workflow_call dry run will replace this in Phase 3. Do not re-enable; the file is kept for history until the post-Phase-3 deletion PR.
 name: Dry run release
 
 # Security: These write permissions are required for dry-run release testing

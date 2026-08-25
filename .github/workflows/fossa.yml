@@ -1,3 +1,4 @@
+# DISABLED 2026-08-25 (TECHOPS-1099): superseded by fossa_ai.yml and the FOSSA job in main.yml. Do not re-enable; the file is kept for history until the post-Phase-3 deletion PR.
 # Name of the GitHub Action workflow
 name: FOSSA License Compliance and Security Check
 
