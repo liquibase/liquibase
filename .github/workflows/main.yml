@@ -6,11 +6,13 @@ name: Main
 # pull request. Sonar and FOSSA need vault credentials and therefore run only
 # here, not on PRs. [TECHOPS-1104]
 #
-# Interim contract (until the release pipeline builds from tag, Phase 3): the
-# `liquibase-artifacts` artifact keeps the same name and file layout that
-# build.yml produced, because create-release.yml and dry-run-release.yml
-# download it by run id. Signatures are not produced here; create-release.yml
-# re-versions and re-signs everything at release time.
+# Artifact contracts kept from build.yml:
+# - `liquibase-artifacts`: create-release.yml / dry-run-release.yml download it
+#   by run id until the release pipeline builds from tag (Phase 3). Unsigned;
+#   create-release.yml re-versions and re-signs at release time.
+# - `liquibase-zip-main`, `liquibase-artifacts-main`: liquibase-sdk-maven-plugin
+#   (`install-snapshot-cli`, used by liquibase-pro-tests and the test harness)
+#   downloads these from the latest run of this workflow on `main`.
 
 on:
   push:
@@ -119,7 +121,7 @@ jobs:
 
           # keep temp-artifact's tested 0-SNAPSHOT jars; the build below cleans these modules
           mkdir -p prebuilt
-          for i in liquibase-maven-plugin liquibase-cli; do
+          for i in liquibase-core liquibase-maven-plugin liquibase-cli liquibase-extension-testing; do
             cp "$i"/target/"$i"-0-SNAPSHOT*.jar prebuilt/
           done
 
@@ -136,13 +138,36 @@ jobs:
           for i in liquibase-maven-plugin liquibase-cli; do
             cp prebuilt/$i-0-SNAPSHOT.jar prebuilt/$i-0-SNAPSHOT-sources.jar prebuilt/$i-0-SNAPSHOT-javadoc.jar artifacts/
           done
-          ls -la artifacts
+
+          # liquibase-sdk-maven-plugin contract (liquibase-pro-tests, liquibase-test-harness):
+          # liquibase-zip-<branch> = extracted distribution, liquibase-artifacts-<branch> =
+          # branch-named jars whose embedded pom is still 0-SNAPSHOT (install-file reads it).
+          mkdir -p branch-artifacts artifacts-named
+          tar -xzf liquibase-dist/target/liquibase-main-SNAPSHOT.tar.gz -C branch-artifacts
+          cp liquibase-dist/target/liquibase-main-SNAPSHOT.tar.gz artifacts-named/liquibase-main.tar.gz
+          cp prebuilt/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-main-deps.jar
+          for i in liquibase-core liquibase-maven-plugin liquibase-cli liquibase-extension-testing; do
+            cp prebuilt/$i-0-SNAPSHOT.jar artifacts-named/$i-main.jar
+          done
+          ls -la artifacts artifacts-named
 
       - name: Upload liquibase-artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: liquibase-artifacts
           path: artifacts/*
+
+      - name: Upload liquibase-zip-main
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: liquibase-zip-main
+          path: branch-artifacts/*
+
+      - name: Upload liquibase-artifacts-main
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: liquibase-artifacts-main
+          path: artifacts-named/*
 
       - name: Publish main-SNAPSHOT and <sha>-SNAPSHOT to GitHub Packages
         run: |
