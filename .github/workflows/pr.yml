@@ -27,31 +27,17 @@ jobs:
       code: ${{ steps.filter.outputs.code }}
       docker: ${{ steps.filter.outputs.docker }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-
       - name: Classify changed files
         id: filter
         env:
-          BASE_REF: ${{ github.event.pull_request.base.sha }}
-          HEAD_REF: ${{ github.event.pull_request.head.sha }}
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
-          files=$(git diff --name-only "${BASE_REF}...${HEAD_REF}")
+          files=$(gh api --paginate "repos/${{ github.repository }}/pulls/${PR}/files" --jq '.[].filename')
           echo "Changed files:"; echo "$files"
-          code=false; docker=false
-          while IFS= read -r f; do
-            [ -z "$f" ] && continue
-            # docker/* first on purpose: docker/README.md should still smoke-test the image
-            # shellcheck disable=SC2221,SC2222
-            case "$f" in
-              docker/*) docker=true ;;
-              *.md|.github/ISSUE_TEMPLATE/*|.github/pull_request_template.md|LICENSE*) ;;
-              *) code=true ;;
-            esac
-          done <<< "$files"
+          docker=$(grep -q '^docker/' <<<"$files" && echo true || echo false)
+          code=$(grep -qvE '\.md$|^docker/|^\.github/ISSUE_TEMPLATE/|^\.github/pull_request_template\.md$|^LICENSE' <<<"$files" && echo true || echo false)
           echo "code=$code" >> "$GITHUB_OUTPUT"
           echo "docker=$docker" >> "$GITHUB_OUTPUT"
 

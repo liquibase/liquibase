@@ -1,6 +1,6 @@
 <!-- Maven settings for CI workflows that only need snapshot dependencies.
      Releases disabled, updatePolicy=always ensures Maven checks for newer snapshots every build.
-     Used by: ci-test.yml (via pr.yml and main.yml)
+     Used by the superseded build.yml, fossa.yml, run-tests.yml, test-pr.yml. New CI (ci-test.yml, main.yml) uses setup-java server-id instead.
      Credential: set MAVEN_GPM_PASSWORD env var before running Maven. -->
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

@@ -19,14 +19,21 @@ on:
 
 permissions:
   contents: read
+  packages: read # pom `remote-repositories` profile resolves through GitHub Packages when CI=true
+
+env:
+  GITHUB_TOKEN: ${{ github.token }} # setup-java server-id credentials for GitHub Packages
+  MAVEN_BUILD_ARGS: >-
+    -Dbuild.repository.owner=liquibase
+    -Dbuild.repository.name=liquibase
+    -Dbuild.branch=${{ github.head_ref || github.ref_name }}
+    -Dbuild.number=${{ github.run_number }}
+    -Dbuild.commit=${{ github.sha }}
 
 jobs:
   unit:
     name: Unit (Java ${{ matrix.java }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read
-      packages: read # pom `remote-repositories` profile resolves through GitHub Packages when CI=true
     strategy:
       fail-fast: false
       matrix:
@@ -48,40 +55,22 @@ jobs:
           java-version: ${{ matrix.java }}
           distribution: temurin
           cache: maven
-
-      - name: Configure Maven settings
-        shell: bash
-        run: |
-          mkdir -p ~/.m2
-          cp .github/maven/settings-snapshots.xml ~/.m2/settings.xml
-          echo "MAVEN_GPM_PASSWORD=${GITHUB_TOKEN}" >> "$GITHUB_ENV"
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+          server-id: liquibase
 
       - name: Build & Test
         shell: bash
         run: |
-          ./mvnw -B \
-            "-Dbuild.repository.owner=liquibase" \
-            "-Dbuild.repository.name=liquibase" \
-            "-Dbuild.branch=${BUILD_BRANCH}" \
-            "-Dbuild.number=${{ github.run_number }}" \
-            "-Dbuild.commit=${{ github.sha }}" \
-            "-DtrimStackTrace=false" \
-            -P 'skip-integration-tests' clean test package surefire-report:report
-        env:
-          BUILD_BRANCH: ${{ github.head_ref || github.ref_name }}
-
-      - name: Remove original JARs
-        if: runner.os != 'Windows'
-        run: find . -name 'original-*.jar' -exec rm {} \;
+          # shellcheck disable=SC2086 # MAVEN_BUILD_ARGS is intentionally word-split
+          ./mvnw -B $MAVEN_BUILD_ARGS -DtrimStackTrace=false -P 'skip-integration-tests' clean test package surefire-report:report
 
       - name: Upload built jars
         if: ${{ inputs.upload_build_artifacts && matrix.java == 17 && matrix.os == 'ubuntu-24.04' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: temp-artifact
-          path: ./**/target/*.jar
+          path: |
+            ./**/target/*.jar
+            !./**/target/original-*.jar
 
       - name: Upload jacoco report
         if: ${{ inputs.upload_build_artifacts && matrix.java == 17 && matrix.os == 'ubuntu-24.04' }}
@@ -104,9 +93,6 @@ jobs:
     needs: unit
     runs-on: ubuntu-24.04
     timeout-minutes: 30
-    permissions:
-      contents: read
-      packages: read
     strategy:
       fail-fast: false
       matrix:
@@ -132,14 +118,7 @@ jobs:
           java-version: '17'
           distribution: temurin
           cache: maven
-
-      - name: Configure Maven settings
-        run: |
-          mkdir -p ~/.m2
-          cp .github/maven/settings-snapshots.xml ~/.m2/settings.xml
-          echo "MAVEN_GPM_PASSWORD=${GITHUB_TOKEN}" >> "$GITHUB_ENV"
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+          server-id: liquibase
 
       - name: Run integration tests
         run: |

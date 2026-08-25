@@ -31,6 +31,11 @@ jobs:
       packages: write
     env:
       GITHUB_TOKEN: ${{ github.token }} # setup-java server-id credentials for GitHub Packages
+      MAVEN_BUILD_ARGS: >-
+        -Dbuild.repository.owner=liquibase
+        -Dbuild.repository.name=liquibase
+        -Dbuild.branch=${{ inputs.ref }}
+        -Dbuild.number=${{ github.run_number }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -38,10 +43,9 @@ jobs:
           persist-credentials: false
 
       - name: Resolve SHA
-        id: meta
         run: |
-          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-          echo "timestamp=$(date +'%Y-%m-%d %H:%M:%S %Z')" >> "$GITHUB_OUTPUT"
+          echo "BUILD_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          echo "BUILD_TIMESTAMP=$(date +'%Y-%m-%d %H:%M:%S %Z')" >> "$GITHUB_ENV"
 
       - name: Set up JDK 17
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
@@ -52,19 +56,14 @@ jobs:
           server-id: liquibase
 
       - name: Publish <sha>-SNAPSHOT to GitHub Packages
-        env:
-          BUILD_SHA: ${{ steps.meta.outputs.sha }}
-          BUILD_TIMESTAMP: ${{ steps.meta.outputs.timestamp }}
-          BUILD_BRANCH: ${{ inputs.ref }}
         run: |
+          # Full 40-char SHA: liquibase-test-harness resolves community builds by
+          # matching <full-sha>-SNAPSHOT in GitHub Packages metadata.
           ./mvnw -B versions:set -DnewVersion="${BUILD_SHA}-SNAPSHOT"
-          ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true \
-            "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${BUILD_BRANCH}" \
-            "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${BUILD_SHA}" "-Dbuild.timestamp=${BUILD_TIMESTAMP}"
+          # shellcheck disable=SC2086 # MAVEN_BUILD_ARGS is intentionally word-split
+          ./mvnw -B $MAVEN_BUILD_ARGS "-Dbuild.commit=$BUILD_SHA" "-Dbuild.timestamp=$BUILD_TIMESTAMP" -DskipTests -pl '!liquibase-dist' clean deploy
 
       - name: Summary
-        env:
-          BUILD_SHA: ${{ steps.meta.outputs.sha }}
         run: |
           cat >> "$GITHUB_STEP_SUMMARY" <<MSG
           ## Published \`${BUILD_SHA}-SNAPSHOT\`

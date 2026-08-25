@@ -1,10 +1,10 @@
 name: Cleanup Packages
 
 # Weekly sweep of orphaned <sha>-SNAPSHOT versions in GitHub Packages: versions
-# whose commit no longer exists, or is neither a branch head nor an ancestor of
-# main/release. Replaces cleanup-branch-builds.yml, whose `delete` trigger
-# ignored its branch filters and whose per-branch job had nothing left to
-# delete once per-PR SNAPSHOT publishing stopped. [TECHOPS-1099]
+# whose commit no longer exists, or is not a branch head, a tag target, or an
+# ancestor of main/release. Replaces cleanup-branch-builds.yml, whose `delete`
+# trigger ignored its branch filters and whose per-branch job had nothing left
+# to delete once per-PR SNAPSHOT publishing stopped. [TECHOPS-1099]
 
 on:
   schedule:
@@ -18,101 +18,71 @@ on:
 
 permissions: {}
 
+env:
+  PACKAGES: org.liquibase.liquibase-core org.liquibase.liquibase-extension-testing org.liquibase.liquibase-integration-tests org.liquibase.liquibase-maven-plugin org.liquibase.liquibase
+
 jobs:
   sweep:
-    name: Sweep ${{ matrix.package }}
+    name: Sweep orphaned SHA-SNAPSHOT versions
     runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
-    strategy:
-      fail-fast: false
-      matrix:
-        package:
-          - org.liquibase.liquibase-core
-          - org.liquibase.liquibase-extension-testing
-          - org.liquibase.liquibase-integration-tests
-          - org.liquibase.liquibase-maven-plugin
-          - org.liquibase.liquibase
+    env:
+      GH_TOKEN: ${{ github.token }}
+      ORG: ${{ github.repository_owner }}
+      REPO: ${{ github.repository }}
+      DRY_RUN: ${{ inputs.dry_run || false }}
     steps:
-      - name: Find orphaned SHA-SNAPSHOT versions
-        id: find
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PACKAGE_NAME: ${{ matrix.package }}
-          REPO: ${{ github.repository }}
+      - name: Sweep
         run: |
-          set -o pipefail
-          ORG="liquibase"
+          set -uo pipefail
 
-          ALL_VERSIONS=$(gh api --paginate "orgs/$ORG/packages/maven/$PACKAGE_NAME/versions" \
-            --jq '.[] | select(.name | test("^[0-9a-f]{7,40}-SNAPSHOT$")) | "\(.id) \(.name)"') || {
-            echo "::error::Failed to fetch package versions"; exit 1; }
+          # SHAs to keep: every branch head and tag target (snapshot-branch.yml accepts tags).
+          KEEP_SHAS=$(gh api --paginate "repos/$REPO/branches?per_page=100" --jq '.[].commit.sha') || {
+            echo "::error::Failed to fetch branch heads; aborting to avoid incorrect deletions"; exit 1; }
+          KEEP_SHAS+=$'\n'$(gh api --paginate "repos/$REPO/tags?per_page=100" --jq '.[].commit.sha' || true)
 
-          if [ -z "$ALL_VERSIONS" ]; then
-            echo "No SHA-SNAPSHOT versions found for $PACKAGE_NAME"
-            echo "ids=" >> "$GITHUB_OUTPUT"; exit 0
-          fi
-          TOTAL=$(echo "$ALL_VERSIONS" | wc -l | tr -d ' ')
-          echo "Found $TOTAL SHA-SNAPSHOT version(s)"
+          declare -A VERDICT # sha -> keep|orphan|skip, shared across packages
 
-          BRANCH_HEADS=$(gh api --paginate "repos/$REPO/branches?per_page=100" --jq '.[].commit.sha') || true
-          if [ -z "$BRANCH_HEADS" ]; then
-            echo "::error::Failed to fetch branch heads; aborting to avoid incorrect deletions"; exit 1
-          fi
+          # Prints why a SHA is kept and returns 0; returns 1 if it is orphaned; returns 2 on API trouble.
+          classify() {
+            local sha=$1 out status
+            if ! out=$(gh api "repos/$REPO/commits/$sha" --jq .sha 2>&1); then
+              grep -q "404\|Not Found" <<<"$out" && return 1
+              return 2
+            fi
+            grep -q "^${sha}" <<<"$KEEP_SHAS" && { echo "branch head or tag"; return 0; }
+            for base in main release; do
+              status=$(gh api "repos/$REPO/compare/${sha}...${base}" --jq .status 2>/dev/null) || return 2
+              [[ "$status" == ahead || "$status" == identical ]] && { echo "ancestor of $base"; return 0; }
+            done
+            return 1
+          }
 
-          ORPHAN_IDS=""; ORPHAN_COUNT=0
-          while read -r VERSION_ID VERSION_NAME; do
-            [ -z "$VERSION_ID" ] && continue
-            COMMIT_SHA="${VERSION_NAME%-SNAPSHOT}"
-            IS_ORPHAN=true
+          failed=0
+          for pkg in $PACKAGES; do
+            echo "::group::$pkg"
+            versions=$(gh api --paginate "orgs/$ORG/packages/maven/$pkg/versions" \
+              --jq '.[] | select(.name | test("^[0-9a-f]{7,40}-SNAPSHOT$")) | "\(.id) \(.name)"') || {
+              echo "::error::Failed to list versions for $pkg"; failed=1; echo "::endgroup::"; continue; }
 
-            COMMIT_RESPONSE=$(gh api "repos/$REPO/commits/$COMMIT_SHA" --jq '.sha' 2>&1) && COMMIT_EXIT=0 || COMMIT_EXIT=$?
-            if [ "$COMMIT_EXIT" -ne 0 ]; then
-              if echo "$COMMIT_RESPONSE" | grep -q "404\|Not Found"; then
-                echo "ORPHANED (commit gone): $VERSION_NAME"
-              else
-                echo "SKIPPED (API error): $VERSION_NAME"; continue
+            while read -r id name; do
+              [ -z "$id" ] && continue
+              sha=${name%-SNAPSHOT}
+              if [ -z "${VERDICT[$sha]:-}" ]; then
+                if reason=$(classify "$sha"); then VERDICT[$sha]="keep ($reason)"
+                elif [ $? -eq 1 ]; then VERDICT[$sha]=orphan
+                else VERDICT[$sha]="skip (API error)"; fi
               fi
-            else
-              if printf '%s\n' "$BRANCH_HEADS" | grep -q "^${COMMIT_SHA}"; then
-                IS_ORPHAN=false; echo "ACTIVE (branch head): $VERSION_NAME"
-              else
-                API_FAILED=false
-                for BASE in main release; do
-                  STATUS=$(gh api "repos/$REPO/compare/${COMMIT_SHA}...${BASE}" --jq '.status' 2>/dev/null || echo api_error)
-                  if [ "$STATUS" = "api_error" ]; then API_FAILED=true; break; fi
-                  if [ "$STATUS" = "ahead" ] || [ "$STATUS" = "identical" ]; then
-                    IS_ORPHAN=false; echo "REACHABLE: $VERSION_NAME (ancestor of $BASE)"; break
-                  fi
-                done
-                if [ "$API_FAILED" = true ]; then echo "SKIPPED (compare API error): $VERSION_NAME"; continue; fi
-              fi
-            fi
-
-            if [ "$IS_ORPHAN" = true ]; then
-              echo "ORPHANED: $VERSION_NAME (id $VERSION_ID)"
-              ORPHAN_IDS="${ORPHAN_IDS}${VERSION_ID},"; ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
-            fi
-          done <<< "$ALL_VERSIONS"
-
-          echo "ids=${ORPHAN_IDS%,}" >> "$GITHUB_OUTPUT"
-          echo "Summary: $ORPHAN_COUNT orphaned of $TOTAL"
-
-      - name: Delete orphaned versions
-        if: steps.find.outputs.ids != '' && !inputs.dry_run
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PACKAGE_NAME: ${{ matrix.package }}
-          IDS: ${{ steps.find.outputs.ids }}
-        run: |
-          DELETED=0; FAILED=0
-          for ID in ${IDS//,/ }; do
-            if gh api -X DELETE "orgs/liquibase/packages/maven/$PACKAGE_NAME/versions/$ID" >/dev/null 2>&1; then
-              DELETED=$((DELETED + 1))
-            else
-              echo "FAILED to delete $PACKAGE_NAME version id $ID"; FAILED=$((FAILED + 1))
-            fi
+              case "${VERDICT[$sha]}" in
+                orphan)
+                  if [ "$DRY_RUN" = true ]; then echo "ORPHAN (dry run): $name"
+                  elif gh api -X DELETE "orgs/$ORG/packages/maven/$pkg/versions/$id" >/dev/null 2>&1; then echo "DELETED: $name"
+                  else echo "::warning::Failed to delete $pkg $name (id $id)"; failed=1; fi ;;
+                *) echo "${VERDICT[$sha]^^}: $name" ;;
+              esac
+            done <<< "$versions"
+            echo "::endgroup::"
           done
-          echo "Deleted: $DELETED, Failed: $FAILED"
-          [ "$FAILED" -eq 0 ] || { echo "::error::$FAILED deletion(s) failed"; exit 1; }
+          exit $failed

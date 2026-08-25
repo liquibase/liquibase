@@ -15,6 +15,9 @@ concurrency:
   group: pr-labels-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
+env:
+  LABELS: "APIBreakingChanges, breakingChanges, newContributors, notableChanges, sdou, skipReleaseNotes, TypeBug, TypeEnhancement, TypeTest"
+
 jobs:
   labels:
     name: PR Labels
@@ -23,20 +26,18 @@ jobs:
       pull-requests: read
     steps:
       - name: Validate PR labels
-        id: check
         uses: mheap/github-action-required-labels@23e10fde7e062233401931a0eece796cd9bf3177 # v5
         with:
           mode: minimum
           count: 1
-          labels: "APIBreakingChanges, breakingChanges, newContributors, notableChanges, sdou, skipReleaseNotes, TypeBug, TypeEnhancement, TypeTest"
+          labels: ${{ env.LABELS }}
           add_comment: false
           exit_type: failure
 
       - name: Explain
         if: failure()
         run: |
-          cat >> "$GITHUB_STEP_SUMMARY" <<'MSG'
-          ## Missing release-notes label
-          Add one of: `APIBreakingChanges`, `breakingChanges`, `newContributors`, `notableChanges`, `sdou`, `skipReleaseNotes`, `TypeBug`, `TypeEnhancement`, `TypeTest`.
-          The check re-runs when a label is added.
-          MSG
+          {
+            echo "## Missing release-notes label"
+            echo "Add one of: $LABELS. The check re-runs when a label is added."
+          } >> "$GITHUB_STEP_SUMMARY"

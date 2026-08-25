@@ -48,7 +48,7 @@ jobs:
 
   sonar:
     needs: test
-    uses: liquibase/build-logic/.github/workflows/sonar-coverage-merge.yml@04ea335beb37e0dfe952d34c0427b41660755f6d # main 2026-08-23
+    uses: liquibase/build-logic/.github/workflows/sonar-coverage-merge.yml@main
     permissions:
       contents: read
       id-token: write
@@ -60,7 +60,7 @@ jobs:
   fossa:
     needs: test
     if: github.event_name != 'schedule' # no code change on the nightly run
-    uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@04ea335beb37e0dfe952d34c0427b41660755f6d # main 2026-08-23
+    uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@main
     permissions:
       contents: read
       id-token: write
@@ -80,21 +80,24 @@ jobs:
     permissions:
       contents: read
       packages: write
-    outputs:
-      sha: ${{ steps.meta.outputs.sha }}
-      timestamp: ${{ steps.meta.outputs.timestamp }}
     env:
       GITHUB_TOKEN: ${{ github.token }} # setup-java server-id credentials for GitHub Packages
+      # Full 40-char SHA: liquibase-test-harness resolves community builds by
+      # matching <full-sha>-SNAPSHOT in GitHub Packages metadata.
+      BUILD_SHA: ${{ github.sha }}
+      MAVEN_BUILD_ARGS: >-
+        -Dbuild.repository.owner=liquibase
+        -Dbuild.repository.name=liquibase
+        -Dbuild.branch=main
+        -Dbuild.number=${{ github.run_number }}
+        -Dbuild.commit=${{ github.sha }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - name: Build metadata
-        id: meta
-        run: |
-          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-          echo "timestamp=$(date +'%Y-%m-%d %H:%M:%S %Z')" >> "$GITHUB_OUTPUT"
+      - name: Build timestamp
+        run: echo "BUILD_TIMESTAMP=$(date +'%Y-%m-%d %H:%M:%S %Z')" >> "$GITHUB_ENV"
 
       - name: Download tested jars
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -110,28 +113,19 @@ jobs:
           server-id: liquibase
 
       - name: Build distribution (main-SNAPSHOT)
-        env:
-          BUILD_TIMESTAMP: ${{ steps.meta.outputs.timestamp }}
-          BUILD_SHA: ${{ steps.meta.outputs.sha }}
         run: |
           set -euo pipefail
           ./mvnw -B versions:set -DnewVersion=main-SNAPSHOT
 
-          # keep temp-artifact's 0-SNAPSHOT jars; the build below cleans these modules
+          # keep temp-artifact's tested 0-SNAPSHOT jars; the build below cleans these modules
           mkdir -p prebuilt
-          for i in liquibase-core liquibase-maven-plugin liquibase-cli liquibase-extension-testing; do
+          for i in liquibase-maven-plugin liquibase-cli; do
             cp "$i"/target/"$i"-0-SNAPSHOT*.jar prebuilt/
           done
 
-          ./mvnw -B -pl liquibase-dist,liquibase-maven-plugin,liquibase-extension-testing -am -DskipTests source:jar clean package \
-            "-Dbuild.repository.owner=liquibase" \
-            "-Dbuild.repository.name=liquibase" \
-            "-Dbuild.branch=main" \
-            "-Dbuild.number=${{ github.run_number }}" \
-            "-Dbuild.commit=${BUILD_SHA}" \
-            "-Dbuild.timestamp=${BUILD_TIMESTAMP}"
-
-          find . -name 'original-*.jar' -exec rm {} \;
+          # shellcheck disable=SC2086 # MAVEN_BUILD_ARGS is intentionally word-split
+          ./mvnw -B $MAVEN_BUILD_ARGS "-Dbuild.timestamp=$BUILD_TIMESTAMP" -DskipTests \
+            -pl liquibase-dist,liquibase-maven-plugin,liquibase-extension-testing -am source:jar clean package
 
           mkdir -p artifacts
           cp liquibase-dist/target/liquibase-main-SNAPSHOT.tar.gz artifacts
@@ -140,9 +134,7 @@ jobs:
           cp liquibase-core/target/liquibase-core-main-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
           cp target/liquibase-main-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
           for i in liquibase-maven-plugin liquibase-cli; do
-            cp prebuilt/$i-0-SNAPSHOT.jar artifacts/$i-0-SNAPSHOT.jar
-            cp prebuilt/$i-0-SNAPSHOT-sources.jar artifacts/$i-0-SNAPSHOT-sources.jar
-            cp prebuilt/$i-0-SNAPSHOT-javadoc.jar artifacts/$i-0-SNAPSHOT-javadoc.jar
+            cp prebuilt/$i-0-SNAPSHOT.jar prebuilt/$i-0-SNAPSHOT-sources.jar prebuilt/$i-0-SNAPSHOT-javadoc.jar artifacts/
           done
           ls -la artifacts
 
@@ -152,29 +144,15 @@ jobs:
           name: liquibase-artifacts
           path: artifacts/*
 
-      - name: Publish main-SNAPSHOT to GitHub Packages
-        env:
-          BUILD_TIMESTAMP: ${{ steps.meta.outputs.timestamp }}
-          BUILD_SHA: ${{ steps.meta.outputs.sha }}
+      - name: Publish main-SNAPSHOT and <sha>-SNAPSHOT to GitHub Packages
         run: |
-          ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true \
-            "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=main" \
-            "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${BUILD_SHA}" "-Dbuild.timestamp=${BUILD_TIMESTAMP}"
-
-      - name: Publish <sha>-SNAPSHOT to GitHub Packages
-        env:
-          BUILD_TIMESTAMP: ${{ steps.meta.outputs.timestamp }}
-          BUILD_SHA: ${{ steps.meta.outputs.sha }}
-        run: |
-          # Full 40-char SHA: liquibase-test-harness resolves community builds by
-          # matching <full-sha>-SNAPSHOT in GitHub Packages metadata.
+          set -euo pipefail
+          # No `clean` between deploys: the reactor is already compiled, only versions change.
+          # shellcheck disable=SC2086 # MAVEN_BUILD_ARGS is intentionally word-split
+          ./mvnw -B $MAVEN_BUILD_ARGS "-Dbuild.timestamp=$BUILD_TIMESTAMP" -DskipTests -pl '!liquibase-dist' deploy
           ./mvnw -B versions:set -DnewVersion="${BUILD_SHA}-SNAPSHOT"
-          ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true \
-            "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=main" \
-            "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${BUILD_SHA}" "-Dbuild.timestamp=${BUILD_TIMESTAMP}"
-          ./mvnw -B -pl liquibase-dist clean deploy -DskipTests=true \
-            "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=main" \
-            "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${BUILD_SHA}" "-Dbuild.timestamp=${BUILD_TIMESTAMP}"
+          # shellcheck disable=SC2086
+          ./mvnw -B $MAVEN_BUILD_ARGS "-Dbuild.timestamp=$BUILD_TIMESTAMP" -DskipTests deploy
 
   nightly-release:
     name: Nightly Release
@@ -204,7 +182,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-          FULL_SHA: ${{ needs.publish-snapshot.outputs.sha }}
+          FULL_SHA: ${{ github.sha }}
           SOURCE_RUN_ID: ${{ github.run_id }}
         run: |
           set -euo pipefail
