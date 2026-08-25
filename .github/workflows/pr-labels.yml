@@ -1,0 +1,42 @@
+name: PR Labels
+
+# Blocks merge until the PR carries a release-notes label. Read-only: the old
+# label-pr.yml posted a comment with pull-requests: write, which fails on fork
+# and Dependabot PRs. The check status itself is the signal. [TECHOPS-1111]
+
+on:
+  pull_request:
+    types: [ opened, labeled, unlabeled, synchronize, reopened ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-labels-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  labels:
+    name: PR Labels
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: read
+    steps:
+      - name: Validate PR labels
+        id: check
+        uses: mheap/github-action-required-labels@23e10fde7e062233401931a0eece796cd9bf3177 # v5
+        with:
+          mode: minimum
+          count: 1
+          labels: "APIBreakingChanges, breakingChanges, newContributors, notableChanges, sdou, skipReleaseNotes, TypeBug, TypeEnhancement, TypeTest"
+          add_comment: false
+          exit_type: failure
+
+      - name: Explain
+        if: failure()
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'MSG'
+          ## Missing release-notes label
+          Add one of: `APIBreakingChanges`, `breakingChanges`, `newContributors`, `notableChanges`, `sdou`, `skipReleaseNotes`, `TypeBug`, `TypeEnhancement`, `TypeTest`.
+          The check re-runs when a label is added.
+          MSG

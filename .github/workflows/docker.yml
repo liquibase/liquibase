@@ -1,0 +1,189 @@
+name: Docker
+
+# Trusted-context Docker test + scan for the community images. The build-logic
+# reusables load vault credentials (Pro license for tests, GHCR push + Slack for
+# scans), so this runs on push to main, nightly and dispatch only. PRs get the
+# secret-free `docker-smoke` job in pr.yml. Replaces docker-test.yml and
+# docker-scan.yml. [TECHOPS-1104, TECHOPS-1109]
+#
+# Note: strategy.matrix + `uses:` on a reusable call is rejected by the parser,
+# so the test jobs are spelled out per (variant x runner).
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "docker/**"
+      - ".github/workflows/docker.yml"
+  schedule:
+    - cron: "0 7 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-main
+  cancel-in-progress: false
+
+jobs:
+  test-community-ubuntu:
+    name: Test community on ubuntu-latest
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-test.yml@04ea335beb37e0dfe952d34c0427b41660755f6d # main 2026-08-23
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      build_context: docker/
+      dockerfile_path: docker/Dockerfile
+      runs_on: ubuntu-latest
+      build_logic_ref: 04ea335beb37e0dfe952d34c0427b41660755f6d
+    secrets: inherit
+
+  test-community-macos:
+    name: Test community on macos-15-intel
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-test.yml@04ea335beb37e0dfe952d34c0427b41660755f6d # main 2026-08-23
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      build_context: docker/
+      dockerfile_path: docker/Dockerfile
+      runs_on: macos-15-intel
+      build_logic_ref: 04ea335beb37e0dfe952d34c0427b41660755f6d
+    secrets: inherit
+
+  test-alpine-ubuntu:
+    name: Test alpine on ubuntu-latest
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-test.yml@04ea335beb37e0dfe952d34c0427b41660755f6d # main 2026-08-23
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      build_context: docker/
+      dockerfile_path: docker/Dockerfile.alpine
+      runs_on: ubuntu-latest
+      build_logic_ref: 04ea335beb37e0dfe952d34c0427b41660755f6d
+    secrets: inherit
+
+  test-alpine-macos:
+    name: Test alpine on macos-15-intel
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-test.yml@04ea335beb37e0dfe952d34c0427b41660755f6d # main 2026-08-23
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      build_context: docker/
+      dockerfile_path: docker/Dockerfile.alpine
+      runs_on: macos-15-intel
+      build_logic_ref: 04ea335beb37e0dfe952d34c0427b41660755f6d
+    secrets: inherit
+
+  scan-community:
+    name: Scan community image
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-scan.yml@04ea335beb37e0dfe952d34c0427b41660755f6d # main 2026-08-23
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+      security-events: write
+      pull-requests: write # declared by the reusable; no-op on push
+      actions: read
+    with:
+      build_context: docker/
+      dockerfile_path: docker/Dockerfile
+      image_name: liquibase/liquibase
+      vex_enabled: false
+      upload_sarif: true
+      dispatch_new_cves: false
+      build_logic_ref: 04ea335beb37e0dfe952d34c0427b41660755f6d
+    secrets: inherit
+
+  scan-alpine:
+    name: Scan alpine image
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-scan.yml@04ea335beb37e0dfe952d34c0427b41660755f6d # main 2026-08-23
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+      security-events: write
+      pull-requests: write # declared by the reusable; no-op on push
+      actions: read
+    with:
+      build_context: docker/
+      dockerfile_path: docker/Dockerfile.alpine
+      image_name: liquibase/liquibase
+      suffix: "-alpine"
+      vex_enabled: false
+      upload_sarif: true
+      dispatch_new_cves: false
+      build_logic_ref: 04ea335beb37e0dfe952d34c0427b41660755f6d
+    secrets: inherit
+
+  # Publishes the community-image scan of main HEAD to the scan-results branch
+  # under liquibase/liquibase/latest/ for the internal security portal.
+  # `always()` on purpose: "Check scan results" in the reusable is a threshold
+  # verdict, not a scan failure; the report artifacts are uploaded before it
+  # runs. Shares the scan-results-writer group with
+  # trivy-scan-published-images.yml so the two never race. [TECHOPS-408]
+  persist-main-latest:
+    name: Persist main HEAD scan to scan-results
+    needs: scan-community
+    if: |
+      always()
+      && needs.scan-community.result != 'cancelled'
+      && needs.scan-community.result != 'skipped'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      actions: read
+    concurrency:
+      group: scan-results-writer
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          # persist-scan-results.sh pushes to the scan-results branch with the
+          # checkout token; this is the one checkout that needs it.
+          persist-credentials: true
+
+      - name: Download community scan artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: scan-artifacts
+          pattern: vulnerability-report-liquibase-liquibase-latest
+
+      # download-artifact@v8 flattens a single-match download into `path`;
+      # persist-scan-results.sh expects scan-artifacts/<artifact-name>/.
+      - name: Wrap artifact files in expected subdir
+        run: |
+          set -euo pipefail
+          ART_NAME="vulnerability-report-liquibase-liquibase-latest"
+          ART_DIR="scan-artifacts/${ART_NAME}"
+          if [ ! -d "$ART_DIR" ]; then
+            mkdir -p "$ART_DIR"
+            find scan-artifacts -maxdepth 1 -type f -exec mv -t "$ART_DIR/" {} +
+          fi
+          ls -la "$ART_DIR"
+
+      - name: Checkout build-logic
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: liquibase/build-logic
+          ref: 04ea335beb37e0dfe952d34c0427b41660755f6d # main 2026-08-23
+          path: build-logic
+          persist-credentials: false
+
+      - name: Persist to scan-results branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          SCRIPT=build-logic/scripts/vulnerability-scanning/persist-scan-results.sh
+          if [ ! -f "$SCRIPT" ]; then
+            echo "::error::$SCRIPT is missing from liquibase/build-logic at the pinned ref."
+            exit 1
+          fi
+          chmod +x "$SCRIPT"
+          "$SCRIPT" scan-artifacts

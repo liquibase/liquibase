@@ -1,0 +1,237 @@
+name: Main
+
+# Trusted build of `main`: test, Sonar, FOSSA, publish main-SNAPSHOT and
+# <full-sha>-SNAPSHOT to GitHub Packages, refresh the `nightly` pre-release.
+# Triggers are push/schedule/dispatch only, so no job here is reachable from a
+# pull request. Sonar and FOSSA need vault credentials and therefore run only
+# here, not on PRs. [TECHOPS-1104]
+#
+# Interim contract (until the release pipeline builds from tag, Phase 3): the
+# `liquibase-artifacts` artifact keeps the same name and file layout that
+# build.yml produced, because create-release.yml and dry-run-release.yml
+# download it by run id. Signatures are not produced here; create-release.yml
+# re-versions and re-signs everything at release time.
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: "5 6 * * *"
+  workflow_dispatch:
+    inputs:
+      skip_publish:
+        description: Run tests only; skip SNAPSHOT publish and nightly release
+        type: boolean
+        default: false
+      archive_test_results:
+        description: Archive surefire reports as run artifacts
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: main
+  cancel-in-progress: false # a cancelled deploy leaves a half-published SNAPSHOT set
+
+
+jobs:
+  test:
+    uses: ./.github/workflows/ci-test.yml
+    permissions:
+      contents: read
+      packages: read
+    with:
+      upload_build_artifacts: true
+      archive_test_results: ${{ inputs.archive_test_results || false }}
+
+  sonar:
+    needs: test
+    uses: liquibase/build-logic/.github/workflows/sonar-coverage-merge.yml@04ea335beb37e0dfe952d34c0427b41660755f6d # main 2026-08-23
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write # declared by the reusable; no-op on push
+    with:
+      testedClassesModuleName: liquibase-standard
+    secrets: inherit
+
+  fossa:
+    needs: test
+    if: github.event_name != 'schedule' # no code change on the nightly run
+    uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@04ea335beb37e0dfe952d34c0427b41660755f6d # main 2026-08-23
+    permissions:
+      contents: read
+      id-token: write
+      actions: write
+      pull-requests: write # declared by the reusable; no-op on push
+    with:
+      check_snippets: true
+      check_ai_generated_code: true
+      generate_fossa_3p_license_report: true
+    secrets: inherit
+
+  publish-snapshot:
+    name: Publish SNAPSHOT
+    needs: test
+    if: ${{ !inputs.skip_publish }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      sha: ${{ steps.meta.outputs.sha }}
+      timestamp: ${{ steps.meta.outputs.timestamp }}
+    env:
+      GITHUB_TOKEN: ${{ github.token }} # setup-java server-id credentials for GitHub Packages
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build metadata
+        id: meta
+        run: |
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "timestamp=$(date +'%Y-%m-%d %H:%M:%S %Z')" >> "$GITHUB_OUTPUT"
+
+      - name: Download tested jars
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: temp-artifact
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+          server-id: liquibase
+
+      - name: Build distribution (main-SNAPSHOT)
+        env:
+          BUILD_TIMESTAMP: ${{ steps.meta.outputs.timestamp }}
+          BUILD_SHA: ${{ steps.meta.outputs.sha }}
+        run: |
+          set -euo pipefail
+          ./mvnw -B versions:set -DnewVersion=main-SNAPSHOT
+
+          # keep temp-artifact's 0-SNAPSHOT jars; the build below cleans these modules
+          mkdir -p prebuilt
+          for i in liquibase-core liquibase-maven-plugin liquibase-cli liquibase-extension-testing; do
+            cp "$i"/target/"$i"-0-SNAPSHOT*.jar prebuilt/
+          done
+
+          ./mvnw -B -pl liquibase-dist,liquibase-maven-plugin,liquibase-extension-testing -am -DskipTests source:jar clean package \
+            "-Dbuild.repository.owner=liquibase" \
+            "-Dbuild.repository.name=liquibase" \
+            "-Dbuild.branch=main" \
+            "-Dbuild.number=${{ github.run_number }}" \
+            "-Dbuild.commit=${BUILD_SHA}" \
+            "-Dbuild.timestamp=${BUILD_TIMESTAMP}"
+
+          find . -name 'original-*.jar' -exec rm {} \;
+
+          mkdir -p artifacts
+          cp liquibase-dist/target/liquibase-main-SNAPSHOT.tar.gz artifacts
+          cp liquibase-dist/target/liquibase-main-SNAPSHOT.zip artifacts
+          cp liquibase-core/target/liquibase-core-main-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
+          cp liquibase-core/target/liquibase-core-main-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
+          cp target/liquibase-main-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
+          for i in liquibase-maven-plugin liquibase-cli; do
+            cp prebuilt/$i-0-SNAPSHOT.jar artifacts/$i-0-SNAPSHOT.jar
+            cp prebuilt/$i-0-SNAPSHOT-sources.jar artifacts/$i-0-SNAPSHOT-sources.jar
+            cp prebuilt/$i-0-SNAPSHOT-javadoc.jar artifacts/$i-0-SNAPSHOT-javadoc.jar
+          done
+          ls -la artifacts
+
+      - name: Upload liquibase-artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: liquibase-artifacts
+          path: artifacts/*
+
+      - name: Publish main-SNAPSHOT to GitHub Packages
+        env:
+          BUILD_TIMESTAMP: ${{ steps.meta.outputs.timestamp }}
+          BUILD_SHA: ${{ steps.meta.outputs.sha }}
+        run: |
+          ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true \
+            "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=main" \
+            "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${BUILD_SHA}" "-Dbuild.timestamp=${BUILD_TIMESTAMP}"
+
+      - name: Publish <sha>-SNAPSHOT to GitHub Packages
+        env:
+          BUILD_TIMESTAMP: ${{ steps.meta.outputs.timestamp }}
+          BUILD_SHA: ${{ steps.meta.outputs.sha }}
+        run: |
+          # Full 40-char SHA: liquibase-test-harness resolves community builds by
+          # matching <full-sha>-SNAPSHOT in GitHub Packages metadata.
+          ./mvnw -B versions:set -DnewVersion="${BUILD_SHA}-SNAPSHOT"
+          ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true \
+            "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=main" \
+            "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${BUILD_SHA}" "-Dbuild.timestamp=${BUILD_TIMESTAMP}"
+          ./mvnw -B -pl liquibase-dist clean deploy -DskipTests=true \
+            "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=main" \
+            "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${BUILD_SHA}" "-Dbuild.timestamp=${BUILD_TIMESTAMP}"
+
+  nightly-release:
+    name: Nightly Release
+    needs: publish-snapshot
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    concurrency:
+      group: nightly-release
+      cancel-in-progress: false
+    steps:
+      - name: Download liquibase-artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: liquibase-artifacts
+          path: download/liquibase-artifacts
+
+      - name: Rename artifacts from SNAPSHOT to nightly
+        run: |
+          cd download/liquibase-artifacts
+          mv liquibase-main-SNAPSHOT.tar.gz liquibase-nightly.tar.gz
+          mv liquibase-main-SNAPSHOT.zip liquibase-nightly.zip
+          mv liquibase-core-0-SNAPSHOT.jar liquibase-core-nightly.jar
+          ls -la liquibase-nightly.* liquibase-core-nightly.jar
+
+      - name: Recreate nightly pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          FULL_SHA: ${{ needs.publish-snapshot.outputs.sha }}
+          SOURCE_RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          date_str=$(date -u +'%Y-%m-%d %H:%M UTC')
+          short_sha=${FULL_SHA:0:7}
+          gh release delete nightly --repo "$REPO" --cleanup-tag --yes 2>/dev/null || true
+          cd download/liquibase-artifacts
+          gh release create nightly \
+            --repo "$REPO" \
+            --target main \
+            --title "Nightly Build ($date_str)" \
+            --notes "## Nightly Build
+          **Date:** $date_str
+          **Commit:** [\`$short_sha\`](https://github.com/$REPO/commit/$FULL_SHA)
+          **Source run:** [Main #$SOURCE_RUN_ID](https://github.com/$REPO/actions/runs/$SOURCE_RUN_ID)
+          ---
+          > **Warning:** This is an automated nightly build from the \`main\` branch. It is not a stable release. Use at your own risk.
+          ### Included Assets
+          | File | Description |
+          |------|-------------|
+          | \`liquibase-nightly.tar.gz\` | CLI distribution (Linux/macOS) |
+          | \`liquibase-nightly.zip\` | CLI distribution (Windows) |
+          | \`liquibase-core-nightly.jar\` | Core library JAR |
+          ### Stable URL
+          https://github.com/$REPO/releases/tag/nightly" \
+            --prerelease \
+            --latest=false \
+            liquibase-nightly.tar.gz liquibase-nightly.zip liquibase-core-nightly.jar
+          echo "## Nightly release published from \`$short_sha\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "https://github.com/$REPO/releases/tag/nightly" >> "$GITHUB_STEP_SUMMARY"

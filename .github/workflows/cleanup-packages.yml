@@ -1,0 +1,118 @@
+name: Cleanup Packages
+
+# Weekly sweep of orphaned <sha>-SNAPSHOT versions in GitHub Packages: versions
+# whose commit no longer exists, or is neither a branch head nor an ancestor of
+# main/release. Replaces cleanup-branch-builds.yml, whose `delete` trigger
+# ignored its branch filters and whose per-branch job had nothing left to
+# delete once per-PR SNAPSHOT publishing stopped. [TECHOPS-1099]
+
+on:
+  schedule:
+    - cron: "30 5 * * 0"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: List orphans without deleting
+        type: boolean
+        default: false
+
+permissions: {}
+
+jobs:
+  sweep:
+    name: Sweep ${{ matrix.package }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - org.liquibase.liquibase-core
+          - org.liquibase.liquibase-extension-testing
+          - org.liquibase.liquibase-integration-tests
+          - org.liquibase.liquibase-maven-plugin
+          - org.liquibase.liquibase
+    steps:
+      - name: Find orphaned SHA-SNAPSHOT versions
+        id: find
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE_NAME: ${{ matrix.package }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -o pipefail
+          ORG="liquibase"
+
+          ALL_VERSIONS=$(gh api --paginate "orgs/$ORG/packages/maven/$PACKAGE_NAME/versions" \
+            --jq '.[] | select(.name | test("^[0-9a-f]{7,40}-SNAPSHOT$")) | "\(.id) \(.name)"') || {
+            echo "::error::Failed to fetch package versions"; exit 1; }
+
+          if [ -z "$ALL_VERSIONS" ]; then
+            echo "No SHA-SNAPSHOT versions found for $PACKAGE_NAME"
+            echo "ids=" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          TOTAL=$(echo "$ALL_VERSIONS" | wc -l | tr -d ' ')
+          echo "Found $TOTAL SHA-SNAPSHOT version(s)"
+
+          BRANCH_HEADS=$(gh api --paginate "repos/$REPO/branches?per_page=100" --jq '.[].commit.sha') || true
+          if [ -z "$BRANCH_HEADS" ]; then
+            echo "::error::Failed to fetch branch heads; aborting to avoid incorrect deletions"; exit 1
+          fi
+
+          ORPHAN_IDS=""; ORPHAN_COUNT=0
+          while read -r VERSION_ID VERSION_NAME; do
+            [ -z "$VERSION_ID" ] && continue
+            COMMIT_SHA="${VERSION_NAME%-SNAPSHOT}"
+            IS_ORPHAN=true
+
+            COMMIT_RESPONSE=$(gh api "repos/$REPO/commits/$COMMIT_SHA" --jq '.sha' 2>&1) && COMMIT_EXIT=0 || COMMIT_EXIT=$?
+            if [ "$COMMIT_EXIT" -ne 0 ]; then
+              if echo "$COMMIT_RESPONSE" | grep -q "404\|Not Found"; then
+                echo "ORPHANED (commit gone): $VERSION_NAME"
+              else
+                echo "SKIPPED (API error): $VERSION_NAME"; continue
+              fi
+            else
+              if printf '%s\n' "$BRANCH_HEADS" | grep -q "^${COMMIT_SHA}"; then
+                IS_ORPHAN=false; echo "ACTIVE (branch head): $VERSION_NAME"
+              else
+                API_FAILED=false
+                for BASE in main release; do
+                  STATUS=$(gh api "repos/$REPO/compare/${COMMIT_SHA}...${BASE}" --jq '.status' 2>/dev/null || echo api_error)
+                  if [ "$STATUS" = "api_error" ]; then API_FAILED=true; break; fi
+                  if [ "$STATUS" = "ahead" ] || [ "$STATUS" = "identical" ]; then
+                    IS_ORPHAN=false; echo "REACHABLE: $VERSION_NAME (ancestor of $BASE)"; break
+                  fi
+                done
+                if [ "$API_FAILED" = true ]; then echo "SKIPPED (compare API error): $VERSION_NAME"; continue; fi
+              fi
+            fi
+
+            if [ "$IS_ORPHAN" = true ]; then
+              echo "ORPHANED: $VERSION_NAME (id $VERSION_ID)"
+              ORPHAN_IDS="${ORPHAN_IDS}${VERSION_ID},"; ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
+            fi
+          done <<< "$ALL_VERSIONS"
+
+          echo "ids=${ORPHAN_IDS%,}" >> "$GITHUB_OUTPUT"
+          echo "Summary: $ORPHAN_COUNT orphaned of $TOTAL"
+
+      - name: Delete orphaned versions
+        if: steps.find.outputs.ids != '' && !inputs.dry_run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE_NAME: ${{ matrix.package }}
+          IDS: ${{ steps.find.outputs.ids }}
+        run: |
+          DELETED=0; FAILED=0
+          for ID in ${IDS//,/ }; do
+            if gh api -X DELETE "orgs/liquibase/packages/maven/$PACKAGE_NAME/versions/$ID" >/dev/null 2>&1; then
+              DELETED=$((DELETED + 1))
+            else
+              echo "FAILED to delete $PACKAGE_NAME version id $ID"; FAILED=$((FAILED + 1))
+            fi
+          done
+          echo "Deleted: $DELETED, Failed: $FAILED"
+          [ "$FAILED" -eq 0 ] || { echo "::error::$FAILED deletion(s) failed"; exit 1; }

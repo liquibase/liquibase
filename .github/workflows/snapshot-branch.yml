@@ -1,0 +1,73 @@
+name: Snapshot Branch
+
+# Maintainer-only: publish <full-sha>-SNAPSHOT for any ref so QA can point
+# liquibase-test-harness or liquibase-pro-tests at an unreleased OSS branch.
+# workflow_dispatch only (requires write access); never runs on a PR event, so
+# there is no PR payload and no fork ref can reach it. No vault, no signing.
+# Replaces the per-PR branch publishing in build-branch.yml / build.yml.
+# [TECHOPS-1104]
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch, tag or commit SHA in liquibase/liquibase to publish
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: snapshot-${{ inputs.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish ${{ inputs.ref }} SNAPSHOT
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }} # setup-java server-id credentials for GitHub Packages
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - name: Resolve SHA
+        id: meta
+        run: |
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "timestamp=$(date +'%Y-%m-%d %H:%M:%S %Z')" >> "$GITHUB_OUTPUT"
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          java-version: '17'
+          distribution: temurin
+          cache: maven
+          server-id: liquibase
+
+      - name: Publish <sha>-SNAPSHOT to GitHub Packages
+        env:
+          BUILD_SHA: ${{ steps.meta.outputs.sha }}
+          BUILD_TIMESTAMP: ${{ steps.meta.outputs.timestamp }}
+          BUILD_BRANCH: ${{ inputs.ref }}
+        run: |
+          ./mvnw -B versions:set -DnewVersion="${BUILD_SHA}-SNAPSHOT"
+          ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true \
+            "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${BUILD_BRANCH}" \
+            "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${BUILD_SHA}" "-Dbuild.timestamp=${BUILD_TIMESTAMP}"
+
+      - name: Summary
+        env:
+          BUILD_SHA: ${{ steps.meta.outputs.sha }}
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<MSG
+          ## Published \`${BUILD_SHA}-SNAPSHOT\`
+          Repository: https://maven.pkg.github.com/liquibase/liquibase
+          Test harness: dispatch \`liquibase-test-harness/main.yml\` with \`liquibaseRepo=liquibase/liquibase\`, \`liquibaseCommit=${BUILD_SHA}\`.
+          MSG
