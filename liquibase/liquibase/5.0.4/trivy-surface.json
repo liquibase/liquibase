@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a03864-e040-7bd8-9327-bdaaf76bda7d",
-  "CreatedAt": "2026-08-25T10:08:50.240777505Z",
+  "ReportID": "01a03d8e-9719-7de2-8631-497bc2b1de82",
+  "CreatedAt": "2026-08-26T10:12:30.105911402Z",
   "ArtifactID": "sha256:6cfbd418093a91cac909e24718bc023de5e6825f4ae22c048f814666c2c3fdbe",
   "ArtifactName": "liquibase/liquibase:5.0.4",
   "ArtifactType": "container_image",
@@ -11054,7 +11054,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-39821"
           ],
           "PublishedDate": "2026-05-22T16:16:20.41Z",
-          "LastModifiedDate": "2026-08-24T13:18:22.547Z"
+          "LastModifiedDate": "2026-08-25T13:18:46.24Z"
         },
         {
           "VulnerabilityID": "CVE-2026-46600",
