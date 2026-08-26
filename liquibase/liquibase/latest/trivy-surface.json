@@ -3,10 +3,10 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a037c7-a8b6-7565-a267-2000087c7aa4",
-  "CreatedAt": "2026-08-25T07:17:06.870354643Z",
+  "ReportID": "01a03ced-fb0f-79d9-844c-de528bde9770",
+  "CreatedAt": "2026-08-26T07:17:04.39964648Z",
   "ArtifactID": "sha256:29fe030896b955d3fda25b724ce64907b488815b93e028f6b9dd3d545666aa16",
-  "ArtifactName": "ghcr.io/liquibase/liquibase/liquibase-liquibase:ff8db73714e888dbeb0bbfaf6f2085f8eca35c0a",
+  "ArtifactName": "ghcr.io/liquibase/liquibase/liquibase-liquibase:1502c9d03fcd9fca01609d90ea0093351bb54d37",
   "ArtifactType": "container_image",
   "Metadata": {
     "Size": 312124416,
@@ -29,12 +29,12 @@
       "sha256:6f272d56394fe0ac7efe3cff283fe170059afb8d142b57e3faa278f797570734"
     ],
     "RepoTags": [
-      "ghcr.io/liquibase/liquibase/liquibase-liquibase:ff8db73714e888dbeb0bbfaf6f2085f8eca35c0a"
+      "ghcr.io/liquibase/liquibase/liquibase-liquibase:1502c9d03fcd9fca01609d90ea0093351bb54d37"
     ],
     "RepoDigests": [
-      "ghcr.io/liquibase/liquibase/liquibase-liquibase@sha256:43365a18e42c38b2e2fe63529773bbe78a3447c947a563ba273aebe3ce3c0387"
+      "ghcr.io/liquibase/liquibase/liquibase-liquibase@sha256:ed515920f1f820c5b9939cc6eeed81edae27c6a155cb292fad624270b3cc8fdb"
     ],
-    "Reference": "ghcr.io/liquibase/liquibase/liquibase-liquibase:ff8db73714e888dbeb0bbfaf6f2085f8eca35c0a",
+    "Reference": "ghcr.io/liquibase/liquibase/liquibase-liquibase:1502c9d03fcd9fca01609d90ea0093351bb54d37",
     "ImageConfig": {
       "architecture": "amd64",
       "created": "2026-08-25T07:16:20.699823872Z",
@@ -340,7 +340,7 @@
   },
   "Results": [
     {
-      "Target": "ghcr.io/liquibase/liquibase/liquibase-liquibase:ff8db73714e888dbeb0bbfaf6f2085f8eca35c0a (ubuntu 24.04)",
+      "Target": "ghcr.io/liquibase/liquibase/liquibase-liquibase:1502c9d03fcd9fca01609d90ea0093351bb54d37 (ubuntu 24.04)",
       "Class": "os-pkgs",
       "Type": "ubuntu",
       "Packages": [
@@ -11032,12 +11032,13 @@
             "https://access.redhat.com/errata/RHSA-2026:57541",
             "https://access.redhat.com/security/cve/CVE-2026-39821",
             "https://bugzilla.redhat.com/2480756",
+            "https://bugzilla.redhat.com/2484207",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2480756",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2498152",
             "https://creativecommons.org/licenses/by/4.0/",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-39821",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-39822",
-            "https://errata.almalinux.org/9/ALSA-2026-37435.html",
+            "https://errata.almalinux.org/10/ALSA-2026-46395.html",
             "https://errata.rockylinux.org/RLSA-2026:37435",
             "https://github.com/golang/go/issues/78760",
             "https://go.dev/cl/767220",
@@ -11053,7 +11054,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-39821"
           ],
           "PublishedDate": "2026-05-22T16:16:20.41Z",
-          "LastModifiedDate": "2026-08-24T13:18:22.547Z"
+          "LastModifiedDate": "2026-08-25T13:18:46.24Z"
         },
         {
           "VulnerabilityID": "CVE-2026-46600",
