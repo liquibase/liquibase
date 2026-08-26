@@ -34,13 +34,20 @@ jobs:
     steps:
 
       - name: Check variables
+        # TECHOPS-526: routed through env: so the values stay data. Interpolating them
+        # straight into the script splices them in as code, even in a debug echo.
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HAS_FUNCTIONAL_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'runFunctionalTests') }}
+          EVENT_AFTER: ${{ github.event.after }}
+          BASE_REF: ${{ github.base_ref }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
         run: |
-          echo "github.event_name: ${{ github.event_name }}"
-          echo "github.event.pull_request.labels.*.name: ${{ contains(github.event.pull_request.labels.*.name, 'runFunctionalTests') }}"
-          echo "github.event.after: ${{ github.event.after }}"
-          echo "github.base_ref: ${{ github.base_ref }}"
-          echo "github.event.pull_request.merged: ${{ github.event.pull_request.merged }}"
-          echo "github.event_name: ${{ github.event_name }}"
+          echo "github.event_name: $EVENT_NAME"
+          echo "github.event.pull_request.labels.*.name: $HAS_FUNCTIONAL_LABEL"
+          echo "github.event.after: $EVENT_AFTER"
+          echo "github.base_ref: $BASE_REF"
+          echo "github.event.pull_request.merged: $PR_MERGED"
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
