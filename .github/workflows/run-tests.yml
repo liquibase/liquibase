@@ -135,6 +135,14 @@ jobs:
       # getting from build results page. If we remove 0-SNAPSHOT then we will need settings.xml
 
       - name: Build & Test Java 17+
+        # TECHOPS-526 follow-up: this job's matrix includes windows-latest, where the
+        # default shell is PowerShell and `$BRANCH_NAME` reads as an undefined
+        # PowerShell variable, not an env var. That silently passed -Dbuild.branch=
+        # and -Dbuild.commit= (empty), and the ant integration tests that short-SHA
+        # build.commit failed with StringIndexOutOfBoundsException. Forcing bash keeps
+        # the env: routing and expands identically on all three runners; mvnw handles
+        # MinGW natively (see its CYGWIN*|MINGW* branch).
+        shell: bash
         env:
           BRANCH_NAME: ${{ needs.setup.outputs.thisBranchName }}
           MERGE_SHA: ${{ needs.setup.outputs.latestMergeSha }}
