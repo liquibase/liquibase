@@ -32,6 +32,9 @@ on:
 
 jobs:
   authorize:
+    # Trusted context only: skip fork PRs so they never reach the credentialed
+    # jobs below (fork PRs are validated by test-pr.yml).
+    if: ${{ !github.event.pull_request || github.event.pull_request.head.repo.full_name == github.repository }}
     #concurrent runs for pull requests from forked repositories will be canceled, while runs for pull requests from the main repository won't be affected.
     #for a pull_request against main: the concurrency check will cancel commit A so that commit B check can run.
     concurrency:
@@ -56,7 +59,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
-          allow-unsafe-pr-checkout: true
 
       - name: Get current date
         id: get-date
@@ -107,7 +109,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
-          allow-unsafe-pr-checkout: true
 
       - name: Built Code Cache
         if: ${{ matrix.java == 17}}
@@ -217,7 +218,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
-          allow-unsafe-pr-checkout: true
 
       - name: Prepare
         id: prepare

@@ -22,6 +22,9 @@ permissions:
 jobs:
 
   authorize:
+    # Trusted context only: skip fork PRs so they never reach the vault/App-token
+    # job below (workflow_call and internal PRs still run).
+    if: ${{ !github.event.pull_request || github.event.pull_request.head.repo.full_name == github.repository }}
     environment: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && 'external' || 'internal' }}
     runs-on: ubuntu-latest
     steps:
@@ -52,7 +55,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
-          allow-unsafe-pr-checkout: true
 
   run-test-harness-tests:
     runs-on: ubuntu-latest
