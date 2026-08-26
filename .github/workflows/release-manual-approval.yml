@@ -37,9 +37,10 @@ jobs:
     if: ${{ inputs.dry_run == false }}
     # The gate itself. GitHub holds the job here until a reviewer on the
     # `release` environment approves the run, and every publishing job in the
-    # orchestrator depends on this job. The reviewer list lives in
-    # liquibase-infrastructure, not in this file, so it cannot be changed by
-    # editing a workflow.
+    # orchestrator depends on this job. The environment and its reviewer list are
+    # defined in liquibase-infrastructure, not in this file, so they cannot be
+    # changed by editing a workflow:
+    # https://github.com/liquibase/liquibase-infrastructure/blob/main/github/liquibase/repos/public/liquibase-release-environment.tf
     environment: release
     steps:
       - name: Record approval

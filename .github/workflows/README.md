@@ -327,7 +327,7 @@ To add a new step to the release process:
 
 **Issue**: Manual approval never arrives or is rejected
 - **Solution**: Check the run's deployment gate, not the issues list: approval happens on the run page under Review deployments
-- **Solution**: Check the reviewer list on the `release` environment. It is managed in liquibase-infrastructure (`github/liquibase/repos/public/liquibase-release-environment.tf`), so changing it takes a PR there
+- **Solution**: Check the reviewer list on the `release` environment. It is managed in [liquibase-release-environment.tf](https://github.com/liquibase/liquibase-infrastructure/blob/main/github/liquibase/repos/public/liquibase-release-environment.tf), so changing it takes a PR in liquibase-infrastructure
 - **Solution**: A reviewer cannot approve a run they started themselves. Someone else on the list has to
 
 **Issue**: Secrets not available in called workflows
@@ -392,7 +392,7 @@ dry_run_branch_name: (leave empty for production)
 **How approval works:** The job carries `environment: release`, so GitHub pauses it and shows
 **Review deployments** on the run page. Any reviewer on that environment can approve or reject,
 except the person who started the run. There is no tracking issue and no keyword replies. The
-reviewer list is Terraform-managed in liquibase-infrastructure.
+reviewer list is Terraform-managed in [liquibase-release-environment.tf](https://github.com/liquibase/liquibase-infrastructure/blob/main/github/liquibase/repos/public/liquibase-release-environment.tf).
 
 **Required inputs:**
 - `version`: Version to approve (e.g., `4.28.0`)
