@@ -262,8 +262,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH_NAME: ${{ needs.setup.outputs.thisBranchName }}
-          MERGE_SHA: ${{ needs.setup.outputs.thisSha }}
-          BUILD_TIMESTAMP: ${{ needs.setup.outputs.timestamp }}
+          MERGE_SHA: ${{ needs.setup.outputs.latestMergeSha }}
+          BUILD_TIMESTAMP: ${{ needs.setup.outputs.timeStamp }}
 
   run-tests-harness:
     needs: [setup, build_publish_branch]
