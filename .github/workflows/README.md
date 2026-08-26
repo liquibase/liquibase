@@ -104,7 +104,7 @@ The main coordinator that triggers all release steps in the proper sequence. Sup
 | Workflow | Purpose | Can Run Independently |
 |----------|---------|----------------------|
 | `release-setup.yml` | Extract release metadata (version, tag, branch) | ✅ Yes |
-| `release-manual-approval.yml` | Request manual deployment approval | ✅ Yes |
+| `release-manual-approval.yml` | Hold the release for approval on the `release` environment | ✅ Yes |
 | `release-deploy-maven.yml` | Deploy artifacts to Maven Central | ✅ Yes |
 | `release-deploy-javadocs.yml` | Upload javadocs to S3 | ✅ Yes |
 | `release-publish-github-packages.yml` | Publish to GitHub Packages | ✅ Yes |
@@ -149,7 +149,7 @@ The pattern matches the orchestrator approach used in `liquibase-pro`:
 
 When a GitHub release is published, the orchestrator automatically:
 1. Extracts release metadata
-2. Requests manual approval (2 approvers required)
+2. Waits for approval on the `release` environment (one reviewer, and not the person who started the run)
 3. Deploys to all targets in parallel where possible
 4. Generates a comprehensive summary
 
@@ -199,7 +199,7 @@ If a specific step fails, you can re-run just that workflow:
                        │
                        ▼
               ┌────────────────┐
-              │Manual Approval │  2 approvers required (skipped if dry_run)
+              │Manual Approval │  `release` environment gate (skipped if dry_run)
               └────────┬───────┘
                        │
         ┌──────────────┴──────────────┐
@@ -325,9 +325,10 @@ To add a new step to the release process:
 - **Solution**: Check permissions in orchestrator file
 - **Solution**: Verify GitHub App has correct permissions
 
-**Issue**: Manual approval times out
-- **Solution**: Increase timeout in `release-manual-approval.yml`
-- **Solution**: Check approver list is correct
+**Issue**: Manual approval never arrives or is rejected
+- **Solution**: Check the run's deployment gate, not the issues list: approval happens on the run page under Review deployments
+- **Solution**: Check the reviewer list on the `release` environment. It is managed in liquibase-infrastructure (`github/liquibase/repos/public/liquibase-release-environment.tf`), so changing it takes a PR there
+- **Solution**: A reviewer cannot approve a run they started themselves. Someone else on the list has to
 
 **Issue**: Secrets not available in called workflows
 - **Solution**: Ensure `secrets: inherit` is present
@@ -387,6 +388,11 @@ dry_run_branch_name: (leave empty for production)
 ### 2. Release Manual Approval (`release-manual-approval.yml`)
 
 **When to use:** If approval was skipped or needs to be re-requested.
+
+**How approval works:** The job carries `environment: release`, so GitHub pauses it and shows
+**Review deployments** on the run page. Any reviewer on that environment can approve or reject,
+except the person who started the run. There is no tracking issue and no keyword replies. The
+reviewer list is Terraform-managed in liquibase-infrastructure.
 
 **Required inputs:**
 - `version`: Version to approve (e.g., `4.28.0`)
