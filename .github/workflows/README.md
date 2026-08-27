@@ -586,3 +586,27 @@ If a workflow continues to fail:
 2. Verify all secrets and credentials are correctly configured
 3. Check AWS/Maven/Docker service status
 4. Consult the team or escalate to DevOps
+
+## :wastebasket: Removed workflows
+
+Deleted 2026-08-27 (TECHOPS-1188). All seven were already `disabled_manually` in the
+Actions API and none of them declares an `on: workflow_call` trigger, so no active
+workflow could reach them: deleting the files removes the ability for anyone to
+re-enable them from the Actions UI.
+
+| Workflow | Own runs (all time) | Last run | Why it was removed |
+|---|---|---|---|
+| `build-branch.yml` | 3239 | 2026-08-25 | Per-PR SNAPSHOT publisher. `pull_request_target` + `packages: write` + `secrets: inherit`; branch snapshots are no longer published per PR. |
+| `claude-code-review.yml` | 1109 | 2026-08-25 | Last 15 runs were all `startup_failure`. Replaced by `@claude review` on the gated `claude.yml` (active, 3675 runs). |
+| `cleanup-branch-builds.yml` | 613 | 2026-08-25 | 29 of its last 30 runs failed, so it deleted nothing. |
+| `fossa.yml` | 0 | never | Never executed once since creation. FOSSA runs today as the `fossa / fossa-scan` job of `run-tests.yml` via `build-logic/fossa_ai.yml`. |
+| `installer-build-check.yml` | 2 | 2026-04-13 | Both runs failed. Installers are built by the release pipeline and rehearsed weekly by `dry-run-release.yml`. |
+| `owasp-scanner.yml` | 1 | 2025-10-02 | One run ever. Dependency CVEs are covered by `codeql.yml`, `trivy-scan-published-images.yml` and Dependabot. |
+| `weekly-integration-tests.yml` | 19 | 2025-11-16 | Scheduled run dead since 2025-11 and its Slack alert could never fire: it dispatched cross-repo to `build-logic` with `secrets.GITHUB_TOKEN`, which is scoped to this repo only. |
+
+Not removed, and why: `build.yml` and `run-test-harness.yml` are marked
+`disabled_manually` but still execute on every internal PR and every push to `main`.
+`run-tests.yml` (active) calls `./.github/workflows/build.yml`, which calls
+`liquibase/liquibase/.github/workflows/run-test-harness.yml@main`. Disabling a
+workflow blocks its event triggers, never `workflow_call`. Both files can only be
+deleted after `run-tests.yml` is retired at the PR #7944 cutover.
