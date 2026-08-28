@@ -133,9 +133,17 @@ jobs:
           echo "Assets API Response status code: $?"
           echo "Assets API Response: $assets_response"
 
-          # Get URLs for zip and tar.gz files - getting browser_download_url instead of url
+          # The zip keeps browser_download_url: nothing downloads it, it is only
+          # surfaced in the summary and passed to consumers that ignore it.
+          #
+          # The tar.gz must use the asset API url. The ansible role deploy is the
+          # only consumer that actually fetches it, and at this point the release is
+          # still a draft, so browser_download_url is an untagged-<hash> path that
+          # 404s for a token-authenticated client. The asset API url resolves with
+          # the Accept: application/octet-stream + bearer token the role already
+          # sends (TECHOPS-1205).
           dry_run_zip_url=$(echo "$assets_response" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.zip$")) | .browser_download_url')
-          dry_run_tar_gz_url=$(echo "$assets_response" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.tar\\.gz$")) | .browser_download_url')
+          dry_run_tar_gz_url=$(echo "$assets_response" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.tar\\.gz$")) | .url')
 
           echo "Found zip URL: $dry_run_zip_url"
           echo "Found tar.gz URL: $dry_run_tar_gz_url"
