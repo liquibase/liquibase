@@ -111,12 +111,17 @@ jobs:
           set -euo pipefail
           JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
           for k in GPG_SECRET GPG_PASSPHRASE LIQUIBOT_PAT_GPM_ACCESS INSTALL4J_LICENSE; do
-            v=$(printf '%s' "$JSON" | jq -r --arg k "$k" '.[$k] // ""')
+            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
+            # which would silently alter a value that legitimately ends in one.
+            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
+            v=${v%X}
             if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
             # One mask per line: the runner matches masks line by line, so a multi-line
             # value masked whole still prints its individual lines in cleartext.
+            # An `if` rather than `&&`: on a value ending in a newline the final empty
+            # line would make the loop exit non-zero and set -e would kill the step.
             printf '%s\n' "$v" | while IFS= read -r line; do
-              [ -n "$line" ] && echo "::add-mask::$line"
+              if [ -n "$line" ]; then echo "::add-mask::$line"; fi
             done
             D="VAULT_EOF_${RANDOM}${RANDOM}"
             { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
