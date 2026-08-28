@@ -104,11 +104,25 @@ jobs:
 
       - name: Get secrets from vault
         id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@2cb1a461cbd4865ac4299648312e4704c646cd53 # v3.0.1
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
+        # TECHOPS-1188: aws-secretsmanager-get-secrets can only load a secret whole, so
+        # parse-json-secrets: true put every credential in /vault/liquibase into this
+        # job's environment; read only the four keys this job uses instead.
+        run: |
+          set -euo pipefail
+          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
+          for k in GPG_SECRET GPG_PASSPHRASE LIQUIBOT_PAT_GPM_ACCESS INSTALL4J_LICENSE; do
+            v=$(printf '%s' "$JSON" | jq -r --arg k "$k" '.[$k] // ""')
+            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
+            # One mask per line: the runner matches masks line by line, so a multi-line
+            # value masked whole still prints its individual lines in cleartext.
+            printf '%s\n' "$v" | while IFS= read -r line; do
+              [ -n "$line" ] && echo "::add-mask::$line"
+            done
+            D="VAULT_EOF_${RANDOM}${RANDOM}"
+            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
+          done
+          unset JSON
+          echo "Loaded GPG_SECRET, GPG_PASSPHRASE, LIQUIBOT_PAT_GPM_ACCESS and INSTALL4J_LICENSE from /vault/liquibase."
 
       - name: Convert escaped newlines and set GPG key
         run: |
