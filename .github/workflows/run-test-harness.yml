@@ -102,19 +102,30 @@ jobs:
           bundle=$(aws secretsmanager get-secret-value \
             --secret-id /vault/liquibase \
             --query SecretString --output text)
-          app_id=$(printf '%s' "$bundle" | jq -re '.LIQUIBASE_GITHUB_APP_ID')
-          app_key=$(printf '%s' "$bundle" | jq -re '.LIQUIBASE_GITHUB_APP_PRIVATE_KEY')
+          # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
+          # which would silently alter a value that legitimately ends in one.
+          app_id=$(printf '%s' "$bundle" | jq -j '.LIQUIBASE_GITHUB_APP_ID // ""'; printf 'X')
+          app_id=${app_id%X}
+          app_key=$(printf '%s' "$bundle" | jq -j '.LIQUIBASE_GITHUB_APP_PRIVATE_KEY // ""'; printf 'X')
+          app_key=${app_key%X}
           unset bundle
-          # add-mask matches line by line, so the PEM needs one mask per line.
-          echo "::add-mask::$app_id"
-          while IFS= read -r line; do
-            [ -n "$line" ] && echo "::add-mask::$line"
-          done <<< "$app_key"
+          if [ -z "$app_id" ]; then echo "::error::LIQUIBASE_GITHUB_APP_ID missing from /vault/liquibase"; exit 1; fi
+          if [ -z "$app_key" ]; then echo "::error::LIQUIBASE_GITHUB_APP_PRIVATE_KEY missing from /vault/liquibase"; exit 1; fi
+          # add-mask matches line by line, so the PEM needs one mask per line. An `if`
+          # rather than `&&`: on a value ending in a newline the final empty line would
+          # make the loop exit non-zero and set -e would kill the step.
+          printf '%s\n' "$app_id" | while IFS= read -r line; do
+            if [ -n "$line" ]; then echo "::add-mask::$line"; fi
+          done
+          printf '%s\n' "$app_key" | while IFS= read -r line; do
+            if [ -n "$line" ]; then echo "::add-mask::$line"; fi
+          done
+          # Heredoc for both, not name=value: a preserved trailing newline would
+          # otherwise corrupt the output file.
+          D="VAULT_EOF_${RANDOM}${RANDOM}"
           {
-            echo "app_id=$app_id"
-            echo "app_key<<VAULT_PEM_EOF"
-            echo "$app_key"
-            echo "VAULT_PEM_EOF"
+            echo "app_id<<$D";  printf '%s\n' "$app_id";  echo "$D"
+            echo "app_key<<$D"; printf '%s\n' "$app_key"; echo "$D"
           } >> "$GITHUB_OUTPUT"
 
       - name: Get GitHub App token
