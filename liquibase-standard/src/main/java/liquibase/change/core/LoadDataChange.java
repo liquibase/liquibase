@@ -246,10 +246,15 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             boolean isCommentingEnabled = StringUtils.isNotEmpty(commentLineStartsWith);
 
             // Skip any blank or commented lines preceding the header, so a leading comment (e.g. a "#"
-            // line describing the file) isn't mistaken for the header row -- see #4434.
+            // line describing the file) isn't mistaken for the header row -- see #4434. Count them, so
+            // line numbers reported in errors below still refer to the real position in the file.
+            int lineNumber = 0;
             String[] headers;
             do {
                 headers = reader.readNext();
+                if (headers != null) {
+                    lineNumber++;
+                }
             } while ((headers != null) && isSkippableLine(headers, isCommentingEnabled));
             if (headers == null) {
                 throw new UnexpectedLiquibaseException("Data file " + getFile() + " was empty");
@@ -266,8 +271,6 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             }
 
             String[] line;
-            // Start at '1' to take into account the header (already processed):
-            int lineNumber = 1;
 
             List<LoadDataRowConfig> rows = new ArrayList<>();
             while ((line = reader.readNext()) != null) {
