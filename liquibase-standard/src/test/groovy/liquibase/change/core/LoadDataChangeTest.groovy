@@ -13,6 +13,7 @@ import liquibase.database.DatabaseFactory
 import liquibase.database.core.H2Database
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MockDatabase
+import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.exception.ValidationErrors
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
@@ -1032,6 +1033,25 @@ class LoadDataChangeTest extends StandardChangeTest {
         sqlStatements.length == 2
         assert columnValue(sqlStatements[0], "username") == "bjohnson"
         assert columnValue(sqlStatements[1], "username") == "jdoe"
+    }
+
+    def "validate the reported line number still matches the file after a leading comment is skipped (#4434)"() {
+        when:
+        def table = testTable("table")
+        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
+
+        LoadDataChange change = new LoadDataChange()
+        change.setFile("liquibase/change/core/sample.data.with.leading.comment.and.bad.row.csv")
+        change.setTableName("table")
+
+        change.generateStatements(mockDB)
+
+        then:
+        def e = thrown(UnexpectedLiquibaseException)
+        // Line 1 is the skipped comment, line 2 is the header, line 3 is a valid row,
+        // so the malformed row is line 4 -- not line 3, which is what a naive count
+        // (starting from 1 at the header) would report after skipping the comment.
+        e.message.contains("Line 4")
     }
 
 
