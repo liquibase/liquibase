@@ -116,13 +116,12 @@ jobs:
             v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
             v=${v%X}
             if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
-            # One mask per line: the runner matches masks line by line, so a multi-line
-            # value masked whole still prints its individual lines in cleartext.
-            # An `if` rather than `&&`: on a value ending in a newline the final empty
-            # line would make the loop exit non-zero and set -e would kill the step.
-            printf '%s\n' "$v" | while IFS= read -r line; do
-              if [ -n "$line" ]; then echo "::add-mask::$line"; fi
-            done
+            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
+            # those literals registers a mask that never matches it; % is escaped first
+            # so the escapes the next two produce are not escaped again.
+            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
+            # Escaped, one command masks the whole value and every line within it.
+            printf '::add-mask::%s\n' "$e"
             D="VAULT_EOF_${RANDOM}${RANDOM}"
             { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
           done
