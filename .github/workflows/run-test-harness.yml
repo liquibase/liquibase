@@ -1,3 +1,4 @@
+# DISABLED 2026-08-25 (TECHOPS-1106): superseded by dispatching liquibase-test-harness/main.yml directly from that repo. Do not re-enable; the file is kept for history until the post-Phase-3 deletion PR.
 name: Run Test Harness Tests
 
 on:
@@ -60,6 +61,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ test-harness-build ]
     name: Trigger Test Harness Tests
+    # Gated directly rather than only through needs, because the authorize job has been removed twice before (#7902, #7906).
+    environment: ${{ github.event.pull_request && github.event.pull_request.head.repo.full_name != github.repository && 'external' || 'internal' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -92,22 +95,50 @@ jobs:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@2cb1a461cbd4865ac4299648312e4704c646cd53 # v3.0.1
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
+      - name: Get App credentials from vault
+        id: app-creds
+        # Read by hand because aws-secretsmanager-get-secrets cannot select individual JSON keys, and this job needs two of them.
+        run: |
+          set -euo pipefail
+          bundle=$(aws secretsmanager get-secret-value \
+            --secret-id /vault/liquibase \
+            --query SecretString --output text)
+          # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
+          # which would silently alter a value that legitimately ends in one.
+          app_id=$(printf '%s' "$bundle" | jq -j '.LIQUIBASE_GITHUB_APP_ID // ""'; printf 'X')
+          app_id=${app_id%X}
+          app_key=$(printf '%s' "$bundle" | jq -j '.LIQUIBASE_GITHUB_APP_PRIVATE_KEY // ""'; printf 'X')
+          app_key=${app_key%X}
+          unset bundle
+          if [ -z "$app_id" ]; then echo "::error::LIQUIBASE_GITHUB_APP_ID missing from /vault/liquibase"; exit 1; fi
+          if [ -z "$app_key" ]; then echo "::error::LIQUIBASE_GITHUB_APP_PRIVATE_KEY missing from /vault/liquibase"; exit 1; fi
+          # add-mask matches line by line, so the PEM needs one mask per line. An `if`
+          # rather than `&&`: on a value ending in a newline the final empty line would
+          # make the loop exit non-zero and set -e would kill the step.
+          printf '%s\n' "$app_id" | while IFS= read -r line; do
+            if [ -n "$line" ]; then echo "::add-mask::$line"; fi
+          done
+          printf '%s\n' "$app_key" | while IFS= read -r line; do
+            if [ -n "$line" ]; then echo "::add-mask::$line"; fi
+          done
+          # Heredoc for both, not name=value: a preserved trailing newline would
+          # otherwise corrupt the output file.
+          D="VAULT_EOF_${RANDOM}${RANDOM}"
+          {
+            echo "app_id<<$D";  printf '%s\n' "$app_id";  echo "$D"
+            echo "app_key<<$D"; printf '%s\n' "$app_key"; echo "$D"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Get GitHub App token
         id: get-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ steps.app-creds.outputs.app_id }}
+          private-key: ${{ steps.app-creds.outputs.app_key }}
           owner: ${{ github.repository_owner }}
-          permission-contents: write
+          # Without repositories: the token covers every repo the App is installed on.
+          repositories: liquibase-test-harness
+          # return-dispatch needs Actions write and nothing else.
           permission-actions: write
 
       - name: Build test-harness dispatch payload

@@ -1,3 +1,4 @@
+# DISABLED 2026-08-25 (TECHOPS-1103): superseded by @claude review via the gated claude.yml; automatic review loaded vault credentials on a PR event. Do not re-enable; the file is kept for history until the post-Phase-3 deletion PR.
 name: Claude Code Review
 
 on:
