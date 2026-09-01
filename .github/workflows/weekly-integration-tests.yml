@@ -1,3 +1,4 @@
+# DISABLED 2026-08-25 (TECHOPS-1112): superseded by nothing; disabled since 2025-11. Do not re-enable; the file is kept for history until the post-Phase-3 deletion PR.
 name: Weekly Integration Tests
 
 permissions:
