@@ -387,7 +387,9 @@ dry_run_branch_name: (leave empty for production)
 
 ### 2. Release Manual Approval (`release-manual-approval.yml`)
 
-**When to use:** If approval was skipped or needs to be re-requested.
+**When to use:** Normally never on its own. Approval is per-run: a paused orchestrator run is
+approved from **Review deployments** on that run's page, and dispatching this workflow standalone
+only gates its own, empty run. It exists as the reusable gate job the orchestrator calls.
 
 **How approval works:** The job carries `environment: release`, so GitHub pauses it and shows
 **Review deployments** on the run page. Any reviewer on that environment can approve or reject,
@@ -406,7 +408,8 @@ version: 4.28.0
 dry_run: false
 ```
 
-**Note:** Requires 2 approvers from the approved list.
+**Note:** One approval from the environment's reviewer list releases the gate, and the approver
+cannot be the person who started the run (`prevent_self_review`).
 
 ### 3. Deploy to Maven Central (`release-deploy-maven.yml`)
 
