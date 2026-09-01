@@ -100,26 +100,29 @@ jobs:
           aws-region: us-east-1
 
       - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@2cb1a461cbd4865ac4299648312e4704c646cd53 # v3.0.1
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
-
-      # TECHOPS-1048: /vault/liquibase is one shared secret and the action can only load
-      # it whole (parse-json-secrets), so this job gets the DigiCert KeyLocker signing
-      # credentials even though it only needs GPG — nothing in `reversion` signs anything.
-      # Blank them so they are not in the environment of any later step in this job.
-      # aws-actions/aws-secretsmanager-get-secrets#264 would let us request a subset of
-      # keys, but it has been open since Sep 2025 and is in no release; the complete fix
-      # is a separate GPG-only secret in Secrets Manager.
-      - name: Drop unused KeyLocker credentials from the job environment
+        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
+        # parse-json-secrets: true put every credential in /vault/liquibase into this
+        # job's environment; read only the three keys this job uses. This also retires
+        # the TECHOPS-1048 workaround that blanked the KeyLocker keys afterwards: they
+        # are never loaded here now, and nothing in `reversion` signs anything.
         run: |
-          for name in ${!SM_@}; do
-            echo "$name=" >> "$GITHUB_ENV"
-            echo "Cleared $name"
+          set -euo pipefail
+          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
+          for k in GPG_SECRET GPG_PASSPHRASE LIQUIBOT_PAT_GPM_ACCESS; do
+            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
+            # which would silently alter a value that legitimately ends in one.
+            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
+            v=${v%X}
+            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
+            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
+            # those literals registers a mask that never matches it; % is escaped first
+            # so the escapes the next two produce are not escaped again.
+            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
+            printf '::add-mask::%s\n' "$e"
+            D="VAULT_EOF_${RANDOM}${RANDOM}"
+            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
           done
+          unset JSON
 
       - name: Download liquibase-artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -225,23 +228,38 @@ jobs:
           aws-region: us-east-1
 
       - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@2cb1a461cbd4865ac4299648312e4704c646cd53 # v3.0.1
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
-
-      # TECHOPS-1048: a dry run never reaches the signing steps below, so the KeyLocker
-      # credentials this job loaded are dead weight in its environment. Blank them on that
-      # path. See the same step in `reversion` for why a subset can't just be requested.
-      - name: Drop unused KeyLocker credentials from the job environment
-        if: ${{ inputs.dry_run == true }}
+        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
+        # parse-json-secrets: true put every credential in /vault/liquibase into this
+        # job's environment; read only what this job signs and builds with. Replaces the
+        # TECHOPS-1048 workaround that loaded the KeyLocker keys and blanked them again
+        # on dry runs: a dry run never reaches the signing steps, so it never loads them.
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
         run: |
-          for name in ${!SM_@}; do
-            echo "$name=" >> "$GITHUB_ENV"
-            echo "Cleared $name"
+          set -euo pipefail
+          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
+          KEYS="GPG_SECRET GPG_PASSPHRASE INSTALL4J_LICENSE_KEY"
+          if [ "$DRY_RUN" != "true" ]; then
+            # The DigiCert KeyLocker client tools and jsign read SM_* straight from the
+            # environment rather than through named inputs, so load that whole family by
+            # prefix; naming them individually would silently drop any key added later.
+            KEYS="$KEYS $(printf '%s' "$JSON" | jq -r 'keys[] | select(startswith("SM_"))' | tr '\n' ' ')"
+          fi
+          for k in $KEYS; do
+            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
+            # which would silently alter a value that legitimately ends in one.
+            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
+            v=${v%X}
+            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
+            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
+            # those literals registers a mask that never matches it; % is escaped first
+            # so the escapes the next two produce are not escaped again.
+            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
+            printf '::add-mask::%s\n' "$e"
+            D="VAULT_EOF_${RANDOM}${RANDOM}"
+            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
           done
+          unset JSON
 
       - name: Convert escaped newlines and set GPG key
         run: |
