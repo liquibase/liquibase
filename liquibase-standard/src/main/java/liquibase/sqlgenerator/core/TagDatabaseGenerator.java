@@ -33,8 +33,16 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
             String dateColumnNameEscaped = database.escapeObjectName("DATEEXECUTED", Column.class);
             String tagColumnNameEscaped = database.escapeObjectName("TAG", Column.class);
             String tagEscaped = DataTypeFactory.getInstance().fromObject(statement.getTag(), database).objectToSql(statement.getTag(), database);
+
+            // Clear the tag off any row that already carries it before tagging the latest row, so re-using a
+            // tag name doesn't leave it applied to multiple changesets (#3763).
+            UpdateStatement clearOldTagStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+                    .addNewColumnValue("TAG", null)
+                    .setWhereClause(tagColumnNameEscaped + " = " + tagEscaped);
+            Sql[] clearOldTagSql = SqlGeneratorFactory.getInstance().generateSql(clearOldTagStatement, database);
+
             if (database instanceof MySQLDatabase) {
-                return new Sql[]{
+                return concat(clearOldTagSql,
                         new UnparsedSql(
                                 "UPDATE " + tableNameEscaped + " AS C " +
                                         "INNER JOIN (" +
@@ -42,18 +50,16 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
                                         "FROM " + tableNameEscaped +
                                         " order by " + dateColumnNameEscaped + " desc, " + orderColumnNameEscaped + " desc limit 1) AS D " +
                                         "ON C." + orderColumnNameEscaped + " = D." + orderColumnNameEscaped + " " +
-                                        "SET C." + tagColumnNameEscaped + " = " + tagEscaped)
-                };
+                                        "SET C." + tagColumnNameEscaped + " = " + tagEscaped));
             } else if (database instanceof AbstractPostgresDatabase) {
-                return new Sql[]{
+                return concat(clearOldTagSql,
                         new UnparsedSql(
                                 "UPDATE " + tableNameEscaped + " t SET TAG=" + tagEscaped +
                                         " FROM (SELECT " + dateColumnNameEscaped + ", " + orderColumnNameEscaped + " FROM " + tableNameEscaped + " ORDER BY " + dateColumnNameEscaped + " DESC, " + orderColumnNameEscaped + " DESC LIMIT 1) sub " +
-                                        "WHERE t." + dateColumnNameEscaped + "=sub." + dateColumnNameEscaped + " AND t." + orderColumnNameEscaped + "=sub." + orderColumnNameEscaped)
-                };
+                                        "WHERE t." + dateColumnNameEscaped + "=sub." + dateColumnNameEscaped + " AND t." + orderColumnNameEscaped + "=sub." + orderColumnNameEscaped));
             } else if (database instanceof InformixDatabase) {
                 String tempTableNameEscaped = database.escapeObjectName("max_order_temp", Table.class);
-                return new Sql[]{
+                return concat(clearOldTagSql,
                         new UnparsedSql(
                                 "SELECT MAX(" + dateColumnNameEscaped + ") AS " + dateColumnNameEscaped +
                                         ", MAX(" + orderColumnNameEscaped + ") AS " + orderColumnNameEscaped + " " +
@@ -71,8 +77,7 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
                                         "FROM " + tempTableNameEscaped +
                                         ");"),
                         new UnparsedSql(
-                                "DROP TABLE " + tempTableNameEscaped + ";")
-                };
+                                "DROP TABLE " + tempTableNameEscaped + ";"));
             } else if (database instanceof MSSQLDatabase) {
                 String changelogAliasEscaped = database.escapeObjectName("changelog", Table.class);
                 String latestAliasEscaped = database.escapeObjectName("latest", Table.class);
@@ -82,7 +87,7 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
 
                 String topClause = "TOP (1)";
 
-                return new Sql[] {
+                return concat(clearOldTagSql,
                         new UnparsedSql(
                                 "UPDATE " + changelogAliasEscaped + " " +
                                 "SET " + tagColumnNameEscaped + " = " + tagEscaped + " " +
@@ -94,8 +99,7 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
                                 ") AS " + latestAliasEscaped + " " +
                                 "ON " + latestAliasEscaped + "." + idColumnEscaped + " = " + changelogAliasEscaped + "." + idColumnEscaped + " " +
                                 "AND " + latestAliasEscaped + "." + authorColumnEscaped + " = " + changelogAliasEscaped + "." + authorColumnEscaped + " " +
-                                "AND " + latestAliasEscaped + "." + filenameColumnEscaped + " = " + changelogAliasEscaped + "." + filenameColumnEscaped)
-                    };
+                                "AND " + latestAliasEscaped + "." + filenameColumnEscaped + " = " + changelogAliasEscaped + "." + filenameColumnEscaped));
             } else if ((database instanceof OracleDatabase) || (database instanceof DB2Database)) {
                 String selectClause = "SELECT";
                 String endClause = ")";
@@ -107,13 +111,12 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
                     endClause = " FETCH FIRST 1 ROWS ONLY)";
                 }
 
-                return new Sql[]{
+                return concat(clearOldTagSql,
                         new UnparsedSql("MERGE INTO " + tableNameEscaped + " a " +
                                 "USING (" + selectClause + " " + orderColumnNameEscaped + ", " + dateColumnNameEscaped + " from " + tableNameEscaped + " order by " + dateColumnNameEscaped + " desc, " + orderColumnNameEscaped + " desc" + endClause + " b " +
                                 "ON ( a." + dateColumnNameEscaped + " = b." + dateColumnNameEscaped + " and a." + orderColumnNameEscaped + "=b." + orderColumnNameEscaped + " ) " +
                                 "WHEN MATCHED THEN " +
-                                "UPDATE SET  a.tag=" + tagEscaped + delimiter)
-                };
+                                "UPDATE SET  a.tag=" + tagEscaped + delimiter));
             } else {
 
                 //Only uses dateexecuted as a default. Depending on the timestamp resolution, multiple rows may be tagged which normally works fine but can cause confusion and some issues.
@@ -127,11 +130,18 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
                                         "FROM " + tableNameEscaped +
                                         ")");
 
-                return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
+                return concat(clearOldTagSql, SqlGeneratorFactory.getInstance().generateSql(updateStatement, database));
             }
         } finally {
             database.setObjectQuotingStrategy(currentStrategy);
         }
 
+    }
+
+    private static Sql[] concat(Sql[] first, Sql... rest) {
+        Sql[] result = new Sql[first.length + rest.length];
+        System.arraycopy(first, 0, result, 0, first.length);
+        System.arraycopy(rest, 0, result, first.length, rest.length);
+        return result;
     }
 }

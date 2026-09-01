@@ -43,7 +43,10 @@ public class TagDatabaseGeneratorTest {
         TagDatabaseStatement statement = new TagDatabaseStatement("v1.0");
         Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, new MSSQLDatabase());
 
-        assertEquals(1, sql.length);
+        assertEquals(2, sql.length);
+        assertEquals(
+                "UPDATE DATABASECHANGELOG SET TAG = NULL WHERE TAG = 'v1.0'",
+                sql[0].toSql());
         assertEquals(
             "UPDATE changelog " +
                 "SET TAG = 'v1.0' " +
@@ -56,7 +59,7 @@ public class TagDatabaseGeneratorTest {
                 "ON latest.ID = changelog.ID " +
                 "AND latest.AUTHOR = changelog.AUTHOR " +
                 "AND latest.FILENAME = changelog.FILENAME",
-                sql[0].toSql());
+                sql[1].toSql());
     }
 
     @Test
@@ -64,7 +67,10 @@ public class TagDatabaseGeneratorTest {
         TagDatabaseStatement statement = new TagDatabaseStatement("v1.0");
         Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, new HsqlDatabase());
 
-        assertEquals(1, sql.length);
+        assertEquals(2, sql.length);
+        assertEquals(
+                "UPDATE DATABASECHANGELOG SET TAG = NULL WHERE TAG = 'v1.0'",
+                sql[0].toSql());
         assertEquals(
                 "UPDATE DATABASECHANGELOG " +
                 "SET TAG = 'v1.0' " +
@@ -72,6 +78,7 @@ public class TagDatabaseGeneratorTest {
                     "SELECT MAX(DATEEXECUTED) " +
                     "FROM DATABASECHANGELOG" +
                 ")",
-                sql[0].toSql());
+                sql[1].toSql());
     }
+
 }
