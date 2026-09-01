@@ -1,3 +1,4 @@
+# DISABLED 2026-08-25 (TECHOPS-1104): superseded by main.yml and snapshot-branch.yml (PR #7944). Do not re-enable; the file is kept for history until the post-Phase-3 deletion PR.
 
 name: Build and Publish
 

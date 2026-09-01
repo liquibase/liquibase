@@ -1,3 +1,4 @@
+# DISABLED 2026-08-25 (TECHOPS-1106): superseded by dispatching liquibase-test-harness/main.yml directly from that repo. Do not re-enable; the file is kept for history until the post-Phase-3 deletion PR.
 name: Run Test Harness Tests
 
 on:
