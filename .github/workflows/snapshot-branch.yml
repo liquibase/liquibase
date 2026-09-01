@@ -33,6 +33,10 @@ jobs:
       packages: write
     env:
       GITHUB_TOKEN: ${{ github.token }} # setup-java server-id credentials for GitHub Packages
+      # Run steps read the ref through $REF, never by direct ${{ }} interpolation
+      # into the script: dispatch needs write access, but env indirection keeps a
+      # crafted ref name from being parsed as shell.
+      REF: ${{ inputs.ref }}
       MAVEN_BUILD_ARGS: >-
         -Dbuild.repository.owner=liquibase
         -Dbuild.repository.name=liquibase
@@ -50,7 +54,7 @@ jobs:
             echo "BUILD_SHA=$(git rev-parse HEAD)"
             echo "BUILD_TIMESTAMP=$(date +'%Y-%m-%d %H:%M:%S %Z')"
             # same munging as build.yml used, which is what the sdk plugin expects
-            echo "BRANCH_FILE=$(tr '/' '_' <<<"${{ inputs.ref }}")"
+            echo "BRANCH_FILE=$(tr '/' '_' <<<"$REF")"
           } >> "$GITHUB_ENV"
 
       - name: Set up JDK 17
@@ -101,6 +105,6 @@ jobs:
           cat >> "$GITHUB_STEP_SUMMARY" <<MSG
           ## Published \`${BUILD_SHA}-SNAPSHOT\`
           Repository: https://maven.pkg.github.com/liquibase/liquibase
-          Run artifacts: \`liquibase-zip-${BRANCH_FILE}\`, \`liquibase-artifacts-${BRANCH_FILE}\` (sdk plugin: \`-Dliquibase.sdk.workflowId=snapshot-branch.yml -Dliquibase.sdk.branchSearch=${{ inputs.ref }}\`)
+          Run artifacts: \`liquibase-zip-${BRANCH_FILE}\`, \`liquibase-artifacts-${BRANCH_FILE}\` (sdk plugin: \`-Dliquibase.sdk.workflowId=snapshot-branch.yml -Dliquibase.sdk.branchSearch=${REF}\`)
           Test harness: dispatch \`liquibase-test-harness/main.yml\` with \`liquibaseRepo=liquibase/liquibase\`, \`liquibaseCommit=${BUILD_SHA}\`.
           MSG
