@@ -6,6 +6,14 @@ on:
         description: 'Liquibase Version'
         required: true
 
+# A called workflow can only reduce the caller's scopes, so this mirrors the set
+# extension-automated-release.yml declares for itself.
+permissions:
+  contents: write
+  packages: write
+  security-events: read
+  id-token: write
+
 jobs:
   automated-os-extensions-release:
     uses: liquibase/build-logic/.github/workflows/extension-automated-release.yml@main

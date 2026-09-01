@@ -8,10 +8,16 @@ on:
     branches:
       - 'main'
 
+# Deny by default so a new job cannot silently pick up the org-wide write default.
+permissions: {}
+
 jobs:
   setup:
     name: Setup
     runs-on: ubuntu-22.04
+    permissions:
+      # Only what the checkout needs; this job publishes nothing, it just emits two outputs.
+      contents: read
     outputs:
       timeStamp: ${{ steps.get-timestamp.outputs.timeStamp }}
       latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
