@@ -1,3 +1,4 @@
+# DISABLED 2026-08-25 (TECHOPS-1099): superseded by cleanup-packages.yml (PR #7944); the delete trigger ignored its branch filters and 29 of the last 30 runs failed. Do not re-enable; the file is kept for history until the post-Phase-3 deletion PR.
 # │ Purpose : Reactive cleanup when a branch is removed 
 name: Cleanup on Branch Delete
 

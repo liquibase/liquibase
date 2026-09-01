@@ -1,3 +1,4 @@
+# DISABLED 2026-08-25 (TECHOPS-1099): superseded by the release pipeline, which builds the installer at release time. Do not re-enable; the file is kept for history until the post-Phase-3 deletion PR.
 name: Build Test Installers
 
 on:

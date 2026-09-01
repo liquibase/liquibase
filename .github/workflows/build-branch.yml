@@ -1,3 +1,4 @@
+# DISABLED 2026-08-25 (TECHOPS-1104): superseded by snapshot-branch.yml for on-demand branch snapshots (PR #7944); per-PR publishing is dropped. Do not re-enable; the file is kept for history until the post-Phase-3 deletion PR.
 name: Build Branch SNAPSHOT
 
 # concurrent runs for pull requests (both internal and forked) will be canceled when a new run is triggered.
