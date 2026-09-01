@@ -36,6 +36,8 @@ jobs:
     name: Publish OSS released assets to s3 bucket liquibaseorg-origin
     runs-on: ubuntu-22.04
     if: ${{ inputs.dry_run == false }}
+    # Emits the `environment:release` OIDC subject, which is what the release-scoped vault role trusts.
+    environment: release
     steps:
       - name: Download released assets
         env:
@@ -52,7 +54,7 @@ jobs:
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.LIQUIBASE_RELEASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
 
       - name: Get secrets from vault
