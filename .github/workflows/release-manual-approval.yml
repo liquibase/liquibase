@@ -28,22 +28,20 @@ on:
         default: false
 
 permissions:
-  issues: write
-  pull-requests: write
+  contents: read
 
 jobs:
   manual-approval:
     name: Request Manual Approval
     runs-on: ubuntu-22.04
     if: ${{ inputs.dry_run == false }}
+    # The gate itself. GitHub holds the job here until a reviewer on the
+    # `release` environment approves the run, and every publishing job in the
+    # orchestrator depends on this job. The environment and its reviewer list are
+    # defined in liquibase-infrastructure, not in this file, so they cannot be
+    # changed by editing a workflow:
+    # https://github.com/liquibase/liquibase-infrastructure/blob/main/github/liquibase/repos/public/liquibase-release-environment.tf
+    environment: release
     steps:
-      - name: Get Version to deploy
-        uses: trstringer/manual-approval@fa642940caf8412403569b28b2db4a1df08a83a3 # v1
-        with:
-          secret: ${{ secrets.GITHUB_TOKEN }}
-          approvers: filipelautert,rberezen,jnewton03,jandroav,sayaliM0412
-          minimum-approvals: 2
-          issue-title: "Deploying ${{ inputs.version }} to Maven Central"
-          issue-body: "Please approve or deny the deployment of version ${{ inputs.version }} to Maven Central"
-          additional-approved-words: "lgtm,✅,👍,proceed,shipit,:shipit:"
-          additional-denied-words: "stop,error,failed,fail,broken,:x:,👎"
+      - name: Record approval
+        run: echo "Release ${{ inputs.version }} approved for deployment."

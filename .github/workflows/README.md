@@ -129,7 +129,7 @@ The main coordinator that triggers all release steps in the proper sequence. Sup
 | Workflow | Purpose | Can Run Independently |
 |----------|---------|----------------------|
 | `release-setup.yml` | Extract release metadata (version, tag, branch) | ✅ Yes |
-| `release-manual-approval.yml` | Request manual deployment approval | ✅ Yes |
+| `release-manual-approval.yml` | Hold the release for approval on the `release` environment | ✅ Yes |
 | `release-deploy-maven.yml` | Deploy artifacts to Maven Central | ✅ Yes |
 | `release-deploy-javadocs.yml` | Upload javadocs to S3 | ✅ Yes |
 | `release-publish-github-packages.yml` | Publish to GitHub Packages | ✅ Yes |
@@ -174,7 +174,7 @@ The pattern matches the orchestrator approach used in `liquibase-pro`:
 
 When a GitHub release is published, the orchestrator automatically:
 1. Extracts release metadata
-2. Requests manual approval (2 approvers required)
+2. Waits for approval on the `release` environment (one reviewer, and not the person who started the run)
 3. Deploys to all targets in parallel where possible
 4. Generates a comprehensive summary
 
@@ -224,7 +224,7 @@ If a specific step fails, you can re-run just that workflow:
                        │
                        ▼
               ┌────────────────┐
-              │Manual Approval │  2 approvers required (skipped if dry_run)
+              │Manual Approval │  `release` environment gate (skipped if dry_run)
               └────────┬───────┘
                        │
         ┌──────────────┴──────────────┐
@@ -350,9 +350,10 @@ To add a new step to the release process:
 - **Solution**: Check permissions in orchestrator file
 - **Solution**: Verify GitHub App has correct permissions
 
-**Issue**: Manual approval times out
-- **Solution**: Increase timeout in `release-manual-approval.yml`
-- **Solution**: Check approver list is correct
+**Issue**: Manual approval never arrives or is rejected
+- **Solution**: Check the run's deployment gate, not the issues list: approval happens on the run page under Review deployments
+- **Solution**: Check the reviewer list on the `release` environment. It is managed in [liquibase-release-environment.tf](https://github.com/liquibase/liquibase-infrastructure/blob/main/github/liquibase/repos/public/liquibase-release-environment.tf), so changing it takes a PR in liquibase-infrastructure
+- **Solution**: A reviewer cannot approve a run they started themselves. Someone else on the list has to
 
 **Issue**: Secrets not available in called workflows
 - **Solution**: Ensure `secrets: inherit` is present
@@ -411,7 +412,14 @@ dry_run_branch_name: (leave empty for production)
 
 ### 2. Release Manual Approval (`release-manual-approval.yml`)
 
-**When to use:** If approval was skipped or needs to be re-requested.
+**When to use:** Normally never on its own. Approval is per-run: a paused orchestrator run is
+approved from **Review deployments** on that run's page, and dispatching this workflow standalone
+only gates its own, empty run. It exists as the reusable gate job the orchestrator calls.
+
+**How approval works:** The job carries `environment: release`, so GitHub pauses it and shows
+**Review deployments** on the run page. Any reviewer on that environment can approve or reject,
+except the person who started the run. There is no tracking issue and no keyword replies. The
+reviewer list is Terraform-managed in [liquibase-release-environment.tf](https://github.com/liquibase/liquibase-infrastructure/blob/main/github/liquibase/repos/public/liquibase-release-environment.tf).
 
 **Required inputs:**
 - `version`: Version to approve (e.g., `4.28.0`)
@@ -425,7 +433,8 @@ version: 4.28.0
 dry_run: false
 ```
 
-**Note:** Requires 2 approvers from the approved list.
+**Note:** One approval from the environment's reviewer list releases the gate, and the approver
+cannot be the person who started the run (`prevent_self_review`).
 
 ### 3. Deploy to Maven Central (`release-deploy-maven.yml`)
 
@@ -611,3 +620,27 @@ If a workflow continues to fail:
 2. Verify all secrets and credentials are correctly configured
 3. Check AWS/Maven/Docker service status
 4. Consult the team or escalate to DevOps
+
+## :wastebasket: Removed workflows
+
+Deleted 2026-08-27 (TECHOPS-1188). All seven were already `disabled_manually` in the
+Actions API and none of them declares an `on: workflow_call` trigger, so no active
+workflow could reach them: deleting the files removes the ability for anyone to
+re-enable them from the Actions UI.
+
+| Workflow | Own runs (all time) | Last run | Why it was removed |
+|---|---|---|---|
+| `build-branch.yml` | 3239 | 2026-08-25 | Per-PR SNAPSHOT publisher. `pull_request_target` + `packages: write` + `secrets: inherit`; branch snapshots are no longer published per PR. |
+| `claude-code-review.yml` | 1109 | 2026-08-25 | Last 15 runs were all `startup_failure`. Replaced by `@claude review` on the gated `claude.yml` (active, 3675 runs). |
+| `cleanup-branch-builds.yml` | 613 | 2026-08-25 | 29 of its last 30 runs failed, so it deleted nothing. |
+| `fossa.yml` | 0 | never | Never executed once since creation. FOSSA runs today as the `fossa / fossa-scan` job of `run-tests.yml` via `build-logic/fossa_ai.yml`. |
+| `installer-build-check.yml` | 2 | 2026-04-13 | Both runs failed. Installers are built by the release pipeline and rehearsed weekly by `dry-run-release.yml`. |
+| `owasp-scanner.yml` | 1 | 2025-10-02 | One run ever. Dependency CVEs are covered by `codeql.yml`, `trivy-scan-published-images.yml` and Dependabot. |
+| `weekly-integration-tests.yml` | 19 | 2025-11-16 | Scheduled run dead since 2025-11 and its Slack alert could never fire: it dispatched cross-repo to `build-logic` with `secrets.GITHUB_TOKEN`, which is scoped to this repo only. |
+
+Not removed, and why: `build.yml` and `run-test-harness.yml` are marked
+`disabled_manually` but still execute on every internal PR and every push to `main`.
+`run-tests.yml` (active) calls `./.github/workflows/build.yml`, which calls
+`liquibase/liquibase/.github/workflows/run-test-harness.yml@main`. Disabling a
+workflow blocks its event triggers, never `workflow_call`. Both files can only be
+deleted after `run-tests.yml` is retired at the PR #7944 cutover.
