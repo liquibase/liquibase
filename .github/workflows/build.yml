@@ -56,15 +56,17 @@ jobs:
 
       - name: Get Current BranchName
         id: get-branch-name
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
           # this logic checks if the branch is from a forked repository PR or not. Where -n is the inverse of -z (not empty)
           if [ -n "${GITHUB_HEAD_REF}" ];
           then
             branch_name=${GITHUB_HEAD_REF}
           else
-            branch_name=${{ github.ref_name }}
+            branch_name=$REF_NAME
           fi
-          modified_branch_name=`(echo $branch_name | tr '/' '_')`
+          modified_branch_name=$(echo $branch_name | tr '/' '_')
           echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT
           echo "unmodifiedBranchName=$branch_name" >> $GITHUB_OUTPUT
           echo "Modified Branch Name:" $modified_branch_name
@@ -103,11 +105,29 @@ jobs:
 
       - name: Get secrets from vault
         id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@2cb1a461cbd4865ac4299648312e4704c646cd53 # v3.0.1
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
+        # TECHOPS-1188: aws-secretsmanager-get-secrets can only load a secret whole, so
+        # parse-json-secrets: true put every credential in /vault/liquibase into this
+        # job's environment; read only the four keys this job uses instead.
+        run: |
+          set -euo pipefail
+          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
+          for k in GPG_SECRET GPG_PASSPHRASE LIQUIBOT_PAT_GPM_ACCESS INSTALL4J_LICENSE; do
+            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
+            # which would silently alter a value that legitimately ends in one.
+            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
+            v=${v%X}
+            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
+            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
+            # those literals registers a mask that never matches it; % is escaped first
+            # so the escapes the next two produce are not escaped again.
+            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
+            # Escaped, one command masks the whole value and every line within it.
+            printf '::add-mask::%s\n' "$e"
+            D="VAULT_EOF_${RANDOM}${RANDOM}"
+            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
+          done
+          unset JSON
+          echo "Loaded GPG_SECRET, GPG_PASSPHRASE, LIQUIBOT_PAT_GPM_ACCESS and INSTALL4J_LICENSE from /vault/liquibase."
 
       - name: Convert escaped newlines and set GPG key
         run: |
@@ -144,8 +164,10 @@ jobs:
 
       # Version artifact based off of branch
       - name: Version Artifact
+        env:
+          BRANCH_NAME: ${{ needs.setup.outputs.thisBranchName }}
         run: |
-          version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
+          version=$BRANCH_NAME-SNAPSHOT
           ./mvnw versions:set -DnewVersion="$version"
 
       - name: Artifacts - Build & Sign
@@ -153,6 +175,9 @@ jobs:
           INSTALL4J_LICENSE: ${{ env.INSTALL4J_LICENSE }}
           GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH_NAME: ${{ needs.setup.outputs.thisBranchName }}
+          MERGE_SHA: ${{ needs.setup.outputs.latestMergeSha }}
+          BUILD_TIMESTAMP: ${{ needs.setup.outputs.timeStamp }}
         run: |
           ## save install4j code signing keys
           mkdir -p liquibase-dist/target/keys
@@ -166,15 +191,15 @@ jobs:
           ./mvnw -B -pl liquibase-dist,liquibase-maven-plugin,liquibase-extension-testing -am source:jar clean package failsafe:integration-test failsafe:verify \
           "-Dbuild.repository.owner=liquibase" \
           "-Dbuild.repository.name=liquibase" \
-          "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" \
+          "-Dbuild.branch=$BRANCH_NAME" \
           "-Dbuild.number=${{ github.run_number }}" \
-          "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" \
-          "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
+          "-Dbuild.commit=$MERGE_SHA" \
+          "-Dbuild.timestamp=$BUILD_TIMESTAMP"
 
           # Extract the tarball to allow us to upload the liquibase installation files to our
           # github actions workflow so that we don't double zip the archive
           mkdir -p branch-artifacts
-          tar -xzf liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz -C branch-artifacts
+          tar -xzf liquibase-dist/target/liquibase-$BRANCH_NAME-SNAPSHOT.tar.gz -C branch-artifacts
 
           ##create installer - disabled here but run as nightly job and as part of release workflow
           # (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
@@ -185,13 +210,13 @@ jobs:
           # Copy artifacts
           mkdir -p artifacts
 
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip artifacts
-          cp liquibase-core/target/liquibase-core-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
-          #cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/internal/lib/liquibase-core.jar artifacts/liquibase-core-0-SNAPSHOT.jar
+          cp liquibase-dist/target/liquibase-$BRANCH_NAME-SNAPSHOT.tar.gz artifacts
+          cp liquibase-dist/target/liquibase-$BRANCH_NAME-SNAPSHOT.zip artifacts
+          cp liquibase-core/target/liquibase-core-$BRANCH_NAME-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
+          #cp liquibase-dist/target/liquibase-$BRANCH_NAME-SNAPSHOT/internal/lib/liquibase-core.jar artifacts/liquibase-core-0-SNAPSHOT.jar
 
-          cp liquibase-core/target/liquibase-core-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
-          cp target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
+          cp liquibase-core/target/liquibase-core-$BRANCH_NAME-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
+          cp target/liquibase-$BRANCH_NAME-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
 
           ##create installer - disabled here but run as nightly job and as part of release workflow
           #cp liquibase-dist/target/liquibase-*-installer-* artifacts
@@ -207,13 +232,13 @@ jobs:
           ##prepare branch-named convenience artifacts directories
           mkdir artifacts-named
 
-          cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.tar.gz
+          cp liquibase-dist/target/liquibase-$BRANCH_NAME-SNAPSHOT.tar.gz artifacts-named/liquibase-$BRANCH_NAME.tar.gz
 
           # liquibase-sdk:install-snapshot runs install-file over these without coordinates, so maven
           # reads the embedded pom: they need 0-SNAPSHOT inside even though the file name says the branch
-          cp prebuilt/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-deps.jar
+          cp prebuilt/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-$BRANCH_NAME-deps.jar
           for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-extension-testing'; do
-            cp prebuilt/$i-0-SNAPSHOT.jar artifacts-named/$i-${{ needs.setup.outputs.thisBranchName }}.jar
+            cp prebuilt/$i-0-SNAPSHOT.jar artifacts-named/$i-$BRANCH_NAME.jar
           done
 
       - name: Archive Packages
@@ -236,20 +261,28 @@ jobs:
 
       # Publish <commitsha>-SNAPSHOT version to GPM
       - name: Version Artifact Publish <commitsha>-SNAPSHOT version to GPM
+        env:
+          MERGE_SHA: ${{ needs.setup.outputs.latestMergeSha }}
         run: |
-          ./mvnw versions:set "-DnewVersion=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT"
+          ./mvnw versions:set "-DnewVersion=$MERGE_SHA-SNAPSHOT"
       - name: Publish <commitsha>-SNAPSHOT package
         run: |
-          ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
+          ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=$BRANCH_NAME" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=$MERGE_SHA" "-Dbuild.timestamp=$BUILD_TIMESTAMP"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH_NAME: ${{ needs.setup.outputs.thisBranchName }}
+          MERGE_SHA: ${{ needs.setup.outputs.latestMergeSha }}
+          BUILD_TIMESTAMP: ${{ needs.setup.outputs.timeStamp }}
 
       #Publish to GitHub Packages.
       - name: Publish tar.gz package to GPM
         run: |
-          ./mvnw -B -pl liquibase-dist clean deploy -DskipTests=true "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}"
+          ./mvnw -B -pl liquibase-dist clean deploy -DskipTests=true "-Dbuild.timestamp=$BUILD_TIMESTAMP" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=$BRANCH_NAME" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=$MERGE_SHA"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH_NAME: ${{ needs.setup.outputs.thisBranchName }}
+          MERGE_SHA: ${{ needs.setup.outputs.latestMergeSha }}
+          BUILD_TIMESTAMP: ${{ needs.setup.outputs.timeStamp }}
 
   run-tests-harness:
     needs: [setup, build_publish_branch]
