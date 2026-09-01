@@ -1,13 +1,7 @@
 name: Attach Artifacts To Draft Release
 
-# Security: These write permissions are required for release creation
-# - contents: write - create release tags and upload assets
-# - actions: write - trigger downstream workflows
-# - id-token: write - AWS OIDC authentication
-permissions:
-  contents: write
-  actions: write
-  id-token: write
+# Deny by default; the two jobs that need scopes grant them for themselves below.
+permissions: {}
 
 on:
   workflow_dispatch:
@@ -89,8 +83,14 @@ jobs:
     needs: [setup]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
+    permissions:
+      # contents: push the release tag; actions: read the source run's artifacts; id-token: AWS OIDC for vault.
+      contents: write
+      actions: read
+      id-token: write
     steps:
 
+      # Credentials stay persisted here: "Set repository tags" below pushes the tag over this remote.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Configure AWS credentials for vault access
@@ -216,10 +216,17 @@ jobs:
     needs: [setup, reversion]
     name: Build Installers
     runs-on: ubuntu-22.04
+    permissions:
+      # contents: attach assets to the draft release; id-token: AWS OIDC for vault.
+      contents: write
+      id-token: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # This job runs no networked git command, so the token does not need to sit in .git/config.
+          persist-credentials: false
 
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
