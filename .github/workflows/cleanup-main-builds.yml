@@ -5,10 +5,16 @@ on:
   release:
     types: [ published ]
 
+# Deny by default so a new job cannot silently pick up the org-wide write default.
+permissions: {}
+
 jobs:
   delete-package:
     name: Delete Github Packages for Main
     runs-on: ubuntu-22.04
+    permissions:
+      # Only scope actions/delete-package-versions needs; it acts on packages owned by this repo.
+      packages: write
 
     strategy:
       matrix:

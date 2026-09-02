@@ -20,6 +20,9 @@ on:
   schedule:
     - cron: '16 14 * * 4'
 
+# Deny by default so a new job cannot silently pick up the org-wide write default.
+permissions: {}
+
 jobs:
   analyze:
     name: Analyze
@@ -42,6 +45,9 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        # A pull_request run checks out the PR merge commit, so Autobuild builds fork-controlled code in this workspace.
+        persist-credentials: false
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -79,6 +85,8 @@ jobs:
     # Replaced rsdmike/github-security-report-action@v3.0.4 (stuck on Node 16, unmaintained)
     # with actions/github-script@v8 (Node 24) to generate a security report from code scanning alerts
     - name: Generate Security Report
+      # A fork pull_request gets a read-only token with no code-scanning access, so this only ever logs a warning there.
+      if: github.event_name != 'pull_request'
       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       with:
         script: |
@@ -156,6 +164,7 @@ jobs:
           core.info(`Security report generated with ${summary.total_open_alerts} open alerts`);
 
     - name: Upload Security Report
+      if: github.event_name != 'pull_request'
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: security-report
