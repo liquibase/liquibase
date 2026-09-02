@@ -852,7 +852,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
     }
 
-    private static InputStreamList handlePropertyFileInputStreams(String propertyFile) throws MojoFailureException {
+    private static InputStreamList handlePropertyFileInputStreams(String propertyFile) throws MojoFailureException, MojoExecutionException {
         try {
             InputStreamList inputStreamList = Scope.getCurrentScope().getResourceAccessor().openStreams(null, propertyFile);
             if (inputStreamList == null || inputStreamList.isEmpty()) {
