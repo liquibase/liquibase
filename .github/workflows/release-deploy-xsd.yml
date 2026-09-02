@@ -40,6 +40,9 @@ jobs:
       - name: Download liquibase xsd
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # This job runs no networked git command, so the token does not need to
+          # sit in .git/config. [TECHOPS-1111]
+          persist-credentials: false
           # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-core-repo
           repository: "liquibase/liquibase"

@@ -55,6 +55,9 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # This job runs no networked git command, so the token does not need to
+          # sit in .git/config. [TECHOPS-1111]
+          persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
 
   run-test-harness-tests:
@@ -65,6 +68,8 @@ jobs:
     environment: ${{ github.event.pull_request && github.event.pull_request.head.repo.full_name != github.repository && 'external' || 'internal' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Set environment variables for PR branch and SHA
         env:
