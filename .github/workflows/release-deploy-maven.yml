@@ -84,12 +84,27 @@ jobs:
           aws-region: us-east-1
 
       - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@2cb1a461cbd4865ac4299648312e4704c646cd53 # v3.0.1
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
+        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
+        # parse-json-secrets: true put every credential in /vault/liquibase into this
+        # job's environment; read only the four keys this job signs and publishes with.
+        run: |
+          set -euo pipefail
+          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
+          for k in GPG_SECRET GPG_PASSPHRASE SONATYPE_USERNAME SONATYPE_TOKEN; do
+            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
+            # which would silently alter a value that legitimately ends in one.
+            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
+            v=${v%X}
+            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
+            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
+            # those literals registers a mask that never matches it; % is escaped first
+            # so the escapes the next two produce are not escaped again.
+            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
+            printf '::add-mask::%s\n' "$e"
+            D="VAULT_EOF_${RANDOM}${RANDOM}"
+            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
+          done
+          unset JSON
 
       - name: Convert escaped newlines and set GPG key
         run: |
@@ -257,12 +272,27 @@ jobs:
           aws-region: us-east-1
 
       - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@2cb1a461cbd4865ac4299648312e4704c646cd53 # v3.0.1
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
+        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
+        # parse-json-secrets: true put every credential in /vault/liquibase into this
+        # job's environment; read only the four keys this job signs and publishes with.
+        run: |
+          set -euo pipefail
+          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
+          for k in GPG_SECRET GPG_PASSPHRASE SONATYPE_USERNAME SONATYPE_TOKEN; do
+            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
+            # which would silently alter a value that legitimately ends in one.
+            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
+            v=${v%X}
+            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
+            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
+            # those literals registers a mask that never matches it; % is escaped first
+            # so the escapes the next two produce are not escaped again.
+            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
+            printf '::add-mask::%s\n' "$e"
+            D="VAULT_EOF_${RANDOM}${RANDOM}"
+            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
+          done
+          unset JSON
 
       - name: Convert escaped newlines and set GPG key
         run: |
