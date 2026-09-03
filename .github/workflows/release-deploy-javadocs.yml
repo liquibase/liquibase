@@ -42,9 +42,8 @@ jobs:
     name: Upload Javadocs to S3
     runs-on: ubuntu-22.04
     if: ${{ inputs.dry_run == false }}
-    # Split so one release costs one approval: an orchestrated run has already cleared the
-    # `release` gate and passes `approved`, while a direct `workflow_dispatch` cannot set that input
-    # (it exists only under `workflow_call`) and so still lands on the reviewer-gated `release`.
+    # `approved` is `workflow_call`-only, so a direct dispatch cannot claim it and still meets the
+    # reviewers on `release`. An orchestrated run cleared that gate once already.
     environment:
       name: ${{ inputs.approved && 'release-publish' || 'release' }}
     steps:
