@@ -132,14 +132,17 @@ jobs:
     # job intentionally exits 1. Docker builds are exercised by docker-test.yml
     # and build-qa-docker.yml; nothing else needs validating here on dry-run.
     if: ${{ !cancelled() && inputs.dry_run != true && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') && needs.deploy-maven.result == 'success' }}
-    uses: ./.github/workflows/release-docker.yml
+    # Calls docker-release.yml directly. release-docker.yml used to sit in between,
+    # but it only renamed these two inputs and re-declared the same three permissions,
+    # so it was one more file to keep in sync for no behaviour. [TECHOPS-1099]
+    uses: ./.github/workflows/docker-release.yml
     permissions:
       contents: write
       id-token: write
       packages: write
     with:
-      version: ${{ needs.setup.outputs.version }}
-      dry_run: ${{ inputs.dry_run || false }}
+      liquibaseVersion: ${{ needs.setup.outputs.version }}
+      dryRun: ${{ inputs.dry_run || false }}
     secrets: inherit
 
   deploy-maven:

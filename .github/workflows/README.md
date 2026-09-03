@@ -134,7 +134,7 @@ The main coordinator that triggers all release steps in the proper sequence. Sup
 | `release-deploy-javadocs.yml` | Upload javadocs to S3 | ✅ Yes |
 | `release-publish-github-packages.yml` | Publish to GitHub Packages | ✅ Yes |
 | `release-deploy-xsd.yml` | Deploy XSD files to S3 and SFTP | ✅ Yes |
-| `release-docker.yml` | Trigger Docker image builds | ✅ Yes |
+| `docker-release.yml` | Build and push release Docker images | ✅ Yes |
 | `release-publish-assets-s3.yml` | Publish release assets to S3 | ✅ Yes |
 
 ## Key Benefits
@@ -512,23 +512,26 @@ version: 4.28.0
 dry_run: false
 ```
 
-### 7. Release Docker Images (`release-docker.yml`)
+### 7. Release Docker Images (`docker-release.yml`)
 
 **When to use:** If Docker image build fails.
 
 **Required inputs:**
-- `version`: Version to release (e.g., `4.28.0`)
+- `liquibaseVersion`: Version to release (e.g., `4.28.0`)
 
 **Optional inputs:**
-- `dry_run`: false (default) or true to skip actual build
+- `dryRun`: false (default) or true to skip pushes and commits
+- `pushDockerHub` / `pushGHCR` / `pushECR`: all true by default; set one to false to skip that registry
 
 **Example:**
 ```
-version: 4.28.0
-dry_run: false
+liquibaseVersion: 4.28.0
+dryRun: false
 ```
 
-**Note:** This triggers a workflow in the `liquibase/docker` repository.
+**Note:** the images are built here, in this repository. `release-docker.yml` used to
+wrap this workflow and only renamed two inputs, so it was removed in TECHOPS-1099.
+An older note here claimed the build ran in `liquibase/docker`; that was not true.
 
 ### 8. Publish Assets to S3 (`release-publish-assets-s3.yml`)
 
