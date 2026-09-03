@@ -15,6 +15,12 @@ on:
         type: boolean
         default: false
   
+      approved:
+        description: "True only when release-published-orchestrator has already cleared the manual-approval gate for this run."
+        required: false
+        type: boolean
+        default: false
+
   workflow_dispatch:
     inputs:
       tag:
@@ -36,8 +42,11 @@ jobs:
     name: Upload Javadocs to S3
     runs-on: ubuntu-22.04
     if: ${{ inputs.dry_run == false }}
-    # Emits the `environment:release` OIDC subject, which is what the release-scoped vault role trusts.
-    environment: release
+    # Split so one release costs one approval: an orchestrated run has already cleared the
+    # `release` gate and passes `approved`, while a direct `workflow_dispatch` cannot set that input
+    # (it exists only under `workflow_call`) and so still lands on the reviewer-gated `release`.
+    environment:
+      name: ${{ inputs.approved && 'release-publish' || 'release' }}
     steps:
       - name: Download release javadocs
         env:

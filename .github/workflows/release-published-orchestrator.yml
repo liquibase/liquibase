@@ -74,6 +74,9 @@ jobs:
       dry_run_branch_name: ${{ inputs.dry_run_branch_name || '' }}
     secrets: inherit
 
+  # The single approval for the whole release: GitHub approves per job, not per run, so the gate
+  # lives on one job that every publishing job depends on rather than on the publishing jobs
+  # themselves, which would stop the release once per wave of this graph.
   manual-approval:
     name: Manual Deployment Approval
     needs: [setup]
@@ -93,6 +96,9 @@ jobs:
     with:
       tag: ${{ needs.setup.outputs.tag }}
       dry_run: ${{ inputs.dry_run || false }}
+      # This run already cleared the `release` gate on manual-approval above, so the callee
+      # uses the reviewer-less `release-publish` environment rather than gating a second time.
+      approved: true
     secrets: inherit
 
   publish-github-packages:
@@ -121,6 +127,9 @@ jobs:
     with:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
+      # This run already cleared the `release` gate on manual-approval above, so the callee
+      # uses the reviewer-less `release-publish` environment rather than gating a second time.
+      approved: true
     secrets: inherit
 
   release-docker:
@@ -156,6 +165,9 @@ jobs:
       tag: ${{ needs.setup.outputs.tag }}
       dry_run: ${{ inputs.dry_run || false }}
       dry_run_release_id: ${{ inputs.dry_run_release_id || '' }}
+      # This run already cleared the `release` gate on manual-approval above, so the callee
+      # uses the reviewer-less `release-publish` environment rather than gating a second time.
+      approved: true
     secrets: inherit
 
   package:
@@ -197,6 +209,9 @@ jobs:
     with:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
+      # This run already cleared the `release` gate on manual-approval above, so the callee
+      # uses the reviewer-less `release-publish` environment rather than gating a second time.
+      approved: true
     secrets: inherit
 
   generate-summary:
