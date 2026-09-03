@@ -1,0 +1,88 @@
+name: Cleanup Packages
+
+# Weekly sweep of orphaned <sha>-SNAPSHOT versions in GitHub Packages: versions
+# whose commit no longer exists, or is not a branch head, a tag target, or an
+# ancestor of main/release. Replaces cleanup-branch-builds.yml, whose `delete`
+# trigger ignored its branch filters and whose per-branch job had nothing left
+# to delete once per-PR SNAPSHOT publishing stopped. [TECHOPS-1099]
+
+on:
+  schedule:
+    - cron: "30 5 * * 0"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: List orphans without deleting
+        type: boolean
+        default: false
+
+permissions: {}
+
+env:
+  PACKAGES: org.liquibase.liquibase-core org.liquibase.liquibase-extension-testing org.liquibase.liquibase-integration-tests org.liquibase.liquibase-maven-plugin org.liquibase.liquibase
+
+jobs:
+  sweep:
+    name: Sweep orphaned SHA-SNAPSHOT versions
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      ORG: ${{ github.repository_owner }}
+      REPO: ${{ github.repository }}
+      DRY_RUN: ${{ inputs.dry_run || false }}
+    steps:
+      - name: Sweep
+        run: |
+          set -uo pipefail
+
+          # SHAs to keep: every branch head and tag target (snapshot-branch.yml accepts tags).
+          KEEP_SHAS=$(gh api --paginate "repos/$REPO/branches?per_page=100" --jq '.[].commit.sha') || {
+            echo "::error::Failed to fetch branch heads; aborting to avoid incorrect deletions"; exit 1; }
+          KEEP_SHAS+=$'\n'$(gh api --paginate "repos/$REPO/tags?per_page=100" --jq '.[].commit.sha' || true)
+
+          declare -A VERDICT # sha -> keep|orphan|skip, shared across packages
+
+          # Prints why a SHA is kept and returns 0; returns 1 if it is orphaned; returns 2 on API trouble.
+          classify() {
+            local sha=$1 out status
+            if ! out=$(gh api "repos/$REPO/commits/$sha" --jq .sha 2>&1); then
+              grep -q "404\|Not Found" <<<"$out" && return 1
+              return 2
+            fi
+            grep -q "^${sha}" <<<"$KEEP_SHAS" && { echo "branch head or tag"; return 0; }
+            for base in main release; do
+              status=$(gh api "repos/$REPO/compare/${sha}...${base}" --jq .status 2>/dev/null) || return 2
+              [[ "$status" == ahead || "$status" == identical ]] && { echo "ancestor of $base"; return 0; }
+            done
+            return 1
+          }
+
+          failed=0
+          for pkg in $PACKAGES; do
+            echo "::group::$pkg"
+            versions=$(gh api --paginate "orgs/$ORG/packages/maven/$pkg/versions" \
+              --jq '.[] | select(.name | test("^[0-9a-f]{7,40}-SNAPSHOT$")) | "\(.id) \(.name)"') || {
+              echo "::error::Failed to list versions for $pkg"; failed=1; echo "::endgroup::"; continue; }
+
+            while read -r id name; do
+              [ -z "$id" ] && continue
+              sha=${name%-SNAPSHOT}
+              if [ -z "${VERDICT[$sha]:-}" ]; then
+                if reason=$(classify "$sha"); then VERDICT[$sha]="keep ($reason)"
+                elif [ $? -eq 1 ]; then VERDICT[$sha]=orphan
+                else VERDICT[$sha]="skip (API error)"; fi
+              fi
+              case "${VERDICT[$sha]}" in
+                orphan)
+                  if [ "$DRY_RUN" = true ]; then echo "ORPHAN (dry run): $name"
+                  elif gh api -X DELETE "orgs/$ORG/packages/maven/$pkg/versions/$id" >/dev/null 2>&1; then echo "DELETED: $name"
+                  else echo "::warning::Failed to delete $pkg $name (id $id)"; failed=1; fi ;;
+                *) echo "${VERDICT[$sha]^^}: $name" ;;
+              esac
+            done <<< "$versions"
+            echo "::endgroup::"
+          done
+          exit $failed

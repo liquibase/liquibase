@@ -82,6 +82,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # persist-scan-results.sh pushes to the scan-results branch with this
+          # checkout's token. [TECHOPS-1111]
+          persist-credentials: true
           fetch-depth: 0
 
       - name: Download community scan artifact
@@ -113,6 +116,7 @@ jobs:
       - name: Checkout build-logic
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           repository: liquibase/build-logic
           path: build-logic
 
