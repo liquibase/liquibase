@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a06197-f592-72c4-acf6-4ecbbc1c0df8",
-  "CreatedAt": "2026-09-02T10:09:03.89018282Z",
+  "ReportID": "01a066be-e305-7e71-b542-d83cc274532b",
+  "CreatedAt": "2026-09-03T10:09:41.125948123Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -605,6 +605,7 @@
             "https://access.redhat.com/errata/RHSA-2026:50849",
             "https://access.redhat.com/errata/RHSA-2026:54435",
             "https://access.redhat.com/errata/RHSA-2026:54622",
+            "https://access.redhat.com/errata/RHSA-2026:62260",
             "https://access.redhat.com/security/cve/CVE-2026-54513",
             "https://bugzilla.redhat.com/2492010",
             "https://bugzilla.redhat.com/2492015",
@@ -629,7 +630,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-54513"
           ],
           "PublishedDate": "2026-06-23T21:17:02.333Z",
-          "LastModifiedDate": "2026-08-26T13:19:15.917Z"
+          "LastModifiedDate": "2026-09-02T13:18:02.49Z"
         },
         {
           "VulnerabilityID": "CVE-2025-59250",
@@ -3596,7 +3597,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-21441"
           ],
           "PublishedDate": "2026-01-07T22:15:44.04Z",
-          "LastModifiedDate": "2026-09-01T13:18:14.823Z"
+          "LastModifiedDate": "2026-09-02T13:17:07.95Z"
         },
         {
           "VulnerabilityID": "CVE-2026-21441",
@@ -3795,7 +3796,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-21441"
           ],
           "PublishedDate": "2026-01-07T22:15:44.04Z",
-          "LastModifiedDate": "2026-09-01T13:18:14.823Z"
+          "LastModifiedDate": "2026-09-02T13:17:07.95Z"
         },
         {
           "VulnerabilityID": "CVE-2026-21441",
@@ -3994,7 +3995,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-21441"
           ],
           "PublishedDate": "2026-01-07T22:15:44.04Z",
-          "LastModifiedDate": "2026-09-01T13:18:14.823Z"
+          "LastModifiedDate": "2026-09-02T13:17:07.95Z"
         },
         {
           "VulnerabilityID": "CVE-2026-44431",
