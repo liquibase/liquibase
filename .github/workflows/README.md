@@ -1,4 +1,29 @@
-# :zap: Liquibase Release Workflows
+# :zap: Liquibase Workflows
+
+## :shield: CI overview (TECHOPS-1100 remediation)
+
+**Rule:** code from a pull request never runs with secrets. There is no `pull_request_target` in this repo.
+
+| Workflow | Trigger | Secrets | Purpose |
+|---|---|---|---|
+| `pr.yml` | `pull_request` | none | Unit + integration matrix (via `ci-test.yml`) and a Docker smoke build. Same for fork, same-repo and Dependabot PRs. Required check: **PR Gate**. |
+| `pr-labels.yml` | `pull_request` | none | Requires one release-notes label. Required check: **PR Labels**. |
+| `ci-test.yml` | `workflow_call` | none | Shared test matrix used by `pr.yml` and `main.yml`. |
+| `main.yml` | `push: main`, nightly cron, dispatch | vault (Sonar, FOSSA only) | Tests, Sonar, FOSSA, publishes `main-SNAPSHOT` and `<full-sha>-SNAPSHOT` to GitHub Packages, uploads `liquibase-artifacts`, recreates the `nightly` pre-release. |
+| `snapshot-branch.yml` | dispatch (maintainers) | none | Publishes `<full-sha>-SNAPSHOT` for any ref so QA can target an unreleased branch from liquibase-test-harness / liquibase-pro-tests. |
+| `docker.yml` | `push: main` (docker/**), cron, dispatch | vault | Full Docker test + vulnerability scan via build-logic reusables; persists main scan to `scan-results`. |
+| `cleanup-packages.yml` | weekly cron, dispatch | none | Deletes orphaned `<sha>-SNAPSHOT` package versions. |
+
+**Superseded (to be disabled at cutover, files kept for history):** `run-tests.yml`, `test-pr.yml`, `build.yml`, `build-branch.yml`, `build-main.yml`, `nightly-release.yml`, `run-test-harness.yml`, `label-pr.yml`, `docker-test.yml`, `docker-scan.yml`, `cleanup-branch-builds.yml`, `installer-build-check.yml`, `owasp-scanner.yml`, `weekly-integration-tests.yml`, `fossa.yml`, `dry-run-release.yml`, `claude-code-review.yml`.
+
+**Consumers of `main.yml` outputs**
+
+- `main-SNAPSHOT` / `<full-sha>-SNAPSHOT` on GitHub Packages: liquibase-test-harness, liquibase-pro nightly wrappers, build-logic `os-extension-test`.
+- `liquibase-artifacts` run artifact: `create-release.yml` (`runId` input) until the release pipeline builds from tag.
+
+**Not on PRs anymore:** SNAPSHOT publishing, Sonar, FOSSA, test-harness dispatch. Run them from `main.yml`, `snapshot-branch.yml`, or the harness repo directly.
+
+# :package: Release workflows
 
 ## :arrows_clockwise: Liquibase Build Process Refactoring
 
