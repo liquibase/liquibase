@@ -26,10 +26,22 @@ permissions:
 
 jobs:
   claude:
+    # Trusted authors only. Every trigger below is public: issue_comment and
+    # issues fire for any GitHub account. This job calls build-logic's
+    # claude.yml, which assumes the vault OIDC role and reads /vault/liquibase
+    # before invoking the action, so without an author gate anyone who writes
+    # "@claude" causes a credential load. Bot senders are excluded so a bot
+    # echoing the mention cannot chain into a run.
+    #
+    # author_association hangs off a different object per event (comment,
+    # review, issue), which is why the check is repeated per branch rather than
+    # hoisted out of the expression.
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      github.event.sender.type != 'Bot' && (
+        (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude') && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+        (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude') && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+        (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude') && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.review.author_association)) ||
+        (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')) && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association))
+      )
     uses: liquibase/build-logic/.github/workflows/claude.yml@main
     secrets: inherit
