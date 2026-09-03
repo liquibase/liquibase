@@ -23,6 +23,19 @@
 
 **Not on PRs anymore:** SNAPSHOT publishing, Sonar, FOSSA, test-harness dispatch. Run them from `main.yml`, `snapshot-branch.yml`, or the harness repo directly.
 
+**Why build-logic reusables are referenced as `@main`, not SHA-pinned**
+
+Every `uses: liquibase/build-logic/.github/workflows/*.yml@main` here is deliberate. Pinning
+per consumer repo was considered and rejected on 2026-08-25: it creates 20+ bump sites in each
+of ~30 repos, and in practice those pins go stale, which is worse than the moving reference.
+
+What compensates for the moving reference is that `main` in build-logic is not writable without
+review: its `reviewed_branch_protection` ruleset requires an approval and a code-owner review
+with no admin bypass, and its `.github/CODEOWNERS` gives `liquibase-devops` ownership of every
+path. A malicious change to a reusable workflow therefore needs a devops approval, the same bar
+as a change to this repo. Revisit the trade-off only if that ruleset or CODEOWNERS changes.
+[TECHOPS-1109]
+
 # :package: Release workflows
 
 ## :arrows_clockwise: Liquibase Build Process Refactoring
@@ -37,7 +50,7 @@ The `dryRun` process simulates our current production Liquibase release workflow
 
 The following actions are identical to those in a regular Liquibase release, with no modifications:
 
-- Get latests liquibase artifacts from the `run-tests.yml` workflow
+- Get latests liquibase artifacts from the `main.yml` workflow
 - Re-version artifacts to `dry-run-GITHUB_RUN_ID` version. i.e `dry-run-10522556642`
 - Build installers
 - Attach artifacts (`zip` and `tar` files) to a dryRun draft release
