@@ -2,7 +2,13 @@
 
 ## :shield: CI overview (TECHOPS-1100 remediation)
 
-**Rule:** code from a pull request never runs with secrets. There is no `pull_request_target` in this repo.
+**Rule:** code from a pull request never runs with secrets.
+
+`pull_request_target` is **not gone yet.** It is still live in `run-tests.yml` and
+`run-test-harness.yml`, and all seven superseded workflows below are still `active` in the
+Actions UI, so both pipelines run on every PR today. The rule above describes the new
+workflows in this table; it becomes true of the repository at the TECHOPS-1222 cutover, when
+those seven are disabled and their files deleted. [TECHOPS-1222]
 
 | Workflow | Trigger | Secrets | Purpose |
 |---|---|---|---|
@@ -22,6 +28,23 @@
 - `liquibase-artifacts` run artifact: `create-release.yml` (`runId` input) until the release pipeline builds from tag.
 
 **Not on PRs anymore:** SNAPSHOT publishing, Sonar, FOSSA, test-harness dispatch. Run them from `main.yml`, `snapshot-branch.yml`, or the harness repo directly.
+
+**Required checks**
+
+`PR Gate` and `PR Labels` are enforced by the `strict_status_checks` ruleset, not by
+`strict_branch_protection`. Status checks live in their own ruleset because a ruleset bypass is
+all-or-nothing: keeping them separate is what lets devops break the glass on a stuck check while
+review stays enforced. The same mechanism means the gate binds everyone **except** the
+`liquibase-devops` team and the two integration apps, which hold an always-bypass on that
+ruleset. [TECHOPS-1155]
+
+Two heads-ups for contributors:
+
+- A pull request opened before this CI existed has never run `PR Gate`, and a required check
+  that has never reported blocks the merge. It shows as "Expected - Waiting for status to be
+  reported" with nothing to click. Push a commit (an empty one is enough) and it clears.
+- Branch SNAPSHOTs are no longer published per PR. Dispatch `snapshot-branch.yml` on the branch
+  first: `gh workflow run snapshot-branch.yml --repo liquibase/liquibase --ref <branch> -f ref=<branch>`
 
 **Why build-logic reusables are referenced as `@main`, not SHA-pinned**
 
