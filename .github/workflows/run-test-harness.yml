@@ -1,3 +1,4 @@
+# DISABLED 2026-08-25 (TECHOPS-1106): superseded by dispatching liquibase-test-harness/main.yml directly from that repo. Do not re-enable; the file is kept for history until the post-Phase-3 deletion PR.
 name: Run Test Harness Tests
 
 on:
@@ -18,10 +19,13 @@ on:
 
 permissions:
   id-token: write # Required for OIDC authentication with AWS
-  
+
 jobs:
 
   authorize:
+    # Trusted context only: skip fork PRs so they never reach the vault/App-token
+    # job below (workflow_call and internal PRs still run).
+    if: ${{ !github.event.pull_request || github.event.pull_request.head.repo.full_name == github.repository }}
     environment: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && 'external' || 'internal' }}
     runs-on: ubuntu-latest
     steps:
@@ -32,36 +36,55 @@ jobs:
     runs-on: ubuntu-latest
     if: contains(github.event.pull_request.labels.*.name, 'runFunctional&HarnessTests') || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
     steps:
-      
+
       - name: Check variables
+        # TECHOPS-526: routed through env: so the values stay data. Interpolating them
+        # straight into the script splices them in as code, even in a debug echo.
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HAS_FUNCTIONAL_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'runFunctionalTests') }}
+          EVENT_AFTER: ${{ github.event.after }}
+          BASE_REF: ${{ github.base_ref }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
         run: |
-          echo "github.event_name: ${{ github.event_name }}"
-          echo "github.event.pull_request.labels.*.name: ${{ contains(github.event.pull_request.labels.*.name, 'runFunctionalTests') }}"
-          echo "github.event.after: ${{ github.event.after }}"
-          echo "github.base_ref: ${{ github.base_ref }}"
-          echo "github.event.pull_request.merged: ${{ github.event.pull_request.merged }}"
-          echo "github.event_name: ${{ github.event_name }}"
+          echo "github.event_name: $EVENT_NAME"
+          echo "github.event.pull_request.labels.*.name: $HAS_FUNCTIONAL_LABEL"
+          echo "github.event.after: $EVENT_AFTER"
+          echo "github.base_ref: $BASE_REF"
+          echo "github.event.pull_request.merged: $PR_MERGED"
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # This job runs no networked git command, so the token does not need to
+          # sit in .git/config. [TECHOPS-1111]
+          persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
-          allow-unsafe-pr-checkout: true
 
   run-test-harness-tests:
     runs-on: ubuntu-latest
     needs: [ test-harness-build ]
     name: Trigger Test Harness Tests
+    # Gated directly rather than only through needs, because the authorize job has been removed twice before (#7902, #7906).
+    environment: ${{ github.event.pull_request && github.event.pull_request.head.repo.full_name != github.repository && 'external' || 'internal' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Set environment variables for PR branch and SHA
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_BRANCH: ${{ inputs.thisBranchName }}
+          INPUT_SHA: ${{ inputs.latestMergeSha }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          if [ "${{ github.event_name }}" == "workflow_call" ]; then
-            echo "RUN_TESTS_BRANCH=${{ inputs.thisBranchName }}" >> $GITHUB_ENV
-            echo "RUN_TESTS_SHA=${{ inputs.latestMergeSha }}" >> $GITHUB_ENV
+          if [ "$EVENT_NAME" == "workflow_call" ]; then
+            echo "RUN_TESTS_BRANCH=$INPUT_BRANCH" >> $GITHUB_ENV
+            echo "RUN_TESTS_SHA=$INPUT_SHA" >> $GITHUB_ENV
           else
-            echo "RUN_TESTS_BRANCH=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
-            echo "RUN_TESTS_SHA=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+            echo "RUN_TESTS_BRANCH=$PR_HEAD_REF" >> $GITHUB_ENV
+            echo "RUN_TESTS_SHA=$PR_HEAD_SHA" >> $GITHUB_ENV
           fi
 
       - name: Get OSS Workflow Run URL
@@ -77,24 +100,62 @@ jobs:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@2cb1a461cbd4865ac4299648312e4704c646cd53 # v3.0.1
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
+      - name: Get App credentials from vault
+        id: app-creds
+        # Read by hand because aws-secretsmanager-get-secrets cannot select individual JSON keys, and this job needs two of them.
+        run: |
+          set -euo pipefail
+          bundle=$(aws secretsmanager get-secret-value \
+            --secret-id /vault/liquibase \
+            --query SecretString --output text)
+          # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
+          # which would silently alter a value that legitimately ends in one.
+          app_id=$(printf '%s' "$bundle" | jq -j '.LIQUIBASE_GITHUB_APP_ID // ""'; printf 'X')
+          app_id=${app_id%X}
+          app_key=$(printf '%s' "$bundle" | jq -j '.LIQUIBASE_GITHUB_APP_PRIVATE_KEY // ""'; printf 'X')
+          app_key=${app_key%X}
+          unset bundle
+          if [ -z "$app_id" ]; then echo "::error::LIQUIBASE_GITHUB_APP_ID missing from /vault/liquibase"; exit 1; fi
+          if [ -z "$app_key" ]; then echo "::error::LIQUIBASE_GITHUB_APP_PRIVATE_KEY missing from /vault/liquibase"; exit 1; fi
+          # add-mask matches line by line, so the PEM needs one mask per line. An `if`
+          # rather than `&&`: on a value ending in a newline the final empty line would
+          # make the loop exit non-zero and set -e would kill the step.
+          printf '%s\n' "$app_id" | while IFS= read -r line; do
+            if [ -n "$line" ]; then echo "::add-mask::$line"; fi
+          done
+          printf '%s\n' "$app_key" | while IFS= read -r line; do
+            if [ -n "$line" ]; then echo "::add-mask::$line"; fi
+          done
+          # Heredoc for both, not name=value: a preserved trailing newline would
+          # otherwise corrupt the output file.
+          D="VAULT_EOF_${RANDOM}${RANDOM}"
+          {
+            echo "app_id<<$D";  printf '%s\n' "$app_id";  echo "$D"
+            echo "app_key<<$D"; printf '%s\n' "$app_key"; echo "$D"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Get GitHub App token
         id: get-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ steps.app-creds.outputs.app_id }}
+          private-key: ${{ steps.app-creds.outputs.app_key }}
           owner: ${{ github.repository_owner }}
-          permission-contents: write
+          # Without repositories: the token covers every repo the App is installed on.
+          repositories: liquibase-test-harness
+          # return-dispatch needs Actions write and nothing else.
           permission-actions: write
-          
+
+      - name: Build test-harness dispatch payload
+        id: build-payload
+        run: |
+          payload=$(jq -nc \
+            --arg commit "$RUN_TESTS_SHA" \
+            --arg desc "$ossWorkflowUrl" \
+            --arg branch "$RUN_TESTS_BRANCH" \
+            '{liquibaseCommit: $commit, runDescription: $desc, liquibaseBranch: $branch}')
+          echo "json=$payload" >> $GITHUB_OUTPUT
+
       - name: Dispatch an action and get the run ID
         uses: codex-/return-dispatch@85e564d60eaec3cc4aca885373d510cfe4bd5b19 # v3
         id: return_dispatch
@@ -104,11 +165,7 @@ jobs:
           repo: liquibase-test-harness
           owner: liquibase
           workflow: main.yml
-          workflow_inputs:
-            '{"liquibaseCommit": "${{ env.RUN_TESTS_SHA }}",
-              "runDescription": "${{ env.ossWorkflowUrl }}",
-              "liquibaseBranch": "${{ env.RUN_TESTS_BRANCH }}"
-            }'
+          workflow_inputs: ${{ steps.build-payload.outputs.json }}
 
       - name: Display run ID
         run: echo ${{ steps.return_dispatch.outputs.run_id }}

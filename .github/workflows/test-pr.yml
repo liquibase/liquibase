@@ -1,0 +1,136 @@
+name: Test Fork PR
+
+# Fork-safe validation: fork PRs run under `pull_request` (read-only token, no
+# secrets) so untrusted code never reaches a credentialed job.
+# Internal PRs use run-tests.yml; keep the jobs here in sync with it.
+permissions:
+  contents: read
+  packages: read # read *-SNAPSHOT dependencies from GitHub Packages
+
+concurrency:
+  group: test-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  setup:
+    name: setup
+    # Fork PRs only; internal PRs run run-tests.yml.
+    if: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
+    runs-on: ubuntu-24.04
+    outputs:
+      latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
+      thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # This job runs no networked git command, so the token does not need to
+          # sit in .git/config. [TECHOPS-1111]
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Get Latest Merge Commit SHA
+        id: get-sha
+        run: |
+          latest_merge_sha=`(git rev-parse HEAD)`
+          echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
+
+      - name: Get Current BranchName
+        id: get-branch-name
+        run: |
+          # this logic checks if the branch is from a forked repository PR or not. Where -n is the inverse of -z (not empty)
+          if [ -n "${GITHUB_HEAD_REF}" ];
+          then
+            branch_name=${GITHUB_HEAD_REF}
+          else
+            branch_name=${{ github.ref_name }}
+          fi
+
+          modified_branch_name=`(echo $branch_name | tr '/_' '-')`
+          echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT
+          echo $modified_branch_name
+
+  build_tests:
+    name: Run Test for (Java ${{ matrix.java }} ${{ matrix.os }})
+    needs: setup
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-24.04, macos-15-intel, windows-latest ]
+        java: [ 17, 21, 25 ]
+        exclude:
+          - os: windows-latest
+            java: 17
+          - os: macos-15-intel
+            java: 17
+    runs-on: ${{ matrix.os }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # read-only for fork PRs
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # look for dependencies in maven
+      - name: Configure Maven settings
+        shell: bash
+        run: |
+          mkdir -p ~/.m2
+          cp .github/maven/settings-snapshots.xml ~/.m2/settings.xml
+          echo "MAVEN_GPM_PASSWORD=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Build & Test Java 17+
+        run: |
+          ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
+
+  integration-test:
+    name: Integration Test
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        testSystem:
+          - db2
+          - h2
+          #- h2:1.4
+          - hsqldb
+          - mariadb
+          - mssql
+          - mysql
+          - oracle
+          - postgresql
+          - sqlite
+          - firebird
+    needs: build_tests
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run Tests
+        run: ./mvnw -B clean verify -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false -Dsurefire.failIfNoTests=false

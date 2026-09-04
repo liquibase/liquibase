@@ -78,18 +78,14 @@ jobs:
     name: Manual Deployment Approval
     needs: [setup]
     uses: ./.github/workflows/release-manual-approval.yml
-    permissions:
-      issues: write
-      pull-requests: write
     with:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
-    secrets: inherit
 
   deploy-javadocs:
     name: Deploy Javadocs
     needs: [setup, manual-approval]
-    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
+    if: ${{ !cancelled() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') }}
     uses: ./.github/workflows/release-deploy-javadocs.yml
     permissions:
       contents: read
@@ -102,7 +98,7 @@ jobs:
   publish-github-packages:
     name: Publish to GitHub Packages
     needs: [setup, manual-approval]
-    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
+    if: ${{ !cancelled() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') }}
     uses: ./.github/workflows/release-publish-github-packages.yml
     permissions:
       contents: read
@@ -117,7 +113,7 @@ jobs:
   deploy-xsd:
     name: Deploy XSD Files
     needs: [setup, manual-approval]
-    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
+    if: ${{ !cancelled() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') }}
     uses: ./.github/workflows/release-deploy-xsd.yml
     permissions:
       contents: read
@@ -135,7 +131,7 @@ jobs:
     # tarballs — a dry-run-${run_id} version yields a zero-byte archive and the
     # job intentionally exits 1. Docker builds are exercised by docker-test.yml
     # and build-qa-docker.yml; nothing else needs validating here on dry-run.
-    if: always() && inputs.dry_run != true && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') && needs.deploy-maven.result == 'success'
+    if: ${{ !cancelled() && inputs.dry_run != true && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') && needs.deploy-maven.result == 'success' }}
     uses: ./.github/workflows/release-docker.yml
     permissions:
       contents: write
@@ -149,7 +145,7 @@ jobs:
   deploy-maven:
     name: Deploy to Maven Central
     needs: [setup, manual-approval, deploy-javadocs, publish-github-packages, deploy-xsd]
-    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') && (needs.deploy-javadocs.result == 'success' || needs.deploy-javadocs.result == 'skipped') && (needs.publish-github-packages.result == 'success' || needs.publish-github-packages.result == 'skipped') && (needs.deploy-xsd.result == 'success' || needs.deploy-xsd.result == 'skipped')
+    if: ${{ !cancelled() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') && (needs.deploy-javadocs.result == 'success' || needs.deploy-javadocs.result == 'skipped') && (needs.publish-github-packages.result == 'success' || needs.publish-github-packages.result == 'skipped') && (needs.deploy-xsd.result == 'success' || needs.deploy-xsd.result == 'skipped') }}
     uses: ./.github/workflows/release-deploy-maven.yml
     permissions:
       contents: write
@@ -165,7 +161,7 @@ jobs:
   package:
     name: Update Packages
     needs: [setup, manual-approval]
-    if: false  # TEMP: skip for v5.0.2 recovery - already published
+    if: ${{ !cancelled() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') }}
     uses: liquibase/build-logic/.github/workflows/package.yml@main
     permissions:
       actions: write
@@ -189,8 +185,11 @@ jobs:
 
   publish-assets-s3:
     name: Publish Assets to S3
-    needs: [setup, package]
-    if: false  # TEMP: skip for v5.0.2 recovery - already uploaded
+    needs: [setup, manual-approval, package]
+    # manual-approval is a direct dependency, not just an inherited one: when
+    # approval is denied `package` is skipped, and accepting a skipped `package`
+    # on its own would publish production assets past a rejected release.
+    if: ${{ !cancelled() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') && (needs.package.result == 'success' || needs.package.result == 'skipped') }}
     uses: ./.github/workflows/release-publish-assets-s3.yml
     permissions:
       contents: read
@@ -219,24 +218,45 @@ jobs:
     steps:
       - name: Generate Orchestrator Summary
         run: |
-          # Determine overall status
-          if [ "${{ needs.setup.result }}" == "success" ] && \
-             [ "${{ needs.deploy-javadocs.result }}" == "success" ] && \
-             [ "${{ needs.publish-github-packages.result }}" == "success" ] && \
-             [ "${{ needs.deploy-xsd.result }}" == "success" ] && \
-             [ "${{ needs.release-docker.result }}" == "success" ] && \
-             [ "${{ needs.deploy-maven.result }}" == "success" ] && \
-             [ "${{ needs.package.result }}" == "success" ] && \
-             [ "${{ needs.publish-assets-s3.result }}" == "success" ]; then
+          VERSION="${{ needs.setup.outputs.version }}"
+          DRY_RUN="${{ inputs.dry_run || false }}"
+
+          # Determine overall status.
+          #
+          # A stage counts as complete when it succeeded. Five of them are gated
+          # on `dry_run == false`, either in the workflow they call (javadocs,
+          # GitHub Packages, XSD, S3 assets) or in this file (docker), so on a
+          # dry run they are skipped by design and `skipped` counts as complete
+          # for them. On a real release every stage must actually succeed.
+          FAILED_STAGES=""
+
+          check_stage() {
+            local name="$1" result="$2" skip_ok_on_dry_run="$3"
+            if [ "$result" == "success" ]; then
+              return 0
+            fi
+            if [ "$result" == "skipped" ] && [ "$skip_ok_on_dry_run" == "yes" ] && [ "$DRY_RUN" == "true" ]; then
+              return 0
+            fi
+            FAILED_STAGES="${FAILED_STAGES:+$FAILED_STAGES, }$name"
+          }
+
+          check_stage "Setup"                   "${{ needs.setup.result }}"                   no
+          check_stage "Deploy Javadocs"         "${{ needs.deploy-javadocs.result }}"         yes
+          check_stage "Publish GitHub Packages" "${{ needs.publish-github-packages.result }}" yes
+          check_stage "Deploy XSD Files"        "${{ needs.deploy-xsd.result }}"              yes
+          check_stage "Release Docker Images"   "${{ needs.release-docker.result }}"          yes
+          check_stage "Deploy to Maven Central" "${{ needs.deploy-maven.result }}"            no
+          check_stage "Update Packages"         "${{ needs.package.result }}"                 no
+          check_stage "Publish Assets to S3"    "${{ needs.publish-assets-s3.result }}"       yes
+
+          if [ -z "$FAILED_STAGES" ]; then
             OVERALL_STATUS="✅ SUCCESS"
             STATUS_ICON="🎉"
           else
             OVERALL_STATUS="❌ FAILED"
             STATUS_ICON="💥"
           fi
-
-          VERSION="${{ needs.setup.outputs.version }}"
-          DRY_RUN="${{ inputs.dry_run || false }}"
 
           # Generate simplified summary
           cat >> $GITHUB_STEP_SUMMARY << EOF
@@ -291,3 +311,16 @@ jobs:
           EOF
 
           echo "📋 Release $VERSION: $OVERALL_STATUS"
+
+          # Fail the run when a stage did not complete. Without this the summary
+          # can report FAILED while the run itself goes green, because writing the
+          # summary is the last thing this job does and it always exits 0. That is
+          # how two skipped publish stages went unnoticed across several releases.
+          if [ -n "$FAILED_STAGES" ]; then
+            {
+              echo ""
+              echo "**Stages that did not complete:** $FAILED_STAGES"
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::Release $VERSION did not complete. Stages that did not complete: $FAILED_STAGES"
+            exit 1
+          fi

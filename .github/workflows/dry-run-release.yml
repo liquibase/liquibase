@@ -69,12 +69,27 @@ jobs:
           aws-region: us-east-1
 
       - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@2cb1a461cbd4865ac4299648312e4704c646cd53 # v3.0.1
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
+        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
+        # parse-json-secrets: true put every credential in /vault/liquibase into this
+        # job's environment; read only the two App keys the token mint below needs.
+        run: |
+          set -euo pipefail
+          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
+          for k in LIQUIBASE_GITHUB_APP_ID LIQUIBASE_GITHUB_APP_PRIVATE_KEY; do
+            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
+            # which would silently alter a value that legitimately ends in one.
+            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
+            v=${v%X}
+            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
+            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
+            # those literals registers a mask that never matches it; % is escaped first
+            # so the escapes the next two produce are not escaped again.
+            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
+            printf '::add-mask::%s\n' "$e"
+            D="VAULT_EOF_${RANDOM}${RANDOM}"
+            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
+          done
+          unset JSON
 
       - name: Get GitHub App token
         id: get-token
@@ -133,9 +148,17 @@ jobs:
           echo "Assets API Response status code: $?"
           echo "Assets API Response: $assets_response"
 
-          # Get URLs for zip and tar.gz files - getting browser_download_url instead of url
+          # The zip keeps browser_download_url: nothing downloads it, it is only
+          # surfaced in the summary and passed to consumers that ignore it.
+          #
+          # The tar.gz must use the asset API url. The ansible role deploy is the
+          # only consumer that actually fetches it, and at this point the release is
+          # still a draft, so browser_download_url is an untagged-<hash> path that
+          # 404s for a token-authenticated client. The asset API url resolves with
+          # the Accept: application/octet-stream + bearer token the role already
+          # sends (TECHOPS-1205).
           dry_run_zip_url=$(echo "$assets_response" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.zip$")) | .browser_download_url')
-          dry_run_tar_gz_url=$(echo "$assets_response" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.tar\\.gz$")) | .browser_download_url')
+          dry_run_tar_gz_url=$(echo "$assets_response" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.tar\\.gz$")) | .url')
 
           echo "Found zip URL: $dry_run_zip_url"
           echo "Found tar.gz URL: $dry_run_tar_gz_url"
@@ -200,12 +223,27 @@ jobs:
           aws-region: us-east-1
 
       - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@2cb1a461cbd4865ac4299648312e4704c646cd53 # v3.0.1
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
+        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
+        # parse-json-secrets: true put every credential in /vault/liquibase into this
+        # job's environment; read only the two App keys the token mint below needs.
+        run: |
+          set -euo pipefail
+          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
+          for k in LIQUIBASE_GITHUB_APP_ID LIQUIBASE_GITHUB_APP_PRIVATE_KEY; do
+            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
+            # which would silently alter a value that legitimately ends in one.
+            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
+            v=${v%X}
+            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
+            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
+            # those literals registers a mask that never matches it; % is escaped first
+            # so the escapes the next two produce are not escaped again.
+            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
+            printf '::add-mask::%s\n' "$e"
+            D="VAULT_EOF_${RANDOM}${RANDOM}"
+            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
+          done
+          unset JSON
 
       - name: Get GitHub App token
         id: get-token
@@ -233,6 +271,10 @@ jobs:
     steps:
       - name: Checkout liquibase
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The cleanup step below deletes the dry-run tag with this checkout's token.
+          # [TECHOPS-1111]
+          persist-credentials: true
 
       - name: Set up Git
         run: |
@@ -265,12 +307,27 @@ jobs:
           aws-region: us-east-1
 
       - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@2cb1a461cbd4865ac4299648312e4704c646cd53 # v3.0.1
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
+        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
+        # parse-json-secrets: true put every credential in /vault/liquibase into this
+        # job's environment; read only the Slack bot token and channel id.
+        run: |
+          set -euo pipefail
+          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
+          for k in DRY_RUN_SLACK_BOT_TOKEN DRYRUN_RELEASES_SLACK_ID; do
+            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
+            # which would silently alter a value that legitimately ends in one.
+            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
+            v=${v%X}
+            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
+            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
+            # those literals registers a mask that never matches it; % is escaped first
+            # so the escapes the next two produce are not escaped again.
+            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
+            printf '::add-mask::%s\n' "$e"
+            D="VAULT_EOF_${RANDOM}${RANDOM}"
+            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
+          done
+          unset JSON
 
       - name: Notify Slack on Build Failure
         uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0

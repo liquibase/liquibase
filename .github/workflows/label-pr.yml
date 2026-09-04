@@ -2,6 +2,10 @@ name: Pull Request Labels
 on:
   pull_request:
     types: [opened, labeled, unlabeled, synchronize, reopened]
+
+# Deny by default so a new job cannot silently pick up the org-wide write default.
+permissions: {}
+
 jobs:
   label:
     runs-on: ubuntu-latest
