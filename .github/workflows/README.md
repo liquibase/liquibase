@@ -126,16 +126,59 @@ The main coordinator that triggers all release steps in the proper sequence. Sup
 
 ### Extracted Reusable Workflows
 
-| Workflow | Purpose | Can Run Independently |
+| Workflow | Purpose | Can run independently |
 |----------|---------|----------------------|
 | `release-setup.yml` | Extract release metadata (version, tag, branch) | ✅ Yes |
 | `release-manual-approval.yml` | Hold the release for approval on the `release` environment | ✅ Yes |
-| `release-deploy-maven.yml` | Deploy artifacts to Maven Central | ✅ Yes |
-| `release-deploy-javadocs.yml` | Upload javadocs to S3 | ✅ Yes |
+| `release-deploy-maven.yml` | Deploy artifacts to Maven Central | ✅ Yes, with one approval |
+| `release-deploy-javadocs.yml` | Upload javadocs to S3 | ✅ Yes, with one approval |
 | `release-publish-github-packages.yml` | Publish to GitHub Packages | ✅ Yes |
-| `release-deploy-xsd.yml` | Deploy XSD files to S3 and SFTP | ✅ Yes |
-| `release-docker.yml` | Trigger Docker image builds | ✅ Yes |
-| `release-publish-assets-s3.yml` | Publish release assets to S3 | ✅ Yes |
+| `release-deploy-xsd.yml` | Deploy XSD files to S3 and SFTP | ✅ Yes, with one approval |
+| `docker-release.yml` | Build and push release Docker images | ✅ Yes |
+| `release-publish-assets-s3.yml` | Publish release assets to S3 | ✅ Yes, with one approval |
+
+## :closed_lock_with_key: What guards each release workflow
+
+The table above says what each workflow does. This one says what stands in front of it. Read it before changing any job that touches `/vault/liquibase`.
+
+| Job | Workflow | Gate | AWS role | Reads |
+|---|---|---|---|---|
+| `setup` | `release-setup.yml` | none | none | nothing |
+| `manual-approval` | `release-manual-approval.yml` | **`release`**, 5 reviewers | none | nothing; the gate makes no AWS call |
+| `deploy-javadocs` | `release-deploy-javadocs.yml` | via `needs` | release-scoped | `/vault/liquibase`, then assumes the build-logic prod role read out of it |
+| `publish-github-packages` | `release-publish-github-packages.yml` | via `needs` | none | `GITHUB_TOKEN` with `packages: write` |
+| `deploy-xsd` | `release-deploy-xsd.yml` | via `needs` | release-scoped | `/vault/liquibase`, then the build-logic role plus five WPEngine SFTP secrets |
+| `package` | `build-logic/package.yml@main` | via `needs` | **broad** | `/vault/liquibase`; shared workflow, so it cannot take this repo's environment |
+| `publish-assets-s3` | `release-publish-assets-s3.yml` | via `needs` | release-scoped | `/vault/liquibase`, then the build-logic prod role |
+| `deploy-maven-production` | `release-deploy-maven.yml` | via `needs` | release-scoped | `/vault/liquibase`; holds the Maven Central credentials |
+| `deploy-maven-dryrun` | `release-deploy-maven.yml` | none, by design | **broad** | `/vault/liquibase`; dry runs skip the gate deliberately |
+| `release-docker` | `docker-release.yml` | via `needs` | **broad** | its `update-dockerfiles` job reads the vault |
+| `reversion`, `build-installers` | `create-release.yml` | none | **broad** | `/vault/liquibase`; holds the GPG and DigiCert signing credentials |
+
+"release-scoped" is `liquibase-release-vault-oidc-role`, whose trust lists explicit subjects. "broad" is `liquibase-vault-oidc-role`, whose GitHub OIDC trust matches any repo in the `liquibase`, `Datical` and `datical` orgs, in both the classic and the immutable `owner@ownerId/repo@repoId` subject formats: six globs, not one. It carries a second statement besides, unrelated to GitHub: any principal inside the AWS org whose ARN matches the Spacelift role shapes can `sts:AssumeRole` into it.
+
+Three of the publishing jobs chain a second role: they read `AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC` **out of the vault** and then assume it. The vault read is not the end of the blast radius.
+
+### :twisted_rightwards_arrows: Which environment a publishing job gets
+
+The four publishing jobs resolve their environment at run time:
+
+```yaml
+environment:
+  name: ${{ inputs.approved && 'release-publish' || 'release' }}
+```
+
+`approved` is declared only under `workflow_call`, never under `workflow_dispatch`, so no person can set it.
+
+| Path | `approved` | Environment | Cost |
+|---|---|---|---|
+| orchestrated release | `true`, passed by the orchestrator after `manual-approval` clears | `release-publish`, no reviewers | one approval for the whole release |
+| direct `workflow_dispatch` of a callee | never set | `release`, 5 reviewers | one approval, from someone other than the dispatcher |
+
+Both names emit an `environment:` OIDC subject, and the release-scoped role trusts both. `manual-approval` lives in the orchestrator, not in a callee's `needs` graph, which is why a direct dispatch needs its own gate rather than inheriting one.
+
+Both environments are defined in `liquibase-infrastructure`, not here, so they cannot be changed by editing a workflow:
+[`github/liquibase/repos/public/liquibase-release-environment.tf`](https://github.com/liquibase/liquibase-infrastructure/blob/main/github/liquibase/repos/public/liquibase-release-environment.tf)
 
 ## Key Benefits
 
@@ -209,58 +252,52 @@ If a specific step fails, you can re-run just that workflow:
    - `dry_run`: false (for production)
 5. Click **Run workflow**
 
+For the four publishing workflows, a direct dispatch runs in the `release` environment and waits for one reviewer before it starts. That is deliberate: `manual-approval` is a job in the orchestrator, so a workflow dispatched on its own never passes it.
+
 ## Deployment Pipeline
 
+```mermaid
+flowchart LR
+    trigger("release: published<br/>workflow_dispatch<br/>workflow_call"):::evt --> setup
+    setup("setup"):::plain --> approval
+    approval("manual-approval<br/>environment: release<br/>5 reviewers"):::gate
+
+    approval --> javadocs
+    approval --> ghpkg
+    approval --> xsd
+    approval --> package
+
+    javadocs("deploy-javadocs"):::scoped --> maven
+    ghpkg("publish-github-packages"):::plain --> maven
+    xsd("deploy-xsd"):::scoped --> maven
+    package("package<br/>build-logic@main"):::broad --> s3
+
+    maven("deploy-maven"):::scoped --> docker("release-docker"):::broad
+    s3("publish-assets-s3"):::scoped
+
+    docker --> summary
+    s3 --> summary
+    summary("generate-summary<br/>needs: all nine<br/>always()"):::plain
+
+    classDef evt    fill:#e9ecf1,stroke:#5b6573,stroke-width:1px,color:#14171c
+    classDef plain  fill:#ffffff,stroke:#5b6573,stroke-width:1px,color:#14171c
+    classDef gate   fill:#f6ead6,stroke:#9d5c00,stroke-width:2px,color:#14171c
+    classDef scoped fill:#dcefe7,stroke:#17654f,stroke-width:2px,color:#14171c
+    classDef broad  fill:#f6dedb,stroke:#9d2f26,stroke-width:2px,color:#14171c
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                  Release Published Event                         │
-│              (or workflow_dispatch trigger)                      │
-└──────────────────────┬──────────────────────────────────────────┘
-                       │
-                       ▼
-              ┌────────────────┐
-              │     Setup      │  Extract version, branch, SHA, timestamp
-              └────────┬───────┘
-                       │
-                       ▼
-              ┌────────────────┐
-              │Manual Approval │  `release` environment gate (skipped if dry_run)
-              └────────┬───────┘
-                       │
-        ┌──────────────┴──────────────┐
-        │                             │
-        ▼                             ▼
-┌───────────────┐            ┌────────────────┐
-│ Deploy        │            │ Publish to     │
-│ Javadocs      │            │ GitHub Packages│
-└───────┬───────┘            └───────┬────────┘
-        │                            │
-        │    ┌───────────────────────┤
-        │    │                       │
-        ▼    ▼                       ▼
-  ┌──────────────┐          ┌────────────┐
-  │ Deploy XSD   │          │  Docker    │
-  └──────┬───────┘          └──────┬─────┘
-         │                         │
-         └─────────────────────────┘
-                                   │
-                                   ▼
-                        ┌──────────────────┐
-                        │  Deploy to Maven │
-                        │     Central      │
-                        └──────────────────┘
-                                   
-         Parallel Execution:
-         ┌─────────────┐        ┌──────────────────┐
-         │   Package   │        │Publish Assets S3 │
-         └─────────────┘        └──────────────────┘
-                                   
-                                   │
-                                   ▼
-                        ┌──────────────────┐
-                        │Generate Summary  │
-                        └──────────────────┘
-```
+
+| | meaning |
+|---|---|
+| :large_orange_diamond: amber | the reviewer gate |
+| :green_square: green | reads `/vault/liquibase` through the release-scoped role |
+| :red_square: red | reads `/vault/liquibase` through the broad `liquibase-vault-oidc-role` |
+| :white_large_square: white | no vault access |
+
+Three edges are easy to get backwards, so read them off the `needs:` keys rather than from memory:
+
+- `release-docker` runs **after** `deploy-maven`, not beside it.
+- `deploy-xsd` runs **beside** `deploy-javadocs`, not after it.
+- `publish-assets-s3` waits on `package`. That edge is load-bearing: when approval is denied `package` is skipped, and accepting a skipped `package` on its own would publish production assets past a rejected release.
 
 ## Testing Strategy
 
@@ -284,7 +321,7 @@ If a specific step fails, you can re-run just that workflow:
 
 3. **Test Manual Approval Logic**
    - Confirm approval is skipped in dry_run mode
-   - Verify 2 approvers are required in production mode
+   - Verify one approval from the `release` reviewer list is required in production mode, and that it cannot come from whoever started the run
 
 4. **Validate Summary Generation**
    - Check that all job statuses appear correctly
@@ -591,19 +628,22 @@ If manually running multiple workflows, follow this order:
 
 ```
 1. release-setup (must run first)
-   ↓
+   |
 2. release-manual-approval (if needed)
-   ↓
+   |
 3. Parallel (can run these together):
    - release-deploy-javadocs
    - release-publish-github-packages
    - release-deploy-xsd
-   - release-docker
-   ↓
-4. release-deploy-maven (waits for step 3)
-   ↓
-5. release-publish-assets-s3 (final step)
+   - package (build-logic)
+   |
+4. release-deploy-maven      (waits for javadocs + github-packages + xsd)
+   release-publish-assets-s3 (waits for package, not for maven)
+   |
+5. release-docker (waits for release-deploy-maven)
 ```
+
+`release-docker` is last, not part of step 3. It declares `needs: [setup, manual-approval, deploy-maven]`, so dispatching it before Maven has finished publishes images for artifacts that are not on Maven Central yet.
 
 ## Tips
 
