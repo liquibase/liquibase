@@ -2,6 +2,11 @@
 # This workflow scans published images on Docker Hub for vulnerabilities
 # using the reusable vulnerability scanning workflow from build-logic.
 #
+# Every active semver tag is scanned on every run (max_tags_to_scan defaults to
+# "all"). The job used to cover only the 10 newest tags, so anything older kept
+# whatever its last scan produced: for three months that was a June run with no
+# Grype output, which the CVE Library rendered as "Clean" (TECHOPS-1253).
+#
 # NOTE: SARIF results are NOT uploaded to GitHub Security tab to avoid stale alerts.
 # Published image vulnerabilities are tracked via workflow artifacts and GitHub Actions summary.
 # Only the main branch workflow (trivy.yml) populates the Security tab.
@@ -12,9 +17,9 @@ on:
   workflow_dispatch:
     inputs:
       max_tags_to_scan:
-        description: "Maximum number of published tags to scan"
+        description: "Number of newest published tags to scan, or \"all\""
         required: false
-        default: "20"
+        default: "all"
   schedule:
     # Run Monday-Friday at 10 AM UTC (published image monitoring)
     - cron: "0 10 * * 1-5"
@@ -37,11 +42,17 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     env:
-      MAX_TAGS: ${{ github.event.inputs.max_tags_to_scan || '10' }}
+      # Scheduled runs have no inputs, so they scan everything too. Needs the
+      # build-logic matrix script that understands "all" (build-logic PR noted
+      # in the TECHOPS-1253 PR that made this change).
+      MAX_TAGS: ${{ github.event.inputs.max_tags_to_scan || 'all' }}
     steps:
       - name: Checkout build-logic
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # This job runs no networked git command, so the token does not need to
+          # sit in .git/config. [TECHOPS-1111]
+          persist-credentials: false
           repository: liquibase/build-logic
           path: build-logic
 
@@ -97,11 +108,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # persist-scan-results.sh pushes to the scan-results branch with this
+          # checkout's token. [TECHOPS-1111]
+          persist-credentials: true
           fetch-depth: 0
 
       - name: Checkout build-logic
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           repository: liquibase/build-logic
           path: build-logic
 

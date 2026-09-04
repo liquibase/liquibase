@@ -124,5 +124,9 @@ updates:
     labels:
       - "docker"
       - "dependencies"
+      # pr-labels.yml requires one release-notes label; without it, docker bumps
+      # can never satisfy the required "PR Labels" check (the maven and
+      # github-actions ecosystems above already carry sdou).
+      - "sdou"
     open-pull-requests-limit: 5
 
