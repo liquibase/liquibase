@@ -96,6 +96,7 @@ jobs:
       tag: ${{ needs.setup.outputs.tag }}
       dry_run: ${{ inputs.dry_run || false }}
       # Gate cleared above, so the callee uses `release-publish` and does not prompt again.
+      # That makes `needs: manual-approval` the only thing holding reviewers in front of this job.
       approved: true
     secrets: inherit
 
@@ -126,6 +127,7 @@ jobs:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
       # Gate cleared above, so the callee uses `release-publish` and does not prompt again.
+      # That makes `needs: manual-approval` the only thing holding reviewers in front of this job.
       approved: true
     secrets: inherit
 
@@ -163,6 +165,7 @@ jobs:
       dry_run: ${{ inputs.dry_run || false }}
       dry_run_release_id: ${{ inputs.dry_run_release_id || '' }}
       # Gate cleared above, so the callee uses `release-publish` and does not prompt again.
+      # That makes `needs: manual-approval` the only thing holding reviewers in front of this job.
       approved: true
     secrets: inherit
 
@@ -206,6 +209,7 @@ jobs:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
       # Gate cleared above, so the callee uses `release-publish` and does not prompt again.
+      # That makes `needs: manual-approval` the only thing holding reviewers in front of this job.
       approved: true
     secrets: inherit
 

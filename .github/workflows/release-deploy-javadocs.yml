@@ -44,6 +44,8 @@ jobs:
     if: ${{ inputs.dry_run == false }}
     # `approved` is `workflow_call`-only, so a direct dispatch cannot claim it and still meets the
     # reviewers on `release`. An orchestrated run cleared that gate once already.
+    # Keep it that way: on `workflow_dispatch` anyone who can dispatch could pick `release-publish`,
+    # and a non-`boolean` input would do it silently because the string "false" is truthy.
     environment:
       name: ${{ inputs.approved && 'release-publish' || 'release' }}
     steps:
