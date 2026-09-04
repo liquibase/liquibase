@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a06a72-f69f-70ed-9ad7-a36e05dce8ab",
-  "CreatedAt": "2026-09-04T03:25:14.271061909Z",
+  "ReportID": "01a06be4-00d7-7ed0-a36e-eebbd1bfa780",
+  "CreatedAt": "2026-09-04T10:08:19.67197191Z",
   "ArtifactID": "sha256:6cfbd418093a91cac909e24718bc023de5e6825f4ae22c048f814666c2c3fdbe",
   "ArtifactName": "liquibase/liquibase:5.0.4",
   "ArtifactType": "container_image",
@@ -10885,13 +10885,13 @@
             "https://go.dev/issue/80405",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://linux.oracle.com/cve/CVE-2026-33818.html",
-            "https://linux.oracle.com/errata/ELSA-2026-60306-0.html",
+            "https://linux.oracle.com/errata/ELSA-2026-63022-0.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-33818",
             "https://pkg.go.dev/vuln/GO-2026-5972",
             "https://www.cve.org/CVERecord?id=CVE-2026-33818"
           ],
           "PublishedDate": "2026-08-13T22:17:19.84Z",
-          "LastModifiedDate": "2026-08-14T16:16:55.317Z"
+          "LastModifiedDate": "2026-09-03T16:37:52.17Z"
         },
         {
           "VulnerabilityID": "CVE-2026-39821",
@@ -11232,13 +11232,13 @@
             "https://go.dev/issue/80205",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://linux.oracle.com/cve/CVE-2026-56853.html",
-            "https://linux.oracle.com/errata/ELSA-2026-60306-0.html",
+            "https://linux.oracle.com/errata/ELSA-2026-63022-0.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-56853",
             "https://pkg.go.dev/vuln/GO-2026-6089",
             "https://www.cve.org/CVERecord?id=CVE-2026-56853"
           ],
           "PublishedDate": "2026-08-13T22:17:22.093Z",
-          "LastModifiedDate": "2026-08-14T16:16:57.21Z"
+          "LastModifiedDate": "2026-09-03T16:37:52.17Z"
         },
         {
           "VulnerabilityID": "CVE-2026-56858",
@@ -11317,13 +11317,13 @@
             "https://go.dev/issue/80435",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://linux.oracle.com/cve/CVE-2026-56858.html",
-            "https://linux.oracle.com/errata/ELSA-2026-60306-0.html",
+            "https://linux.oracle.com/errata/ELSA-2026-63022-0.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-56858",
             "https://pkg.go.dev/vuln/GO-2026-6091",
             "https://www.cve.org/CVERecord?id=CVE-2026-56858"
           ],
           "PublishedDate": "2026-08-13T22:17:22.207Z",
-          "LastModifiedDate": "2026-08-14T16:16:57.367Z"
+          "LastModifiedDate": "2026-09-03T16:37:52.17Z"
         },
         {
           "VulnerabilityID": "CVE-2026-56859",
@@ -11402,13 +11402,13 @@
             "https://go.dev/issue/80481",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://linux.oracle.com/cve/CVE-2026-56859.html",
-            "https://linux.oracle.com/errata/ELSA-2026-60306-0.html",
+            "https://linux.oracle.com/errata/ELSA-2026-63022-0.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-56859",
             "https://pkg.go.dev/vuln/GO-2026-6088",
             "https://www.cve.org/CVERecord?id=CVE-2026-56859"
           ],
           "PublishedDate": "2026-08-13T22:17:22.32Z",
-          "LastModifiedDate": "2026-08-14T16:16:57.523Z"
+          "LastModifiedDate": "2026-09-03T16:37:52.17Z"
         },
         {
           "VulnerabilityID": "CVE-2026-56860",
@@ -11487,13 +11487,13 @@
             "https://go.dev/issue/80494",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://linux.oracle.com/cve/CVE-2026-56860.html",
-            "https://linux.oracle.com/errata/ELSA-2026-60306-0.html",
+            "https://linux.oracle.com/errata/ELSA-2026-63022-0.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-56860",
             "https://pkg.go.dev/vuln/GO-2026-6218",
             "https://www.cve.org/CVERecord?id=CVE-2026-56860"
           ],
           "PublishedDate": "2026-08-13T22:17:22.44Z",
-          "LastModifiedDate": "2026-08-14T17:19:13.91Z"
+          "LastModifiedDate": "2026-09-03T16:37:52.17Z"
         },
         {
           "VulnerabilityID": "CVE-2026-56862",
@@ -11572,13 +11572,13 @@
             "https://go.dev/issue/80528",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://linux.oracle.com/cve/CVE-2026-56862.html",
-            "https://linux.oracle.com/errata/ELSA-2026-60306-0.html",
+            "https://linux.oracle.com/errata/ELSA-2026-63022-0.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-56862",
             "https://pkg.go.dev/vuln/GO-2026-6090",
             "https://www.cve.org/CVERecord?id=CVE-2026-56862"
           ],
           "PublishedDate": "2026-08-13T22:17:22.55Z",
-          "LastModifiedDate": "2026-08-14T16:16:57.717Z"
+          "LastModifiedDate": "2026-09-03T16:37:52.17Z"
         }
       ]
     }
