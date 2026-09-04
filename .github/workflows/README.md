@@ -290,7 +290,7 @@ flowchart LR
 |---|---|
 | :large_orange_diamond: amber | the reviewer gate |
 | :green_square: green | reads `/vault/liquibase` through the release-scoped role |
-| :red_square: red | reads `/vault/liquibase` through the broad `repo:liquibase/*:*` role |
+| :red_square: red | reads `/vault/liquibase` through the broad `liquibase-vault-oidc-role` |
 | :white_large_square: white | no vault access |
 
 Three edges are easy to get backwards, so read them off the `needs:` keys rather than from memory:
@@ -321,7 +321,7 @@ Three edges are easy to get backwards, so read them off the `needs:` keys rather
 
 3. **Test Manual Approval Logic**
    - Confirm approval is skipped in dry_run mode
-   - Verify 2 approvers are required in production mode
+   - Verify one approval from the `release` reviewer list is required in production mode, and that it cannot come from whoever started the run
 
 4. **Validate Summary Generation**
    - Check that all job statuses appear correctly
