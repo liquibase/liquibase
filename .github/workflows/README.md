@@ -134,7 +134,7 @@ The main coordinator that triggers all release steps in the proper sequence. Sup
 | `release-deploy-javadocs.yml` | Upload javadocs to S3 | ✅ Yes, with one approval |
 | `release-publish-github-packages.yml` | Publish to GitHub Packages | ✅ Yes |
 | `release-deploy-xsd.yml` | Deploy XSD files to S3 and SFTP | ✅ Yes, with one approval |
-| `release-docker.yml` | Trigger Docker image builds | ✅ Yes |
+| `docker-release.yml` | Build and push release Docker images | ✅ Yes |
 | `release-publish-assets-s3.yml` | Publish release assets to S3 | ✅ Yes, with one approval |
 
 ## :closed_lock_with_key: What guards each release workflow
@@ -152,10 +152,10 @@ The table above says what each workflow does. This one says what stands in front
 | `publish-assets-s3` | `release-publish-assets-s3.yml` | via `needs` | release-scoped | `/vault/liquibase`, then the build-logic prod role |
 | `deploy-maven-production` | `release-deploy-maven.yml` | via `needs` | release-scoped | `/vault/liquibase`; holds the Maven Central credentials |
 | `deploy-maven-dryrun` | `release-deploy-maven.yml` | none, by design | **broad** | `/vault/liquibase`; dry runs skip the gate deliberately |
-| `release-docker` | `release-docker.yml` | via `needs` | **broad** | delegates to `docker-release.yml`, whose `update-dockerfiles` reads the vault |
+| `release-docker` | `docker-release.yml` | via `needs` | **broad** | its `update-dockerfiles` job reads the vault |
 | `reversion`, `build-installers` | `create-release.yml` | none | **broad** | `/vault/liquibase`; holds the GPG and DigiCert signing credentials |
 
-"release-scoped" is `liquibase-release-vault-oidc-role`, whose trust lists explicit subjects. "broad" is `liquibase-vault-oidc-role`, trusted as `repo:liquibase/*:*`.
+"release-scoped" is `liquibase-release-vault-oidc-role`, whose trust lists explicit subjects. "broad" is `liquibase-vault-oidc-role`, whose GitHub OIDC trust matches any repo in the `liquibase`, `Datical` and `datical` orgs, in both the classic and the immutable `owner@ownerId/repo@repoId` subject formats: six globs, not one. It carries a second statement besides, unrelated to GitHub: any principal inside the AWS org whose ARN matches the Spacelift role shapes can `sts:AssumeRole` into it.
 
 Three of the publishing jobs chain a second role: they read `AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC` **out of the vault** and then assume it. The vault read is not the end of the blast radius.
 
