@@ -96,7 +96,10 @@ jobs:
         run: |
           # Full 40-char SHA: liquibase-test-harness resolves community builds by
           # matching <full-sha>-SNAPSHOT in GitHub Packages metadata.
-          ./mvnw -B versions:set -DnewVersion="${BUILD_SHA}-SNAPSHOT"
+          # Fully-qualified goal, not the `versions:set` prefix: resolving a plugin prefix
+          # makes Maven fetch org/codehaus/mojo/maven-metadata.xml from Central on every run,
+          # and a 429 there fails the build outright (main run 33716558208). [TECHOPS-1222]
+          ./mvnw -B org.codehaus.mojo:versions-maven-plugin:2.21.0:set -DnewVersion="${BUILD_SHA}-SNAPSHOT"
           # shellcheck disable=SC2086 # MAVEN_BUILD_ARGS is intentionally word-split
           ./mvnw -B $MAVEN_BUILD_ARGS "-Dbuild.commit=$BUILD_SHA" "-Dbuild.timestamp=$BUILD_TIMESTAMP" -DskipTests -pl '!liquibase-dist' deploy
 

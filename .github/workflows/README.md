@@ -2,7 +2,13 @@
 
 ## :shield: CI overview (TECHOPS-1100 remediation)
 
-**Rule:** code from a pull request never runs with secrets. There is no `pull_request_target` in this repo.
+**Rule:** code from a pull request never runs with secrets.
+
+`pull_request_target` is **not gone yet.** It is still live in `run-tests.yml` and
+`run-test-harness.yml`, and all seven superseded workflows below are still `active` in the
+Actions UI, so both pipelines run on every PR today. The rule above describes the new
+workflows in this table; it becomes true of the repository at the TECHOPS-1222 cutover, when
+those seven are disabled and their files deleted. [TECHOPS-1222]
 
 | Workflow | Trigger | Secrets | Purpose |
 |---|---|---|---|
@@ -23,6 +29,36 @@
 
 **Not on PRs anymore:** SNAPSHOT publishing, Sonar, FOSSA, test-harness dispatch. Run them from `main.yml`, `snapshot-branch.yml`, or the harness repo directly.
 
+**Required checks**
+
+`PR Gate` and `PR Labels` are enforced by the `strict_status_checks` ruleset, not by
+`strict_branch_protection`. Status checks live in their own ruleset because a ruleset bypass is
+all-or-nothing: keeping them separate is what lets devops break the glass on a stuck check while
+review stays enforced. The same mechanism means the gate binds everyone **except** the
+`liquibase-devops` team and the two integration apps, which hold an always-bypass on that
+ruleset. [TECHOPS-1155]
+
+Two heads-ups for contributors:
+
+- A pull request opened before this CI existed has never run `PR Gate`, and a required check
+  that has never reported blocks the merge. It shows as "Expected - Waiting for status to be
+  reported" with nothing to click. Push a commit (an empty one is enough) and it clears.
+- Branch SNAPSHOTs are no longer published per PR. Dispatch `snapshot-branch.yml` on the branch
+  first: `gh workflow run snapshot-branch.yml --repo liquibase/liquibase --ref <branch> -f ref=<branch>`
+
+**Why build-logic reusables are referenced as `@main`, not SHA-pinned**
+
+Every `uses: liquibase/build-logic/.github/workflows/*.yml@main` here is deliberate. Pinning
+per consumer repo was considered and rejected on 2026-08-25: it creates 20+ bump sites in each
+of ~30 repos, and in practice those pins go stale, which is worse than the moving reference.
+
+What compensates for the moving reference is that `main` in build-logic is not writable without
+review: its `reviewed_branch_protection` ruleset requires an approval and a code-owner review
+with no admin bypass, and its `.github/CODEOWNERS` gives `liquibase-devops` ownership of every
+path. A malicious change to a reusable workflow therefore needs a devops approval, the same bar
+as a change to this repo. Revisit the trade-off only if that ruleset or CODEOWNERS changes.
+[TECHOPS-1109]
+
 # :package: Release workflows
 
 ## :arrows_clockwise: Liquibase Build Process Refactoring
@@ -37,7 +73,7 @@ The `dryRun` process simulates our current production Liquibase release workflow
 
 The following actions are identical to those in a regular Liquibase release, with no modifications:
 
-- Get latests liquibase artifacts from the `run-tests.yml` workflow
+- Get latests liquibase artifacts from the `main.yml` workflow
 - Re-version artifacts to `dry-run-GITHUB_RUN_ID` version. i.e `dry-run-10522556642`
 - Build installers
 - Attach artifacts (`zip` and `tar` files) to a dryRun draft release
