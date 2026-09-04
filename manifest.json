@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-04T03:00:47Z",
+  "lastUpdated": "2026-09-04T03:27:28Z",
   "images": {
     "liquibase/liquibase": [
       "5.0.4",
@@ -61,7 +61,10 @@
       "4.3.0",
       "4.2.2",
       "4.2.0",
+      "4.1.1",
       "4.1",
+      "3.10.3",
+      "3.10",
       "latest"
     ]
   },
@@ -126,6 +129,9 @@
     "liquibase/liquibase:4.3.2": "success",
     "liquibase/liquibase:4.3.3": "success",
     "liquibase/liquibase:4.3.4": "success",
-    "liquibase/liquibase:4.3.5": "success"
+    "liquibase/liquibase:4.3.5": "success",
+    "liquibase/liquibase:3.10": "success",
+    "liquibase/liquibase:3.10.3": "success",
+    "liquibase/liquibase:4.1.1": "success"
   }
 }
