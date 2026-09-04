@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 /**
@@ -82,7 +83,7 @@ public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
      */
     @Override
     public void close() throws IOException {
-        for (InputStream stream : this) {
+        for (InputStream stream : streams.values()) {
             try {
                 stream.close();
             } catch (IOException e) {
@@ -116,5 +117,31 @@ public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
 
     public List<URI> getURIs() {
         return new ArrayList<>(streams.keySet());
+    }
+
+    public List<InputStream> getInputStreams() {
+        return new ArrayList<>(streams.values());
+    }
+
+    public InputStream getFirst() {
+            Iterator<InputStream> i = streams.values().iterator();
+            return i.hasNext() ? i.next() : null;
+    }
+
+    public Iterable<Map.Entry<URI, InputStream>> iterableWithURI() {
+        return new Iterable<>() {
+            @Override
+            public Iterator<Entry<URI, InputStream>> iterator() {
+                return streams.entrySet().iterator();
+            }
+            @Override
+            public void forEach(Consumer<? super Map.Entry<URI, InputStream>> action) {
+                streams.entrySet().forEach(action);
+            }
+            @Override
+            public Spliterator<Map.Entry<URI, InputStream>> spliterator() {
+                return streams.entrySet().spliterator();
+            }
+        };
     }
 }
