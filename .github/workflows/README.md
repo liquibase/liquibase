@@ -46,6 +46,11 @@ Two heads-ups for contributors:
 - Branch SNAPSHOTs are no longer published per PR. Dispatch `snapshot-branch.yml` on the branch
   first: `gh workflow run snapshot-branch.yml --repo liquibase/liquibase --ref <branch> -f ref=<branch>`
 
+  **Re-dispatch weekly for a long-lived branch.** Run artifacts here are kept for 7 days, which is
+  the org maximum, and `liquibase-sdk-maven-plugin` reads the run artifact rather than the
+  `<sha>-SNAPSHOT` the same workflow also publishes to GitHub Packages. The old producer rebuilt on
+  every push so this never came up; now the dispatch has a shelf life.
+
 **Why build-logic reusables are referenced as `@main`, not SHA-pinned**
 
 Every `uses: liquibase/build-logic/.github/workflows/*.yml@main` here is deliberate. Pinning
