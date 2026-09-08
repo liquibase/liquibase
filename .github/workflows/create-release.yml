@@ -90,10 +90,11 @@ jobs:
       id-token: write
     steps:
 
-      # Credentials stay persisted here: "Set repository tags" below pushes the tag over this remote.
+      # No persisted credentials: "Set repository tags" below pushes over an explicit app-token
+      # remote, and nothing else in this job talks to git.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: true
+          persist-credentials: false
 
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
@@ -110,7 +111,7 @@ jobs:
         run: |
           set -euo pipefail
           JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
-          for k in GPG_SECRET GPG_PASSPHRASE LIQUIBOT_PAT_GPM_ACCESS; do
+          for k in GPG_SECRET GPG_PASSPHRASE LIQUIBOT_PAT_GPM_ACCESS LIQUIBASE_GITHUB_APP_ID LIQUIBASE_GITHUB_APP_PRIVATE_KEY; do
             # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
             # which would silently alter a value that legitimately ends in one.
             v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
@@ -208,11 +209,32 @@ jobs:
           path: re-version/final
           retention-days: 1
 
+      # The tag must be pushed by an app installed in the org. A ruleset cannot grant a bypass to
+      # GITHUB_TOKEN: its app is GitHub's own global one, and GitHub rejects it as a bypass actor.
+      - name: Get GitHub App token
+        id: get-token
+        if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          permission-contents: write
+
       - name: Set repository tags
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
+        env:
+          GH_APP_TOKEN: ${{ steps.get-token.outputs.token }}
+          VERSION: ${{ needs.setup.outputs.version }}
         run: |
-          git tag -f v${{ needs.setup.outputs.version }}
-          git push -f origin v${{ needs.setup.outputs.version }}
+          set -euo pipefail
+          git tag -f "v${VERSION}"
+          # The token goes in the URL rather than a remote, so it is never persisted to
+          # .git/config. -c clears the basic-auth header actions/checkout would otherwise
+          # leave in place, which takes precedence over URL credentials.
+          git -c http.https://github.com/.extraheader= \
+            push -f "https://x-access-token:${GH_APP_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            "v${VERSION}"
 
   build-installers:
     needs: [setup, reversion]
