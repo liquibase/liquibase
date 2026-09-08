@@ -3,9 +3,9 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a07fd4-c911-7a3e-8875-d644dcd6cf3d",
-  "CreatedAt": "2026-09-08T07:04:06.673673044Z",
-  "ArtifactID": "sha256:bafb5c1bbbd6968625c6b8552ca59b2fe58b05760ed11fdae8bbcfd56be643ba",
+  "ReportID": "01a07fd9-69c4-7245-842d-51f0d5321c58",
+  "CreatedAt": "2026-09-08T07:09:09.956150615Z",
+  "ArtifactID": "sha256:a544d27afe80956c761479d56d863b4f23c843024623238a15066df8578d5eb8",
   "ArtifactName": "ghcr.io/liquibase/liquibase/liquibase-liquibase:e9da1290c0a464af57635b1e156c9e523ad1977d",
   "ArtifactType": "container_image",
   "Metadata": {
@@ -14,30 +14,30 @@
       "Family": "ubuntu",
       "Name": "24.04"
     },
-    "ImageID": "sha256:0fc7f6bf62c6505df2077832cafab1ca5dd7c9ff431d3f2faf8ed4087503ae44",
+    "ImageID": "sha256:69deef0259a763340677d58a6c240cbcf625d3e1b698a6cf0ab30b1c20c2302a",
     "DiffIDs": [
       "sha256:b9a65b3c65ab22d490085bd0bf5490e2409da8748b406870f2463bdc41cd6795",
       "sha256:b7238f4494c885051c2f7596f43d9c3b6ef6687cb374964607508a42ae3d1d4f",
       "sha256:91e7b7cd23a25d0fecd1638363b70786ab363631660a4c8ce5cba8984fefb5b0",
       "sha256:30863acad8f3c37e2262a1346dc3c59dc3794085fafefe43afffb7a7eb9f3321",
       "sha256:7089a8e6d32230110bea7acbc24316442ded8bd484212664369ffb69387adb71",
-      "sha256:83690b6965121600583c9717e5dc5889c1984aae73c58603c2fdf76124d0ab19",
+      "sha256:23a1246ea137ffb31e9f94b238f9643f315af5c2f3aac1249326efde62d21ce7",
       "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
-      "sha256:74c06754bf82a6a0decb884679263b0156e3971e0d545abd231f8de4df11dc11",
-      "sha256:fc13114192ab4b4796c38470d692422b7e14c33350c46ec9531140eff83d7d48",
-      "sha256:837e356de262708325733b9f57f5d14ece89017de20d5aad41109426f4e12ad1",
-      "sha256:e6766a1ce2ed8ae112ee933a1b55d8f677093cfee46b02dd367c43c48002c078"
+      "sha256:394aaab3b8986c2a6a6e51d73b02c4a22d4fe3db2b94eb23ab1cefff75659a1d",
+      "sha256:652960df3be57ecfc825d99e66f0bd73eb2c61ad630580302bae367e0c1f7caa",
+      "sha256:3844dac17228d0712b6d93aefd2557f0682d14d7242ff0644f601e55d272509e",
+      "sha256:ee4bb3da54137fef8ae4677e92901754cb5ee81c112ddd953ef2da65ae0a5985"
     ],
     "RepoTags": [
       "ghcr.io/liquibase/liquibase/liquibase-liquibase:e9da1290c0a464af57635b1e156c9e523ad1977d"
     ],
     "RepoDigests": [
-      "ghcr.io/liquibase/liquibase/liquibase-liquibase@sha256:8c0405eb40260acc156f3909907040ac43ec7ac4c68753cda2ae623583a18f7e"
+      "ghcr.io/liquibase/liquibase/liquibase-liquibase@sha256:c7460310b350e55447181b164aa492eb20791a694a0f3b07fd2c1d78cd9bfac8"
     ],
     "Reference": "ghcr.io/liquibase/liquibase/liquibase-liquibase:e9da1290c0a464af57635b1e156c9e523ad1977d",
     "ImageConfig": {
       "architecture": "amd64",
-      "created": "2026-09-08T07:02:46.633499482Z",
+      "created": "2026-09-08T07:07:52.554354021Z",
       "history": [
         {
           "created": "2026-08-17T13:09:48.224837029Z",
@@ -114,121 +114,121 @@
           "empty_layer": true
         },
         {
-          "created": "2026-09-08T07:02:39.995059387Z",
+          "created": "2026-09-08T07:07:43.976091117Z",
           "created_by": "RUN /bin/sh -c groupadd --gid 1001 liquibase \u0026\u0026     useradd --uid 1001 --gid liquibase --create-home --home-dir /liquibase liquibase \u0026\u0026     chown liquibase:root /liquibase \u0026\u0026     chmod g+rx /liquibase # buildkit",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-08T07:02:40.003399668Z",
+          "created": "2026-09-08T07:07:43.986650369Z",
           "created_by": "WORKDIR /liquibase",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-08T07:02:41.565582458Z",
+          "created": "2026-09-08T07:07:45.81238352Z",
           "created_by": "ARG LIQUIBASE_VERSION=5.0.4",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-08T07:02:41.565582458Z",
+          "created": "2026-09-08T07:07:45.81238352Z",
           "created_by": "ARG LB_SHA256=bb08638d70dddd6af8cca6e033148576f8214b5996831b1f8864eb3528f4cfce",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-08T07:02:41.565582458Z",
+          "created": "2026-09-08T07:07:45.81238352Z",
           "created_by": "RUN |2 LIQUIBASE_VERSION=5.0.4 LB_SHA256=bb08638d70dddd6af8cca6e033148576f8214b5996831b1f8864eb3528f4cfce /bin/sh -c wget -q -O liquibase-${LIQUIBASE_VERSION}.tar.gz \"https://package.liquibase.com/downloads/dockerhub/official/liquibase-${LIQUIBASE_VERSION}.tar.gz\" \u0026\u0026     echo \"$LB_SHA256 *liquibase-${LIQUIBASE_VERSION}.tar.gz\" | sha256sum -c - \u0026\u0026     tar -xzf liquibase-${LIQUIBASE_VERSION}.tar.gz \u0026\u0026     rm liquibase-${LIQUIBASE_VERSION}.tar.gz \u0026\u0026     ln -s /liquibase/liquibase /usr/local/bin/liquibase \u0026\u0026     ln -s /liquibase/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh \u0026\u0026     liquibase --version # buildkit",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-08T07:02:41.565582458Z",
+          "created": "2026-09-08T07:07:45.81238352Z",
           "created_by": "ARG LPM_VERSION=0.3.6",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-08T07:02:41.565582458Z",
+          "created": "2026-09-08T07:07:45.81238352Z",
           "created_by": "ARG LPM_SHA256=c93fd5738299111dea9e0ef6443ed608348b1990784d12ca32c28dc5c8c126be",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-08T07:02:41.565582458Z",
+          "created": "2026-09-08T07:07:45.81238352Z",
           "created_by": "ARG LPM_SHA256_ARM=8859f268148d3b8901a7ba10582c9a4b260506d9a66383c7e6a28a7b6f294bcc",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-08T07:02:41.565582458Z",
+          "created": "2026-09-08T07:07:45.81238352Z",
           "created_by": "LABEL org.opencontainers.image.description=Liquibase Container Image",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-08T07:02:41.565582458Z",
+          "created": "2026-09-08T07:07:45.81238352Z",
           "created_by": "LABEL org.opencontainers.image.licenses=FSL-1.1-ALv2",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-08T07:02:41.565582458Z",
+          "created": "2026-09-08T07:07:45.81238352Z",
           "created_by": "LABEL org.opencontainers.image.vendor=Liquibase",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-08T07:02:41.565582458Z",
+          "created": "2026-09-08T07:07:45.81238352Z",
           "created_by": "LABEL org.opencontainers.image.version=5.0.4",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-08T07:02:41.565582458Z",
+          "created": "2026-09-08T07:07:45.81238352Z",
           "created_by": "LABEL org.opencontainers.image.documentation=https://docs.liquibase.com",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-08T07:02:46.613341054Z",
+          "created": "2026-09-08T07:07:52.526321345Z",
           "created_by": "RUN |5 LIQUIBASE_VERSION=5.0.4 LB_SHA256=bb08638d70dddd6af8cca6e033148576f8214b5996831b1f8864eb3528f4cfce LPM_VERSION=0.3.6 LPM_SHA256=c93fd5738299111dea9e0ef6443ed608348b1990784d12ca32c28dc5c8c126be LPM_SHA256_ARM=8859f268148d3b8901a7ba10582c9a4b260506d9a66383c7e6a28a7b6f294bcc /bin/sh -c apt-get update \u0026\u0026     apt-get -yqq install unzip --no-install-recommends \u0026\u0026     rm -rf /var/lib/apt/lists/* \u0026\u0026     mkdir /liquibase/bin \u0026\u0026     arch=\"$(dpkg --print-architecture)\" \u0026\u0026     case \"$arch\" in     amd64)  DOWNLOAD_ARCH=\"\"  ;;     arm64)  DOWNLOAD_ARCH=\"-arm64\" \u0026\u0026 LPM_SHA256=$LPM_SHA256_ARM ;;     *) echo \u003e\u00262 \"error: unsupported architecture '$arch'\" \u0026\u0026 exit 1 ;;     esac \u0026\u0026 wget -q -O lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip \"https://github.com/liquibase/liquibase-package-manager/releases/download/v${LPM_VERSION}/lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip\" \u0026\u0026     echo \"$LPM_SHA256 *lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip\" | sha256sum -c - \u0026\u0026     unzip lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip -d bin/ \u0026\u0026     rm lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip \u0026\u0026     apt-get purge -y --auto-remove unzip \u0026\u0026     ln -s /liquibase/bin/lpm /usr/local/bin/lpm \u0026\u0026     lpm --version # buildkit",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-08T07:02:46.613341054Z",
+          "created": "2026-09-08T07:07:52.526321345Z",
           "created_by": "ENV LIQUIBASE_HOME=/liquibase",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-08T07:02:46.613341054Z",
+          "created": "2026-09-08T07:07:52.526321345Z",
           "created_by": "ENV DOCKER_LIQUIBASE=true",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-08T07:02:46.624226097Z",
+          "created": "2026-09-08T07:07:52.542837865Z",
           "created_by": "COPY docker-entrypoint.sh ./ # buildkit",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-08T07:02:46.633499482Z",
+          "created": "2026-09-08T07:07:52.554354021Z",
           "created_by": "COPY liquibase.docker.properties ./ # buildkit",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-08T07:02:46.633499482Z",
+          "created": "2026-09-08T07:07:52.554354021Z",
           "created_by": "USER liquibase:liquibase",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-08T07:02:46.633499482Z",
+          "created": "2026-09-08T07:07:52.554354021Z",
           "created_by": "ENTRYPOINT [\"/liquibase/docker-entrypoint.sh\"]",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-08T07:02:46.633499482Z",
+          "created": "2026-09-08T07:07:52.554354021Z",
           "created_by": "CMD [\"--help\"]",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
@@ -243,12 +243,12 @@
           "sha256:91e7b7cd23a25d0fecd1638363b70786ab363631660a4c8ce5cba8984fefb5b0",
           "sha256:30863acad8f3c37e2262a1346dc3c59dc3794085fafefe43afffb7a7eb9f3321",
           "sha256:7089a8e6d32230110bea7acbc24316442ded8bd484212664369ffb69387adb71",
-          "sha256:83690b6965121600583c9717e5dc5889c1984aae73c58603c2fdf76124d0ab19",
+          "sha256:23a1246ea137ffb31e9f94b238f9643f315af5c2f3aac1249326efde62d21ce7",
           "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
-          "sha256:74c06754bf82a6a0decb884679263b0156e3971e0d545abd231f8de4df11dc11",
-          "sha256:fc13114192ab4b4796c38470d692422b7e14c33350c46ec9531140eff83d7d48",
-          "sha256:837e356de262708325733b9f57f5d14ece89017de20d5aad41109426f4e12ad1",
-          "sha256:e6766a1ce2ed8ae112ee933a1b55d8f677093cfee46b02dd367c43c48002c078"
+          "sha256:394aaab3b8986c2a6a6e51d73b02c4a22d4fe3db2b94eb23ab1cefff75659a1d",
+          "sha256:652960df3be57ecfc825d99e66f0bd73eb2c61ad630580302bae367e0c1f7caa",
+          "sha256:3844dac17228d0712b6d93aefd2557f0682d14d7242ff0644f601e55d272509e",
+          "sha256:ee4bb3da54137fef8ae4677e92901754cb5ee81c112ddd953ef2da65ae0a5985"
         ]
       },
       "config": {
@@ -308,8 +308,8 @@
       },
       {
         "Size": 23552,
-        "Digest": "sha256:39e71fdd00547c63761107b404d9ebc1ae997ecda839734b51e6ff8cdca5b4d1",
-        "DiffID": "sha256:83690b6965121600583c9717e5dc5889c1984aae73c58603c2fdf76124d0ab19"
+        "Digest": "sha256:aa831df21ab897871da46f36a5a765b2ba2d0f5624bd75579178da993518bcb5",
+        "DiffID": "sha256:23a1246ea137ffb31e9f94b238f9643f315af5c2f3aac1249326efde62d21ce7"
       },
       {
         "Size": 1024,
@@ -318,23 +318,23 @@
       },
       {
         "Size": 10009600,
-        "Digest": "sha256:91ecf684a6719be717f25f39928a30d5c7e4136bd76cc2132835bed3e8608565",
-        "DiffID": "sha256:74c06754bf82a6a0decb884679263b0156e3971e0d545abd231f8de4df11dc11"
+        "Digest": "sha256:1af0068bd5c24dbecc70388bfc15baa0cf9c6fa49d0f51f51953814de9a33bdc",
+        "DiffID": "sha256:394aaab3b8986c2a6a6e51d73b02c4a22d4fe3db2b94eb23ab1cefff75659a1d"
       },
       {
         "Size": 10220032,
-        "Digest": "sha256:4d48cf36c88227e85a502c8764bffe29a9f4282b86c9d3e5d55dfa5fe1d28b81",
-        "DiffID": "sha256:fc13114192ab4b4796c38470d692422b7e14c33350c46ec9531140eff83d7d48"
+        "Digest": "sha256:a150ef4fa859ec6ded41db9172290ff5e99800bb23ecd998630701ac0bfede98",
+        "DiffID": "sha256:652960df3be57ecfc825d99e66f0bd73eb2c61ad630580302bae367e0c1f7caa"
       },
       {
         "Size": 7168,
-        "Digest": "sha256:421fff4c21c656596476520595608c3c693807bf7a90d5dafc785fa43ba1bbf3",
-        "DiffID": "sha256:837e356de262708325733b9f57f5d14ece89017de20d5aad41109426f4e12ad1"
+        "Digest": "sha256:2f48f28c88d441659308daca8bfe2032df2329790fcaf1703437b97381145fdf",
+        "DiffID": "sha256:3844dac17228d0712b6d93aefd2557f0682d14d7242ff0644f601e55d272509e"
       },
       {
         "Size": 2560,
-        "Digest": "sha256:84c69c1e986da59d3f2ae91c5f56b459711143fe2d826ad56e69a7b371dbe7eb",
-        "DiffID": "sha256:e6766a1ce2ed8ae112ee933a1b55d8f677093cfee46b02dd367c43c48002c078"
+        "Digest": "sha256:56303427762af98038ce3d3275ac5ee80dbe9278eb162b3b936f6bd17eb82673",
+        "DiffID": "sha256:ee4bb3da54137fef8ae4677e92901754cb5ee81c112ddd953ef2da65ae0a5985"
       }
     ]
   },
@@ -10610,8 +10610,8 @@
           },
           "Version": "2.4.240",
           "Layer": {
-            "Digest": "sha256:91ecf684a6719be717f25f39928a30d5c7e4136bd76cc2132835bed3e8608565",
-            "DiffID": "sha256:74c06754bf82a6a0decb884679263b0156e3971e0d545abd231f8de4df11dc11"
+            "Digest": "sha256:1af0068bd5c24dbecc70388bfc15baa0cf9c6fa49d0f51f51953814de9a33bdc",
+            "DiffID": "sha256:394aaab3b8986c2a6a6e51d73b02c4a22d4fe3db2b94eb23ab1cefff75659a1d"
           },
           "FilePath": "liquibase/internal/lib/h2.jar",
           "AnalyzedBy": "jar"
@@ -10624,8 +10624,8 @@
           },
           "Version": "5.12.0",
           "Layer": {
-            "Digest": "sha256:91ecf684a6719be717f25f39928a30d5c7e4136bd76cc2132835bed3e8608565",
-            "DiffID": "sha256:74c06754bf82a6a0decb884679263b0156e3971e0d545abd231f8de4df11dc11"
+            "Digest": "sha256:1af0068bd5c24dbecc70388bfc15baa0cf9c6fa49d0f51f51953814de9a33bdc",
+            "DiffID": "sha256:394aaab3b8986c2a6a6e51d73b02c4a22d4fe3db2b94eb23ab1cefff75659a1d"
           },
           "FilePath": "liquibase/internal/lib/opencsv.jar",
           "AnalyzedBy": "jar"
@@ -10638,8 +10638,8 @@
           },
           "Version": "2.22.0",
           "Layer": {
-            "Digest": "sha256:91ecf684a6719be717f25f39928a30d5c7e4136bd76cc2132835bed3e8608565",
-            "DiffID": "sha256:74c06754bf82a6a0decb884679263b0156e3971e0d545abd231f8de4df11dc11"
+            "Digest": "sha256:1af0068bd5c24dbecc70388bfc15baa0cf9c6fa49d0f51f51953814de9a33bdc",
+            "DiffID": "sha256:394aaab3b8986c2a6a6e51d73b02c4a22d4fe3db2b94eb23ab1cefff75659a1d"
           },
           "FilePath": "liquibase/internal/lib/commons-io.jar",
           "AnalyzedBy": "jar"
@@ -10652,8 +10652,8 @@
           },
           "Version": "4.7.7",
           "Layer": {
-            "Digest": "sha256:91ecf684a6719be717f25f39928a30d5c7e4136bd76cc2132835bed3e8608565",
-            "DiffID": "sha256:74c06754bf82a6a0decb884679263b0156e3971e0d545abd231f8de4df11dc11"
+            "Digest": "sha256:1af0068bd5c24dbecc70388bfc15baa0cf9c6fa49d0f51f51953814de9a33bdc",
+            "DiffID": "sha256:394aaab3b8986c2a6a6e51d73b02c4a22d4fe3db2b94eb23ab1cefff75659a1d"
           },
           "FilePath": "liquibase/internal/lib/picocli.jar",
           "AnalyzedBy": "jar"
@@ -10666,8 +10666,8 @@
           },
           "Version": "4.6.0",
           "Layer": {
-            "Digest": "sha256:91ecf684a6719be717f25f39928a30d5c7e4136bd76cc2132835bed3e8608565",
-            "DiffID": "sha256:74c06754bf82a6a0decb884679263b0156e3971e0d545abd231f8de4df11dc11"
+            "Digest": "sha256:1af0068bd5c24dbecc70388bfc15baa0cf9c6fa49d0f51f51953814de9a33bdc",
+            "DiffID": "sha256:394aaab3b8986c2a6a6e51d73b02c4a22d4fe3db2b94eb23ab1cefff75659a1d"
           },
           "FilePath": "liquibase/internal/lib/commons-collections4.jar",
           "AnalyzedBy": "jar"
@@ -10680,8 +10680,8 @@
           },
           "Version": "3.20.0",
           "Layer": {
-            "Digest": "sha256:91ecf684a6719be717f25f39928a30d5c7e4136bd76cc2132835bed3e8608565",
-            "DiffID": "sha256:74c06754bf82a6a0decb884679263b0156e3971e0d545abd231f8de4df11dc11"
+            "Digest": "sha256:1af0068bd5c24dbecc70388bfc15baa0cf9c6fa49d0f51f51953814de9a33bdc",
+            "DiffID": "sha256:394aaab3b8986c2a6a6e51d73b02c4a22d4fe3db2b94eb23ab1cefff75659a1d"
           },
           "FilePath": "liquibase/internal/lib/commons-lang3.jar",
           "AnalyzedBy": "jar"
@@ -10694,8 +10694,8 @@
           },
           "Version": "1.15.0",
           "Layer": {
-            "Digest": "sha256:91ecf684a6719be717f25f39928a30d5c7e4136bd76cc2132835bed3e8608565",
-            "DiffID": "sha256:74c06754bf82a6a0decb884679263b0156e3971e0d545abd231f8de4df11dc11"
+            "Digest": "sha256:1af0068bd5c24dbecc70388bfc15baa0cf9c6fa49d0f51f51953814de9a33bdc",
+            "DiffID": "sha256:394aaab3b8986c2a6a6e51d73b02c4a22d4fe3db2b94eb23ab1cefff75659a1d"
           },
           "FilePath": "liquibase/internal/lib/commons-text.jar",
           "AnalyzedBy": "jar"
@@ -10708,8 +10708,8 @@
           },
           "Version": "5.0.4",
           "Layer": {
-            "Digest": "sha256:91ecf684a6719be717f25f39928a30d5c7e4136bd76cc2132835bed3e8608565",
-            "DiffID": "sha256:74c06754bf82a6a0decb884679263b0156e3971e0d545abd231f8de4df11dc11"
+            "Digest": "sha256:1af0068bd5c24dbecc70388bfc15baa0cf9c6fa49d0f51f51953814de9a33bdc",
+            "DiffID": "sha256:394aaab3b8986c2a6a6e51d73b02c4a22d4fe3db2b94eb23ab1cefff75659a1d"
           },
           "FilePath": "liquibase/internal/lib/liquibase-core.jar",
           "AnalyzedBy": "jar"
@@ -10722,8 +10722,8 @@
           },
           "Version": "2.6",
           "Layer": {
-            "Digest": "sha256:91ecf684a6719be717f25f39928a30d5c7e4136bd76cc2132835bed3e8608565",
-            "DiffID": "sha256:74c06754bf82a6a0decb884679263b0156e3971e0d545abd231f8de4df11dc11"
+            "Digest": "sha256:1af0068bd5c24dbecc70388bfc15baa0cf9c6fa49d0f51f51953814de9a33bdc",
+            "DiffID": "sha256:394aaab3b8986c2a6a6e51d73b02c4a22d4fe3db2b94eb23ab1cefff75659a1d"
           },
           "FilePath": "liquibase/internal/lib/snakeyaml.jar",
           "AnalyzedBy": "jar"
@@ -10745,8 +10745,8 @@
           "Version": "v1.26.5",
           "Relationship": "direct",
           "Layer": {
-            "Digest": "sha256:4d48cf36c88227e85a502c8764bffe29a9f4282b86c9d3e5d55dfa5fe1d28b81",
-            "DiffID": "sha256:fc13114192ab4b4796c38470d692422b7e14c33350c46ec9531140eff83d7d48"
+            "Digest": "sha256:a150ef4fa859ec6ded41db9172290ff5e99800bb23ecd998630701ac0bfede98",
+            "DiffID": "sha256:652960df3be57ecfc825d99e66f0bd73eb2c61ad630580302bae367e0c1f7caa"
           },
           "AnalyzedBy": "gobinary"
         },
@@ -10759,8 +10759,8 @@
           },
           "Version": "v1.9.0",
           "Layer": {
-            "Digest": "sha256:4d48cf36c88227e85a502c8764bffe29a9f4282b86c9d3e5d55dfa5fe1d28b81",
-            "DiffID": "sha256:fc13114192ab4b4796c38470d692422b7e14c33350c46ec9531140eff83d7d48"
+            "Digest": "sha256:a150ef4fa859ec6ded41db9172290ff5e99800bb23ecd998630701ac0bfede98",
+            "DiffID": "sha256:652960df3be57ecfc825d99e66f0bd73eb2c61ad630580302bae367e0c1f7caa"
           },
           "AnalyzedBy": "gobinary"
         },
@@ -10773,8 +10773,8 @@
           },
           "Version": "v1.10.2",
           "Layer": {
-            "Digest": "sha256:4d48cf36c88227e85a502c8764bffe29a9f4282b86c9d3e5d55dfa5fe1d28b81",
-            "DiffID": "sha256:fc13114192ab4b4796c38470d692422b7e14c33350c46ec9531140eff83d7d48"
+            "Digest": "sha256:a150ef4fa859ec6ded41db9172290ff5e99800bb23ecd998630701ac0bfede98",
+            "DiffID": "sha256:652960df3be57ecfc825d99e66f0bd73eb2c61ad630580302bae367e0c1f7caa"
           },
           "AnalyzedBy": "gobinary"
         },
@@ -10787,8 +10787,8 @@
           },
           "Version": "v1.0.9",
           "Layer": {
-            "Digest": "sha256:4d48cf36c88227e85a502c8764bffe29a9f4282b86c9d3e5d55dfa5fe1d28b81",
-            "DiffID": "sha256:fc13114192ab4b4796c38470d692422b7e14c33350c46ec9531140eff83d7d48"
+            "Digest": "sha256:a150ef4fa859ec6ded41db9172290ff5e99800bb23ecd998630701ac0bfede98",
+            "DiffID": "sha256:652960df3be57ecfc825d99e66f0bd73eb2c61ad630580302bae367e0c1f7caa"
           },
           "AnalyzedBy": "gobinary"
         },
@@ -10800,8 +10800,8 @@
             "UID": "13ea817821fe4afd"
           },
           "Layer": {
-            "Digest": "sha256:4d48cf36c88227e85a502c8764bffe29a9f4282b86c9d3e5d55dfa5fe1d28b81",
-            "DiffID": "sha256:fc13114192ab4b4796c38470d692422b7e14c33350c46ec9531140eff83d7d48"
+            "Digest": "sha256:a150ef4fa859ec6ded41db9172290ff5e99800bb23ecd998630701ac0bfede98",
+            "DiffID": "sha256:652960df3be57ecfc825d99e66f0bd73eb2c61ad630580302bae367e0c1f7caa"
           },
           "AnalyzedBy": "gobinary"
         }
@@ -10822,8 +10822,8 @@
           "FixedVersion": "1.25.13, 1.26.6, 1.27.0-rc.3",
           "Status": "fixed",
           "Layer": {
-            "Digest": "sha256:4d48cf36c88227e85a502c8764bffe29a9f4282b86c9d3e5d55dfa5fe1d28b81",
-            "DiffID": "sha256:fc13114192ab4b4796c38470d692422b7e14c33350c46ec9531140eff83d7d48"
+            "Digest": "sha256:a150ef4fa859ec6ded41db9172290ff5e99800bb23ecd998630701ac0bfede98",
+            "DiffID": "sha256:652960df3be57ecfc825d99e66f0bd73eb2c61ad630580302bae367e0c1f7caa"
           },
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-33818",
           "DataSource": {
@@ -10831,7 +10831,7 @@
             "Name": "The Go Vulnerability Database",
             "URL": "https://pkg.go.dev/vuln/"
           },
-          "Fingerprint": "sha256:a8999c2af3564d2f382417afdfbe3077f227b8e395d93cc5d168722e3a688baf",
+          "Fingerprint": "sha256:e7d0aa2be73ca3bbbfa6aa193e8b13ab488447c3c6ffda3573b095fea9c3d88f",
           "Title": "encoding/asn1: golang: Go encoding/asn1: Denial of Service via excessive recursion in Unmarshal",
           "Description": "Enforce a recursion limit in Unmarshal to prevent stack exhaustion when parsing deeply-nested, recursive structures.",
           "Severity": "HIGH",
@@ -10906,8 +10906,8 @@
           "FixedVersion": "1.25.13, 1.26.6, 1.27.0-rc.3",
           "Status": "fixed",
           "Layer": {
-            "Digest": "sha256:4d48cf36c88227e85a502c8764bffe29a9f4282b86c9d3e5d55dfa5fe1d28b81",
-            "DiffID": "sha256:fc13114192ab4b4796c38470d692422b7e14c33350c46ec9531140eff83d7d48"
+            "Digest": "sha256:a150ef4fa859ec6ded41db9172290ff5e99800bb23ecd998630701ac0bfede98",
+            "DiffID": "sha256:652960df3be57ecfc825d99e66f0bd73eb2c61ad630580302bae367e0c1f7caa"
           },
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-39821",
           "DataSource": {
@@ -10915,7 +10915,7 @@
             "Name": "The Go Vulnerability Database",
             "URL": "https://pkg.go.dev/vuln/"
           },
-          "Fingerprint": "sha256:31abcd051aabb80ef9a9b8ea93c2eae05aa0ed6216006584ad4b9fc3f6c4359a",
+          "Fingerprint": "sha256:10530312ec4c0955ee8396ceab8363a2b886f5960cb9c3d39d0baa508e99a35c",
           "Title": "golang.org/x/net/idna: golang: net/http: golang.org/x/net/idna: Privilege escalation via incorrect Punycode label processing",
           "Description": "The ToASCII and ToUnicode functions incorrectly accept Punycode-encoded labels that decode to an ASCII-only label. For example, ToUnicode(\"xn--example-.com\") incorrectly returns the name \"example.com\" rather than an error. This behavior can lead to privilege escalation in programs using the idna package. For example, a program which performs privilege checks on the ASCII hostname may reject \"example.com\" but permit \"xn--example-.com\". If that program subsequently converts the ASCII hostname to Unicode, it will inadvertently permits access to the Unicode name \"example.com\".",
           "Severity": "HIGH",
@@ -11111,8 +11111,8 @@
           "FixedVersion": "1.26.6, 1.27.0-rc.3",
           "Status": "fixed",
           "Layer": {
-            "Digest": "sha256:4d48cf36c88227e85a502c8764bffe29a9f4282b86c9d3e5d55dfa5fe1d28b81",
-            "DiffID": "sha256:fc13114192ab4b4796c38470d692422b7e14c33350c46ec9531140eff83d7d48"
+            "Digest": "sha256:a150ef4fa859ec6ded41db9172290ff5e99800bb23ecd998630701ac0bfede98",
+            "DiffID": "sha256:652960df3be57ecfc825d99e66f0bd73eb2c61ad630580302bae367e0c1f7caa"
           },
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-46600",
           "DataSource": {
@@ -11120,7 +11120,7 @@
             "Name": "The Go Vulnerability Database",
             "URL": "https://pkg.go.dev/vuln/"
           },
-          "Fingerprint": "sha256:595e40e5dd1e2e63ce236f03ec98a1514e62fa3fa6055923f275585b87ce6d46",
+          "Fingerprint": "sha256:19c20268956b91458e57b525091a8731092c167048815c599acade4a797f6597",
           "Title": "golang.org/x/net/dns/dnsmessage: golang.org/x/net/dns/dnsmessage: Denial of Service via invalid DNS record parsing",
           "Description": "Parsing an invalid SVCB or HTTPS RR can panic when the size of a parameter value overflows the message buffer.",
           "Severity": "HIGH",
@@ -11169,8 +11169,8 @@
           "FixedVersion": "1.25.13, 1.26.6, 1.27.0-rc.3",
           "Status": "fixed",
           "Layer": {
-            "Digest": "sha256:4d48cf36c88227e85a502c8764bffe29a9f4282b86c9d3e5d55dfa5fe1d28b81",
-            "DiffID": "sha256:fc13114192ab4b4796c38470d692422b7e14c33350c46ec9531140eff83d7d48"
+            "Digest": "sha256:a150ef4fa859ec6ded41db9172290ff5e99800bb23ecd998630701ac0bfede98",
+            "DiffID": "sha256:652960df3be57ecfc825d99e66f0bd73eb2c61ad630580302bae367e0c1f7caa"
           },
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-56853",
           "DataSource": {
@@ -11178,7 +11178,7 @@
             "Name": "The Go Vulnerability Database",
             "URL": "https://pkg.go.dev/vuln/"
           },
-          "Fingerprint": "sha256:0140dd190940432722c2a769038028ff912b03d59e1265c1bbdd0e2ab9fd2916",
+          "Fingerprint": "sha256:9cd9c45e733d69acbc0cc9552f86b7694989e6140df9192c8472b69153eb0865",
           "Title": "net/http: golang: Go net/http: Unencrypted HTTP/2 connections vulnerable to Denial of Service",
           "Description": "When a server is configured to support unencrypted HTTP/2, it reads a few bytes from each new connection to see if they contain the HTTP/2 client preface. ReadHeaderTimeout is unexpectedly not being applied when doing this.",
           "Severity": "HIGH",
@@ -11260,8 +11260,8 @@
           "FixedVersion": "1.25.13, 1.26.6, 1.27.0-rc.3",
           "Status": "fixed",
           "Layer": {
-            "Digest": "sha256:4d48cf36c88227e85a502c8764bffe29a9f4282b86c9d3e5d55dfa5fe1d28b81",
-            "DiffID": "sha256:fc13114192ab4b4796c38470d692422b7e14c33350c46ec9531140eff83d7d48"
+            "Digest": "sha256:a150ef4fa859ec6ded41db9172290ff5e99800bb23ecd998630701ac0bfede98",
+            "DiffID": "sha256:652960df3be57ecfc825d99e66f0bd73eb2c61ad630580302bae367e0c1f7caa"
           },
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-56858",
           "DataSource": {
@@ -11269,7 +11269,7 @@
             "Name": "The Go Vulnerability Database",
             "URL": "https://pkg.go.dev/vuln/"
           },
-          "Fingerprint": "sha256:f4da7da9cf67e2401e6aca3216d668a4558153b9907f4ee0d51243b1b964001e",
+          "Fingerprint": "sha256:87de7cc79b8185fe17dd3ad2a2636394ba42032a43d496e643c7b011c52c0a95",
           "Title": "html/template: golang: Go html/template: Cross-Site Scripting via pathological input",
           "Description": "Previously, pathological inputs could close an unescaped '/' early, allowing for attack-controlled data to inject arbitrary content, potentially leading to XSS.",
           "Severity": "HIGH",
@@ -11344,8 +11344,8 @@
           "FixedVersion": "1.25.13, 1.26.6, 1.27.0-rc.3",
           "Status": "fixed",
           "Layer": {
-            "Digest": "sha256:4d48cf36c88227e85a502c8764bffe29a9f4282b86c9d3e5d55dfa5fe1d28b81",
-            "DiffID": "sha256:fc13114192ab4b4796c38470d692422b7e14c33350c46ec9531140eff83d7d48"
+            "Digest": "sha256:a150ef4fa859ec6ded41db9172290ff5e99800bb23ecd998630701ac0bfede98",
+            "DiffID": "sha256:652960df3be57ecfc825d99e66f0bd73eb2c61ad630580302bae367e0c1f7caa"
           },
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-56859",
           "DataSource": {
@@ -11353,7 +11353,7 @@
             "Name": "The Go Vulnerability Database",
             "URL": "https://pkg.go.dev/vuln/"
           },
-          "Fingerprint": "sha256:98ec807f212d679bec7ec9ca544124588ac11dc391abeaa5855820a4ab514c13",
+          "Fingerprint": "sha256:a224408bacaefe282a163c0952a0ac6b9b5e662c5e97cc1f14dc378e002eb707",
           "Title": "encoding/xml: golang: Go: Denial of Service via XML decoding recursion depth issue",
           "Description": "Previously, DecodeElement would reset the depth counter causing it to never fire; this could lead to stack exhaustion.",
           "Severity": "HIGH",
@@ -11435,8 +11435,8 @@
           "FixedVersion": "1.25.13, 1.26.6, 1.27.0-rc.3",
           "Status": "fixed",
           "Layer": {
-            "Digest": "sha256:4d48cf36c88227e85a502c8764bffe29a9f4282b86c9d3e5d55dfa5fe1d28b81",
-            "DiffID": "sha256:fc13114192ab4b4796c38470d692422b7e14c33350c46ec9531140eff83d7d48"
+            "Digest": "sha256:a150ef4fa859ec6ded41db9172290ff5e99800bb23ecd998630701ac0bfede98",
+            "DiffID": "sha256:652960df3be57ecfc825d99e66f0bd73eb2c61ad630580302bae367e0c1f7caa"
           },
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-56860",
           "DataSource": {
@@ -11444,7 +11444,7 @@
             "Name": "The Go Vulnerability Database",
             "URL": "https://pkg.go.dev/vuln/"
           },
-          "Fingerprint": "sha256:28a9fdc9550c77e4d878926f2fbb2f67e168589ef436711816602163046d9d56",
+          "Fingerprint": "sha256:d440cf0aca393dac0e49000d2eed2125de840766721093bbc73f870e439584ad",
           "Title": "net/url: golang: golang net/url: Denial of Service from quadratic complexity in path resolution",
           "Description": "Previously, resolving relative paths containing parent directory ('..') segments performed string conversions and buffer rewrites on each step, resulting in quadratic time complexity and high memory allocation overhead. Now, path resolution operates on a byte buffer using index-based backtracking for '..' segments, eliminating the quadratic time complexity and significantly reducing memory allocations.",
           "Severity": "HIGH",
@@ -11519,8 +11519,8 @@
           "FixedVersion": "1.25.13, 1.26.6, 1.27.0-rc.3",
           "Status": "fixed",
           "Layer": {
-            "Digest": "sha256:4d48cf36c88227e85a502c8764bffe29a9f4282b86c9d3e5d55dfa5fe1d28b81",
-            "DiffID": "sha256:fc13114192ab4b4796c38470d692422b7e14c33350c46ec9531140eff83d7d48"
+            "Digest": "sha256:a150ef4fa859ec6ded41db9172290ff5e99800bb23ecd998630701ac0bfede98",
+            "DiffID": "sha256:652960df3be57ecfc825d99e66f0bd73eb2c61ad630580302bae367e0c1f7caa"
           },
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-56862",
           "DataSource": {
@@ -11528,7 +11528,7 @@
             "Name": "The Go Vulnerability Database",
             "URL": "https://pkg.go.dev/vuln/"
           },
-          "Fingerprint": "sha256:32447ed48368ed94aa6ee0e306877095b40bcc08326de5a115381266c8a07ae0",
+          "Fingerprint": "sha256:34c744b2c12a04b092f885c53121051caf68144108354622889bc84b870f9ddb",
           "Title": "crypto/tls: golang: Golang crypto/tls: Denial of Service via indefinite KeyUpdate messages",
           "Description": "Handshake messages, such as KeyUpdate, are always considered as state-advancing, regardless of whether a handshake has been completed or not. As a result, a malicious client can keep sending KeyUpdate messages to force the server to keep performing key derivation operations indefinitely.",
           "Severity": "HIGH",
