@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a07b57-2c44-7a95-82fe-782d5c52896d",
-  "CreatedAt": "2026-09-07T10:08:25.6686952Z",
+  "ReportID": "01a0807d-560d-70cd-8ab4-75ecf959cdd2",
+  "CreatedAt": "2026-09-08T10:08:12.813054298Z",
   "ArtifactID": "sha256:ab06f77e82c54ce2f2a004f579c5c6b6c1689d650816b8124569f23747ebbd32",
   "ArtifactName": "liquibase/liquibase:5.0.3",
   "ArtifactType": "container_image",
@@ -10749,7 +10749,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-45447"
           ],
           "PublishedDate": "2026-06-09T17:17:19.277Z",
-          "LastModifiedDate": "2026-09-04T13:19:52.843Z"
+          "LastModifiedDate": "2026-09-07T13:20:09.227Z"
         },
         {
           "VulnerabilityID": "CVE-2026-45447",
@@ -10877,7 +10877,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-45447"
           ],
           "PublishedDate": "2026-06-09T17:17:19.277Z",
-          "LastModifiedDate": "2026-09-04T13:19:52.843Z"
+          "LastModifiedDate": "2026-09-07T13:20:09.227Z"
         }
       ]
     },
@@ -11254,7 +11254,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-27145"
           ],
           "PublishedDate": "2026-06-02T23:16:35.57Z",
-          "LastModifiedDate": "2026-09-04T13:18:37.147Z"
+          "LastModifiedDate": "2026-09-07T13:18:32.367Z"
         },
         {
           "VulnerabilityID": "CVE-2026-33818",
@@ -11519,6 +11519,7 @@
             "https://access.redhat.com/errata/RHSA-2026:60520",
             "https://access.redhat.com/errata/RHSA-2026:61245",
             "https://access.redhat.com/errata/RHSA-2026:61253",
+            "https://access.redhat.com/errata/RHSA-2026:63134",
             "https://access.redhat.com/security/cve/CVE-2026-39821",
             "https://bugzilla.redhat.com/2480756",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2480756",
@@ -11542,7 +11543,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-39821"
           ],
           "PublishedDate": "2026-05-22T16:16:20.41Z",
-          "LastModifiedDate": "2026-08-31T13:18:06.777Z"
+          "LastModifiedDate": "2026-09-07T13:19:13.533Z"
         },
         {
           "VulnerabilityID": "CVE-2026-39822",
