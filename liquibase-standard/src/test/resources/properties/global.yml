@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - property: { name: main-global, value: main-gv }
+  - preConditions:
+     - changeLogPropertyDefined: { property: main-global, value: main-gv }
+#    - not: [ changeLogPropertyDefined: { property: inc-global } ] # Does not work as one would expect
+  - include: { file: properties/inc.yml }
+  - changeSet:
+      id: after inc.yml before inc2.yml
+      author: g
+      preConditions:
+        - changeLogPropertyDefined: { property: main-global, value: main-gv }
+        - changeLogPropertyDefined: { property: inc-global, value: inc-gv }
+        - changeLogPropertyDefined: { property: inc.inc-global, value: inc.inc-gv }
+#        - not: [ changeLogPropertyDefined: { property: inc2-global } ]
+      output: global.yml > main-global:${main-global}, inc-global:${inc-global}, inc.inc-global:${inc.inc-global}
+  - include: { file: properties/inc2.yml }
+  - changeSet:
+      id: after inc2.yml
+      author: g
+      preConditions:
+      - changeLogPropertyDefined: { property: main-global, value: main-gv }
+      - changeLogPropertyDefined: { property: inc-global, value: inc-gv }
+      - changeLogPropertyDefined: { property: inc2-global, value: inc2-gv }
+      - changeLogPropertyDefined: { property: inc.inc-global, value: inc.inc-gv }
+      output: global.yml > main-global:${main-global}, inc-global:${inc-global}, inc2-global:${inc2-global},
+              inc.inc-global:${inc.inc-global}

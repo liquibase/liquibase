@@ -1,0 +1,19 @@
+databaseChangeLog:
+ - property: { name: inc-global, value: inc-gv }
+ - preConditions:
+   - changeLogPropertyDefined: { property: main-global, value: main-gv }
+   - changeLogPropertyDefined: { property: inc-global, value: inc-gv }
+ - changeSet:
+    id: before inc.inc.yml
+    author: g
+    output: inc.yml > main-global:${main-global}, inc-global:${inc-global}
+ - include:
+    file: properties/inc.inc.yml
+ - changeSet:
+    id: after inc.inc.yml
+    author: g
+    preConditions:
+     - changeLogPropertyDefined: { property: main-global, value: main-gv }
+     - changeLogPropertyDefined: { property: inc-global, value: inc-gv }
+     - changeLogPropertyDefined: { property: inc.inc-global, value: inc.inc-gv }
+    output: inc.yml > main-global:${main-global}, inc-global:${inc-global}, inc.inc-global:${inc.inc-global}
