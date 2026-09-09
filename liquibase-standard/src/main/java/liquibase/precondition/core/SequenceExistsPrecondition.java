@@ -66,7 +66,16 @@ public class SequenceExistsPrecondition extends AbstractPrecondition {
                 checkPostgresSequence(database, changeLog);
             } else {
                 Schema schema = new Schema(getCatalogName(), getSchemaName());
-                if (!SnapshotGeneratorFactory.getInstance().has(new Sequence().setName(getSequenceName()).setSchema(schema), database)) {
+                Sequence sequence = new Sequence().setName(getSequenceName()).setSchema(schema);
+                boolean sequenceExists;
+
+                if (database.supportsEfficientPreconditionChecks()) {
+                    sequenceExists = SnapshotGeneratorFactory.getInstance().hasIgnoreNested(sequence, database);
+                } else {
+                    sequenceExists = SnapshotGeneratorFactory.getInstance().has(sequence, database);
+                }
+
+                if (!sequenceExists) {
                     throw new PreconditionFailedException("Sequence " + database.escapeSequenceName(getCatalogName(), getSchemaName(), getSequenceName()) + " does not exist", changeLog, this);
                 }
             }
