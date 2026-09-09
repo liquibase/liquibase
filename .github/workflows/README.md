@@ -4,11 +4,11 @@
 
 **Rule:** code from a pull request never runs with secrets.
 
-`pull_request_target` is **not gone yet.** It is still live in `run-tests.yml` and
-`run-test-harness.yml`, and all seven superseded workflows below are still `active` in the
-Actions UI, so both pipelines run on every PR today. The rule above describes the new
-workflows in this table; it becomes true of the repository at the TECHOPS-1222 cutover, when
-those seven are disabled and their files deleted. [TECHOPS-1222]
+There is no `pull_request_target` anywhere under `.github/workflows/`. The workflows that
+carried it were disabled and then deleted at the TECHOPS-1222 cutover on 2026-09-09, so the
+rule above is a property of the repository rather than an intention. Verified on a real fork
+pull request (#7982): the full unit and integration matrix ran, and no job in it reached a
+credential. [TECHOPS-1222]
 
 | Workflow | Trigger | Secrets | Purpose |
 |---|---|---|---|
@@ -20,7 +20,14 @@ those seven are disabled and their files deleted. [TECHOPS-1222]
 | `docker.yml` | `push: main` (docker/**), cron, dispatch | vault | Full Docker test + vulnerability scan via build-logic reusables; persists main scan to `scan-results`. |
 | `cleanup-packages.yml` | weekly cron, dispatch | none | Deletes orphaned `<sha>-SNAPSHOT` package versions. |
 
-**Superseded (to be disabled at cutover, files kept for history):** `run-tests.yml`, `test-pr.yml`, `build.yml`, `build-branch.yml`, `build-main.yml`, `nightly-release.yml`, `run-test-harness.yml`, `label-pr.yml`, `docker-test.yml`, `docker-scan.yml`, `cleanup-branch-builds.yml`, `installer-build-check.yml`, `owasp-scanner.yml`, `weekly-integration-tests.yml`, `fossa.yml`, `dry-run-release.yml`, `claude-code-review.yml`.
+**Deleted at the cutover:** `run-tests.yml`, `test-pr.yml`, `build.yml`, `build-main.yml`,
+`nightly-release.yml`, `run-test-harness.yml`, `label-pr.yml`, `docker-test.yml`,
+`docker-scan.yml`, plus two files whose only callers were those workflows,
+`.github/util/workflow-helper.js` and `.github/maven/settings-snapshots.xml`. Earlier removals:
+`build-branch.yml`, `cleanup-branch-builds.yml`, `installer-build-check.yml`,
+`owasp-scanner.yml`, `weekly-integration-tests.yml`, `fossa.yml`, `claude-code-review.yml`.
+`dry-run-release.yml` was **kept**: it is the weekly release rehearsal and is not superseded.
+Git history has all of them.
 
 **Consumers of `main.yml` outputs**
 
@@ -714,14 +721,20 @@ re-enable them from the Actions UI.
 | `build-branch.yml` | 3239 | 2026-08-25 | Per-PR SNAPSHOT publisher. `pull_request_target` + `packages: write` + `secrets: inherit`; branch snapshots are no longer published per PR. |
 | `claude-code-review.yml` | 1109 | 2026-08-25 | Last 15 runs were all `startup_failure`. Replaced by `@claude review` on the gated `claude.yml` (active, 3675 runs). |
 | `cleanup-branch-builds.yml` | 613 | 2026-08-25 | 29 of its last 30 runs failed, so it deleted nothing. |
-| `fossa.yml` | 0 | never | Never executed once since creation. FOSSA runs today as the `fossa / fossa-scan` job of `run-tests.yml` via `build-logic/fossa_ai.yml`. |
+| `fossa.yml` | 0 | never | Never executed once since creation. FOSSA ran as a job of `run-tests.yml` via `build-logic/fossa_ai.yml`; since the cutover it runs from `main.yml`. |
 | `installer-build-check.yml` | 2 | 2026-04-13 | Both runs failed. Installers are built by the release pipeline and rehearsed weekly by `dry-run-release.yml`. |
 | `owasp-scanner.yml` | 1 | 2025-10-02 | One run ever. Dependency CVEs are covered by `codeql.yml`, `trivy-scan-published-images.yml` and Dependabot. |
 | `weekly-integration-tests.yml` | 19 | 2025-11-16 | Scheduled run dead since 2025-11 and its Slack alert could never fire: it dispatched cross-repo to `build-logic` with `secrets.GITHUB_TOKEN`, which is scoped to this repo only. |
 
-Not removed, and why: `build.yml` and `run-test-harness.yml` are marked
-`disabled_manually` but still execute on every internal PR and every push to `main`.
-`run-tests.yml` (active) calls `./.github/workflows/build.yml`, which calls
-`liquibase/liquibase/.github/workflows/run-test-harness.yml@main`. Disabling a
-workflow blocks its event triggers, never `workflow_call`. Both files can only be
-deleted after `run-tests.yml` is retired at the PR #7944 cutover.
+Now removed. `build.yml` and `run-test-harness.yml` spent months marked
+`disabled_manually` while still executing on every internal PR and every push to `main`:
+`run-tests.yml` called `./.github/workflows/build.yml`, which called
+`liquibase/liquibase/.github/workflows/run-test-harness.yml@main`. **Disabling a workflow
+blocks its event triggers, never `workflow_call`**, so the only thing that stopped them was
+deleting the caller. Worth remembering the next time a workflow looks retired in the Actions
+UI: check who calls it, not what the UI says.
+
+One stale reference survives outside this repository. `liquibase-pro` carries a vendored copy
+at `core/.github/workflows/build.yml` that still names `run-test-harness.yml@main`. It is
+inert: GitHub only registers workflows under a repository's own root `.github/workflows/`, and
+liquibase-pro has zero workflows registered under `core/`.
