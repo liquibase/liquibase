@@ -19,7 +19,12 @@ on:
 
 concurrency:
   group: nightly-release
-  cancel-in-progress: true
+  # Was `true`. main.yml's nightly-release job shares this group, and cancelling it mid-run can
+  # land between its `gh release delete nightly --cleanup-tag` and `gh release create`, leaving
+  # no nightly release and no tag at all. Both publishers now queue instead of cancelling, so the
+  # loser waits rather than killing the winner. This workflow is disabled at the TECHOPS-1222
+  # cutover, which removes the duplication entirely; until then, queueing is the safe shape.
+  cancel-in-progress: false
 
 jobs:
   nightly-release:
