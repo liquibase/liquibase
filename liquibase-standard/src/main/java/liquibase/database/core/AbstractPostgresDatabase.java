@@ -248,4 +248,19 @@ public abstract class AbstractPostgresDatabase extends AbstractJdbcDatabase {
     public boolean supportsStoredLogicSnapshot() {
         return false;
     }
+
+    /**
+     * Whether this database supports PostgreSQL session-level advisory locks
+     * ({@code pg_try_advisory_lock} / {@code pg_advisory_unlock}), as used by
+     * {@code PostgreSQLSessionLockService} when {@code liquibase.useSessionLock} is enabled.
+     * <p>
+     * Unlike the snapshot-ability hooks above, this one defaults to {@code true}: advisory locks
+     * are a core PostgreSQL feature present since 8.2, so every real PostgreSQL is expected to have
+     * them and a variant that does not (CockroachDB) opts <em>down</em>.
+     *
+     * @return true if session-level advisory locks on this database are usable as a changelog lock
+     */
+    public boolean supportsAdvisoryLocks() {
+        return true;
+    }
 }
