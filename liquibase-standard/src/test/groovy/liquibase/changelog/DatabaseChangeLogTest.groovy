@@ -13,6 +13,7 @@ import liquibase.database.core.MockDatabase
 import liquibase.exception.ChangeLogParseException
 import liquibase.exception.SetupException
 import liquibase.exception.UnexpectedLiquibaseException
+import liquibase.exception.UnknownChangelogFormatException
 import liquibase.logging.core.BufferedLogService
 import liquibase.parser.ChangeLogParser
 import liquibase.parser.ChangeLogParserConfiguration
@@ -485,6 +486,146 @@ create view sql_view as select * from sql_table;'''
         test2ChangeLog.isIncludeIgnore() == true
     }
 
+    def "include ignore if hidden filename"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/.hiddenfile": test1Xml,
+        ])
+
+        BufferedLogService bufferLog = new BufferedLogService()
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        Scope.child([
+                (Scope.Attr.logService.name())                                      : bufferLog,
+                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getKey()): ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                rootChangeLog.include("com/example/.hiddenfile", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+            }
+        })
+
+        def changeSets= rootChangeLog.changeSets
+
+        then:
+        changeSets.isEmpty() == true
+        bufferLog.getLogAsString(Level.WARNING) == ""
+    }
+
+    def "include ignore if version control system files"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/cvs": test1Xml,
+                "com/example/.svn": test1Xml.replace("testUser", "otherUser").replace("person", "person2"),
+                "com/example/.gitkeep": test1Xml.replace("testUser", "otherUser").replace("person", "person3"),
+                "com/example/.gitignore": test1Xml.replace("testUser", "otherUser").replace("person", "person4")
+        ])
+
+        BufferedLogService bufferLog = new BufferedLogService()
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        Scope.child([
+                (Scope.Attr.logService.name())                                      : bufferLog,
+                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getKey()): ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                rootChangeLog.include("com/example/cvs", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+                rootChangeLog.include("com/example/.svn", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+                rootChangeLog.include("com/example/.gitkeep", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+                rootChangeLog.include("com/example/.gitignore", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+            }
+        })
+
+        def changeSets= rootChangeLog.changeSets
+
+        then:
+        changeSets.isEmpty() == true
+        bufferLog.getLogAsString(Level.WARNING) == ""
+    }
+
+    def "start with classpath: and hidden"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "classpath:com/example/.hiddenfile": test1Xml,
+        ])
+
+        // TODO: Not use deprecated
+        BufferedLogService bufferLog = new BufferedLogService()
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        Scope.child([
+                (Scope.Attr.logService.name())                                                     : bufferLog,
+                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getKey())               : ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                rootChangeLog.include("classpath:com/example/.hiddenfile", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+            }
+        })
+
+        def changeSets= rootChangeLog.changeSets
+
+        then:
+        changeSets.isEmpty() == true
+        bufferLog.getLogAsString(Level.WARNING) == ""
+    }
+
+    def "start with classpath: and cvs"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "classpath:com/example/cvs": test1Xml,
+        ])
+
+        // TODO: Not use deprecated
+        BufferedLogService bufferLog = new BufferedLogService()
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        Scope.child([
+                (Scope.Attr.logService.name())                                                     : bufferLog,
+                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getKey())               : ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                rootChangeLog.include("classpath:com/example/cvs", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+            }
+        })
+
+        def changeSets= rootChangeLog.changeSets
+
+        then:
+        changeSets.isEmpty() == true
+        bufferLog.getLogAsString(Level.WARNING) == ""
+    }
+
+    def "start with classpath: and hidden filename and PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS is true"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "classpath:com/example/.hiddenfile": test1Xml,
+        ])
+
+        // TODO: Not use deprecated
+        BufferedLogService bufferLog = new BufferedLogService()
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        Scope.child([
+                (Scope.Attr.logService.name())                                                     : bufferLog,
+                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getKey())               : ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
+                (GlobalConfiguration.PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS.getKey())       : true,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                rootChangeLog.include("classpath:com/example/.hiddenfile", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+            }
+        })
+
+        def changeSets= rootChangeLog.changeSets
+
+        then:
+        changeSets.isEmpty() == true
+        bufferLog.getLogAsString(Level.WARNING).contains("included file classpath:com/example/.hiddenfile is not a recognized file type")
+    }
+
     def "includeAll executes include in alphabetical order"() {
         when:
         def resourceAccessor = new MockResourceAccessor([
@@ -616,22 +757,32 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
     }
 
-    def "include fails if no parser supports the file"() {
+    def "include logs warning if no parser supports the file"() {
         when:
         def resourceAccessor = new MockResourceAccessor(["com/example/test1.invalid": test1Xml])
 
+        BufferedLogService bufferLog = new BufferedLogService()
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
 
-        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
-                .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
-                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
-                .addChildren([include: [file: "com/example/test1.invalid"]])
-                , resourceAccessor)
+        Scope.child([
+                (Scope.Attr.logService.name()): bufferLog,
+                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getKey()): ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                        .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
+                        .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                        .addChildren([include: [file: "com/example/test1.invalid"]])
+                        , resourceAccessor)
+            }
+        })
 
+        def changeSets = rootChangeLog.changeSets
 
         then:
-        def e = thrown(SetupException)
-        e.message == "Cannot find parser that supports com/example/test1.invalid"
+        changeSets.size() == 1
+        bufferLog.getLogAsString(Level.WARNING).contains("included file com/example/test1.invalid is not a recognized file type")
     }
 
     def "include fails if XML file is empty"() {
