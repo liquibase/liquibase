@@ -89,6 +89,14 @@ jobs:
     needs: [setup]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
+    # [TECHOPS-1223] Same expression release-deploy-maven.yml uses, but keyed on dry_run
+    # instead of approved: this job is reached directly through workflow_dispatch (via
+    # dispatch-and-wait), never through this repo's own workflow_call chain, so dry_run
+    # is the input that actually distinguishes a rehearsal from a real release here.
+    # `release-publish` has 0 reviewers so the weekly cron is not blocked; `release` has
+    # 5. See .github/workflows/README.md for the broad-role OIDC trust this depends on.
+    environment:
+      name: ${{ inputs.dry_run && 'release-publish' || 'release' }}
     permissions:
       # contents: read for checkout; packages: read for the GitHub Packages Maven repo
       # (mirrors ci-test.yml); id-token: AWS OIDC for vault.
@@ -282,6 +290,9 @@ jobs:
     needs: [setup, reversion]
     name: Build Installers
     runs-on: ubuntu-22.04
+    # [TECHOPS-1223] See the comment on `reversion`, above.
+    environment:
+      name: ${{ inputs.dry_run && 'release-publish' || 'release' }}
     permissions:
       # contents: attach assets to the draft release; id-token: AWS OIDC for vault.
       contents: write
