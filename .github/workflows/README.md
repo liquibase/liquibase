@@ -2,7 +2,13 @@
 
 ## :shield: CI overview (TECHOPS-1100 remediation)
 
-**Rule:** code from a pull request never runs with secrets. There is no `pull_request_target` in this repo.
+**Rule:** code from a pull request never runs with secrets.
+
+There is no `pull_request_target` anywhere under `.github/workflows/`. The workflows that
+carried it were disabled and then deleted at the TECHOPS-1222 cutover on 2026-09-09, so the
+rule above is a property of the repository rather than an intention. Verified on a real fork
+pull request (#7982): the full unit and integration matrix ran, and no job in it reached a
+credential. [TECHOPS-1222]
 
 | Workflow | Trigger | Secrets | Purpose |
 |---|---|---|---|
@@ -14,7 +20,14 @@
 | `docker.yml` | `push: main` (docker/**), cron, dispatch | vault | Full Docker test + vulnerability scan via build-logic reusables; persists main scan to `scan-results`. |
 | `cleanup-packages.yml` | weekly cron, dispatch | none | Deletes orphaned `<sha>-SNAPSHOT` package versions. |
 
-**Superseded (to be disabled at cutover, files kept for history):** `run-tests.yml`, `test-pr.yml`, `build.yml`, `build-branch.yml`, `build-main.yml`, `nightly-release.yml`, `run-test-harness.yml`, `label-pr.yml`, `docker-test.yml`, `docker-scan.yml`, `cleanup-branch-builds.yml`, `installer-build-check.yml`, `owasp-scanner.yml`, `weekly-integration-tests.yml`, `fossa.yml`, `dry-run-release.yml`, `claude-code-review.yml`.
+**Deleted at the cutover:** `run-tests.yml`, `test-pr.yml`, `build.yml`, `build-main.yml`,
+`nightly-release.yml`, `run-test-harness.yml`, `label-pr.yml`, `docker-test.yml`,
+`docker-scan.yml`, plus two files whose only callers were those workflows,
+`.github/util/workflow-helper.js` and `.github/maven/settings-snapshots.xml`. Earlier removals:
+`build-branch.yml`, `cleanup-branch-builds.yml`, `installer-build-check.yml`,
+`owasp-scanner.yml`, `weekly-integration-tests.yml`, `fossa.yml`, `claude-code-review.yml`.
+`dry-run-release.yml` was **kept**: it is the weekly release rehearsal and is not superseded.
+Git history has all of them.
 
 **Consumers of `main.yml` outputs**
 
@@ -22,6 +35,41 @@
 - `liquibase-artifacts` run artifact: `create-release.yml` (`runId` input) until the release pipeline builds from tag.
 
 **Not on PRs anymore:** SNAPSHOT publishing, Sonar, FOSSA, test-harness dispatch. Run them from `main.yml`, `snapshot-branch.yml`, or the harness repo directly.
+
+**Required checks**
+
+`PR Gate` and `PR Labels` are enforced by the `strict_status_checks` ruleset, not by
+`strict_branch_protection`. Status checks live in their own ruleset because a ruleset bypass is
+all-or-nothing: keeping them separate is what lets devops break the glass on a stuck check while
+review stays enforced. The same mechanism means the gate binds everyone **except** the
+`liquibase-devops` team and the two integration apps, which hold an always-bypass on that
+ruleset. [TECHOPS-1155]
+
+Two heads-ups for contributors:
+
+- A pull request opened before this CI existed has never run `PR Gate`, and a required check
+  that has never reported blocks the merge. It shows as "Expected - Waiting for status to be
+  reported" with nothing to click. Push a commit (an empty one is enough) and it clears.
+- Branch SNAPSHOTs are no longer published per PR. Dispatch `snapshot-branch.yml` on the branch
+  first: `gh workflow run snapshot-branch.yml --repo liquibase/liquibase --ref <branch> -f ref=<branch>`
+
+  **Re-dispatch weekly for a long-lived branch.** Run artifacts here are kept for 7 days, which is
+  the org maximum, and `liquibase-sdk-maven-plugin` reads the run artifact rather than the
+  `<sha>-SNAPSHOT` the same workflow also publishes to GitHub Packages. The old producer rebuilt on
+  every push so this never came up; now the dispatch has a shelf life.
+
+**Why build-logic reusables are referenced as `@main`, not SHA-pinned**
+
+Every `uses: liquibase/build-logic/.github/workflows/*.yml@main` here is deliberate. Pinning
+per consumer repo was considered and rejected on 2026-08-25: it creates 20+ bump sites in each
+of ~30 repos, and in practice those pins go stale, which is worse than the moving reference.
+
+What compensates for the moving reference is that `main` in build-logic is not writable without
+review: its `reviewed_branch_protection` ruleset requires an approval and a code-owner review
+with no admin bypass, and its `.github/CODEOWNERS` gives `liquibase-devops` ownership of every
+path. A malicious change to a reusable workflow therefore needs a devops approval, the same bar
+as a change to this repo. Revisit the trade-off only if that ruleset or CODEOWNERS changes.
+[TECHOPS-1109]
 
 # :package: Release workflows
 
@@ -37,7 +85,7 @@ The `dryRun` process simulates our current production Liquibase release workflow
 
 The following actions are identical to those in a regular Liquibase release, with no modifications:
 
-- Get latests liquibase artifacts from the `run-tests.yml` workflow
+- Get latests liquibase artifacts from the `main.yml` workflow
 - Re-version artifacts to `dry-run-GITHUB_RUN_ID` version. i.e `dry-run-10522556642`
 - Build installers
 - Attach artifacts (`zip` and `tar` files) to a dryRun draft release
@@ -579,23 +627,26 @@ version: 4.28.0
 dry_run: false
 ```
 
-### 7. Release Docker Images (`release-docker.yml`)
+### 7. Release Docker Images (`docker-release.yml`)
 
 **When to use:** If Docker image build fails.
 
 **Required inputs:**
-- `version`: Version to release (e.g., `4.28.0`)
+- `liquibaseVersion`: Version to release (e.g., `4.28.0`)
 
 **Optional inputs:**
-- `dry_run`: false (default) or true to skip actual build
+- `dryRun`: false (default) or true to skip pushes and commits
+- `pushDockerHub` / `pushGHCR` / `pushECR`: all true by default; set one to false to skip that registry
 
 **Example:**
 ```
-version: 4.28.0
-dry_run: false
+liquibaseVersion: 4.28.0
+dryRun: false
 ```
 
-**Note:** This triggers a workflow in the `liquibase/docker` repository.
+**Note:** the images are built here, in this repository. `release-docker.yml` used to
+wrap this workflow and only renamed two inputs, so it was removed in TECHOPS-1099.
+An older note here claimed the build ran in `liquibase/docker`; that was not true.
 
 ### 8. Publish Assets to S3 (`release-publish-assets-s3.yml`)
 
@@ -703,14 +754,20 @@ re-enable them from the Actions UI.
 | `build-branch.yml` | 3239 | 2026-08-25 | Per-PR SNAPSHOT publisher. `pull_request_target` + `packages: write` + `secrets: inherit`; branch snapshots are no longer published per PR. |
 | `claude-code-review.yml` | 1109 | 2026-08-25 | Last 15 runs were all `startup_failure`. Replaced by `@claude review` on the gated `claude.yml` (active, 3675 runs). |
 | `cleanup-branch-builds.yml` | 613 | 2026-08-25 | 29 of its last 30 runs failed, so it deleted nothing. |
-| `fossa.yml` | 0 | never | Never executed once since creation. FOSSA runs today as the `fossa / fossa-scan` job of `run-tests.yml` via `build-logic/fossa_ai.yml`. |
+| `fossa.yml` | 0 | never | Never executed once since creation. FOSSA ran as a job of `run-tests.yml` via `build-logic/fossa_ai.yml`; since the cutover it runs from `main.yml`. |
 | `installer-build-check.yml` | 2 | 2026-04-13 | Both runs failed. Installers are built by the release pipeline and rehearsed weekly by `dry-run-release.yml`. |
 | `owasp-scanner.yml` | 1 | 2025-10-02 | One run ever. Dependency CVEs are covered by `codeql.yml`, `trivy-scan-published-images.yml` and Dependabot. |
 | `weekly-integration-tests.yml` | 19 | 2025-11-16 | Scheduled run dead since 2025-11 and its Slack alert could never fire: it dispatched cross-repo to `build-logic` with `secrets.GITHUB_TOKEN`, which is scoped to this repo only. |
 
-Not removed, and why: `build.yml` and `run-test-harness.yml` are marked
-`disabled_manually` but still execute on every internal PR and every push to `main`.
-`run-tests.yml` (active) calls `./.github/workflows/build.yml`, which calls
-`liquibase/liquibase/.github/workflows/run-test-harness.yml@main`. Disabling a
-workflow blocks its event triggers, never `workflow_call`. Both files can only be
-deleted after `run-tests.yml` is retired at the PR #7944 cutover.
+Now removed. `build.yml` and `run-test-harness.yml` spent months marked
+`disabled_manually` while still executing on every internal PR and every push to `main`:
+`run-tests.yml` called `./.github/workflows/build.yml`, which called
+`liquibase/liquibase/.github/workflows/run-test-harness.yml@main`. **Disabling a workflow
+blocks its event triggers, never `workflow_call`**, so the only thing that stopped them was
+deleting the caller. Worth remembering the next time a workflow looks retired in the Actions
+UI: check who calls it, not what the UI says.
+
+One stale reference survives outside this repository. `liquibase-pro` carries a vendored copy
+at `core/.github/workflows/build.yml` that still names `run-test-harness.yml@main`. It is
+inert: GitHub only registers workflows under a repository's own root `.github/workflows/`, and
+liquibase-pro has zero workflows registered under `core/`.
