@@ -1,10 +1,18 @@
 name: Cleanup Packages
 
-# Weekly sweep of orphaned <sha>-SNAPSHOT versions in GitHub Packages: versions
-# whose commit no longer exists, or is not a branch head, a tag target, or an
-# ancestor of main/release. Replaces cleanup-branch-builds.yml, whose `delete`
-# trigger ignored its branch filters and whose per-branch job had nothing left
-# to delete once per-PR SNAPSHOT publishing stopped. [TECHOPS-1099]
+# Weekly sweep of orphaned SNAPSHOT versions in GitHub Packages. Two shapes:
+#
+#   <sha>-SNAPSHOT      deleted when the commit no longer exists, or is not a
+#                       branch head, a tag target, or an ancestor of main/release
+#   <branch>-SNAPSHOT   deleted when no branch of that name exists any more
+#
+# The branch-named half was missed originally, and it is the larger pile: on
+# 2026-09-09 liquibase-core had 830 versions, 229 branch-named, and 218 of those
+# pointed at branches that no longer exist. `firebird-sequence-start-value-SNAPSHOT`
+# among them, the fork-built artifact from TECHOPS-1101, still installable from
+# org.liquibase 22 days after it was reported. Per-PR publishing stopped at the
+# TECHOPS-1222 cutover so the pile no longer grows, but nothing removes it.
+# [TECHOPS-1224, replaces cleanup-branch-builds.yml under TECHOPS-1099]
 
 on:
   schedule:
@@ -23,7 +31,7 @@ env:
 
 jobs:
   sweep:
-    name: Sweep orphaned SHA-SNAPSHOT versions
+    name: Sweep orphaned SNAPSHOT versions
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -38,10 +46,19 @@ jobs:
         run: |
           set -uo pipefail
 
+          # One fetch, two derivations: a partial branch list would orphan live branches,
+          # so both keep-lists have to come from the same payload and the same abort.
+          BRANCHES=$(gh api --paginate "repos/$REPO/branches?per_page=100") || {
+            echo "::error::Failed to fetch branches; aborting to avoid incorrect deletions"; exit 1; }
+
           # SHAs to keep: every branch head and tag target (snapshot-branch.yml accepts tags).
-          KEEP_SHAS=$(gh api --paginate "repos/$REPO/branches?per_page=100" --jq '.[].commit.sha') || {
-            echo "::error::Failed to fetch branch heads; aborting to avoid incorrect deletions"; exit 1; }
+          KEEP_SHAS=$(jq -r '.[].commit.sha' <<<"$BRANCHES")
           KEEP_SHAS+=$'\n'$(gh api --paginate "repos/$REPO/tags?per_page=100" --jq '.[].commit.sha' || true)
+
+          # Branch names to keep, with / turned into _ because that is the munging
+          # snapshot-branch.yml applies when it names the artifact.
+          KEEP_BRANCHES=$(jq -r '.[].name' <<<"$BRANCHES" | tr '/' '_')
+          [ -z "$KEEP_BRANCHES" ] && { echo "::error::Empty branch list; aborting"; exit 1; }
 
           declare -A VERDICT # sha -> keep|orphan|skip, shared across packages
 
@@ -83,6 +100,25 @@ jobs:
                 *) echo "${VERDICT[$sha]^^}: $name" ;;
               esac
             done <<< "$versions"
+
+            # Branch-named versions. The selector deliberately excludes the sha shape so
+            # the two passes stay disjoint: a version is classified by exactly one of them.
+            bversions=$(gh api --paginate "orgs/$ORG/packages/maven/$pkg/versions" \
+              --jq '.[] | select(.name | endswith("-SNAPSHOT")) | select(.name | test("^[0-9a-f]{7,40}-SNAPSHOT$") | not) | "\(.id) \(.name)"') || {
+              echo "::error::Failed to list branch-named versions for $pkg"; failed=1; echo "::endgroup::"; continue; }
+
+            while read -r id name; do
+              [ -z "$id" ] && continue
+              branch=${name%-SNAPSHOT}
+              if [ -n "$branch" ] && grep -qxF "$branch" <<<"$KEEP_BRANCHES"; then
+                echo "KEEP (live branch): $name"
+                continue
+              fi
+              if [ "$DRY_RUN" = true ]; then echo "ORPHAN (dry run): $name"
+              elif gh api -X DELETE "orgs/$ORG/packages/maven/$pkg/versions/$id" >/dev/null 2>&1; then echo "DELETED: $name"
+              else echo "::warning::Failed to delete $pkg $name (id $id)"; failed=1; fi
+            done <<< "$bversions"
+
             echo "::endgroup::"
           done
           exit $failed
