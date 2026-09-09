@@ -187,7 +187,7 @@ The main coordinator that triggers all release steps in the proper sequence. Sup
 
 ## :footprints: How a release actually goes
 
-Two moments need a person. Everything between them is automated.
+Three moments need a person: starting `create-release.yml`, publishing the draft release, and one approval. Everything else is automated.
 
 | Step | Who | What happens |
 |---|---|---|
@@ -201,7 +201,7 @@ Two moments need a person. Everything between them is automated.
 
 ## :traffic_light: The guards, and which ones need a human
 
-Only two guards need a person. The rest hold whether anyone is watching or not. The next section breaks the same ground down per job, with the exact role and secrets each one reaches.
+Two guards need a person; the third human moment above, starting `create-release.yml`, is the release itself rather than a gate. The rest are automatic, but two of them do not hold on their own yet and their rows say why. The next section breaks the same ground down per job, with the exact role and secrets each one reaches.
 
 | Guard | Kind | What it stops | Defined in |
 |---|---|---|---|
@@ -210,7 +210,7 @@ Only two guards need a person. The rest hold whether anyone is watching or not. 
 | `needs: manual-approval` | Automatic | Any publishing job running before the approval. Every one of them depends on that job. | `release-published-orchestrator.yml` |
 | The `approved` input | Automatic | A hand-dispatched publishing workflow skipping the reviewers. Only the orchestrator can set it, so a direct dispatch lands on the reviewed environment instead. | the four publishing callees |
 | Environment branch and tag policies | Automatic | A release credential being reachable from a feature branch. Both environments accept only `main` or a `v*` tag. | `liquibase-infrastructure` |
-| Role trust on the release-scoped role | Automatic | Any job that has not declared a release environment from assuming it at all. | `liquibase-infrastructure` |
+| Role trust on the release-scoped role | Automatic, **incomplete** | Any other repository, and any job on `main` or a feature branch, from assuming it. Not yet a job that declares no environment: the trust also accepts `refs/tags/v*`, and every `release: published` run is on a `v*` tag. All four jobs that read the role declare an environment today, so those two subjects can come out. | `liquibase-infrastructure` |
 | `refs/tags/v*` tag ruleset | Automatic, **watch-only** | Who may create a release tag. Currently at `enforcement = "evaluate"`, so it records rather than blocks, while the tagging identity is moved onto an app the ruleset can grant a bypass to. | `liquibase-infrastructure` |
 
 `needs: manual-approval` is load-bearing and worth calling out on its own: because the publishing jobs no longer sit behind reviewers themselves, that edge is the only thing keeping the gate in front of them. Removing it would not change any environment or any infrastructure code.
