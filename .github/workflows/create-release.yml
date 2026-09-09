@@ -103,9 +103,10 @@ jobs:
           aws-region: us-east-1
 
       - name: Get secrets from vault
+        id: vault
         # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
         # parse-json-secrets: true put every credential in /vault/liquibase into this
-        # job's environment; read only the three keys this job uses. This also retires
+        # job's environment; read only the keys this job uses. This also retires
         # the TECHOPS-1048 workaround that blanked the KeyLocker keys afterwards: they
         # are never loaded here now, and nothing in `reversion` signs anything.
         run: |
@@ -123,7 +124,9 @@ jobs:
             e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
             printf '::add-mask::%s\n' "$e"
             D="VAULT_EOF_${RANDOM}${RANDOM}"
-            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
+            # The app credentials go to outputs rather than GITHUB_ENV, which every later step in this job inherits.
+            case $k in LIQUIBASE_GITHUB_APP_*) sink=$GITHUB_OUTPUT ;; *) sink=$GITHUB_ENV ;; esac
+            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$sink"
           done
           unset JSON
 
@@ -216,9 +219,11 @@ jobs:
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ steps.vault.outputs.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ steps.vault.outputs.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          # Without repositories the token would cover every repo in the org, since the app is installed on all of them.
+          repositories: ${{ github.event.repository.name }}
           permission-contents: write
 
       - name: Set repository tags
@@ -229,11 +234,9 @@ jobs:
         run: |
           set -euo pipefail
           git tag -f "v${VERSION}"
-          # The token goes in the URL rather than a remote, so it is never persisted to
-          # .git/config. -c clears the basic-auth header actions/checkout would otherwise
-          # leave in place, which takes precedence over URL credentials.
-          git -c http.https://github.com/.extraheader= \
-            push -f "https://x-access-token:${GH_APP_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+          # The token goes in the URL rather than a remote, so it is never persisted to .git/config.
+          git push -f \
+            "https://x-access-token:${GH_APP_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
             "v${VERSION}"
 
   build-installers:
