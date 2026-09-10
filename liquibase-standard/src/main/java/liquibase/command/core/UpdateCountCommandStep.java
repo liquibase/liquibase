@@ -9,6 +9,7 @@ import liquibase.changelog.filter.*;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.lockservice.LockService;
 import liquibase.logging.mdc.MdcKey;
 
 import java.util.ArrayList;
@@ -100,9 +101,17 @@ public class UpdateCountCommandStep extends AbstractUpdateCommandStep {
 
     @Override
     public List<Class<?>> requiredDependencies() {
+        // Lock is acquired lazily in run(), only if the fast-check finds pending changes -- see #6102.
         List<Class<?>> deps = new ArrayList<>(super.requiredDependencies());
+        deps.remove(LockService.class);
         deps.add(UpdateSummaryEnum.class);
         return deps;
+    }
+
+    @Override
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        setDBLock(false);
+        super.run(resultsBuilder);
     }
 
     @Override
