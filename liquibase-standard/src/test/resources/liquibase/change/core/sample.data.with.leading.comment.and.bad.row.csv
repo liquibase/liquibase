@@ -1,0 +1,4 @@
+#This is a comment describing the file, not the header
+name,username
+Bob Johnson,bjohnson
+BadRowMissingAColumn
