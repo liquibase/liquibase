@@ -53,7 +53,10 @@ public class GrantComparator implements DatabaseObjectComparator {
         Grant thisGrant = (Grant) databaseObject1;
         Grant otherGrant = (Grant) databaseObject2;
 
-        if ((thisGrant.getSchema() != null) && (otherGrant.getSchema() != null) &&
+        if ((thisGrant.getSchema() == null) != (otherGrant.getSchema() == null)) {
+            return false;
+        }
+        if (thisGrant.getSchema() != null &&
                 !DatabaseObjectComparatorFactory.getInstance().isSameObject(thisGrant.getSchema(), otherGrant.getSchema(), chain.getSchemaComparisons(), accordingTo)) {
             return false;
         }
