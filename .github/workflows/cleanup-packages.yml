@@ -164,6 +164,7 @@ jobs:
             echo "::endgroup::"
           done
 
+          echo "Total: $deleted_total removed, $kept_total kept."
           {
             echo
             echo "**Total: $deleted_total removed, $kept_total kept.**"
