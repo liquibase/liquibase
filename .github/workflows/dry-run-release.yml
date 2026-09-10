@@ -64,7 +64,7 @@ jobs:
     steps:
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -104,7 +104,7 @@ jobs:
 
       - name: Invoke Create Release
         id: trigger-step
-        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@d12b38713b9a20a72f95468749ee5031137689a6 # main
+        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@3bd8cc014cf3ec9de68a3c35f67279a91e67abb0 # main
         with:
           workflow: create-release.yml
           ref: main
@@ -218,7 +218,7 @@ jobs:
     steps:
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -257,7 +257,7 @@ jobs:
           permission-actions: write
 
       - name: Trigger release-published-orchestrator workflow
-        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@d12b38713b9a20a72f95468749ee5031137689a6 # main
+        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@3bd8cc014cf3ec9de68a3c35f67279a91e67abb0 # main
         with:
           workflow: release-published-orchestrator.yml
           ref: main
@@ -302,7 +302,7 @@ jobs:
     steps:
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
