@@ -185,6 +185,36 @@ The main coordinator that triggers all release steps in the proper sequence. Sup
 | `docker-release.yml` | Build and push release Docker images | ✅ Yes |
 | `release-publish-assets-s3.yml` | Publish release assets to S3 | ✅ Yes, with one approval |
 
+## :footprints: How a release actually goes
+
+Three moments need a person: starting `create-release.yml`, publishing the draft release, and one approval. Everything else is automated.
+
+| Step | Who | What happens |
+|---|---|---|
+| 1 | **A person** | Runs `create-release.yml`. It re-versions the artifacts, pushes the `v*` tag, and leaves a **draft** GitHub release. |
+| 2 | **A person** | Publishes the draft release. This is what starts the orchestrator, which listens for `release: published`, so nothing runs while the release is still a draft. |
+| 3 | Automatic | `setup` resolves the version, then the run **parks**. GitHub marks it `waiting` and notifies the reviewers. Nothing has been published and no release credential has been issued yet. |
+| 4 | **A person** | One reviewer approves. Self-approval is prevented, so it cannot be whoever started the run, and admins are not exempt. |
+| 5 | Automatic | Everything else: GitHub Packages, javadocs, XSDs, Maven Central, S3 assets, Docker images, then `generate-summary`. |
+
+**One approval covers the whole release.** GitHub approves per job rather than per run, which is why only `manual-approval` sits on the reviewer-gated environment while the four publishing jobs sit on a reviewer-less one. Putting all five on `release` would stop a release once per wave of the `needs` graph instead of once, and a release that stops four times gets rubber-stamped.
+
+## :traffic_light: The guards, and which ones need a human
+
+Two guards need a person; the third human moment above, starting `create-release.yml`, is the release itself rather than a gate. The rest are automatic, but two of them do not hold on their own yet and their rows say why. The next section breaks the same ground down per job, with the exact role and secrets each one reaches.
+
+| Guard | Kind | What it stops | Defined in |
+|---|---|---|---|
+| One approval on the `release` environment | **Person** | A release going out unseen. Five reviewers, self-approval prevented, admins not exempt. | `liquibase-infrastructure` |
+| Publishing the draft release | **Person** | The pipeline starting on its own. A tag on its own does nothing. | the GitHub release UI |
+| `needs: manual-approval` | Automatic | Any publishing job running before the approval. Every one of them depends on that job. | `release-published-orchestrator.yml` |
+| The `approved` input | Automatic | A hand-dispatched publishing workflow skipping the reviewers. Only the orchestrator can set it, so a direct dispatch lands on the reviewed environment instead. | the four publishing callees |
+| Environment branch and tag policies | Automatic | A release credential being reachable from a feature branch. Both environments accept only `main` or a `v*` tag. | `liquibase-infrastructure` |
+| Role trust on the release-scoped role | Automatic, **incomplete** | Any other repository, and any job on `main` or a feature branch, from assuming it. Not yet a job that declares no environment: the trust also accepts `refs/tags/v*`, and every `release: published` run is on a `v*` tag. All four jobs that read the role declare an environment today, so those two subjects can come out. | `liquibase-infrastructure` |
+| `refs/tags/v*` tag ruleset | Automatic, **watch-only** | Who may create a release tag. Currently at `enforcement = "evaluate"`, so it records rather than blocks, while the tagging identity is moved onto an app the ruleset can grant a bypass to. | `liquibase-infrastructure` |
+
+`needs: manual-approval` is load-bearing and worth calling out on its own: because the publishing jobs no longer sit behind reviewers themselves, that edge is the only thing keeping the gate in front of them. Removing it would not change any environment or any infrastructure code.
+
 ## :closed_lock_with_key: What guards each release workflow
 
 The table above says what each workflow does. This one says what stands in front of it. Read it before changing any job that touches `/vault/liquibase`.
