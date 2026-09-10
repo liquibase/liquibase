@@ -9,6 +9,8 @@ import liquibase.executor.ExecutorService;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import liquibase.util.ColumnParentType;
 
 import java.util.List;
@@ -41,8 +43,7 @@ public class SetColumnRemarksGeneratorSnowflake extends SetColumnRemarksGenerato
                 // Check if we're trying to set the column remarks on a view, and if so, note that this is not supported.
                 try {
                     List<Map<String, ?>> viewList = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(
-                            new RawParameterizedSqlStatement(String.format("SHOW VIEWS LIKE '%s'",
-                                database.escapeStringForDatabase(statement.getTableName()))));
+                            buildShowViewsStatement(statement, database));
                     if (!viewList.isEmpty()) {
                         validationErrors.addError(SET_COLUMN_REMARKS_NOT_SUPPORTED_ON_VIEW_MSG);
                     }
@@ -52,5 +53,32 @@ public class SetColumnRemarksGeneratorSnowflake extends SetColumnRemarksGenerato
             }
         }
         return validationErrors;
+    }
+
+    /**
+     * Builds the SHOW VIEWS used to tell a table apart from a view.
+     * <p>
+     * The table name is a LIKE pattern, so {@code %} and {@code _} have to be escaped or a table
+     * named MY_TABLE also matches a view named MYXTABLE. The statement is also scoped to the
+     * schema being changed: an unscoped SHOW VIEWS searches every database the role can see, so a
+     * same-named view in an unrelated schema would make this look like a view.
+     */
+    protected RawParameterizedSqlStatement buildShowViewsStatement(SetColumnRemarksStatement statement, Database database) {
+        String pattern = database.escapeStringForDatabase(statement.getTableName())
+                .replace("%", "\\%")
+                .replace("_", "\\_");
+        StringBuilder sql = new StringBuilder(String.format("SHOW VIEWS LIKE '%s'", pattern));
+
+        String schemaName = statement.getSchemaName() != null ? statement.getSchemaName() : database.getDefaultSchemaName();
+        if (schemaName != null) {
+            String catalogName = statement.getCatalogName() != null ? statement.getCatalogName() : database.getDefaultCatalogName();
+            sql.append(" IN SCHEMA ");
+            if (catalogName != null) {
+                sql.append(database.escapeObjectName(catalogName, Catalog.class)).append('.');
+            }
+            sql.append(database.escapeObjectName(schemaName, Schema.class));
+        }
+
+        return new RawParameterizedSqlStatement(sql.toString());
     }
 }
