@@ -3,8 +3,10 @@ package liquibase.command.core.helpers
 import liquibase.command.CommandResultsBuilder
 import liquibase.command.CommandScope
 import liquibase.database.Database
+import liquibase.database.core.PostgresDatabase
 import liquibase.lockservice.LockService
 import liquibase.lockservice.LockServiceFactory
+import liquibase.lockservice.StandardLockService
 import spock.lang.Specification
 
 import java.util.concurrent.CyclicBarrier
@@ -223,5 +225,70 @@ class LockServiceCommandStepTest extends Specification {
         then: "cleanUp must not attempt a second release against an already-unlocked row"
         1 * mockLockService.waitForLock()
         0 * mockLockService.releaseLock()
+    }
+
+    def "cleanUp drops only its own database's lock service, leaving a concurrent execution able to release its own lock"() {
+        // cleanUp() used to end with the blanket LockServiceFactory.resetAll(). Since that factory is a
+        // JVM-wide singleton, one execution finishing discarded every other database's LockService too:
+        // the peer's release then ran against a freshly built service, saw hasChangeLogLock() == false,
+        // skipped the release, and left that database's DATABASECHANGELOGLOCK row set.
+        given: "a lock service implementation that needs no live database"
+        LockServiceFactory.getInstance().register(new FakeLockService())
+        def databaseA = new PostgresDatabase()
+        def databaseB = new PostgresDatabase()
+
+        and: "execution B has acquired its lock and is still in flight"
+        def serviceB = LockServiceFactory.getInstance().getLockService(databaseB)
+        serviceB.waitForLock()
+
+        and: "execution A has acquired its own lock through its own step"
+        def stepA = new LockServiceCommandStep()
+        def commandA = new CommandScope(LockServiceCommandStep.COMMAND_NAME)
+                .provideDependency(Database.class, databaseA)
+        def resultsBuilderA = new CommandResultsBuilder(commandA, new ByteArrayOutputStream())
+        stepA.run(resultsBuilderA)
+        def serviceA = LockServiceFactory.getInstance().getLockService(databaseA)
+
+        when: "A finishes and cleans up"
+        stepA.cleanUp(resultsBuilderA)
+
+        then: "A released its own lock and its service was dropped"
+        !serviceA.hasChangeLogLock()
+        !LockServiceFactory.getInstance().getLockService(databaseA).is(serviceA)
+
+        and: "B still holds its lock through the very same service, so its own release will find it"
+        LockServiceFactory.getInstance().getLockService(databaseB).is(serviceB)
+        serviceB.hasChangeLogLock()
+    }
+
+    /**
+     * A LockService that can be driven without a database, and that outranks StandardLockService in
+     * LockServiceFactory#getLockService's priority-based lookup. Instantiated reflectively by that
+     * lookup, so it needs a public no-arg constructor.
+     */
+    static class FakeLockService extends StandardLockService {
+
+        private boolean locked
+
+        @Override
+        int getPriority() { PRIORITY_DATABASE }
+
+        @Override
+        boolean supports(Database database) { true }
+
+        @Override
+        boolean hasChangeLogLock() { locked }
+
+        @Override
+        void waitForLock() { locked = true }
+
+        @Override
+        boolean acquireLock() { locked = true; true }
+
+        @Override
+        void releaseLock() { locked = false }
+
+        @Override
+        void reset() { locked = false }
     }
 }
