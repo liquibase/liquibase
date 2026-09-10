@@ -83,10 +83,11 @@ jobs:
       id-token: write
     steps:
 
-      # Credentials stay persisted here: "Set repository tags" below pushes the tag over this remote.
+      # No persisted credentials: "Set repository tags" below pushes over an explicit app-token
+      # remote, and nothing else in this job talks to git.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: true
+          persist-credentials: false
 
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
@@ -95,15 +96,16 @@ jobs:
           aws-region: us-east-1
 
       - name: Get secrets from vault
+        id: vault
         # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
         # parse-json-secrets: true put every credential in /vault/liquibase into this
-        # job's environment; read only the three keys this job uses. This also retires
+        # job's environment; read only the keys this job uses. This also retires
         # the TECHOPS-1048 workaround that blanked the KeyLocker keys afterwards: they
         # are never loaded here now, and nothing in `reversion` signs anything.
         run: |
           set -euo pipefail
           JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
-          for k in GPG_SECRET GPG_PASSPHRASE LIQUIBOT_PAT_GPM_ACCESS; do
+          for k in GPG_SECRET GPG_PASSPHRASE LIQUIBOT_PAT_GPM_ACCESS LIQUIBASE_GITHUB_APP_ID LIQUIBASE_GITHUB_APP_PRIVATE_KEY; do
             # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
             # which would silently alter a value that legitimately ends in one.
             v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
@@ -115,7 +117,9 @@ jobs:
             e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
             printf '::add-mask::%s\n' "$e"
             D="VAULT_EOF_${RANDOM}${RANDOM}"
-            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
+            # The app credentials go to outputs rather than GITHUB_ENV, which every later step in this job inherits.
+            case $k in LIQUIBASE_GITHUB_APP_*) sink=$GITHUB_OUTPUT ;; *) sink=$GITHUB_ENV ;; esac
+            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$sink"
           done
           unset JSON
 
@@ -201,11 +205,32 @@ jobs:
           path: re-version/final
           retention-days: 1
 
+      # The tag must be pushed by an app installed in the org. A ruleset cannot grant a bypass to
+      # GITHUB_TOKEN: its app is GitHub's own global one, and GitHub rejects it as a bypass actor.
+      - name: Get GitHub App token
+        id: get-token
+        if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ steps.vault.outputs.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ steps.vault.outputs.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          # Without repositories the token would cover every repo in the org, since the app is installed on all of them.
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+
       - name: Set repository tags
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
+        env:
+          GH_APP_TOKEN: ${{ steps.get-token.outputs.token }}
+          VERSION: ${{ needs.setup.outputs.version }}
         run: |
-          git tag -f v${{ needs.setup.outputs.version }}
-          git push -f origin v${{ needs.setup.outputs.version }}
+          set -euo pipefail
+          git tag -f "v${VERSION}"
+          # The token goes in the URL rather than a remote, so it is never persisted to .git/config.
+          git push -f \
+            "https://x-access-token:${GH_APP_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            "v${VERSION}"
 
   build-installers:
     needs: [setup, reversion]
