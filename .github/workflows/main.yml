@@ -117,7 +117,10 @@ jobs:
       - name: Build distribution (main-SNAPSHOT)
         run: |
           set -euo pipefail
-          ./mvnw -B versions:set -DnewVersion=main-SNAPSHOT
+          # Fully-qualified goal, not the `versions:set` prefix: resolving a plugin prefix
+          # makes Maven fetch org/codehaus/mojo/maven-metadata.xml from Central on every run,
+          # and a 429 there fails the build outright (main run 33716558208). [TECHOPS-1222]
+          ./mvnw -B org.codehaus.mojo:versions-maven-plugin:2.21.0:set -DnewVersion=main-SNAPSHOT
 
           # keep temp-artifact's tested 0-SNAPSHOT jars; the build below cleans these modules
           mkdir -p prebuilt
@@ -175,7 +178,7 @@ jobs:
           # No `clean` between deploys: the reactor is already compiled, only versions change.
           # shellcheck disable=SC2086 # MAVEN_BUILD_ARGS is intentionally word-split
           ./mvnw -B $MAVEN_BUILD_ARGS "-Dbuild.timestamp=$BUILD_TIMESTAMP" -DskipTests -pl '!liquibase-dist' deploy
-          ./mvnw -B versions:set -DnewVersion="${BUILD_SHA}-SNAPSHOT"
+          ./mvnw -B org.codehaus.mojo:versions-maven-plugin:2.21.0:set -DnewVersion="${BUILD_SHA}-SNAPSHOT"
           # shellcheck disable=SC2086
           ./mvnw -B $MAVEN_BUILD_ARGS "-Dbuild.timestamp=$BUILD_TIMESTAMP" -DskipTests deploy
 

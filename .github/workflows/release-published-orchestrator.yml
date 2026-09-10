@@ -74,6 +74,8 @@ jobs:
       dry_run_branch_name: ${{ inputs.dry_run_branch_name || '' }}
     secrets: inherit
 
+  # GitHub approves per job, not per run, so the gate sits on one job every publisher depends on.
+  # On the publishers themselves it would stop the release once per wave of this graph.
   manual-approval:
     name: Manual Deployment Approval
     needs: [setup]
@@ -93,6 +95,9 @@ jobs:
     with:
       tag: ${{ needs.setup.outputs.tag }}
       dry_run: ${{ inputs.dry_run || false }}
+      # Gate cleared above, so the callee uses `release-publish` and does not prompt again.
+      # That makes `needs: manual-approval` the only thing holding reviewers in front of this job.
+      approved: true
     secrets: inherit
 
   publish-github-packages:
@@ -121,6 +126,9 @@ jobs:
     with:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
+      # Gate cleared above, so the callee uses `release-publish` and does not prompt again.
+      # That makes `needs: manual-approval` the only thing holding reviewers in front of this job.
+      approved: true
     secrets: inherit
 
   release-docker:
@@ -129,17 +137,20 @@ jobs:
     # Skip on dry-run: docker-release.yml resolves SHA256 from
     # package.liquibase.com/.../liquibase-${version}.tar.gz, which only hosts GA
     # tarballs — a dry-run-${run_id} version yields a zero-byte archive and the
-    # job intentionally exits 1. Docker builds are exercised by docker-test.yml
+    # job intentionally exits 1. Docker builds are exercised by docker.yml
     # and build-qa-docker.yml; nothing else needs validating here on dry-run.
     if: ${{ !cancelled() && inputs.dry_run != true && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') && needs.deploy-maven.result == 'success' }}
-    uses: ./.github/workflows/release-docker.yml
+    # Calls docker-release.yml directly. release-docker.yml used to sit in between,
+    # but it only renamed these two inputs and re-declared the same three permissions,
+    # so it was one more file to keep in sync for no behaviour. [TECHOPS-1099]
+    uses: ./.github/workflows/docker-release.yml
     permissions:
       contents: write
       id-token: write
       packages: write
     with:
-      version: ${{ needs.setup.outputs.version }}
-      dry_run: ${{ inputs.dry_run || false }}
+      liquibaseVersion: ${{ needs.setup.outputs.version }}
+      dryRun: ${{ inputs.dry_run || false }}
     secrets: inherit
 
   deploy-maven:
@@ -156,6 +167,9 @@ jobs:
       tag: ${{ needs.setup.outputs.tag }}
       dry_run: ${{ inputs.dry_run || false }}
       dry_run_release_id: ${{ inputs.dry_run_release_id || '' }}
+      # Gate cleared above, so the callee uses `release-publish` and does not prompt again.
+      # That makes `needs: manual-approval` the only thing holding reviewers in front of this job.
+      approved: true
     secrets: inherit
 
   package:
@@ -197,6 +211,9 @@ jobs:
     with:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
+      # Gate cleared above, so the callee uses `release-publish` and does not prompt again.
+      # That makes `needs: manual-approval` the only thing holding reviewers in front of this job.
+      approved: true
     secrets: inherit
 
   generate-summary:

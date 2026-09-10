@@ -24,15 +24,16 @@ jobs:
       dry_run_id: ${{ steps.get_run_id.outputs.dry_run_id }}
       dry_run_branch_name: ${{ steps.get_run_id.outputs.dry_run_branch_name }}
     steps:
-      - name: Get run-tests.yml runId
+      - name: Get main.yml runId
         id: get_run_id
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Find the most recent run-tests.yml run on main that has a valid (non-expired) liquibase-artifacts artifact.
+          # Find the most recent main.yml run on main that has a valid (non-expired) liquibase-artifacts artifact.
+          # main.yml took over as the producer of that artifact at the TECHOPS-1222 cutover.
           # We scan up to 20 recent completed runs, so a single unrelated failing job
-          # (e.g. test-harness dispatch) cannot starve the dry-run of fresh build artifacts.
-          response=$(gh api "repos/${{ github.repository }}/actions/workflows/run-tests.yml/runs?branch=main&status=completed&per_page=20")
+          # cannot starve the dry-run of fresh build artifacts.
+          response=$(gh api "repos/${{ github.repository }}/actions/workflows/main.yml/runs?branch=main&status=completed&per_page=20")
 
           run_id=""
           while IFS= read -r candidate_id; do
@@ -40,13 +41,13 @@ jobs:
               --jq 'any(.artifacts[]; .name == "liquibase-artifacts" and (.expired | not))') || continue
             if [ "$valid" = "true" ]; then
               run_id="$candidate_id"
-              echo "Found valid liquibase-artifacts in run-tests run $run_id"
+              echo "Found valid liquibase-artifacts in main.yml run $run_id"
               break
             fi
           done < <(echo "$response" | jq -r '.workflow_runs[].id')
 
           if [ -z "$run_id" ]; then
-            echo "ERROR: No run-tests.yml run found with a valid liquibase-artifacts artifact in the last 20 completed runs on main"
+            echo "ERROR: No main.yml run found with a valid liquibase-artifacts artifact in the last 20 completed runs on main"
             exit 1
           fi
 
@@ -201,7 +202,7 @@ jobs:
           ### Build Source
           | Property | Value |
           |----------|-------|
-          | **Source Run** | [run-tests.yml #${{ needs.setup.outputs.dry_run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ needs.setup.outputs.dry_run_id }}) |
+          | **Source Run** | [main.yml #${{ needs.setup.outputs.dry_run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ needs.setup.outputs.dry_run_id }}) |
           | **Branch** | \`${{ needs.setup.outputs.dry_run_branch_name }}\` |
 
           ### Triggered Workflows
