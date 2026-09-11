@@ -414,7 +414,7 @@ createSequence: |
     Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,hsqldb,informix,mssql,postgresql
   incrementBy bigInteger 
     Description: Interval between sequence numbers
-    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,hsqldb,informix,mariadb,mssql,oracle,postgresql
+    Supported: all
   maxValue bigInteger 
     Description: Maximum value of the sequence
     Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,informix,mariadb,mssql,oracle,postgresql
@@ -433,7 +433,7 @@ createSequence: |
     Required For: all
   startValue bigInteger 
     Description: First sequence number to be generated.
-    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,hsqldb,informix,mariadb,mssql,oracle,postgresql
+    Supported: all
 
 createTable: |
   catalogName string (since 3.0)
