@@ -65,6 +65,7 @@ jobs:
     outputs:
       version: ${{ inputs.version }}
       sha: ${{ steps.resolve.outputs.sha }}
+      build_timestamp: ${{ steps.resolve.outputs.build_timestamp }}
     steps:
       - id: resolve
         env:
@@ -78,11 +79,33 @@ jobs:
           # interpolated into the script body, and VERSION is charset-validated
           # because it becomes a git ref and a filename below.
           [[ "$VERSION" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::bad version"; exit 1; }
+          # The charset alone still admits refs git rejects, `1..0` and names ending in
+          # `.lock` among them. The tag is not created until the end of the run, so without
+          # this the pipeline would build and sign before discovering the name is unusable.
+          git check-ref-format "refs/tags/v$VERSION" || {
+            echo "::error::v$VERSION is not a valid tag name"; exit 1; }
+
           sha=$(gh api "repos/$REPO/commits/$REF" --jq .sha)
           [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::$REF did not resolve"; exit 1; }
           if gh api "repos/$REPO/git/ref/tags/v$VERSION" >/dev/null 2>&1; then
             echo "::error::tag v$VERSION already exists"; exit 1
           fi
+
+          # Nothing else asserts the commit is releasable, and the build runs -DskipTests,
+          # so without this a red commit ships. A commit with no completed checks is refused
+          # as well: "never tested" and "tested green" must not look the same here.
+          runs=$(gh api "repos/$REPO/commits/$sha/check-runs?per_page=100" --jq '.check_runs')
+          bad=$(jq -r '[.[] | select(.conclusion=="failure" or .conclusion=="timed_out" or .conclusion=="cancelled") | .name] | join(", ")' <<<"$runs")
+          ok=$(jq -r '[.[] | select(.conclusion=="success")] | length' <<<"$runs")
+          [ -z "$bad" ] || { echo "::error::$sha has failing checks: $bad"; exit 1; }
+          [ "$ok" -gt 0 ] || { echo "::error::$sha has no successful check runs"; exit 1; }
+          echo "$sha: $ok successful checks, none failing"
+
+          # Taken from the commit rather than the clock, so re-running the same tag yields
+          # the same value. Byte-for-byte reproducibility additionally needs
+          # project.build.outputTimestamp in the poms, which is a separate change.
+          committed=$(gh api "repos/$REPO/commits/$sha" --jq .commit.committer.date)
+          echo "build_timestamp=$(date -u -d "$committed" +'%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_OUTPUT"
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
 
   reversion:
@@ -96,7 +119,11 @@ jobs:
     # `release-publish` has 0 reviewers so the weekly cron is not blocked; `release` has
     # 5. See .github/workflows/README.md for the broad-role OIDC trust this depends on.
     environment:
-      name: ${{ inputs.dry_run && 'release-publish' || 'release' }}
+      # `release-publish` has 0 reviewers, which the weekly rehearsal needs so the cron
+      # does not hang. It is reachable only for a dry run of `main`: `branch` is a free-form
+      # dispatch input and this job builds it with Maven, so any other ref executing
+      # third-party plugins beside the GPG key goes through `release` and its 5 reviewers.
+      name: ${{ (inputs.dry_run && inputs.branch == 'main') && 'release-publish' || 'release' }}
     permissions:
       # contents: read for checkout; packages: read for the GitHub Packages Maven repo
       # (mirrors ci-test.yml); id-token: AWS OIDC for vault.
@@ -134,6 +161,7 @@ jobs:
           SHA: ${{ needs.setup.outputs.sha }}
           REF: ${{ inputs.branch }}
           RUN_NUMBER: ${{ github.run_number }}
+          BUILD_TS: ${{ needs.setup.outputs.build_timestamp }}
         run: |
           set -euo pipefail
           ./mvnw -B org.codehaus.mojo:versions-maven-plugin:2.21.0:set -DnewVersion="$VERSION"
@@ -141,7 +169,7 @@ jobs:
             -Dbuild.repository.owner=liquibase -Dbuild.repository.name=liquibase \
             -Dbuild.branch="$REF" -Dbuild.number="$RUN_NUMBER" \
             -Dbuild.commit="$SHA" -Dbuild.version="$VERSION" \
-            "-Dbuild.timestamp=$(date +'%Y-%m-%d %H:%M:%S %Z')" \
+            "-Dbuild.timestamp=$BUILD_TS" \
             -pl liquibase-dist,liquibase-maven-plugin -am clean package
 
       - name: Stage release artifacts
@@ -239,60 +267,17 @@ jobs:
           path: re-version/final
           retention-days: 1
 
-      - name: Get App credentials from vault      # SECOND, late vault read
-        if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
-        run: |
-          set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
-          for k in LIQUIBASE_GITHUB_APP_ID LIQUIBASE_GITHUB_APP_PRIVATE_KEY; do
-            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
-            # which would silently alter a value that legitimately ends in one.
-            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
-            v=${v%X}
-            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
-            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
-            # those literals registers a mask that never matches it; % is escaped first
-            # so the escapes the next two produce are not escaped again.
-            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
-            printf '::add-mask::%s\n' "$e"
-            D="VAULT_EOF_${RANDOM}${RANDOM}"
-            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
-          done
-          unset JSON
-
-      - name: Get GitHub App token
-        id: get-token
-        if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        with:
-          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: liquibase
-          permission-contents: write        # only scope; no permission-actions
-
-      - name: Create release tag
-        # Atomic and non-forcing: POST /git/refs has no `force` parameter, so it 422s on a
-        # pre-existing ref instead of silently repointing an already-released tag. A re-run
-        # against the same version therefore fails fast here rather than repointing history.
-        if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
-        env:
-          GH_TOKEN: ${{ steps.get-token.outputs.token }}
-          REPO: ${{ github.repository }}
-          VERSION: ${{ needs.setup.outputs.version }}
-          SHA: ${{ needs.setup.outputs.sha }}
-        run: |
-          set -euo pipefail
-          gh api --method POST "repos/$REPO/git/refs" \
-            -f ref="refs/tags/v$VERSION" -f sha="$SHA"
-
   build-installers:
     needs: [setup, reversion]
     name: Build Installers
     runs-on: ubuntu-22.04
     # [TECHOPS-1223] See the comment on `reversion`, above.
     environment:
-      name: ${{ inputs.dry_run && 'release-publish' || 'release' }}
+      # `release-publish` has 0 reviewers, which the weekly rehearsal needs so the cron
+      # does not hang. It is reachable only for a dry run of `main`: `branch` is a free-form
+      # dispatch input and this job builds it with Maven, so any other ref executing
+      # third-party plugins beside the GPG key goes through `release` and its 5 reviewers.
+      name: ${{ (inputs.dry_run && inputs.branch == 'main') && 'release-publish' || 'release' }}
     permissions:
       # contents: attach assets to the draft release; id-token: AWS OIDC for vault.
       contents: write
@@ -499,6 +484,10 @@ jobs:
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
+          # `draft: true` creates no git ref, so the tag is not made here. The commitish
+          # still decides which base `generate_release_notes` diffs against, which without
+          # it is the default branch rather than the commit these assets were built from.
+          target_commitish: ${{ needs.setup.outputs.sha }}
           fail_on_unmatched_files: true
           body: Liquibase ${{ needs.setup.outputs.version }}
           generate_release_notes: true
@@ -513,6 +502,10 @@ jobs:
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
+          # `draft: true` creates no git ref, so the tag is not made here. The commitish
+          # still decides which base `generate_release_notes` diffs against, which without
+          # it is the default branch rather than the commit these assets were built from.
+          target_commitish: ${{ needs.setup.outputs.sha }}
           fail_on_unmatched_files: true
           body: Liquibase ${{ needs.setup.outputs.version }} (Dry-Run)
           generate_release_notes: true
@@ -527,3 +520,91 @@ jobs:
         with:
           name: liquibase-installers-${{ needs.setup.outputs.version }}
           path: re-version/final/*
+
+  tag-release:
+    name: Create release tag
+    needs: [setup, reversion, build-installers]
+    # The tag is the last thing a release does. Creating it inside `reversion`, before the
+    # installers existed, left `v$VERSION` pointing at a commit with no release whenever
+    # `build-installers` failed, and because the API call is deliberately non-forcing the
+    # retry then died on setup's pre-existing-tag check instead of recovering the way
+    # `git push -f` used to. Nothing is tagged now until every asset is built. [TECHOPS-1223]
+    if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
+    runs-on: ubuntu-22.04
+    # `release` already gated `reversion` for this run, so asking again would be a second
+    # prompt for one release. `release-publish` is the codified "approved upstream" variant,
+    # unreachable on its own here: this job needs three jobs that cannot run without it.
+    environment:
+      name: release-publish
+    permissions:
+      id-token: write
+    steps:
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get App credentials from vault
+        id: app-vault
+        run: |
+          set -euo pipefail
+          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
+          for k in LIQUIBASE_GITHUB_APP_ID LIQUIBASE_GITHUB_APP_PRIVATE_KEY; do
+            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
+            # which would silently alter a value that legitimately ends in one.
+            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
+            v=${v%X}
+            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
+            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
+            # those literals registers a mask that never matches it; % is escaped first
+            # so the escapes the next two produce are not escaped again.
+            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
+            printf '::add-mask::%s\n' "$e"
+            D="VAULT_EOF_${RANDOM}${RANDOM}"
+            # Step outputs, not GITHUB_ENV: only the token step needs these, and GITHUB_ENV
+            # would hand them to every later step in the job.
+            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_OUTPUT"
+          done
+          unset JSON
+
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ steps.app-vault.outputs.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ steps.app-vault.outputs.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          # Without `repositories` the token would cover every repo in the org, since the
+          # app is installed on all of them.
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write        # only scope; no permission-actions
+
+      - name: Create release tag
+        # Atomic and non-forcing: POST /git/refs has no `force` parameter, so it 422s on a
+        # pre-existing ref instead of silently repointing an already-released tag. A re-run
+        # against the same version therefore fails fast here rather than repointing history.
+        env:
+          GH_TOKEN: ${{ steps.get-token.outputs.token }}
+          REPO: ${{ github.repository }}
+          VERSION: ${{ needs.setup.outputs.version }}
+          SHA: ${{ needs.setup.outputs.sha }}
+        run: |
+          set -euo pipefail
+          gh api --method POST "repos/$REPO/git/refs" \
+            -f ref="refs/tags/v$VERSION" -f sha="$SHA"
+
+      - name: Verify the tag points at the built commit
+        # No dry run reaches this job, so a real release is the first execution of every
+        # step above. Reading the tag back turns a silent mistake into a failed release.
+        env:
+          GH_TOKEN: ${{ steps.get-token.outputs.token }}
+          REPO: ${{ github.repository }}
+          VERSION: ${{ needs.setup.outputs.version }}
+          SHA: ${{ needs.setup.outputs.sha }}
+        run: |
+          set -euo pipefail
+          got=$(gh api "repos/$REPO/git/ref/tags/v$VERSION" --jq .object.sha)
+          [ "$got" = "$SHA" ] || {
+            echo "::error::tag v$VERSION points at $got, expected $SHA"; exit 1; }
+          echo "v$VERSION -> $SHA"

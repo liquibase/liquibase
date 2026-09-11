@@ -191,7 +191,7 @@ Three moments need a person: starting `create-release.yml`, publishing the draft
 
 | Step | Who | What happens |
 |---|---|---|
-| 1 | **A person** | Runs `create-release.yml`. It re-versions the artifacts, pushes the `v*` tag, and leaves a **draft** GitHub release. |
+| 1 | **A person** | Runs `create-release.yml`. It resolves the branch to a commit SHA, refuses it unless its checks are green, builds and signs from that SHA, leaves a **draft** GitHub release, and creates the `v*` tag last, only once every asset exists. |
 | 2 | **A person** | Publishes the draft release. This is what starts the orchestrator, which listens for `release: published`, so nothing runs while the release is still a draft. |
 | 3 | Automatic | `setup` resolves the version, then the run **parks**. GitHub marks it `waiting` and notifies the reviewers. Nothing has been published and no release credential has been issued yet. |
 | 4 | **A person** | One reviewer approves. Self-approval is prevented, so it cannot be whoever started the run, and admins are not exempt. |
@@ -231,7 +231,8 @@ The table above says what each workflow does. This one says what stands in front
 | `deploy-maven-production` | `release-deploy-maven.yml` | via `needs` | release-scoped | `/vault/liquibase`; holds the Maven Central credentials |
 | `deploy-maven-dryrun` | `release-deploy-maven.yml` | none, by design | **broad** | `/vault/liquibase`; dry runs skip the gate deliberately |
 | `release-docker` | `docker-release.yml` | via `needs` | **broad** | its `update-dockerfiles` job reads the vault |
-| `reversion`, `build-installers` | `create-release.yml` | `release`/`release-publish`, by `dry_run` [TECHOPS-1223] | **broad** | `/vault/liquibase`; holds the GPG and DigiCert signing credentials |
+| `reversion`, `build-installers` | `create-release.yml` | `release`, or `release-publish` only for a dry run of `main` [TECHOPS-1223] | **broad** | `/vault/liquibase`; holds the GPG and DigiCert signing credentials |
+| `tag-release` | `create-release.yml` | `release-publish`, after `reversion` cleared `release` | none | `/vault/liquibase` for the App key only; mints a `contents: write` token scoped to this repo |
 
 "release-scoped" is `liquibase-release-vault-oidc-role`, whose trust lists explicit subjects. "broad" is `liquibase-vault-oidc-role`, whose GitHub OIDC trust matches any repo in the `liquibase`, `Datical` and `datical` orgs, in both the classic and the immutable `owner@ownerId/repo@repoId` subject formats: six globs, not one. It carries a second statement besides, unrelated to GitHub: any principal inside the AWS org whose ARN matches the Spacelift role shapes can `sts:AssumeRole` into it.
 
