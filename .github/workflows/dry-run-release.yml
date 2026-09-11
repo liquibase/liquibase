@@ -18,44 +18,10 @@ on:
     - cron: "0 6 * * 3"
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      dry_run_id: ${{ steps.get_run_id.outputs.dry_run_id }}
-      dry_run_branch_name: ${{ steps.get_run_id.outputs.dry_run_branch_name }}
-    steps:
-      - name: Get main.yml runId
-        id: get_run_id
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Find the most recent main.yml run on main that has a valid (non-expired) liquibase-artifacts artifact.
-          # main.yml took over as the producer of that artifact at the TECHOPS-1222 cutover.
-          # We scan up to 20 recent completed runs, so a single unrelated failing job
-          # cannot starve the dry-run of fresh build artifacts.
-          response=$(gh api "repos/${{ github.repository }}/actions/workflows/main.yml/runs?branch=main&status=completed&per_page=20")
-
-          run_id=""
-          while IFS= read -r candidate_id; do
-            valid=$(gh api "repos/${{ github.repository }}/actions/runs/${candidate_id}/artifacts" \
-              --jq 'any(.artifacts[]; .name == "liquibase-artifacts" and (.expired | not))') || continue
-            if [ "$valid" = "true" ]; then
-              run_id="$candidate_id"
-              echo "Found valid liquibase-artifacts in main.yml run $run_id"
-              break
-            fi
-          done < <(echo "$response" | jq -r '.workflow_runs[].id')
-
-          if [ -z "$run_id" ]; then
-            echo "ERROR: No main.yml run found with a valid liquibase-artifacts artifact in the last 20 completed runs on main"
-            exit 1
-          fi
-
-          echo "dry_run_id=$run_id" >> $GITHUB_OUTPUT
-          echo "dry_run_branch_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-
+  # [TECHOPS-1223] create-release.yml now builds from a pinned commit SHA instead of
+  # reusing another workflow run's uploaded artifact, so there is no run to scan for
+  # anymore. This job, and the 20-run scan it used to do, is deleted outright.
   dry-run-create-release:
-    needs: [setup]
     runs-on: ubuntu-latest
     outputs:
       dry_run_zip_url: ${{ steps.wait_and_get_outputs.outputs.dry_run_zip_url }}
@@ -108,7 +74,7 @@ jobs:
         with:
           workflow: create-release.yml
           ref: main
-          inputs: '{"version": "dry-run-${{ github.run_id }}", "runId": "${{ needs.setup.outputs.dry_run_id }}", "standalone_zip": "false", "dry_run": "true", "branch": "main"}'
+          inputs: '{"version": "dry-run-${{ github.run_id }}", "standalone_zip": "false", "dry_run": "true", "branch": "main"}'
           wait: 'true'
           gh-token: ${{ steps.get-token.outputs.token }}
 
@@ -202,8 +168,7 @@ jobs:
           ### Build Source
           | Property | Value |
           |----------|-------|
-          | **Source Run** | [main.yml #${{ needs.setup.outputs.dry_run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ needs.setup.outputs.dry_run_id }}) |
-          | **Branch** | \`${{ needs.setup.outputs.dry_run_branch_name }}\` |
+          | **Branch** | \`${{ github.ref_name }}\` |
 
           ### Triggered Workflows
           | Workflow | Link |
@@ -213,7 +178,7 @@ jobs:
           EOF
 
   dry-run-release-published:
-    needs: [setup, dry-run-create-release]
+    needs: [dry-run-create-release]
     runs-on: ubuntu-latest
     steps:
 
@@ -261,14 +226,14 @@ jobs:
         with:
           workflow: release-published-orchestrator.yml
           ref: main
-          inputs: '{"tag": "vdry-run-${{ github.run_id }}", "dry_run_release_id": "${{ needs.dry-run-create-release.outputs.dry_run_release_id }}", "dry_run_zip_url": "${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}", "dry_run_tar_gz_url": "${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}", "dry_run": true, "dry_run_branch_name": "${{ needs.setup.outputs.dry_run_branch_name }}"}'
+          inputs: '{"tag": "vdry-run-${{ github.run_id }}", "dry_run_release_id": "${{ needs.dry-run-create-release.outputs.dry_run_release_id }}", "dry_run_zip_url": "${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}", "dry_run_tar_gz_url": "${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}", "dry_run": true, "dry_run_branch_name": "${{ github.ref_name }}"}'
           wait: 'true'
           gh-token: ${{ steps.get-token.outputs.token }}
 
   cleanup:
     runs-on: ubuntu-latest
     if: always()
-    needs: [setup, dry-run-create-release, dry-run-release-published]
+    needs: [dry-run-create-release, dry-run-release-published]
     steps:
       - name: Checkout liquibase
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -298,7 +263,7 @@ jobs:
   notify:
     if: failure()
     runs-on: ubuntu-latest
-    needs: [setup, dry-run-create-release, dry-run-release-published, cleanup]
+    needs: [dry-run-create-release, dry-run-release-published, cleanup]
     steps:
 
       - name: Configure AWS credentials for vault access

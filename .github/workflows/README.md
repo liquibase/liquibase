@@ -32,7 +32,7 @@ Git history has all of them.
 **Consumers of `main.yml` outputs**
 
 - `main-SNAPSHOT` / `<full-sha>-SNAPSHOT` on GitHub Packages: liquibase-test-harness, liquibase-pro nightly wrappers, build-logic `os-extension-test`.
-- `liquibase-artifacts` run artifact: `create-release.yml` (`runId` input) until the release pipeline builds from tag.
+- `liquibase-artifacts` run artifact: no longer consumed. `create-release.yml` builds from a pinned commit SHA instead of an uploaded run artifact [TECHOPS-1223].
 
 **Not on PRs anymore:** SNAPSHOT publishing, Sonar, FOSSA, test-harness dispatch. Run them from `main.yml`, `snapshot-branch.yml`, or the harness repo directly.
 
@@ -112,11 +112,10 @@ You can check the `dry-run-release.yml` workflow, which is essentially composed 
 [...]
 
   dry-run-create-release:
-    needs: [ setup ]
     uses: liquibase/liquibase/.github/workflows/create-release.yml@main
     with:
       version: "dry-run-${{ github.run_id }}"
-      runId: ${{ needs.setup.outputs.dry_run_id }}
+      branch: main
       standalone_zip: false
       dry_run: true
     secrets: inherit
@@ -124,7 +123,7 @@ You can check the `dry-run-release.yml` workflow, which is essentially composed 
 [...]
 
   dry-run-release-published:
-    needs: [ setup, dry-run-create-release, dry-run-get-draft-release ]
+    needs: [ dry-run-create-release, dry-run-get-draft-release ]
     uses: liquibase/liquibase/.github/workflows/release-published-orchestrator.yml@main
     with:
       tag: "vdry-run-${{ github.run_id }}"
@@ -132,6 +131,7 @@ You can check the `dry-run-release.yml` workflow, which is essentially composed 
       dry_run_zip_url: ${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}
       dry_run_tar_gz_url: ${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}
       dry_run: true
+      dry_run_branch_name: ${{ github.ref_name }}
     secrets: inherit
 
 [...]
@@ -191,7 +191,7 @@ Three moments need a person: starting `create-release.yml`, publishing the draft
 
 | Step | Who | What happens |
 |---|---|---|
-| 1 | **A person** | Runs `create-release.yml`. It re-versions the artifacts, pushes the `v*` tag, and leaves a **draft** GitHub release. |
+| 1 | **A person** | Runs `create-release.yml`. It resolves the branch to a commit SHA, refuses it unless its checks are green, builds and signs from that SHA, leaves a **draft** GitHub release, and creates the `v*` tag last, only once every asset exists. |
 | 2 | **A person** | Publishes the draft release. This is what starts the orchestrator, which listens for `release: published`, so nothing runs while the release is still a draft. |
 | 3 | Automatic | `setup` resolves the version, then the run **parks**. GitHub marks it `waiting` and notifies the reviewers. Nothing has been published and no release credential has been issued yet. |
 | 4 | **A person** | One reviewer approves. Self-approval is prevented, so it cannot be whoever started the run, and admins are not exempt. |
@@ -231,7 +231,8 @@ The table above says what each workflow does. This one says what stands in front
 | `deploy-maven-production` | `release-deploy-maven.yml` | via `needs` | release-scoped | `/vault/liquibase`; holds the Maven Central credentials |
 | `deploy-maven-dryrun` | `release-deploy-maven.yml` | none, by design | **broad** | `/vault/liquibase`; dry runs skip the gate deliberately |
 | `release-docker` | `docker-release.yml` | via `needs` | **broad** | its `update-dockerfiles` job reads the vault |
-| `reversion`, `build-installers` | `create-release.yml` | none | **broad** | `/vault/liquibase`; holds the GPG and DigiCert signing credentials |
+| `reversion`, `build-installers` | `create-release.yml` | `release`, or `release-publish` only for a dry run of `main` [TECHOPS-1223] | **broad** | `/vault/liquibase`; holds the GPG and DigiCert signing credentials |
+| `tag-release` | `create-release.yml` | `release-publish`, after `reversion` cleared `release` | none | `/vault/liquibase` for the App key only; mints a `contents: write` token scoped to this repo |
 
 "release-scoped" is `liquibase-release-vault-oidc-role`, whose trust lists explicit subjects. "broad" is `liquibase-vault-oidc-role`, whose GitHub OIDC trust matches any repo in the `liquibase`, `Datical` and `datical` orgs, in both the classic and the immutable `owner@ownerId/repo@repoId` subject formats: six globs, not one. It carries a second statement besides, unrelated to GitHub: any principal inside the AWS org whose ARN matches the Spacelift role shapes can `sts:AssumeRole` into it.
 
@@ -257,6 +258,15 @@ Both names emit an `environment:` OIDC subject, and the release-scoped role trus
 
 Both environments are defined in `liquibase-infrastructure`, not here, so they cannot be changed by editing a workflow:
 [`github/liquibase/repos/public/liquibase-release-environment.tf`](https://github.com/liquibase/liquibase-infrastructure/blob/main/github/liquibase/repos/public/liquibase-release-environment.tf)
+
+**`create-release.yml`'s `reversion` and `build-installers` are a variant of this** [TECHOPS-1223]: they select the same two environment names by expression, but on `dry_run` rather than `approved`, because they are reached directly through `workflow_dispatch` (via `dispatch-and-wait`) and never through this repo's `workflow_call` chain:
+
+```yaml
+environment:
+  name: ${{ inputs.dry_run && 'release-publish' || 'release' }}
+```
+
+`dry_run` stays dispatch-settable on purpose. A dispatcher who sets `dry_run: true` to dodge the `release` reviewer list thereby also skips tag creation and signing-gated publishing, and gets a dry-run draft instead of a real release: they cannot use it to produce a real tag or a real published asset.
 
 ## Key Benefits
 
