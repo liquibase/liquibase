@@ -1,10 +1,31 @@
 name: Cleanup Packages
 
-# Weekly sweep of orphaned <sha>-SNAPSHOT versions in GitHub Packages: versions
-# whose commit no longer exists, or is not a branch head, a tag target, or an
-# ancestor of main/release. Replaces cleanup-branch-builds.yml, whose `delete`
-# trigger ignored its branch filters and whose per-branch job had nothing left
-# to delete once per-PR SNAPSHOT publishing stopped. [TECHOPS-1099]
+# Weekly sweep of orphaned SNAPSHOT versions in GitHub Packages. Two shapes:
+#
+#   <sha>-SNAPSHOT      deleted when the commit no longer exists, or is not a
+#                       branch head, a tag target, or an ancestor of main/release
+#   <branch>-SNAPSHOT   deleted when no branch of that name exists any more
+#
+# The branch-named half was missed originally, and it is the larger pile. Measured
+# 2026-09-10 across all five packages: 1,157 branch-named versions, 47 live-branch
+# keeps, 1,110 deletions (219 core / 297 extension-testing / 297 integration-tests /
+# 297 maven-plugin / 0 liquibase). `firebird-sequence-start-value-SNAPSHOT` is among
+# them, the fork-built artifact from TECHOPS-1101, still installable from org.liquibase.
+#
+# Per-PR publishing is disarmed on `main`, but it is re-armable, not stopped:
+# `build-branch.yml` was deleted at the TECHOPS-1222 cutover, yet a `pull_request_target`
+# run queued before the cutover still executes the workflow file captured when it was
+# queued. Run 31821424949 was created 2026-08-14 and ran 2026-09-09 12:33Z, after the
+# deletion, and published `fix-postgres-jsonb-defaults-SNAPSHOT`. Several hundred runs
+# remain in `action_required`/`waiting`, so approving a stale one can republish a name
+# this sweep has already removed. Purging that queue is tracked separately.
+#
+# Related: `cleanup-main-builds.yml` also deletes package versions, on every published
+# release. It omits `num-old-versions-to-delete`, whose default is 1 and which takes
+# precedence over `min-versions-to-keep`, so its `min-versions-to-keep: 0` is inert and
+# it removes one oldest version per package per release regardless of shape, with only
+# `^DAT-.*-SNAPSHOT$` protected. Not changed here; flagged for its own ticket.
+# [TECHOPS-1224, replaces cleanup-branch-builds.yml under TECHOPS-1099]
 
 on:
   schedule:
@@ -23,7 +44,7 @@ env:
 
 jobs:
   sweep:
-    name: Sweep orphaned SHA-SNAPSHOT versions
+    name: Sweep orphaned SNAPSHOT versions
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -38,12 +59,35 @@ jobs:
         run: |
           set -uo pipefail
 
+          # One fetch, two derivations: a partial branch list would orphan live branches,
+          # so both keep-lists have to come from the same payload and the same abort.
+          BRANCHES=$(gh api --paginate "repos/$REPO/branches?per_page=100") || {
+            echo "::error::Failed to fetch branches; aborting to avoid incorrect deletions"; exit 1; }
+
           # SHAs to keep: every branch head and tag target (snapshot-branch.yml accepts tags).
-          KEEP_SHAS=$(gh api --paginate "repos/$REPO/branches?per_page=100" --jq '.[].commit.sha') || {
-            echo "::error::Failed to fetch branch heads; aborting to avoid incorrect deletions"; exit 1; }
+          KEEP_SHAS=$(jq -r '.[].commit.sha' <<<"$BRANCHES")
           KEEP_SHAS+=$'\n'$(gh api --paginate "repos/$REPO/tags?per_page=100" --jq '.[].commit.sha' || true)
 
+          # Branch names to keep, with / turned into _ because that is the munging the
+          # now-deleted build.yml / build-branch.yml applied when naming the package
+          # version. snapshot-branch.yml munges only its run-artifact filenames; the
+          # version it publishes is <full-sha>-SNAPSHOT, handled by the sha pass.
+          KEEP_BRANCHES=$(jq -r '.[].name' <<<"$BRANCHES" | tr '/' '_')
+          [ -z "$KEEP_BRANCHES" ] && { echo "::error::Empty branch list; aborting"; exit 1; }
+
           declare -A VERDICT # sha -> keep|orphan|skip, shared across packages
+
+          # Actions log retention here is 7 days, and a sweep of this size needs a record
+          # that outlives it, so every removal is also written to the run summary.
+          deleted_total=0
+          kept_total=0
+          if [ "$DRY_RUN" = true ]; then mode="dry run, nothing deleted"; else mode="delete"; fi
+          {
+            echo "## Cleanup Packages"
+            echo
+            echo "Mode: $mode"
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
 
           # Prints why a SHA is kept and returns 0; returns 1 if it is orphaned; returns 2 on API trouble.
           classify() {
@@ -63,13 +107,31 @@ jobs:
           failed=0
           for pkg in $PACKAGES; do
             echo "::group::$pkg"
-            versions=$(gh api --paginate "orgs/$ORG/packages/maven/$pkg/versions" \
-              --jq '.[] | select(.name | test("^[0-9a-f]{7,40}-SNAPSHOT$")) | "\(.id) \(.name)"') || {
+            pkg_deleted=0
+
+            # One fetch per package, two derivations, for the same reason as the branch
+            # list above: two calls classify from two different snapshots of the same
+            # list. per_page is explicit because the API default of 30 paginated this
+            # into roughly 124 requests across the five packages.
+            allversions=$(gh api --paginate "orgs/$ORG/packages/maven/$pkg/versions?per_page=100" | jq -s 'add // []') || {
               echo "::error::Failed to list versions for $pkg"; failed=1; echo "::endgroup::"; continue; }
+
+            versions=$(jq -r '.[] | select(.name | test("^[0-9a-f]{7,40}-SNAPSHOT$")) | "\(.id) \(.name)"' <<<"$allversions")
+            # The branch selector excludes the sha shape so the two passes stay disjoint:
+            # a version is classified by exactly one of them.
+            bversions=$(jq -r '.[] | select(.name | endswith("-SNAPSHOT")) | select(.name | test("^[0-9a-f]{7,40}-SNAPSHOT$") | not) | "\(.id) \(.name)"' <<<"$allversions")
 
             while read -r id name; do
               [ -z "$id" ] && continue
               sha=${name%-SNAPSHOT}
+              # A live branch whose name is hex only, 7 to 40 characters, produces a
+              # version that matches the sha shape, and the branch pass excludes it by
+              # selector. Without this check it would be looked up as a commit, fail to
+              # resolve, and be deleted while its branch is alive. No live branch matches
+              # today, so this guards a latent case rather than an observed one.
+              if grep -qxF "$sha" <<<"$KEEP_BRANCHES"; then
+                echo "KEEP (live branch): $name"; kept_total=$((kept_total + 1)); continue
+              fi
               if [ -z "${VERDICT[$sha]:-}" ]; then
                 if reason=$(classify "$sha"); then VERDICT[$sha]="keep ($reason)"
                 elif [ $? -eq 1 ]; then VERDICT[$sha]=orphan
@@ -77,12 +139,34 @@ jobs:
               fi
               case "${VERDICT[$sha]}" in
                 orphan)
-                  if [ "$DRY_RUN" = true ]; then echo "ORPHAN (dry run): $name"
-                  elif gh api -X DELETE "orgs/$ORG/packages/maven/$pkg/versions/$id" >/dev/null 2>&1; then echo "DELETED: $name"
-                  else echo "::warning::Failed to delete $pkg $name (id $id)"; failed=1; fi ;;
-                *) echo "${VERDICT[$sha]^^}: $name" ;;
+                  if [ "$DRY_RUN" = true ]; then echo "ORPHAN (dry run): $name"; pkg_deleted=$((pkg_deleted + 1))
+                  elif gh api -X DELETE "orgs/$ORG/packages/maven/$pkg/versions/$id" >/dev/null 2>&1; then echo "DELETED: $name"; pkg_deleted=$((pkg_deleted + 1))
+                  else echo "::warning::Failed to delete $pkg $name (id $id)"; failed=1; continue; fi
+                  echo "- \`$pkg\` \`$name\`" >> "$GITHUB_STEP_SUMMARY" ;;
+                *) echo "${VERDICT[$sha]^^}: $name"; kept_total=$((kept_total + 1)) ;;
               esac
             done <<< "$versions"
+
+            while read -r id name; do
+              [ -z "$id" ] && continue
+              branch=${name%-SNAPSHOT}
+              if [ -n "$branch" ] && grep -qxF "$branch" <<<"$KEEP_BRANCHES"; then
+                echo "KEEP (live branch): $name"; kept_total=$((kept_total + 1)); continue
+              fi
+              if [ "$DRY_RUN" = true ]; then echo "ORPHAN (dry run): $name"; pkg_deleted=$((pkg_deleted + 1))
+              elif gh api -X DELETE "orgs/$ORG/packages/maven/$pkg/versions/$id" >/dev/null 2>&1; then echo "DELETED: $name"; pkg_deleted=$((pkg_deleted + 1))
+              else echo "::warning::Failed to delete $pkg $name (id $id)"; failed=1; continue; fi
+              echo "- \`$pkg\` \`$name\`" >> "$GITHUB_STEP_SUMMARY"
+            done <<< "$bversions"
+
+            deleted_total=$((deleted_total + pkg_deleted))
+            echo "$pkg: $pkg_deleted removed"
             echo "::endgroup::"
           done
+
+          echo "Total: $deleted_total removed, $kept_total kept."
+          {
+            echo
+            echo "**Total: $deleted_total removed, $kept_total kept.**"
+          } >> "$GITHUB_STEP_SUMMARY"
           exit $failed
