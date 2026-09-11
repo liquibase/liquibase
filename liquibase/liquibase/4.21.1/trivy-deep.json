@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a08ac9-9088-7cd5-81ec-fdc5359d88b0",
-  "CreatedAt": "2026-09-10T10:07:40.680842132Z",
+  "ReportID": "01a08ff0-d91f-7e7e-9bda-a02a308fc045",
+  "CreatedAt": "2026-09-11T10:08:41.247951Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -396,8 +396,8 @@
           },
           "CVSS": {
             "bitnami": {
-              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
-              "V3Score": 9.8
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+              "V3Score": 10
             },
             "ghsa": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",

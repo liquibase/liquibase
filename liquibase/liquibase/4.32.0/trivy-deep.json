@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a08aca-af52-74f5-b635-2f4b365f9057",
-  "CreatedAt": "2026-09-10T10:08:54.098325962Z",
+  "ReportID": "01a08ff1-957c-77e5-893e-8f80655bfd1c",
+  "CreatedAt": "2026-09-11T10:09:29.468519387Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -661,15 +661,15 @@
             "CWE-287"
           ],
           "VendorSeverity": {
-            "bitnami": 2,
+            "bitnami": 3,
             "ghsa": 3,
             "nvd": 2,
             "redhat": 3
           },
           "CVSS": {
             "bitnami": {
-              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
-              "V3Score": 5.9
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N",
+              "V3Score": 8.2
             },
             "ghsa": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N",
@@ -3156,7 +3156,7 @@
             "https://github.com/urllib3/urllib3/commit/c19571de34c47de3a766541b041637ba5f716ed7",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-2xpw-w6gg-jr37",
             "https://linux.oracle.com/cve/CVE-2025-66471.html",
-            "https://linux.oracle.com/errata/ELSA-2026-1254.html",
+            "https://linux.oracle.com/errata/ELSA-2026-9031.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2025-66471",
             "https://ubuntu.com/security/notices/USN-7927-1",
             "https://ubuntu.com/security/notices/USN-7927-2",
@@ -3245,7 +3245,7 @@
             "https://github.com/urllib3/urllib3/commit/c19571de34c47de3a766541b041637ba5f716ed7",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-2xpw-w6gg-jr37",
             "https://linux.oracle.com/cve/CVE-2025-66471.html",
-            "https://linux.oracle.com/errata/ELSA-2026-1254.html",
+            "https://linux.oracle.com/errata/ELSA-2026-9031.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2025-66471",
             "https://ubuntu.com/security/notices/USN-7927-1",
             "https://ubuntu.com/security/notices/USN-7927-2",
@@ -3334,7 +3334,7 @@
             "https://github.com/urllib3/urllib3/commit/c19571de34c47de3a766541b041637ba5f716ed7",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-2xpw-w6gg-jr37",
             "https://linux.oracle.com/cve/CVE-2025-66471.html",
-            "https://linux.oracle.com/errata/ELSA-2026-1254.html",
+            "https://linux.oracle.com/errata/ELSA-2026-9031.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2025-66471",
             "https://ubuntu.com/security/notices/USN-7927-1",
             "https://ubuntu.com/security/notices/USN-7927-2",
@@ -3545,7 +3545,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-21441"
           ],
           "PublishedDate": "2026-01-07T22:15:44.04Z",
-          "LastModifiedDate": "2026-09-07T13:18:06.477Z"
+          "LastModifiedDate": "2026-09-10T13:17:38.183Z"
         },
         {
           "VulnerabilityID": "CVE-2026-21441",
@@ -3744,7 +3744,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-21441"
           ],
           "PublishedDate": "2026-01-07T22:15:44.04Z",
-          "LastModifiedDate": "2026-09-07T13:18:06.477Z"
+          "LastModifiedDate": "2026-09-10T13:17:38.183Z"
         },
         {
           "VulnerabilityID": "CVE-2026-21441",
@@ -3943,7 +3943,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-21441"
           ],
           "PublishedDate": "2026-01-07T22:15:44.04Z",
-          "LastModifiedDate": "2026-09-07T13:18:06.477Z"
+          "LastModifiedDate": "2026-09-10T13:17:38.183Z"
         },
         {
           "VulnerabilityID": "CVE-2026-44431",

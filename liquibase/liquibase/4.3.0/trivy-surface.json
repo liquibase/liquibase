@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a08ac9-2b85-74ff-8307-4554316d7a20",
-  "CreatedAt": "2026-09-10T10:07:14.821328395Z",
+  "ReportID": "01a08ff0-59ea-7adc-8050-5fb2962f7cec",
+  "CreatedAt": "2026-09-11T10:08:08.682715139Z",
   "ArtifactID": "sha256:123ebf59dfc05f037535c0a6d3c4fc77fc43053d469b6c9de8f1a02d4dfe5348",
   "ArtifactName": "liquibase/liquibase:4.3.0",
   "ArtifactType": "container_image",
@@ -20845,8 +20845,8 @@
           },
           "CVSS": {
             "bitnami": {
-              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
-              "V3Score": 9.8
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+              "V3Score": 10
             },
             "ghsa": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
