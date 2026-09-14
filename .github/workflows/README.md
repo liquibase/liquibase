@@ -15,7 +15,7 @@ credential. [TECHOPS-1222]
 | `pr.yml` | `pull_request` | none | Unit + integration matrix (via `ci-test.yml`) and a Docker smoke build. Same for fork, same-repo and Dependabot PRs. Required check: **PR Gate**. |
 | `pr-labels.yml` | `pull_request` | none | Requires one release-notes label. Required check: **PR Labels**. |
 | `ci-test.yml` | `workflow_call` | none | Shared test matrix used by `pr.yml` and `main.yml`. |
-| `main.yml` | `push: main`, nightly cron, dispatch | vault (Sonar, FOSSA only) | Tests, Sonar, FOSSA, publishes `main-SNAPSHOT` and `<full-sha>-SNAPSHOT` to GitHub Packages, uploads `liquibase-artifacts`, recreates the `nightly` pre-release. |
+| `main.yml` | `push: main`, nightly cron, dispatch | vault (Sonar, FOSSA only) | Tests, Sonar, FOSSA, uploads `liquibase-artifacts` on every run, and publishes `main-SNAPSHOT` and `<full-sha>-SNAPSHOT` to GitHub Packages on the cron and on dispatch **but not on push** [TECHOPS-1224]. Recreates the `nightly` pre-release. |
 | `snapshot-branch.yml` | dispatch (maintainers) | none | Publishes `<full-sha>-SNAPSHOT` for any ref so QA can target an unreleased branch from liquibase-test-harness / liquibase-pro-tests. |
 | `docker.yml` | `push: main` (docker/**), cron, dispatch | vault | Full Docker test + vulnerability scan via build-logic reusables; persists main scan to `scan-results`. |
 | `cleanup-packages.yml` | weekly cron, dispatch | none | Deletes orphaned `<sha>-SNAPSHOT` package versions. |
@@ -31,7 +31,8 @@ Git history has all of them.
 
 **Consumers of `main.yml` outputs**
 
-- `main-SNAPSHOT` / `<full-sha>-SNAPSHOT` on GitHub Packages: liquibase-test-harness, liquibase-pro nightly wrappers, build-logic `os-extension-test`.
+- `main-SNAPSHOT` on GitHub Packages, refreshed once a day by the cron: build-logic `os-extension-test` and `pro-extension-test`, both only behind `if: inputs.nightly`, and liquibase-neo4j's nightly build. liquibase-test-harness resolves run artifacts rather than packages, and liquibase-pro renames locally with `versions:set` instead of downloading, so neither is a consumer.
+- `<full-sha>-SNAPSHOT` on GitHub Packages: published by `snapshot-branch.yml` on maintainer dispatch when a specific commit is needed. `main.yml` no longer publishes one per push.
 - `liquibase-artifacts` run artifact: `create-release.yml` (`runId` input) until the release pipeline builds from tag.
 
 **Not on PRs anymore:** SNAPSHOT publishing, Sonar, FOSSA, test-harness dispatch. Run them from `main.yml`, `snapshot-branch.yml`, or the harness repo directly.
