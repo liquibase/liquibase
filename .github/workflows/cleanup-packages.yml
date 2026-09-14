@@ -75,6 +75,15 @@ jobs:
           KEEP_BRANCHES=$(jq -r '.[].name' <<<"$BRANCHES" | tr '/' '_')
           [ -z "$KEEP_BRANCHES" ] && { echo "::error::Empty branch list; aborting"; exit 1; }
 
+          # Long-lived branches to test ancestry against, narrowed to the ones that exist.
+          # Comparing against a branch that is not there returns 404, the error path below
+          # then classifies the version as "skip (API error)", and the whole sha pass stops
+          # deleting anything while still reporting success. `release` did exactly that: it
+          # has not existed in this repo for as long as the branch list goes back.
+          BASES=$(jq -r '.[].name' <<<"$BRANCHES" | grep -xE 'main|release' | tr '\n' ' ')
+          [ -n "$BASES" ] && echo "Ancestry bases: $BASES" || {
+            echo "::error::None of the expected base branches exist; aborting"; exit 1; }
+
           declare -A VERDICT # sha -> keep|orphan|skip, shared across packages
 
           # Actions log retention here is 7 days, and a sweep of this size needs a record
@@ -97,7 +106,7 @@ jobs:
               return 2
             fi
             grep -q "^${sha}" <<<"$KEEP_SHAS" && { echo "branch head or tag"; return 0; }
-            for base in main release; do
+            for base in $BASES; do
               status=$(gh api "repos/$REPO/compare/${sha}...${base}" --jq .status 2>/dev/null) || return 2
               [[ "$status" == ahead || "$status" == identical ]] && { echo "ancestor of $base"; return 0; }
             done
@@ -143,6 +152,10 @@ jobs:
                   elif gh api -X DELETE "orgs/$ORG/packages/maven/$pkg/versions/$id" >/dev/null 2>&1; then echo "DELETED: $name"; pkg_deleted=$((pkg_deleted + 1))
                   else echo "::warning::Failed to delete $pkg $name (id $id)"; failed=1; continue; fi
                   echo "- \`$pkg\` \`$name\`" >> "$GITHUB_STEP_SUMMARY" ;;
+                "skip (API error)")
+                  # Not a keep: the version was never classified. Counting it as kept let a
+                  # broken sha pass report success with nothing deleted.
+                  echo "SKIP (API error): $name"; failed=1 ;;
                 *) echo "${VERDICT[$sha]^^}: $name"; kept_total=$((kept_total + 1)) ;;
               esac
             done <<< "$versions"
