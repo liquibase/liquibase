@@ -142,9 +142,15 @@ jobs:
                 echo "KEEP (live branch): $name"; kept_total=$((kept_total + 1)); continue
               fi
               if [ -z "${VERDICT[$sha]:-}" ]; then
-                if reason=$(classify "$sha"); then VERDICT[$sha]="keep ($reason)"
-                elif [ $? -eq 1 ]; then VERDICT[$sha]=orphan
-                else VERDICT[$sha]="skip (API error)"; fi
+                # Retry before giving up. A sweep this size hits secondary rate limits, and
+                # an unclassified version now fails the run, so a transient 403 would fail
+                # the weekly cron and get ignored: the same outcome as the silence this
+                # replaced. Three attempts with backoff, then give up loudly.
+                for attempt in 1 2 3; do
+                  if reason=$(classify "$sha"); then VERDICT[$sha]="keep ($reason)"; break
+                  elif [ $? -eq 1 ]; then VERDICT[$sha]=orphan; break
+                  else VERDICT[$sha]="skip (API error)"; sleep $((attempt * 5)); fi
+                done
               fi
               case "${VERDICT[$sha]}" in
                 orphan)
