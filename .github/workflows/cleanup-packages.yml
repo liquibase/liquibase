@@ -102,7 +102,14 @@ jobs:
           classify() {
             local sha=$1 out status
             if ! out=$(gh api "repos/$REPO/commits/$sha" --jq .sha 2>&1); then
+              # 404 on a resolvable name means the commit is genuinely gone: orphan.
               grep -q "404\|Not Found" <<<"$out" && return 1
+              # 422 means GitHub could not resolve the name at all, which is NOT the same as
+              # absent, and the difference is not academic. `f123ee6-SNAPSHOT` is a real case
+              # here: that 7-character prefix became ambiguous as the repo grew, and one of
+              # its candidates is a commit that IS an ancestor of main. Deleting on 422 would
+              # remove a version built from merged code. Keep it and say so.
+              grep -q "No commit found for SHA" <<<"$out" && return 3
               return 2
             fi
             grep -q "^${sha}" <<<"$KEEP_SHAS" && { echo "branch head or tag"; return 0; }
@@ -147,9 +154,15 @@ jobs:
                 # the weekly cron and get ignored: the same outcome as the silence this
                 # replaced. Three attempts with backoff, then give up loudly.
                 for attempt in 1 2 3; do
-                  if reason=$(classify "$sha"); then VERDICT[$sha]="keep ($reason)"; break
-                  elif [ $? -eq 1 ]; then VERDICT[$sha]=orphan; break
-                  else VERDICT[$sha]="skip (API error)"; sleep $((attempt * 5)); fi
+                  # Capture the status once: `$?` after an `elif [ ... ]` reports that test,
+                  # not classify.
+                  reason=$(classify "$sha"); rc=$?
+                  case $rc in
+                    0) VERDICT[$sha]="keep ($reason)"; break ;;
+                    1) VERDICT[$sha]=orphan; break ;;
+                    3) VERDICT[$sha]="keep (sha not resolvable, not proven absent)"; break ;;
+                    *) VERDICT[$sha]="skip (API error)"; sleep $((attempt * 5)) ;;
+                  esac
                 done
               fi
               case "${VERDICT[$sha]}" in
