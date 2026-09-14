@@ -19,10 +19,16 @@ import liquibase.precondition.Precondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.*;
 
+import static liquibase.executor.ExecutorService.JDBC;
+
 public class PreconditionContainer extends AndPrecondition implements ChangeLogChild {
+    @Getter @Setter
+    protected DatabaseChangeLog changeLog;
 
     public enum FailOption {
         HALT("HALT"),
@@ -78,15 +84,15 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
         }
     }
 
+    @Getter
     private FailOption onFail = FailOption.HALT;
+    @Getter
     private ErrorOption onError = ErrorOption.HALT;
     private OnSqlOutputOption onSqlOutput = OnSqlOutputOption.IGNORE;
+    @Getter @Setter
     private String onFailMessage;
+    @Getter @Setter
     private String onErrorMessage;
-
-    public FailOption getOnFail() {
-        return onFail;
-    }
 
     public void setOnFail(String onFail) {
         if (onFail == null) {
@@ -110,9 +116,6 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
         this.onFail = onFail;
     }
 
-    public ErrorOption getOnError() {
-        return onError;
-    }
 
     public void setOnError(String onError) {
         if (onError == null) {
@@ -167,31 +170,18 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
         }
     }
 
-    public String getOnFailMessage() {
-        return onFailMessage;
-    }
-
-    public void setOnFailMessage(String onFailMessage) {
-        this.onFailMessage = onFailMessage;
-    }
-
-    public String getOnErrorMessage() {
-        return onErrorMessage;
-    }
-
-    public void setOnErrorMessage(String onErrorMessage) {
-        this.onErrorMessage = onErrorMessage;
-    }
-
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
             throws PreconditionFailedException, PreconditionErrorException {
+        if(null != this.changeLog) {
+            changeLog = this.changeLog;
+        }
         String ranOn = String.valueOf(changeLog);
         if (changeSet != null) {
             ranOn = String.valueOf(changeSet);
         }
 
-        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(JDBC, database);
         try {
             // Three cases for preConditions onUpdateSQL:
             // 1. TEST: preConditions should be run, as in regular update mode
@@ -215,14 +205,14 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
             }
         } catch (PreconditionFailedException e) {
             StringBuilder message = new StringBuilder();
-            message.append("     ").append(e.getFailedPreconditions().size()).append(" preconditions failed").append(StreamUtil.getLineSeparator());
-            for (FailedPrecondition invalid : e.getFailedPreconditions()) {
-                message.append("     ").append(invalid.toString());
-                message.append(StreamUtil.getLineSeparator());
-            }
-
             if (getOnFailMessage() != null) {
-                message = new StringBuilder(getOnFailMessage());
+                message.append(getOnFailMessage());
+            } else {
+                message.append("     ").append(e.getFailedPreconditions().size()).append(" preconditions failed").append(StreamUtil.getLineSeparator());
+                for (FailedPrecondition invalid : e.getFailedPreconditions()) {
+                    message.append("     ").append(invalid.toString());
+                    message.append(StreamUtil.getLineSeparator());
+                }
             }
             if (this.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
                 final String exceptionMessage = "Executing " + ranOn + " despite precondition failure due to onFail='WARN':\n " + message;
@@ -262,11 +252,6 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
                 }                
             }
         }
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 
     @Override
