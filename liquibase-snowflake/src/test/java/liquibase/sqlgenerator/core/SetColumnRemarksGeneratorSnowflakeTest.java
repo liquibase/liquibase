@@ -4,7 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
+import java.util.TreeSet;
+
 import liquibase.database.core.SnowflakeDatabase;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SetColumnRemarksStatement;
 
 public class SetColumnRemarksGeneratorSnowflakeTest {
@@ -36,6 +39,28 @@ public class SetColumnRemarksGeneratorSnowflakeTest {
 
         assertThat(generator.buildShowViewsStatement(statement, new SnowflakeDatabase()).getSql())
             .isEqualTo("SHOW VIEWS LIKE 'mytable'");
+    }
+
+    @Test
+    public void showViewsFallsBackToTheCatalogWhenNoSchemaIsKnown() {
+        // an unscoped SHOW VIEWS would still reach views in other databases, so narrow it to the
+        // catalog when that is all we have
+        SetColumnRemarksStatement statement =
+            new SetColumnRemarksStatement("mycatalog", null, "mytable", "mycolumn", "a remark");
+
+        assertThat(generator.buildShowViewsStatement(statement, new SnowflakeDatabase()).getSql())
+            .isEqualTo("SHOW VIEWS LIKE 'mytable' IN DATABASE mycatalog");
+    }
+
+    @Test
+    public void validateReturnsEarlyWithoutATableName() {
+        // the view lookup builds a LIKE pattern from the table name, so it cannot run before the
+        // statement itself is valid
+        SetColumnRemarksStatement statement =
+            new SetColumnRemarksStatement("mycatalog", "myschema", null, "mycolumn", "a remark");
+
+        assertThat(generator.validate(statement, new SnowflakeDatabase(), new SqlGeneratorChain<>(new TreeSet<>()))
+            .hasErrors()).isTrue();
     }
 
     @Test

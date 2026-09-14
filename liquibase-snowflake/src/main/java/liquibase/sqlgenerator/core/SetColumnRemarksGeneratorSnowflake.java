@@ -33,6 +33,10 @@ public class SetColumnRemarksGeneratorSnowflake extends SetColumnRemarksGenerato
     @Override
     public ValidationErrors validate(SetColumnRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = super.validate(statement, database, sqlGeneratorChain);
+        if (validationErrors.hasErrors()) {
+            // Without a table name there is nothing to look up, and the lookup below would fail on it.
+            return validationErrors;
+        }
         if (database instanceof SnowflakeDatabase) {
             if (statement.getColumnParentType() != null) {
                 // Snowflake doesn't support setting the column remarks on a view.
@@ -61,7 +65,8 @@ public class SetColumnRemarksGeneratorSnowflake extends SetColumnRemarksGenerato
      * The table name is a LIKE pattern, so {@code %} and {@code _} have to be escaped or a table
      * named MY_TABLE also matches a view named MYXTABLE. The statement is also scoped to the
      * schema being changed: an unscoped SHOW VIEWS searches every database the role can see, so a
-     * same-named view in an unrelated schema would make this look like a view.
+     * same-named view in an unrelated schema would make this look like a view. When no schema can
+     * be resolved the lookup is narrowed to the catalog instead.
      */
     protected RawParameterizedSqlStatement buildShowViewsStatement(SetColumnRemarksStatement statement, Database database) {
         String pattern = database.escapeStringForDatabase(statement.getTableName())
@@ -70,13 +75,15 @@ public class SetColumnRemarksGeneratorSnowflake extends SetColumnRemarksGenerato
         StringBuilder sql = new StringBuilder(String.format("SHOW VIEWS LIKE '%s'", pattern));
 
         String schemaName = statement.getSchemaName() != null ? statement.getSchemaName() : database.getDefaultSchemaName();
+        String catalogName = statement.getCatalogName() != null ? statement.getCatalogName() : database.getDefaultCatalogName();
         if (schemaName != null) {
-            String catalogName = statement.getCatalogName() != null ? statement.getCatalogName() : database.getDefaultCatalogName();
             sql.append(" IN SCHEMA ");
             if (catalogName != null) {
                 sql.append(database.escapeObjectName(catalogName, Catalog.class)).append('.');
             }
             sql.append(database.escapeObjectName(schemaName, Schema.class));
+        } else if (catalogName != null) {
+            sql.append(" IN DATABASE ").append(database.escapeObjectName(catalogName, Catalog.class));
         }
 
         return new RawParameterizedSqlStatement(sql.toString());
