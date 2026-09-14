@@ -154,9 +154,13 @@ jobs:
                 # the weekly cron and get ignored: the same outcome as the silence this
                 # replaced. Three attempts with backoff, then give up loudly.
                 for attempt in 1 2 3; do
-                  # Capture the status once: `$?` after an `elif [ ... ]` reports that test,
-                  # not classify.
-                  reason=$(classify "$sha"); rc=$?
+                  # GitHub runs `run:` steps as `bash -e {0}`, and the `set` line above does
+                  # not turn that off. A bare `reason=$(classify ...)` therefore kills the
+                  # step the first time classify reports a non-zero verdict, which is every
+                  # orphan. The `|| rc=$?` form keeps the call in a condition context, where
+                  # `-e` is suspended, and still captures the status once: reading `$?` after
+                  # an `elif [ ... ]` would report that test rather than the function.
+                  reason=$(classify "$sha") && rc=0 || rc=$?
                   case $rc in
                     0) VERDICT[$sha]="keep ($reason)"; break ;;
                     1) VERDICT[$sha]=orphan; break ;;
