@@ -177,4 +177,30 @@ class AbstractUpdateCommandStepTest extends Specification {
         !executorService.getExecutor("jdbc", databaseA).is(overrideA)
         resets["A"] == 1
     }
+
+    def "cleanUp only drops the LockService for its own database"() {
+        // Same JVM-wide-singleton hazard as the test above, for LockServiceFactory: cleanUp() used to
+        // call the blanket LockServiceFactory.resetAll(), which nulls the singleton and with it every
+        // database's LockService. A concurrently running execution then looked its lock service up
+        // again, got a freshly built one whose hasChangeLogLock() is false, skipped its release without
+        // logging anything, and left its DATABASECHANGELOGLOCK row set.
+        given: "two independent executions, each with an open lock service"
+        def databaseA = new PostgresDatabase()
+        def databaseB = new PostgresDatabase()
+        def lockServiceA = LockServiceFactory.getInstance().getLockService(databaseA)
+        def lockServiceB = LockServiceFactory.getInstance().getLockService(databaseB)
+
+        def commandA = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME)
+                .provideDependency(Database.class, databaseA)
+        def resultsBuilderA = new CommandResultsBuilder(commandA, new ByteArrayOutputStream())
+
+        when: "execution A finishes and cleans up while execution B is still in flight"
+        new UpdateSqlCommandStep().cleanUp(resultsBuilderA)
+
+        then: "B keeps the very lock service that knows it holds the changelog lock"
+        LockServiceFactory.getInstance().getLockService(databaseB).is(lockServiceB)
+
+        and: "A's own lock service is dropped, its execution being over"
+        !LockServiceFactory.getInstance().getLockService(databaseA).is(lockServiceA)
+    }
 }
