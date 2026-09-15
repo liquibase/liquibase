@@ -7,8 +7,15 @@ RUN addgroup --gid 1001 liquibase && \
     chown liquibase:root /liquibase && \
     chmod g+rx /liquibase
 
-# Install smaller JRE, if available and acceptable
-RUN apk add --no-cache openjdk21-jre-headless bash
+# Install smaller JRE, if available and acceptable.
+# `apk upgrade` first: the alpine:3.24 tag is rebuilt on Alpine's own cadence,
+# so the image lags security fixes that are already in the v3.24 package index.
+# openssl 3.5.8-r0 sat in the index for months while every published tag, edge
+# included, still shipped the vulnerable 3.5.7-r0. The scan gate fails on any
+# HIGH/CRITICAL, so we pull patches rather than wait for a rebuild. This stays
+# inside the pinned 3.24 release; it is not a dist-upgrade. [TECHOPS-1304]
+RUN apk upgrade --no-cache && \
+    apk add --no-cache openjdk21-jre-headless bash
 
 WORKDIR /liquibase
 
