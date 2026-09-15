@@ -92,14 +92,35 @@ jobs:
           fi
 
           # Nothing else asserts the commit is releasable, and the build runs -DskipTests,
-          # so without this a red commit ships. A commit with no completed checks is refused
+          # so without this a red commit ships. A commit with no completed run is refused
           # as well: "never tested" and "tested green" must not look the same here.
-          runs=$(gh api "repos/$REPO/commits/$sha/check-runs?per_page=100" --jq '.check_runs')
-          bad=$(jq -r '[.[] | select(.conclusion=="failure" or .conclusion=="timed_out" or .conclusion=="cancelled") | .name] | join(", ")' <<<"$runs")
-          ok=$(jq -r '[.[] | select(.conclusion=="success")] | length' <<<"$runs")
-          [ -z "$bad" ] || { echo "::error::$sha has failing checks: $bad"; exit 1; }
-          [ "$ok" -gt 0 ] || { echo "::error::$sha has no successful check runs"; exit 1; }
-          echo "$sha: $ok successful checks, none failing"
+          #
+          # Judged on workflow runs rather than check runs. Reading check-runs was wrong
+          # three separate ways, all found in review:
+          #   - It is paginated and main commits routinely carry 187 to 830 check runs, so
+          #     one page of 100 reported "none failing" on 7a9a3413, which had three.
+          #   - Check runs accumulate across attempts, so a job that failed and was then
+          #     re-run green leaves its failure in the list forever.
+          #   - Scheduled image scans attach to the commit hours later. They fail on the
+          #     CVE feed moving, which says nothing about whether this commit builds.
+          # So: drop `schedule` and `dynamic` events, keep only the newest run per
+          # workflow, and require all of them finished and none failing.
+          runs=$(gh api --paginate "repos/$REPO/actions/runs?head_sha=$sha&per_page=100" \
+                   --jq '.workflow_runs[] | {name, event, conclusion, created_at}' | jq -s '.')
+          verdict=$(jq -r '
+            [ .[] | select(.event != "schedule" and .event != "dynamic") ]
+            | group_by(.name) | map(sort_by(.created_at) | last)
+            | { bad:     [ .[] | select(.conclusion=="failure" or .conclusion=="timed_out" or .conclusion=="cancelled") | .name ],
+                running: [ .[] | select(.conclusion == null) | .name ],
+                ok:      [ .[] | select(.conclusion=="success") ] | length }' <<<"$runs")
+          bad=$(jq -r '.bad | join(", ")' <<<"$verdict")
+          running=$(jq -r '.running | join(", ")' <<<"$verdict")
+          ok=$(jq -r '.ok' <<<"$verdict")
+          [ -z "$bad" ] || { echo "::error::$sha has failing workflows: $bad"; exit 1; }
+          # Still in flight is "not yet red", which is not the same as green.
+          [ -z "$running" ] || { echo "::error::$sha still has workflows running: $running"; exit 1; }
+          [ "$ok" -gt 0 ] || { echo "::error::$sha has no successful workflow runs"; exit 1; }
+          echo "$sha: $ok successful workflows, none failing or in flight"
 
           # Taken from the commit rather than the clock, so re-running the same tag yields
           # the same value. Byte-for-byte reproducibility additionally needs
@@ -120,10 +141,17 @@ jobs:
     # 5. See .github/workflows/README.md for the broad-role OIDC trust this depends on.
     environment:
       # `release-publish` has 0 reviewers, which the weekly rehearsal needs so the cron
-      # does not hang. It is reachable only for a dry run of `main`: `branch` is a free-form
-      # dispatch input and this job builds it with Maven, so any other ref executing
-      # third-party plugins beside the GPG key goes through `release` and its 5 reviewers.
-      name: ${{ (inputs.dry_run && inputs.branch == 'main') && 'release-publish' || 'release' }}
+      # does not hang. It is reachable only for a dry run that is BOTH building `main` and
+      # running `main`'s own workflow file.
+      #
+      # `inputs.branch` alone was not enough. The YAML executing here comes from
+      # `github.ref`, set by the dispatch `--ref`, while the conditional keyed only on
+      # `inputs.branch`. Modified workflow code on any branch could therefore reach the
+      # 0-reviewer environment with the vault and the GPG key, and `release-publish` has
+      # `can_admins_bypass: true`, so an admin was not stopped by the branch policy either.
+      # All 7 deployments in its history came from a feature branch. Requiring `github.ref`
+      # as well makes the sentence above true for everyone, admins included.
+      name: ${{ (inputs.dry_run && inputs.branch == 'main' && github.ref == 'refs/heads/main') && 'release-publish' || 'release' }}
     permissions:
       # contents: read for checkout; packages: read for the GitHub Packages Maven repo
       # (mirrors ci-test.yml); id-token: AWS OIDC for vault.
@@ -274,10 +302,17 @@ jobs:
     # [TECHOPS-1223] See the comment on `reversion`, above.
     environment:
       # `release-publish` has 0 reviewers, which the weekly rehearsal needs so the cron
-      # does not hang. It is reachable only for a dry run of `main`: `branch` is a free-form
-      # dispatch input and this job builds it with Maven, so any other ref executing
-      # third-party plugins beside the GPG key goes through `release` and its 5 reviewers.
-      name: ${{ (inputs.dry_run && inputs.branch == 'main') && 'release-publish' || 'release' }}
+      # does not hang. It is reachable only for a dry run that is BOTH building `main` and
+      # running `main`'s own workflow file.
+      #
+      # `inputs.branch` alone was not enough. The YAML executing here comes from
+      # `github.ref`, set by the dispatch `--ref`, while the conditional keyed only on
+      # `inputs.branch`. Modified workflow code on any branch could therefore reach the
+      # 0-reviewer environment with the vault and the GPG key, and `release-publish` has
+      # `can_admins_bypass: true`, so an admin was not stopped by the branch policy either.
+      # All 7 deployments in its history came from a feature branch. Requiring `github.ref`
+      # as well makes the sentence above true for everyone, admins included.
+      name: ${{ (inputs.dry_run && inputs.branch == 'main' && github.ref == 'refs/heads/main') && 'release-publish' || 'release' }}
     permissions:
       # contents: attach assets to the draft release; id-token: AWS OIDC for vault.
       contents: write
@@ -531,11 +566,16 @@ jobs:
     # `git push -f` used to. Nothing is tagged now until every asset is built. [TECHOPS-1223]
     if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
     runs-on: ubuntu-22.04
-    # `release` already gated `reversion` for this run, so asking again would be a second
-    # prompt for one release. `release-publish` is the codified "approved upstream" variant,
-    # unreachable on its own here: this job needs three jobs that cannot run without it.
+    # `release`, not `release-publish`. This is the one irreversible step in the pipeline
+    # and the only job holding an App token with `contents: write`, so it belongs behind the
+    # 5 reviewers rather than behind an environment with none.
+    #
+    # It costs no extra prompt: approval is per environment per run, not per job (the
+    # pending-deployments API takes `environment_ids` and returns one object per
+    # environment), and `reversion` and `build-installers` are already on `release` for a
+    # real release. Established in TECHOPS-1214.
     environment:
-      name: release-publish
+      name: release
     permissions:
       id-token: write
     steps:

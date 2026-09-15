@@ -85,7 +85,7 @@ The `dryRun` process simulates our current production Liquibase release workflow
 
 The following actions are identical to those in a regular Liquibase release, with no modifications:
 
-- Get latests liquibase artifacts from the `main.yml` workflow
+- Build the artifacts from the commit SHA `create-release.yml` pinned, not from a `main.yml` run artifact [TECHOPS-1223]
 - Re-version artifacts to `dry-run-GITHUB_RUN_ID` version. i.e `dry-run-10522556642`
 - Build installers
 - Attach artifacts (`zip` and `tar` files) to a dryRun draft release
@@ -95,7 +95,6 @@ The following actions are identical to those in a regular Liquibase release, wit
 - Executes the test for the `brew` PR creation
 - Deploy artifacts to Maven, to our internal Maven repository: `https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging`
 - Delete the dryRun draft release. i.e `dry-run-10522556642`
-- Delete the dryRun repository tag. i.e `vdry-run-10522556642`
 
 ## :warning: What a DryRun Release does not do?
 

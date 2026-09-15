@@ -235,24 +235,14 @@ jobs:
     if: always()
     needs: [dry-run-create-release, dry-run-release-published]
     steps:
-      - name: Checkout liquibase
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          # The cleanup step below deletes the dry-run tag with this checkout's token.
-          # [TECHOPS-1111]
-          persist-credentials: true
-
-      - name: Set up Git
-        run: |
-          git config user.name "liquibase-workflows[bot]"
-          git config user.email "1241802+liquibase-workflows[bot]@users.noreply.github.com"
-
-      - name: Delete liquibase dry-run tag
-        if: always()
-        run: |
-          git push origin --delete refs/tags/vdry-run-${{ github.run_id }}
-          echo "Remote tag vdry-run-${{ github.run_id }} deleted"
-
+      # [TECHOPS-1223] The checkout, the git identity and the tag deletion that used to
+      # live here are gone. They existed to remove `vdry-run-<run_id>`, which the old
+      # create-release.yml created with `git tag -f "v${VERSION}"` during a dry run.
+      # The release is now attached with `draft: true`, which creates no git ref, and
+      # `tag-release` is gated on `dry_run == false`, so a dry run never makes a tag.
+      # Left in place, `git push origin --delete` would fail on a ref that does not
+      # exist and take the weekly cron red. Dropping the checkout also stops persisting
+      # a credential on disk for a job that only needs the API call below.
       - name: Delete the dry-run draft release
         if: always()
         run: |
