@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a09f63-5830-7c80-ac7c-38c984007f2b",
-  "CreatedAt": "2026-09-14T10:08:03.120821405Z",
+  "ReportID": "01a0a48a-25c8-780f-9ad7-4d2b76cf6df2",
+  "CreatedAt": "2026-09-15T10:08:32.200529565Z",
   "ArtifactID": "sha256:3b3119706bb9d14069b5eab36a4d25f9d2ebce093c7324d7a1168011c1ce94ed",
   "ArtifactName": "liquibase/liquibase:3.10",
   "ArtifactType": "container_image",
@@ -18098,7 +18098,7 @@
           ],
           "VendorSeverity": {
             "alma": 1,
-            "amazon": 2,
+            "amazon": 3,
             "azure": 3,
             "bitnami": 3,
             "cbl-mariner": 3,
@@ -18236,7 +18236,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 2,
+            "amazon": 3,
             "azure": 3,
             "cbl-mariner": 3,
             "julia": 3,
@@ -18351,7 +18351,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 2,
+            "amazon": 3,
             "cbl-mariner": 3,
             "julia": 3,
             "nvd": 3,
@@ -18834,7 +18834,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "julia": 3,
@@ -21089,7 +21089,7 @@
           ],
           "VendorSeverity": {
             "alma": 1,
-            "amazon": 2,
+            "amazon": 3,
             "azure": 3,
             "bitnami": 3,
             "cbl-mariner": 3,
@@ -21227,7 +21227,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 2,
+            "amazon": 3,
             "azure": 3,
             "cbl-mariner": 3,
             "julia": 3,
@@ -21342,7 +21342,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 2,
+            "amazon": 3,
             "cbl-mariner": 3,
             "julia": 3,
             "nvd": 3,
@@ -21825,7 +21825,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "julia": 3,
@@ -22476,7 +22476,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 2,
+            "amazon": 3,
             "azure": 4,
             "bottlerocket": 2,
             "cbl-mariner": 4,
@@ -24486,7 +24486,7 @@
             "https://bugzilla.redhat.com/show_bug.cgi?id=2463857",
             "https://creativecommons.org/licenses/by/4.0/",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42198",
-            "https://errata.almalinux.org/9/ALSA-2026-22304.html",
+            "https://errata.almalinux.org/10/ALSA-2026-24348.html",
             "https://errata.rockylinux.org/RLSA-2026:22304",
             "https://github.com/pgjdbc/pgjdbc",
             "https://github.com/pgjdbc/pgjdbc/releases/tag/REL42.7.11",

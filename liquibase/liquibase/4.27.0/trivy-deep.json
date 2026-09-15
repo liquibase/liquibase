@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a09f63-c936-7bda-a171-e70846bb0f95",
-  "CreatedAt": "2026-09-14T10:08:32.054778243Z",
+  "ReportID": "01a0a48b-25ca-722a-bcd8-c695e880dc2f",
+  "CreatedAt": "2026-09-15T10:09:37.738142867Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -538,7 +538,7 @@
             "https://bugzilla.redhat.com/show_bug.cgi?id=2463857",
             "https://creativecommons.org/licenses/by/4.0/",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42198",
-            "https://errata.almalinux.org/9/ALSA-2026-22304.html",
+            "https://errata.almalinux.org/10/ALSA-2026-24348.html",
             "https://errata.rockylinux.org/RLSA-2026:22304",
             "https://github.com/pgjdbc/pgjdbc",
             "https://github.com/pgjdbc/pgjdbc/releases/tag/REL42.7.11",
