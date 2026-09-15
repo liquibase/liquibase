@@ -1,0 +1,94 @@
+name: PR
+
+# The only workflow that runs code from a pull request. Plain `pull_request`
+# event, read-only GITHUB_TOKEN, no secrets, no publishing. Identical for fork,
+# same-repo and Dependabot PRs. Never add secrets or write permissions here;
+# anything that needs them belongs in main.yml (push/schedule/dispatch).
+# No trigger-level path filters: a required check that never reports leaves the
+# PR stuck at "Expected". The `changes` job decides what to run instead.
+# [TECHOPS-1104, GHSA-mqw2-j77g-6486]
+
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened, ready_for_review ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-24.04
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+      docker: ${{ steps.filter.outputs.docker }}
+    steps:
+      - name: Classify changed files
+        id: filter
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          files=$(gh api --paginate "repos/${{ github.repository }}/pulls/${PR}/files" --jq '.[].filename')
+          echo "Changed files:"; echo "$files"
+          docker=$(grep -q '^docker/' <<<"$files" && echo true || echo false)
+          code=$(grep -qvE '\.md$|^docker/|^\.github/ISSUE_TEMPLATE/|^\.github/pull_request_template\.md$|^LICENSE' <<<"$files" && echo true || echo false)
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "docker=$docker" >> "$GITHUB_OUTPUT"
+
+  test:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    uses: ./.github/workflows/ci-test.yml
+    permissions:
+      contents: read
+      packages: read
+
+  docker-smoke:
+    name: Docker smoke (${{ matrix.variant }})
+    needs: changes
+    if: needs.changes.outputs.docker == 'true'
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: community
+            dockerfile: docker/Dockerfile
+          - variant: alpine
+            dockerfile: docker/Dockerfile.alpine
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build image
+        run: docker build -f "${{ matrix.dockerfile }}" -t liquibase-smoke:${{ matrix.variant }} docker/
+
+      - name: Smoke test
+        run: |
+          docker run --rm liquibase-smoke:${{ matrix.variant }} --version
+          docker run --rm liquibase-smoke:${{ matrix.variant }} --help > /dev/null
+
+  pr-gate:
+    name: PR Gate
+    needs: [ changes, test, docker-smoke ]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check results
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          echo "$RESULTS" | jq .
+          bad=$(echo "$RESULTS" | jq -r 'to_entries[] | select(.value.result != "success" and .value.result != "skipped") | .key')
+          if [ -n "$bad" ]; then
+            echo "::error::Failed or cancelled jobs: $bad"
+            exit 1
+          fi
+          echo "All required jobs passed or were skipped."

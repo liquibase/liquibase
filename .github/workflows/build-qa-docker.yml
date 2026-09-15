@@ -84,7 +84,7 @@ jobs:
       generate_sbom: true
       # ─── TECHOPS-408: community scans MUST NOT dispatch CVEs to investigate-cve in liquibase-pro ───
       # The pro-secure twin (liquibase-pro/.github/workflows/build-qa-docker.yml) sets this to true.
-      # DO NOT COPY THAT VALUE HERE. Community CVE handling is owned by docker-scan.yml in this repo.
+      # DO NOT COPY THAT VALUE HERE. Community CVE handling is owned by docker.yml in this repo.
       # See: https://liquibase.atlassian.net/browse/TECHOPS-408
       dispatch_new_cves: false
       build_logic_ref: main
@@ -105,7 +105,7 @@ jobs:
       generate_sbom: true
       # ─── TECHOPS-408: community scans MUST NOT dispatch CVEs to investigate-cve in liquibase-pro ───
       # The pro-secure twin (liquibase-pro/.github/workflows/build-qa-docker.yml) sets this to true.
-      # DO NOT COPY THAT VALUE HERE. Community CVE handling is owned by docker-scan.yml in this repo.
+      # DO NOT COPY THAT VALUE HERE. Community CVE handling is owned by docker.yml in this repo.
       # See: https://liquibase.atlassian.net/browse/TECHOPS-408
       dispatch_new_cves: false
       build_logic_ref: main
