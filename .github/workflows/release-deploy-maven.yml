@@ -29,6 +29,12 @@ on:
         type: string
         default: ""
 
+      approved:
+        description: "True only when release-published-orchestrator has already cleared the manual-approval gate for this run."
+        required: false
+        type: boolean
+        default: false
+
   workflow_dispatch:
     inputs:
       version:
@@ -68,6 +74,12 @@ jobs:
     name: Deploy to Maven Central (Production)
     runs-on: ubuntu-22.04
     if: ${{ inputs.dry_run == false }}
+    # `approved` is `workflow_call`-only, so a direct dispatch cannot claim it and still meets the
+    # reviewers on `release`. An orchestrated run cleared that gate once already.
+    # Keep it that way: on `workflow_dispatch` anyone who can dispatch could pick `release-publish`,
+    # and a non-`boolean` input would do it silently because the string "false" is truthy.
+    environment:
+      name: ${{ inputs.approved && 'release-publish' || 'release' }}
     steps:
       - name: Download release assets
         env:
@@ -78,7 +90,7 @@ jobs:
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.LIQUIBASE_RELEASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
 
       - name: Get secrets from vault

@@ -13,5 +13,8 @@ permissions:
 
 jobs:
   dependabot-automerge:
+    # Only Dependabot's own PRs. Without this gate every pull_request event runs
+    # the reusable workflow with inherited secrets. [TECHOPS-1111]
+    if: github.actor == 'dependabot[bot]'
     uses: liquibase/build-logic/.github/workflows/dependabot-automerge.yml@main
     secrets: inherit
