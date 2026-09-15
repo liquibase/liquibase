@@ -69,7 +69,12 @@ public class SetColumnRemarksGeneratorSnowflake extends SetColumnRemarksGenerato
      * be resolved the lookup is narrowed to the catalog instead.
      */
     protected RawParameterizedSqlStatement buildShowViewsStatement(SetColumnRemarksStatement statement, Database database) {
-        String pattern = database.escapeStringForDatabase(statement.getTableName())
+        // Escape in one pass rather than via escapeStringForDatabase: that method leaves backslashes
+        // alone and skips a quote already preceded by one, so doubling backslashes around it would
+        // leave the quote unescaped and break the literal.
+        String pattern = statement.getTableName()
+                .replace("\\", "\\\\")
+                .replace("'", "\\'")
                 .replace("%", "\\%")
                 .replace("_", "\\_");
         StringBuilder sql = new StringBuilder(String.format("SHOW VIEWS LIKE '%s'", pattern));

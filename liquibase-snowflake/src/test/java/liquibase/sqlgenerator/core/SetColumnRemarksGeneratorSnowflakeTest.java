@@ -53,6 +53,26 @@ public class SetColumnRemarksGeneratorSnowflakeTest {
     }
 
     @Test
+    public void backslashesInTheTableNameAreEscaped() {
+        // snowflake reads backslash escape sequences in a string literal, so a raw \b in the
+        // pattern would arrive as a backspace and never match the view
+        SetColumnRemarksStatement statement =
+            new SetColumnRemarksStatement(null, "myschema", "a\\b", "mycolumn", "a remark");
+
+        assertThat(generator.buildShowViewsStatement(statement, new SnowflakeDatabase()).getSql())
+            .isEqualTo("SHOW VIEWS LIKE 'a\\\\b' IN SCHEMA myschema");
+    }
+
+    @Test
+    public void quotesInTheTableNameAreEscaped() {
+        SetColumnRemarksStatement statement =
+            new SetColumnRemarksStatement(null, "myschema", "o'brien", "mycolumn", "a remark");
+
+        assertThat(generator.buildShowViewsStatement(statement, new SnowflakeDatabase()).getSql())
+            .isEqualTo("SHOW VIEWS LIKE 'o\\'brien' IN SCHEMA myschema");
+    }
+
+    @Test
     public void validateReturnsEarlyWithoutATableName() {
         // the view lookup builds a LIKE pattern from the table name, so it cannot run before the
         // statement itself is valid
