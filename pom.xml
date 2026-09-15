@@ -65,6 +65,7 @@
         <build.branch>unknown</build.branch>
         <build.repository.name>unknown</build.repository.name>
         <build.repository.owner>unknown</build.repository.owner>
+        <build.version>DEV</build.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <trimStackTrace>false</trimStackTrace>
