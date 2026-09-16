@@ -15,7 +15,7 @@ credential. [TECHOPS-1222]
 | `pr.yml` | `pull_request` | none | Unit + integration matrix (via `ci-test.yml`) and a Docker smoke build. Same for fork, same-repo and Dependabot PRs. Required check: **PR Gate**. |
 | `pr-labels.yml` | `pull_request` | none | Requires one release-notes label. Required check: **PR Labels**. |
 | `ci-test.yml` | `workflow_call` | none | Shared test matrix used by `pr.yml` and `main.yml`. |
-| `main.yml` | `push: main`, nightly cron, dispatch | vault (Sonar, FOSSA only) | Tests, Sonar, FOSSA, uploads `liquibase-artifacts` on every run, and publishes `main-SNAPSHOT` and `<full-sha>-SNAPSHOT` to GitHub Packages on the cron and on dispatch **but not on push** [TECHOPS-1224]. Recreates the `nightly` pre-release. |
+| `main.yml` | `push: main`, nightly cron, dispatch | vault (Sonar, FOSSA only) | Tests, Sonar, FOSSA, uploads `liquibase-artifacts` on every run, and publishes `main-SNAPSHOT` and `<full-sha>-SNAPSHOT` to GitHub Packages on the cron and on dispatch **but not on push** [TECHOPS-1224]. Recreates the `nightly` pre-release on the same triggers, also **not on push** [TECHOPS-1224]. |
 | `snapshot-branch.yml` | dispatch (maintainers) | none | Publishes `<full-sha>-SNAPSHOT` for any ref so QA can target an unreleased branch from liquibase-test-harness / liquibase-pro-tests. |
 | `docker.yml` | `push: main` (docker/**), cron, dispatch | vault | Full Docker test + vulnerability scan via build-logic reusables; persists main scan to `scan-results`. |
 | `cleanup-packages.yml` | weekly cron, dispatch | none | Deletes orphaned `<sha>-SNAPSHOT` package versions. |
@@ -33,6 +33,7 @@ Git history has all of them.
 
 - `main-SNAPSHOT` on GitHub Packages, refreshed once a day by the cron: build-logic `os-extension-test` and `pro-extension-test`, both only behind `if: inputs.nightly`, and liquibase-neo4j's nightly build. liquibase-test-harness resolves run artifacts rather than packages, and liquibase-pro renames locally with `versions:set` instead of downloading, so neither is a consumer.
 - `<full-sha>-SNAPSHOT` on GitHub Packages: published by `snapshot-branch.yml` on maintainer dispatch when a specific commit is needed. `main.yml` no longer publishes one per push.
+- `nightly` GitHub pre-release (`liquibase-nightly.tar.gz`, `.zip`, `liquibase-core-nightly.jar`): recreated by `main.yml` on the cron and on dispatch. It is deleted and rebuilt each time, so it always reflects one commit, not a history.
 - `liquibase-artifacts` run artifact: no longer consumed. `create-release.yml` builds from a pinned commit SHA instead of an uploaded run artifact [TECHOPS-1223].
 
 **Not on PRs anymore:** SNAPSHOT publishing, Sonar, FOSSA, test-harness dispatch. Run them from `main.yml`, `snapshot-branch.yml`, or the harness repo directly.
