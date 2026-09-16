@@ -199,6 +199,13 @@ jobs:
   nightly-release:
     name: Nightly Release
     needs: publish-snapshot
+    # [TECHOPS-1224] Not on push. This job runs `gh release delete nightly
+    # --cleanup-tag` and recreates the public `nightly` pre-release with three
+    # assets, so leaving it unguarded republished artifacts from the public repo
+    # on every merge to main, which is the build-server role this ticket removes.
+    # The cron and maintainer dispatch still produce it, once a day, as the name
+    # already implied. Same guard as the GitHub Packages step above.
+    if: ${{ github.event_name != 'push' }}
     runs-on: ubuntu-24.04
     permissions:
       contents: write
