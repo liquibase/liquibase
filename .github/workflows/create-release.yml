@@ -73,6 +73,8 @@ jobs:
           REPO: ${{ github.repository }}
           REF: ${{ inputs.branch }}
           VERSION: ${{ inputs.version }}
+          # This workflow's own display name, so the gate below can exclude its own runs.
+          SELF: ${{ github.workflow }}
         run: |
           set -euo pipefail
           # Injection sink: REF/VERSION are dispatch inputs. Passed via env, never
@@ -103,12 +105,20 @@ jobs:
           #     re-run green leaves its failure in the list forever.
           #   - Scheduled image scans attach to the commit hours later. They fail on the
           #     CVE feed moving, which says nothing about whether this commit builds.
-          # So: drop `schedule` and `dynamic` events, keep only the newest run per
-          # workflow, and require all of them finished and none failing.
+          # So: drop `schedule` and `dynamic` events, drop this workflow's own runs,
+          # keep only the newest run per workflow, and require all finished and none failing.
+          #
+          # Dropping SELF is load-bearing, not tidiness. This workflow is dispatched with
+          # `--ref main` and `branch: main` (that is exactly what dry-run-release.yml does),
+          # so its own in-flight run carries the very head_sha being judged and reports
+          # `conclusion: null`. Without this the gate sees itself as "still running" and
+          # refuses every single time, which deadlocks the weekly dry run. Excluding the
+          # release workflow is also right on its own terms: a previous release attempt on
+          # this commit says nothing about whether the commit builds.
           runs=$(gh api --paginate "repos/$REPO/actions/runs?head_sha=$sha&per_page=100" \
                    --jq '.workflow_runs[] | {name, event, conclusion, created_at}' | jq -s '.')
-          verdict=$(jq -r '
-            [ .[] | select(.event != "schedule" and .event != "dynamic") ]
+          verdict=$(jq -r --arg self "$SELF" '
+            [ .[] | select(.event != "schedule" and .event != "dynamic" and .name != $self) ]
             | group_by(.name) | map(sort_by(.created_at) | last)
             | { bad:     [ .[] | select(.conclusion=="failure" or .conclusion=="timed_out" or .conclusion=="cancelled") | .name ],
                 running: [ .[] | select(.conclusion == null) | .name ],
