@@ -5,11 +5,28 @@ name: "Auto-create Jira ticket on Community PR merge"
 # queue of every shipping change without scraping merged PRs at release
 # time. Full process: https://github.com/liquibase/liquibase-infrastructure/blob/main/jira/docs/community-release-process.md
 #
-# Three triggers cover real-world merge patterns:
-#   1. PR closed (merged) WITH milestone → create ticket immediately
+# Four triggers cover real-world merge patterns:
+#   1. push to main → the merge itself. Squash is the only merge strategy
+#      enabled on this repo, so one pushed commit maps to exactly one PR.
 #   2. PR milestoned AFTER merge (forgot-to-set case) → create ticket
 #   3. Milestone renamed (e.g. 1NEXT → 5.0.4) → backfill Fix Version on
 #      every auto-created ticket in that milestone
+#   4. workflow_dispatch with a PR number → manual backfill for one PR
+#
+# TECHOPS-1307: trigger 1 used to be `pull_request: closed`, and that never
+# worked for the contributions this workflow exists to track. A `pull_request`
+# event raised by a fork carries a read-only GITHUB_TOKEN and no secrets, so
+# `id-token: write` is never granted and the vault step below cannot run. Every
+# merged external PR failed here and silently got no Jira ticket: 32 of this
+# workflow's 34 recorded failures have a fork head repository, against 2 from
+# liquibase/liquibase. Reacting to the push instead makes the trigger a commit
+# on a protected branch, which is trusted and does carry secrets.
+#
+# `pull_request_target` would also have fixed it, and would even have been safe
+# here because this workflow never checks out PR code. It is deliberately not
+# used: TECHOPS-1100 left this repository with zero pull_request_target files,
+# and that absolute is what makes the fork policy auditable with one grep. An
+# exception, however well reasoned, costs more than the convenience is worth.
 #
 # Decoupled from TECHOPS-273 (release-tag Fix Version automation): this
 # workflow owns the full Community-PR → Jira lifecycle on its own.
@@ -37,24 +54,43 @@ concurrency:
   cancel-in-progress: false
 
 on:
+  push:
+    branches: [main]
   pull_request:
-    types: [closed, milestoned]
+    types: [milestoned]
   milestone:
     types: [edited]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Merged PR number to backfill (digits only, e.g. 7909)"
+        required: true
+        type: string
 
 permissions:
   id-token: write
   contents: read
   pull-requests: read
+  # listForRepo in the milestone-rename handler reads PRs through the issues
+  # API, which is gated by `issues`, not by `pull-requests`.
+  issues: read
 
 jobs:
   auto-create:
     runs-on: ubuntu-latest
+    # The pull_request arm is restricted to PRs whose head is this repository.
+    # A fork PR reaching this workflow through pull_request has no secrets, so
+    # it could only fail; the push arm already covered it at merge time. Adding
+    # a milestone to an already-merged fork PR is the one case left uncovered,
+    # and workflow_dispatch handles it.
     if: |
+      github.event_name == 'push' ||
+      github.event_name == 'workflow_dispatch' ||
       github.event_name == 'milestone' ||
       (github.event_name == 'pull_request' &&
-        ((github.event.action == 'closed' && github.event.pull_request.merged == true) ||
-         (github.event.action == 'milestoned' && github.event.pull_request.merged == true)))
+        github.event.action == 'milestoned' &&
+        github.event.pull_request.merged == true &&
+        github.event.pull_request.head.repo.full_name == github.repository)
     steps:
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6
@@ -91,6 +127,9 @@ jobs:
           JIRA_BASE_URL: https://datical.atlassian.net
           JIRA_EMAIL: ${{ env.JIRA_USER }}
           JIRA_TOKEN: ${{ env.JIRA_API_TOKEN }}
+          # Passed through the environment and validated in the script rather
+          # than interpolated into a shell command.
+          BACKFILL_PR_NUMBER: ${{ inputs.pr_number }}
         with:
           script: |
             // ---- Config -----------------------------------------------------
@@ -203,9 +242,11 @@ jobs:
               return null;
             }
 
-            // ---- Trigger 1 + 2: PR merged ----------------------------------
-            async function handlePullRequest() {
-              const pr = context.payload.pull_request;
+            // ---- Triggers 1, 2 and 4: a merged PR --------------------------
+            // Takes the PR rather than reading context.payload, because on the
+            // push and dispatch paths there is no pull_request in the payload
+            // and the PR has to be fetched. The shape is the same either way.
+            async function handlePullRequest(pr) {
               if (!pr.merged) {
                 core.info('PR not merged, skipping');
                 return;
@@ -325,9 +366,104 @@ jobs:
               }
             }
 
+            // ---- Shared PR lookup -------------------------------------------
+            // The push and dispatch paths only know a number, and the webhook
+            // payload's PR object is not available to them.
+            async function fetchPr(number) {
+              const { data } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: number,
+              });
+              return data;
+            }
+
+            // ---- Trigger 1: a commit landed on main -------------------------
+            async function handlePush() {
+              // Squash is the only merge strategy enabled on this repo, so a
+              // pushed commit maps to at most one merged PR. GitHub caps the
+              // `commits` array at 20 entries, so head_commit is added
+              // explicitly: on a larger push the merge commit is still the head.
+              const shas = new Set((context.payload.commits || []).map(c => c.id));
+              if (context.payload.head_commit) shas.add(context.payload.head_commit.id);
+              if (shas.size === 0) {
+                core.info('Push carried no commits, skipping');
+                return;
+              }
+
+              // Commit-to-PR association is not immediately consistent: the
+              // push webhook can beat GitHub's own indexing, and an empty
+              // answer here would silently lose the ticket, which is the exact
+              // failure this workflow is being fixed for. A squash commit
+              // subject ends in "(#1234)", so the number is also recoverable
+              // from the message with no API call and no delay. The API stays
+              // authoritative; the subject is only consulted when it returns
+              // nothing.
+              const byMessage = (commit) => {
+                const m = /\(#(\d+)\)\s*$/.exec((commit?.message || '').split('\n')[0]);
+                return m ? [{ number: Number(m[1]) }] : [];
+              };
+
+              const commitsBySha = new Map();
+              for (const c of context.payload.commits || []) commitsBySha.set(c.id, c);
+              if (context.payload.head_commit) {
+                commitsBySha.set(context.payload.head_commit.id, context.payload.head_commit);
+              }
+
+              const handled = new Set();
+              for (const sha of shas) {
+                let refs = await github.paginate(
+                  github.rest.repos.listPullRequestsAssociatedWithCommit,
+                  { owner: context.repo.owner, repo: context.repo.repo, commit_sha: sha },
+                );
+                if (refs.length === 0) {
+                  refs = byMessage(commitsBySha.get(sha));
+                  if (refs.length) {
+                    core.info(`No PR associated with ${sha.slice(0, 7)} yet; recovered #${refs[0].number} from the commit subject`);
+                  }
+                }
+                for (const ref of refs) {
+                  if (handled.has(ref.number)) continue;
+                  handled.add(ref.number);
+                  let pr;
+                  try {
+                    pr = await fetchPr(ref.number);
+                  } catch (e) {
+                    core.warning(`Could not read PR #${ref.number} for ${sha.slice(0, 7)}: ${e.message}`);
+                    continue;
+                  }
+                  if (!pr.merged) {
+                    core.info(`PR #${pr.number} touches ${sha.slice(0, 7)} but is not merged, skipping`);
+                    continue;
+                  }
+                  await handlePullRequest(pr);
+                }
+              }
+
+              if (handled.size === 0) {
+                core.info('No pull request is associated with the pushed commits; direct push, nothing to do');
+              }
+            }
+
+            // ---- Trigger 4: manual backfill ---------------------------------
+            async function handleDispatch() {
+              const raw = process.env.BACKFILL_PR_NUMBER || '';
+              if (!/^\d+$/.test(raw)) {
+                core.setFailed(`pr_number must be digits only, got "${raw}"`);
+                return;
+              }
+              const pr = await fetchPr(Number(raw));
+              core.info(`Backfilling PR #${pr.number}`);
+              await handlePullRequest(pr);
+            }
+
             // ---- Dispatch ---------------------------------------------------
-            if (context.eventName === 'pull_request') {
-              await handlePullRequest();
+            if (context.eventName === 'push') {
+              await handlePush();
+            } else if (context.eventName === 'workflow_dispatch') {
+              await handleDispatch();
+            } else if (context.eventName === 'pull_request') {
+              await handlePullRequest(context.payload.pull_request);
             } else if (context.eventName === 'milestone' && context.payload.action === 'edited') {
               await handleMilestoneEdit();
             } else {
