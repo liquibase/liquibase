@@ -3,232 +3,232 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a0a3e6-ffe2-7ddc-ac52-24a0093c57e1",
-  "CreatedAt": "2026-09-15T07:10:20.130909495Z",
-  "ArtifactID": "sha256:322d099be243bc336bb60d315ab9f782f5b78a4b65bc6a2d38a1b98ed54dd99d",
-  "ArtifactName": "ghcr.io/liquibase/liquibase/liquibase-liquibase:7a9a3413da31aa6802783e8a92f5c22d24ddc1ba",
+  "ReportID": "01a0a90e-1aa7-72bf-a710-6d72adb4413a",
+  "CreatedAt": "2026-09-16T07:11:08.967181145Z",
+  "ArtifactID": "sha256:a4348ca377c7adbb5220913b668c43fcb41b5ac4d8ceecf097a663eb31840d7f",
+  "ArtifactName": "ghcr.io/liquibase/liquibase/liquibase-liquibase:b49152331e0e62decd4fcda4eecb5a3a80c651a6",
   "ArtifactType": "container_image",
   "Metadata": {
-    "Size": 312145408,
+    "Size": 312150528,
     "OS": {
       "Family": "ubuntu",
       "Name": "24.04"
     },
-    "ImageID": "sha256:262d764d796f5117555e75a30b1f9d9f6a40a042038ec382773a589aadca44aa",
+    "ImageID": "sha256:af2ece6b0a2d2c292e07df3cbc0e091f3478ebb1271681c56640ea3516918e79",
     "DiffIDs": [
-      "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a",
-      "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6",
-      "sha256:e3bbde51f2843e9ad52e3f8c218c608cf733dba685e3751ae89be64ed878ef0f",
-      "sha256:a14746a4e2d7c8357935258807da0798846b3534d9963cc86485f4c5e443a969",
-      "sha256:6db02a85e6db7e326800e08e2ccb65dcdad99ed901979e0877b8332acd73bece",
-      "sha256:19225ec9d050eb3b4d5463b05eb578b816c2a210be89aa6171de63dc6f4d4e1e",
+      "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1",
+      "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f",
+      "sha256:0933397ca2c26103c5e4f8ee981beaf5d75071c1f32271e22b04ded1e5f13e6d",
+      "sha256:b5933306ed7c7fee662be35ba60da940e0f98a04e7515320cf59e96f51738dfe",
+      "sha256:84fbb6db2b5db76f02bd4eae02fd5790cb7ce0e338ebbaae447f860e1900239c",
+      "sha256:23714dbdab9a5d7ea1c35e1c8f31b60ad2fe3368962d683f31fdaabd952c5daa",
       "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
-      "sha256:7b6eba8d24aeedfa243e545c392db2a0bb1ceedf2ba85f19d2c0fde061deab74",
-      "sha256:da34c69cba640c90e3a5b7a87a57c2e38ebe88d7c59d8532d4d8b170500e4a52",
-      "sha256:82e29862701456f9df4669d835211a9a4437dfc89a98e0af617bef5d4f7eaf46",
-      "sha256:a4a22c445c5c9587cb2b3346f4a7b5831c94b34986c3a3a188e6de3767ab7b80"
+      "sha256:301b588e2f99c5783c44ccb4be673b24bc9a77086d28c94f200d50655a469522",
+      "sha256:f774294133bc176325bd1f586374bdb1f4fdc014574c0541397a98d0542fc75a",
+      "sha256:8c665b9c1ab1a076c8997ae70650f344753f88d4abb954862ef09524f62774c3",
+      "sha256:129fddea6eaa8eda4a4f749a8b1953d53d64175a68e157f0f5f557eb05de23fd"
     ],
     "RepoTags": [
-      "ghcr.io/liquibase/liquibase/liquibase-liquibase:7a9a3413da31aa6802783e8a92f5c22d24ddc1ba"
+      "ghcr.io/liquibase/liquibase/liquibase-liquibase:b49152331e0e62decd4fcda4eecb5a3a80c651a6"
     ],
     "RepoDigests": [
-      "ghcr.io/liquibase/liquibase/liquibase-liquibase@sha256:da89e9c638317528d0bea600e6a8fdb20c459fa595ab117c1fa7f923e4181700"
+      "ghcr.io/liquibase/liquibase/liquibase-liquibase@sha256:56e86b993c36a117e7686ac68ba0fe42b7d878f0832c010968a6d0e4cfa36ddf"
     ],
-    "Reference": "ghcr.io/liquibase/liquibase/liquibase-liquibase:7a9a3413da31aa6802783e8a92f5c22d24ddc1ba",
+    "Reference": "ghcr.io/liquibase/liquibase/liquibase-liquibase:b49152331e0e62decd4fcda4eecb5a3a80c651a6",
     "ImageConfig": {
       "architecture": "amd64",
-      "created": "2026-09-14T07:17:37.069675723Z",
+      "created": "2026-09-16T07:09:27.925892345Z",
       "history": [
         {
-          "created": "2026-09-07T06:58:02.122524315Z",
+          "created": "2026-09-11T11:44:03.605540158Z",
           "created_by": "/bin/sh -c #(nop)  ARG RELEASE",
           "empty_layer": true
         },
         {
-          "created": "2026-09-07T06:58:02.150755619Z",
+          "created": "2026-09-11T11:44:03.646010328Z",
           "created_by": "/bin/sh -c #(nop)  ARG LAUNCHPAD_BUILD_ARCH",
           "empty_layer": true
         },
         {
-          "created": "2026-09-07T06:58:02.194118734Z",
+          "created": "2026-09-11T11:44:03.67741558Z",
           "created_by": "/bin/sh -c #(nop)  LABEL org.opencontainers.image.version=24.04",
           "empty_layer": true
         },
         {
-          "created": "2026-09-07T06:58:04.454896143Z",
-          "created_by": "/bin/sh -c #(nop) ADD file:de4937ce3dfc7c89f05f1503c52434f0a631ac84995f0df65eed0754e5c97d48 in / "
+          "created": "2026-09-11T11:44:06.020434349Z",
+          "created_by": "/bin/sh -c #(nop) ADD file:43d479b270bbaf47965cfc86b37f4c517bda83ddefda6f708f98c3b2b7d15396 in / "
         },
         {
-          "created": "2026-09-07T06:58:04.874726458Z",
+          "created": "2026-09-11T11:44:06.579973371Z",
           "created_by": "/bin/sh -c #(nop)  CMD [\"/bin/bash\"]",
           "empty_layer": true
         },
         {
-          "created": "2026-09-09T02:20:44.646792679Z",
+          "created": "2026-09-16T03:16:14.403163053Z",
           "created_by": "ENV JAVA_HOME=/opt/java/openjdk",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-09T02:20:44.646792679Z",
+          "created": "2026-09-16T03:16:14.403163053Z",
           "created_by": "ENV PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-09T02:20:44.646792679Z",
+          "created": "2026-09-16T03:16:14.403163053Z",
           "created_by": "ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-09T02:20:44.646792679Z",
+          "created": "2026-09-16T03:16:14.403163053Z",
           "created_by": "RUN /bin/sh -c set -eux;     apt-get update;     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends         curl         wget         gnupg         fontconfig         ca-certificates p11-kit         tzdata         locales     ;     echo \"en_US.UTF-8 UTF-8\" \u003e\u003e /etc/locale.gen;     locale-gen en_US.UTF-8;     rm -rf /var/lib/apt/lists/* # buildkit",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-09T02:20:44.646792679Z",
+          "created": "2026-09-16T03:16:14.403163053Z",
           "created_by": "ENV JAVA_VERSION=jdk-21.0.12+8",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-09T02:20:47.637382442Z",
+          "created": "2026-09-16T03:17:37.115202651Z",
           "created_by": "RUN /bin/sh -c set -eux;     ARCH=\"$(dpkg --print-architecture)\";     case \"${ARCH}\" in        amd64)          ESUM='8a379a67c91a3ae61ffb33d46e0a40c7ba35e70713c4db31cfca30492f792eff';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12%2B8/OpenJDK21U-jre_x64_linux_hotspot_21.0.12_8.tar.gz';          ;;        arm64)          ESUM='5f9c96b656827b9d14ebeda7739e25be554fa6d25669b03847c1df6e869c0679';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12%2B8/OpenJDK21U-jre_aarch64_linux_hotspot_21.0.12_8.tar.gz';          ;;        ppc64el)          ESUM='fe1b73886269d589336532c31c0db0d01ac7cd567313cfe3e76f02b37b58c068';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12%2B8/OpenJDK21U-jre_ppc64le_linux_hotspot_21.0.12_8.tar.gz';          ;;        riscv64)          ESUM='e1fabd17fd266409221323a754b0a5467a0bdc118b06302646f7b795cd49d95a';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12%2B8/OpenJDK21U-jre_riscv64_linux_hotspot_21.0.12_8.tar.gz';          ;;        s390x)          ESUM='2ec0aecaec755ffa8c7904983f89873e51c28e683de39946ba49496acae8fe96';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12%2B8/OpenJDK21U-jre_s390x_linux_hotspot_21.0.12_8.tar.gz';          ;;        *)          echo \"Unsupported arch: ${ARCH}\";          exit 1;          ;;     esac;     wget --progress=dot:giga -O /tmp/openjdk.tar.gz ${BINARY_URL};     wget --progress=dot:giga -O /tmp/openjdk.tar.gz.sig ${BINARY_URL}.sig;     export GNUPGHOME=\"$(mktemp -d)\";     gpg --batch --keyserver keyserver.ubuntu.com --recv-keys 3B04D753C9050D9A5D343F39843C48A565F8F04B;     gpg --batch --verify /tmp/openjdk.tar.gz.sig /tmp/openjdk.tar.gz;     rm -rf \"${GNUPGHOME}\" /tmp/openjdk.tar.gz.sig;     echo \"${ESUM} */tmp/openjdk.tar.gz\" | sha256sum -c -;     mkdir -p \"$JAVA_HOME\";     tar --extract         --file /tmp/openjdk.tar.gz         --directory \"$JAVA_HOME\"         --strip-components 1         --no-same-owner     ;     rm -f /tmp/openjdk.tar.gz;     find \"$JAVA_HOME/lib\" -name '*.so' -exec dirname '{}' ';' | sort -u \u003e /etc/ld.so.conf.d/docker-openjdk.conf;     ldconfig;     java -Xshare:dump; # buildkit",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-09T02:20:47.75781744Z",
+          "created": "2026-09-16T03:17:37.231913449Z",
           "created_by": "RUN /bin/sh -c set -eux;     echo \"Verifying install ...\";     echo \"java --version\"; java --version;     echo \"Complete.\" # buildkit",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-09T02:20:47.787652697Z",
+          "created": "2026-09-16T03:17:37.25930096Z",
           "created_by": "COPY --chmod=755 entrypoint.sh /__cacert_entrypoint.sh # buildkit",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-09T02:20:47.787652697Z",
+          "created": "2026-09-16T03:17:37.25930096Z",
           "created_by": "ENTRYPOINT [\"/__cacert_entrypoint.sh\"]",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-14T07:17:28.595876168Z",
+          "created": "2026-09-16T07:09:18.617381938Z",
           "created_by": "RUN /bin/sh -c groupadd --gid 1001 liquibase \u0026\u0026     useradd --uid 1001 --gid liquibase --create-home --home-dir /liquibase liquibase \u0026\u0026     chown liquibase:root /liquibase \u0026\u0026     chmod g+rx /liquibase # buildkit",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-14T07:17:28.603716511Z",
+          "created": "2026-09-16T07:09:18.625860331Z",
           "created_by": "WORKDIR /liquibase",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-14T07:17:29.957441406Z",
+          "created": "2026-09-16T07:09:20.012248788Z",
           "created_by": "ARG LIQUIBASE_VERSION=5.0.4",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-14T07:17:29.957441406Z",
+          "created": "2026-09-16T07:09:20.012248788Z",
           "created_by": "ARG LB_SHA256=bb08638d70dddd6af8cca6e033148576f8214b5996831b1f8864eb3528f4cfce",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-14T07:17:29.957441406Z",
+          "created": "2026-09-16T07:09:20.012248788Z",
           "created_by": "RUN |2 LIQUIBASE_VERSION=5.0.4 LB_SHA256=bb08638d70dddd6af8cca6e033148576f8214b5996831b1f8864eb3528f4cfce /bin/sh -c wget -q -O liquibase-${LIQUIBASE_VERSION}.tar.gz \"https://package.liquibase.com/downloads/dockerhub/official/liquibase-${LIQUIBASE_VERSION}.tar.gz\" \u0026\u0026     echo \"$LB_SHA256 *liquibase-${LIQUIBASE_VERSION}.tar.gz\" | sha256sum -c - \u0026\u0026     tar -xzf liquibase-${LIQUIBASE_VERSION}.tar.gz \u0026\u0026     rm liquibase-${LIQUIBASE_VERSION}.tar.gz \u0026\u0026     ln -s /liquibase/liquibase /usr/local/bin/liquibase \u0026\u0026     ln -s /liquibase/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh \u0026\u0026     liquibase --version # buildkit",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-14T07:17:29.957441406Z",
+          "created": "2026-09-16T07:09:20.012248788Z",
           "created_by": "ARG LPM_VERSION=0.3.6",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-14T07:17:29.957441406Z",
+          "created": "2026-09-16T07:09:20.012248788Z",
           "created_by": "ARG LPM_SHA256=c93fd5738299111dea9e0ef6443ed608348b1990784d12ca32c28dc5c8c126be",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-14T07:17:29.957441406Z",
+          "created": "2026-09-16T07:09:20.012248788Z",
           "created_by": "ARG LPM_SHA256_ARM=8859f268148d3b8901a7ba10582c9a4b260506d9a66383c7e6a28a7b6f294bcc",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-14T07:17:29.957441406Z",
+          "created": "2026-09-16T07:09:20.012248788Z",
           "created_by": "LABEL org.opencontainers.image.description=Liquibase Container Image",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-14T07:17:29.957441406Z",
+          "created": "2026-09-16T07:09:20.012248788Z",
           "created_by": "LABEL org.opencontainers.image.licenses=FSL-1.1-ALv2",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-14T07:17:29.957441406Z",
+          "created": "2026-09-16T07:09:20.012248788Z",
           "created_by": "LABEL org.opencontainers.image.vendor=Liquibase",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-14T07:17:29.957441406Z",
+          "created": "2026-09-16T07:09:20.012248788Z",
           "created_by": "LABEL org.opencontainers.image.version=5.0.4",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-14T07:17:29.957441406Z",
+          "created": "2026-09-16T07:09:20.012248788Z",
           "created_by": "LABEL org.opencontainers.image.documentation=https://docs.liquibase.com",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-14T07:17:37.047746239Z",
+          "created": "2026-09-16T07:09:27.899453588Z",
           "created_by": "RUN |5 LIQUIBASE_VERSION=5.0.4 LB_SHA256=bb08638d70dddd6af8cca6e033148576f8214b5996831b1f8864eb3528f4cfce LPM_VERSION=0.3.6 LPM_SHA256=c93fd5738299111dea9e0ef6443ed608348b1990784d12ca32c28dc5c8c126be LPM_SHA256_ARM=8859f268148d3b8901a7ba10582c9a4b260506d9a66383c7e6a28a7b6f294bcc /bin/sh -c apt-get update \u0026\u0026     apt-get -yqq install unzip --no-install-recommends \u0026\u0026     rm -rf /var/lib/apt/lists/* \u0026\u0026     mkdir /liquibase/bin \u0026\u0026     arch=\"$(dpkg --print-architecture)\" \u0026\u0026     case \"$arch\" in     amd64)  DOWNLOAD_ARCH=\"\"  ;;     arm64)  DOWNLOAD_ARCH=\"-arm64\" \u0026\u0026 LPM_SHA256=$LPM_SHA256_ARM ;;     *) echo \u003e\u00262 \"error: unsupported architecture '$arch'\" \u0026\u0026 exit 1 ;;     esac \u0026\u0026 wget -q -O lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip \"https://github.com/liquibase/liquibase-package-manager/releases/download/v${LPM_VERSION}/lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip\" \u0026\u0026     echo \"$LPM_SHA256 *lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip\" | sha256sum -c - \u0026\u0026     unzip lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip -d bin/ \u0026\u0026     rm lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip \u0026\u0026     apt-get purge -y --auto-remove unzip \u0026\u0026     ln -s /liquibase/bin/lpm /usr/local/bin/lpm \u0026\u0026     lpm --version # buildkit",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-14T07:17:37.047746239Z",
+          "created": "2026-09-16T07:09:27.899453588Z",
           "created_by": "ENV LIQUIBASE_HOME=/liquibase",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-14T07:17:37.047746239Z",
+          "created": "2026-09-16T07:09:27.899453588Z",
           "created_by": "ENV DOCKER_LIQUIBASE=true",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-14T07:17:37.061703386Z",
+          "created": "2026-09-16T07:09:27.910075121Z",
           "created_by": "COPY docker-entrypoint.sh ./ # buildkit",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-14T07:17:37.069675723Z",
+          "created": "2026-09-16T07:09:27.925892345Z",
           "created_by": "COPY liquibase.docker.properties ./ # buildkit",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-14T07:17:37.069675723Z",
+          "created": "2026-09-16T07:09:27.925892345Z",
           "created_by": "USER liquibase:liquibase",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-14T07:17:37.069675723Z",
+          "created": "2026-09-16T07:09:27.925892345Z",
           "created_by": "ENTRYPOINT [\"/liquibase/docker-entrypoint.sh\"]",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-14T07:17:37.069675723Z",
+          "created": "2026-09-16T07:09:27.925892345Z",
           "created_by": "CMD [\"--help\"]",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
@@ -238,17 +238,17 @@
       "rootfs": {
         "type": "layers",
         "diff_ids": [
-          "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a",
-          "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6",
-          "sha256:e3bbde51f2843e9ad52e3f8c218c608cf733dba685e3751ae89be64ed878ef0f",
-          "sha256:a14746a4e2d7c8357935258807da0798846b3534d9963cc86485f4c5e443a969",
-          "sha256:6db02a85e6db7e326800e08e2ccb65dcdad99ed901979e0877b8332acd73bece",
-          "sha256:19225ec9d050eb3b4d5463b05eb578b816c2a210be89aa6171de63dc6f4d4e1e",
+          "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1",
+          "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f",
+          "sha256:0933397ca2c26103c5e4f8ee981beaf5d75071c1f32271e22b04ded1e5f13e6d",
+          "sha256:b5933306ed7c7fee662be35ba60da940e0f98a04e7515320cf59e96f51738dfe",
+          "sha256:84fbb6db2b5db76f02bd4eae02fd5790cb7ce0e338ebbaae447f860e1900239c",
+          "sha256:23714dbdab9a5d7ea1c35e1c8f31b60ad2fe3368962d683f31fdaabd952c5daa",
           "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
-          "sha256:7b6eba8d24aeedfa243e545c392db2a0bb1ceedf2ba85f19d2c0fde061deab74",
-          "sha256:da34c69cba640c90e3a5b7a87a57c2e38ebe88d7c59d8532d4d8b170500e4a52",
-          "sha256:82e29862701456f9df4669d835211a9a4437dfc89a98e0af617bef5d4f7eaf46",
-          "sha256:a4a22c445c5c9587cb2b3346f4a7b5831c94b34986c3a3a188e6de3767ab7b80"
+          "sha256:301b588e2f99c5783c44ccb4be673b24bc9a77086d28c94f200d50655a469522",
+          "sha256:f774294133bc176325bd1f586374bdb1f4fdc014574c0541397a98d0542fc75a",
+          "sha256:8c665b9c1ab1a076c8997ae70650f344753f88d4abb954862ef09524f62774c3",
+          "sha256:129fddea6eaa8eda4a4f749a8b1953d53d64175a68e157f0f5f557eb05de23fd"
         ]
       },
       "config": {
@@ -282,34 +282,34 @@
     },
     "Layers": [
       {
-        "Size": 80686592,
-        "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-        "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+        "Size": 80691200,
+        "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+        "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
       },
       {
-        "Size": 45687296,
-        "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-        "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+        "Size": 45687808,
+        "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+        "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
       },
       {
         "Size": 165496832,
-        "Digest": "sha256:290ba3f2ba3bdbc75176cb8a44004666ce51cb8e07926fb07cb1459d03344e74",
-        "DiffID": "sha256:e3bbde51f2843e9ad52e3f8c218c608cf733dba685e3751ae89be64ed878ef0f"
+        "Digest": "sha256:c598504294317537fe2edfca4fe2d105b93e91cfb69347fa86b5f2d20a5bc0d6",
+        "DiffID": "sha256:0933397ca2c26103c5e4f8ee981beaf5d75071c1f32271e22b04ded1e5f13e6d"
       },
       {
         "Size": 2560,
-        "Digest": "sha256:3f11fec0bf28c4fcfd24a36ba1e793f6d80612ca08135334d2529bc4cc74af53",
-        "DiffID": "sha256:a14746a4e2d7c8357935258807da0798846b3534d9963cc86485f4c5e443a969"
+        "Digest": "sha256:e8aa988864d57d690f6ab0c872bc2ac67ceef6597a5dfbc66d2510c88ff20d79",
+        "DiffID": "sha256:b5933306ed7c7fee662be35ba60da940e0f98a04e7515320cf59e96f51738dfe"
       },
       {
         "Size": 7680,
-        "Digest": "sha256:b6632003ddd870d8e553e0e8fda05617cc4b0a44048e3c5470bffa6d0985d72c",
-        "DiffID": "sha256:6db02a85e6db7e326800e08e2ccb65dcdad99ed901979e0877b8332acd73bece"
+        "Digest": "sha256:230f8708b1a639a22aab59043f0690ccdf7779b22e8508dfe3ae66ca29e75b86",
+        "DiffID": "sha256:84fbb6db2b5db76f02bd4eae02fd5790cb7ce0e338ebbaae447f860e1900239c"
       },
       {
         "Size": 23552,
-        "Digest": "sha256:ef5b6aad9095996884a3edbcb02c0a6a1e74ce3dfd793df10b5d8b6db9f05f78",
-        "DiffID": "sha256:19225ec9d050eb3b4d5463b05eb578b816c2a210be89aa6171de63dc6f4d4e1e"
+        "Digest": "sha256:81e0400032e784db2d9c168870b319eb96ab47e101872e3bb96b91c749a2c5ad",
+        "DiffID": "sha256:23714dbdab9a5d7ea1c35e1c8f31b60ad2fe3368962d683f31fdaabd952c5daa"
       },
       {
         "Size": 1024,
@@ -318,29 +318,29 @@
       },
       {
         "Size": 10009600,
-        "Digest": "sha256:d3370a9ddc78ceebb67048d7e3d142a678e032736e4068dba210f8c413999da0",
-        "DiffID": "sha256:7b6eba8d24aeedfa243e545c392db2a0bb1ceedf2ba85f19d2c0fde061deab74"
+        "Digest": "sha256:6adeb703030415895fbfe2d84e96523d38c0bc7f0bd1b9083bb20004cebae86b",
+        "DiffID": "sha256:301b588e2f99c5783c44ccb4be673b24bc9a77086d28c94f200d50655a469522"
       },
       {
         "Size": 10220544,
-        "Digest": "sha256:f581114f50955c925f7fe98703bf9d44216ed200b2368bb30e410de90ffac517",
-        "DiffID": "sha256:da34c69cba640c90e3a5b7a87a57c2e38ebe88d7c59d8532d4d8b170500e4a52"
+        "Digest": "sha256:ed0c847507dabe1d370d5dbf9b27210335776229b8cdc21d626bb33dacf808c1",
+        "DiffID": "sha256:f774294133bc176325bd1f586374bdb1f4fdc014574c0541397a98d0542fc75a"
       },
       {
         "Size": 7168,
-        "Digest": "sha256:ca1fb080831835f12bf70a0a61feb99939e0e564e18fd45e27c7b413b5b0ae6d",
-        "DiffID": "sha256:82e29862701456f9df4669d835211a9a4437dfc89a98e0af617bef5d4f7eaf46"
+        "Digest": "sha256:46e546f4029c67eb2a8d061284643cddaf3d333679fe85247b285a5f3cd4abd6",
+        "DiffID": "sha256:8c665b9c1ab1a076c8997ae70650f344753f88d4abb954862ef09524f62774c3"
       },
       {
         "Size": 2560,
-        "Digest": "sha256:50ca4641f1e889c90b17d3f601855c56078dfa1a94e5e7ee9b86693dafff2f5a",
-        "DiffID": "sha256:a4a22c445c5c9587cb2b3346f4a7b5831c94b34986c3a3a188e6de3767ab7b80"
+        "Digest": "sha256:7bf9f25cc39fe70682f15d47caa6a8e4bce8dc07de062b229be74524a17d9bae",
+        "DiffID": "sha256:129fddea6eaa8eda4a4f749a8b1953d53d64175a68e157f0f5f557eb05de23fd"
       }
     ]
   },
   "Results": [
     {
-      "Target": "ghcr.io/liquibase/liquibase/liquibase-liquibase:7a9a3413da31aa6802783e8a92f5c22d24ddc1ba (ubuntu 24.04)",
+      "Target": "ghcr.io/liquibase/liquibase/liquibase-liquibase:b49152331e0e62decd4fcda4eecb5a3a80c651a6 (ubuntu 24.04)",
       "Class": "os-pkgs",
       "Type": "ubuntu",
       "Packages": [
@@ -367,8 +367,8 @@
             "passwd@1:4.13+dfsg1-4ubuntu3.2"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/sbin/adduser",
@@ -414,7 +414,7 @@
           "Name": "apt",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/apt@2.8.3?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "55d47a273a5de9ef"
+            "UID": "a1916cffe4e1862f"
           },
           "Version": "2.8.3",
           "Arch": "amd64",
@@ -435,7 +435,7 @@
             "base-passwd@3.6.3build1",
             "gpgv@2.4.4-2ubuntu17.6",
             "libapt-pkg6.0t64@2.8.3",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgcc-s1@14.2.0-4ubuntu2~24.04.1",
             "libgnutls30t64@3.8.3-1.1ubuntu3.6",
             "libseccomp2@2.5.5-1ubuntu3.1",
@@ -444,8 +444,8 @@
             "ubuntu-keyring@2023.11.28.1"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/apt",
@@ -635,16 +635,16 @@
           "AnalyzedBy": "dpkg"
         },
         {
-          "ID": "base-files@13ubuntu10.4",
+          "ID": "base-files@13ubuntu10.5",
           "Name": "base-files",
           "Identifier": {
-            "PURL": "pkg:deb/ubuntu/base-files@13ubuntu10.4?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "1e85de94615ef0e9"
+            "PURL": "pkg:deb/ubuntu/base-files@13ubuntu10.5?arch=amd64\u0026distro=ubuntu-24.04",
+            "UID": "5f5c6b9aa448c74f"
           },
-          "Version": "13ubuntu10.4",
+          "Version": "13ubuntu10.5",
           "Arch": "amd64",
           "SrcName": "base-files",
-          "SrcVersion": "13ubuntu10.4",
+          "SrcVersion": "13ubuntu10.5",
           "Licenses": [
             "GPL-2.0-or-later"
           ],
@@ -653,12 +653,12 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libcrypt1@1:4.4.36-4build1"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/locale-check",
@@ -713,7 +713,7 @@
           "Name": "base-passwd",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/base-passwd@3.6.3build1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "8cc29c40d41597b6"
+            "UID": "f3596a09793ae398"
           },
           "Version": "3.6.3build1",
           "Arch": "amd64",
@@ -728,13 +728,13 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libdebconfclient0@0.271ubuntu3",
             "libselinux1@3.5-2ubuntu2.1"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/sbin/update-passwd",
@@ -762,7 +762,7 @@
           "Name": "bash",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/bash@5.2.21-2ubuntu4?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "cbf5ccc4f14bc582"
+            "UID": "b3c03eeb210f4057"
           },
           "Version": "5.2.21",
           "Release": "2ubuntu4",
@@ -788,12 +788,12 @@
             "Class": "official"
           },
           "DependsOn": [
-            "base-files@13ubuntu10.4",
+            "base-files@13ubuntu10.5",
             "debianutils@5.17build1"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/bash",
@@ -858,8 +858,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/logger",
@@ -911,8 +911,8 @@
             "openssl@3.0.13-0ubuntu3.15"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/sbin/update-ca-certificates",
@@ -1083,8 +1083,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/[",
@@ -1314,7 +1314,7 @@
           "Name": "curl",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/curl@8.5.0-2ubuntu10.13?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "b7f7376e3a0dd27e"
+            "UID": "5697f79f54d1027f"
           },
           "Version": "8.5.0",
           "Release": "2ubuntu10.13",
@@ -1340,13 +1340,13 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libcurl4t64@8.5.0-2ubuntu10.13",
             "zlib1g@1:1.3.dfsg-3.1ubuntu2.2"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/bin/curl",
@@ -1385,8 +1385,8 @@
             "dpkg@1.22.6ubuntu6.6"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/dash",
@@ -1420,8 +1420,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/debconf",
@@ -1580,8 +1580,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/ischroot",
@@ -1697,8 +1697,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/cmp",
@@ -1721,7 +1721,7 @@
           "Name": "dirmngr",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/dirmngr@2.4.4-2ubuntu17.6?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "c0ae61845f0780be"
+            "UID": "5b575c50d35f57f9"
           },
           "Version": "2.4.4",
           "Release": "2ubuntu17.6",
@@ -1754,7 +1754,7 @@
             "gpgconf@2.4.4-2ubuntu17.6",
             "init-system-helpers@1.66ubuntu1",
             "libassuan0@2.5.6-1build1",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgcrypt20@1.10.3-2ubuntu0.2",
             "libgnutls30t64@3.8.3-1.1ubuntu3.6",
             "libgpg-error0@1.47-3build2.1",
@@ -1763,8 +1763,8 @@
             "libnpth0t64@1.6-3.1build1"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/bin/dirmngr",
@@ -1809,8 +1809,8 @@
             "tar@1.35+dfsg-3ubuntu0.4"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/dpkg",
@@ -1997,8 +1997,8 @@
             "logsave@1.47.0-2.4~exp1ubuntu4.1"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/chattr",
@@ -2101,8 +2101,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/find",
@@ -2127,7 +2127,7 @@
           "Name": "fontconfig",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/fontconfig@2.15.0-1.1ubuntu2?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "76600c2ba322d0ce"
+            "UID": "5d564dcdeb93097e"
           },
           "Version": "2.15.0",
           "Release": "1.1ubuntu2",
@@ -2141,13 +2141,13 @@
           },
           "DependsOn": [
             "fontconfig-config@2.15.0-1.1ubuntu2",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libfontconfig1@2.15.0-1.1ubuntu2",
             "libfreetype6@2.13.2+dfsg-1ubuntu0.1"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/bin/fc-cache",
@@ -2199,8 +2199,8 @@
             "fonts-dejavu-core@2.37-8"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/share/doc/fontconfig-config/changelog.Debian.gz",
@@ -2281,8 +2281,8 @@
             "fonts-dejavu-mono@2.37-8"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/share/doc/fonts-dejavu-core/copyright",
@@ -2316,8 +2316,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/share/doc/fonts-dejavu-mono/AUTHORS",
@@ -2360,8 +2360,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/share/doc/gcc-14-base/README.Debian.amd64.gz",
@@ -2414,8 +2414,8 @@
             "keyboxd@2.4.4-2ubuntu17.6"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/share/doc/gnupg/DCO",
@@ -2448,7 +2448,7 @@
           "Name": "gnupg-utils",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/gnupg-utils@2.4.4-2ubuntu17.6?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "176591da269aecb"
+            "UID": "3143b1ba663f3a61"
           },
           "Version": "2.4.4",
           "Release": "2ubuntu17.6",
@@ -2478,15 +2478,15 @@
           },
           "DependsOn": [
             "libbz2-1.0@1.0.8-5.1ubuntu0.1",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgcrypt20@1.10.3-2ubuntu0.2",
             "libgpg-error0@1.47-3build2.1",
             "libksba8@1.6.6-1build1",
             "zlib1g@1:1.3.dfsg-3.1ubuntu2.2"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/bin/gpgparsemail",
@@ -2519,7 +2519,7 @@
           "Name": "gpg",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/gpg@2.4.4-2ubuntu17.6?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "beaf7d097a9d3ca8"
+            "UID": "90b9a075aefcd401"
           },
           "Version": "2.4.4",
           "Release": "2ubuntu17.6",
@@ -2551,7 +2551,7 @@
             "gpgconf@2.4.4-2ubuntu17.6",
             "libassuan0@2.5.6-1build1",
             "libbz2-1.0@1.0.8-5.1ubuntu0.1",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgcrypt20@1.10.3-2ubuntu0.2",
             "libgpg-error0@1.47-3build2.1",
             "libnpth0t64@1.6-3.1build1",
@@ -2560,8 +2560,8 @@
             "zlib1g@1:1.3.dfsg-3.1ubuntu2.2"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/bin/gpg",
@@ -2575,7 +2575,7 @@
           "Name": "gpg-agent",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/gpg-agent@2.4.4-2ubuntu17.6?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "eeedf2dfd6f3bbe1"
+            "UID": "45e3baf8606b6651"
           },
           "Version": "2.4.4",
           "Release": "2ubuntu17.6",
@@ -2607,15 +2607,15 @@
             "gpgconf@2.4.4-2ubuntu17.6",
             "init-system-helpers@1.66ubuntu1",
             "libassuan0@2.5.6-1build1",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgcrypt20@1.10.3-2ubuntu0.2",
             "libgpg-error0@1.47-3build2.1",
             "libnpth0t64@1.6-3.1build1",
             "pinentry-curses@1.2.1-3ubuntu5"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/bin/gpg-agent",
@@ -2643,7 +2643,7 @@
           "Name": "gpgconf",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/gpgconf@2.4.4-2ubuntu17.6?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "806717e117db8dfe"
+            "UID": "f990f332ea480b2d"
           },
           "Version": "2.4.4",
           "Release": "2ubuntu17.6",
@@ -2673,14 +2673,14 @@
           },
           "DependsOn": [
             "libassuan0@2.5.6-1build1",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgcrypt20@1.10.3-2ubuntu0.2",
             "libgpg-error0@1.47-3build2.1",
             "libreadline8t64@8.2-4build1"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/bin/gpg-connect-agent",
@@ -2700,7 +2700,7 @@
           "Name": "gpgsm",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/gpgsm@2.4.4-2ubuntu17.6?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "4eaa4469c94fb0cb"
+            "UID": "1303c54234f3d969"
           },
           "Version": "2.4.4",
           "Release": "2ubuntu17.6",
@@ -2731,7 +2731,7 @@
           "DependsOn": [
             "gpgconf@2.4.4-2ubuntu17.6",
             "libassuan0@2.5.6-1build1",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgcrypt20@1.10.3-2ubuntu0.2",
             "libgpg-error0@1.47-3build2.1",
             "libksba8@1.6.6-1build1",
@@ -2739,8 +2739,8 @@
             "libreadline8t64@8.2-4build1"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/bin/gpgsm",
@@ -2754,7 +2754,7 @@
           "Name": "gpgv",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/gpgv@2.4.4-2ubuntu17.6?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "9ab5689d8f512a53"
+            "UID": "60fe3a2b10d559e8"
           },
           "Version": "2.4.4",
           "Release": "2ubuntu17.6",
@@ -2785,15 +2785,15 @@
           "DependsOn": [
             "libassuan0@2.5.6-1build1",
             "libbz2-1.0@1.0.8-5.1ubuntu0.1",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgcrypt20@1.10.3-2ubuntu0.2",
             "libgpg-error0@1.47-3build2.1",
             "libnpth0t64@1.6-3.1build1",
             "zlib1g@1:1.3.dfsg-3.1ubuntu2.2"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/gpgv",
@@ -2826,8 +2826,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/egrep",
@@ -2875,8 +2875,8 @@
             "dpkg@1.22.6ubuntu6.6"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/gunzip",
@@ -2929,8 +2929,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/hostname",
@@ -2961,8 +2961,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/deb-systemd-helper",
@@ -2988,7 +2988,7 @@
           "Name": "keyboxd",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/keyboxd@2.4.4-2ubuntu17.6?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "37e9cd8bf6bfe309"
+            "UID": "91a86875412e598d"
           },
           "Version": "2.4.4",
           "Release": "2ubuntu17.6",
@@ -3020,7 +3020,7 @@
             "gpgconf@2.4.4-2ubuntu17.6",
             "init-system-helpers@1.66ubuntu1",
             "libassuan0@2.5.6-1build1",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgcrypt20@1.10.3-2ubuntu0.2",
             "libgpg-error0@1.47-3build2.1",
             "libksba8@1.6.6-1build1",
@@ -3028,8 +3028,8 @@
             "libsqlite3-0@3.45.1-1ubuntu2.7"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/gnupg/keyboxd",
@@ -3046,7 +3046,7 @@
           "Name": "libacl1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libacl1@2.3.2-1build1.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "911485a9123e88d7"
+            "UID": "b6a7777cd253503e"
           },
           "Version": "2.3.2",
           "Release": "1build1.1",
@@ -3065,11 +3065,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libacl.so.1.1.2302",
@@ -3084,7 +3084,7 @@
           "Name": "libapt-pkg6.0t64",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libapt-pkg6.0t64@2.8.3?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "eef1c69ae839be18"
+            "UID": "e4c9be52dd6155fb"
           },
           "Version": "2.8.3",
           "Arch": "amd64",
@@ -3102,7 +3102,7 @@
           },
           "DependsOn": [
             "libbz2-1.0@1.0.8-5.1ubuntu0.1",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgcc-s1@14.2.0-4ubuntu2~24.04.1",
             "libgcrypt20@1.10.3-2ubuntu0.2",
             "liblz4-1@1.9.4-1build1.1",
@@ -3115,8 +3115,8 @@
             "zlib1g@1:1.3.dfsg-3.1ubuntu2.2"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libapt-pkg.so.6.0.0",
@@ -3175,7 +3175,7 @@
           "Name": "libassuan0",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libassuan0@2.5.6-1build1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "2ff79fe6dc6acf3"
+            "UID": "4c29eb2c703b303c"
           },
           "Version": "2.5.6",
           "Release": "1build1",
@@ -3201,12 +3201,12 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgpg-error0@1.47-3build2.1"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libassuan.so.0.8.6",
@@ -3220,7 +3220,7 @@
           "Name": "libattr1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libattr1@2.5.2-1ubuntu0.1?arch=amd64\u0026distro=ubuntu-24.04\u0026epoch=1",
-            "UID": "57a98c9ba087dec9"
+            "UID": "ef26836d0e1244c0"
           },
           "Version": "2.5.2",
           "Release": "1ubuntu0.1",
@@ -3241,11 +3241,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libattr.so.1.1.2502",
@@ -3280,8 +3280,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/share/doc/libaudit-common/changelog.Debian.gz",
@@ -3295,7 +3295,7 @@
           "Name": "libaudit1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libaudit1@3.1.2-2.1build1.1?arch=amd64\u0026distro=ubuntu-24.04\u0026epoch=1",
-            "UID": "d94b6cdbf72891aa"
+            "UID": "8fc1f3b89ca4b1b5"
           },
           "Version": "3.1.2",
           "Release": "2.1build1.1",
@@ -3316,12 +3316,12 @@
           },
           "DependsOn": [
             "libaudit-common@1:3.1.2-2.1build1.1",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libcap-ng0@0.8.4-2build2"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libaudit.so.1.0.0",
@@ -3335,7 +3335,7 @@
           "Name": "libblkid1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libblkid1@2.39.3-9ubuntu6.6?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "a1fd2f84ac329e9b"
+            "UID": "88cf939c1b1cb1e5"
           },
           "Version": "2.39.3",
           "Release": "9ubuntu6.6",
@@ -3365,11 +3365,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libblkid.so.1.1.0",
@@ -3384,7 +3384,7 @@
           "Name": "libbrotli1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libbrotli1@1.1.0-2build2?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "9fd380d5d4007dba"
+            "UID": "8bee371bc8e014bd"
           },
           "Version": "1.1.0",
           "Release": "2build2",
@@ -3400,11 +3400,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libbrotlicommon.so.1.1.0",
@@ -3421,7 +3421,7 @@
           "Name": "libbz2-1.0",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libbz2-1.0@1.0.8-5.1ubuntu0.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "54cab23073f1e0b2"
+            "UID": "1d3b76b8ed05f3b6"
           },
           "Version": "1.0.8",
           "Release": "5.1ubuntu0.1",
@@ -3438,11 +3438,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libbz2.so.1.0.4",
@@ -3452,18 +3452,18 @@
           "AnalyzedBy": "dpkg"
         },
         {
-          "ID": "libc-bin@2.39-0ubuntu8.8",
+          "ID": "libc-bin@2.39-0ubuntu8.9",
           "Name": "libc-bin",
           "Identifier": {
-            "PURL": "pkg:deb/ubuntu/libc-bin@2.39-0ubuntu8.8?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "7fdd1ac41e2b5a0a"
+            "PURL": "pkg:deb/ubuntu/libc-bin@2.39-0ubuntu8.9?arch=amd64\u0026distro=ubuntu-24.04",
+            "UID": "601de63d8d82db42"
           },
           "Version": "2.39",
-          "Release": "0ubuntu8.8",
+          "Release": "0ubuntu8.9",
           "Arch": "amd64",
           "SrcName": "glibc",
           "SrcVersion": "2.39",
-          "SrcRelease": "0ubuntu8.8",
+          "SrcRelease": "0ubuntu8.9",
           "Licenses": [
             "LGPL-2.1-only",
             "GPL-2.0-only",
@@ -3474,11 +3474,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/getconf",
@@ -3515,18 +3515,18 @@
           "AnalyzedBy": "dpkg"
         },
         {
-          "ID": "libc6@2.39-0ubuntu8.8",
+          "ID": "libc6@2.39-0ubuntu8.9",
           "Name": "libc6",
           "Identifier": {
-            "PURL": "pkg:deb/ubuntu/libc6@2.39-0ubuntu8.8?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "1b03c846923ea4e1"
+            "PURL": "pkg:deb/ubuntu/libc6@2.39-0ubuntu8.9?arch=amd64\u0026distro=ubuntu-24.04",
+            "UID": "64914ca885a9a254"
           },
           "Version": "2.39",
-          "Release": "0ubuntu8.8",
+          "Release": "0ubuntu8.9",
           "Arch": "amd64",
           "SrcName": "glibc",
           "SrcVersion": "2.39",
-          "SrcRelease": "0ubuntu8.8",
+          "SrcRelease": "0ubuntu8.9",
           "Licenses": [
             "LGPL-2.1-only",
             "GPL-2.0-only",
@@ -3540,8 +3540,8 @@
             "libgcc-s1@14.2.0-4ubuntu2~24.04.1"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/gconv/ANSI_X3.110.so",
@@ -3835,7 +3835,7 @@
           "Name": "libcap-ng0",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libcap-ng0@0.8.4-2build2?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "ccf5cb0c0d63dfac"
+            "UID": "bc7a8653ba87a093"
           },
           "Version": "0.8.4",
           "Release": "2build2",
@@ -3855,11 +3855,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libcap-ng.so.0.0.0",
@@ -3874,7 +3874,7 @@
           "Name": "libcap2",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libcap2@2.66-5ubuntu2.4?arch=amd64\u0026distro=ubuntu-24.04\u0026epoch=1",
-            "UID": "f9085f35849c6ff4"
+            "UID": "a9235828f328bc27"
           },
           "Version": "2.66",
           "Release": "5ubuntu2.4",
@@ -3894,11 +3894,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libcap.so.2.66",
@@ -3913,7 +3913,7 @@
           "Name": "libcom-err2",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libcom-err2@1.47.0-2.4~exp1ubuntu4.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "95189cd939f655e4"
+            "UID": "8f3a1c7363dd2b5e"
           },
           "Version": "1.47.0",
           "Release": "2.4~exp1ubuntu4.1",
@@ -3938,11 +3938,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libcom_err.so.2.1",
@@ -3956,7 +3956,7 @@
           "Name": "libcrypt1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libcrypt1@4.4.36-4build1?arch=amd64\u0026distro=ubuntu-24.04\u0026epoch=1",
-            "UID": "51d4c3bcfbc3488e"
+            "UID": "767a401009bafdfa"
           },
           "Version": "4.4.36",
           "Release": "4build1",
@@ -3971,11 +3971,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libcrypt.so.1.1.0",
@@ -3989,7 +3989,7 @@
           "Name": "libcurl4t64",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libcurl4t64@8.5.0-2ubuntu10.13?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "f97b02f8719081a2"
+            "UID": "375caeffae3322e6"
           },
           "Version": "8.5.0",
           "Release": "2ubuntu10.13",
@@ -4016,8 +4016,8 @@
           },
           "DependsOn": [
             "libbrotli1@1.1.0-2build2",
-            "libc6@2.39-0ubuntu8.8",
-            "libgssapi-krb5-2@1.20.1-6ubuntu2.8",
+            "libc6@2.39-0ubuntu8.9",
+            "libgssapi-krb5-2@1.20.1-6ubuntu2.10",
             "libidn2-0@2.3.7-2build1.1",
             "libldap2@2.6.10+dfsg-0ubuntu0.24.04.1",
             "libnghttp2-14@1.59.0-1ubuntu0.4",
@@ -4029,8 +4029,8 @@
             "zlib1g@1:1.3.dfsg-3.1ubuntu2.2"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libcurl.so.4.8.0",
@@ -4045,7 +4045,7 @@
           "Name": "libdb5.3t64",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libdb5.3t64@5.3.28%2Bdfsg2-7?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "610cf5d44d018d0a"
+            "UID": "d77b726da72de029"
           },
           "Version": "5.3.28+dfsg2",
           "Release": "7",
@@ -4071,11 +4071,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libdb-5.3.so",
@@ -4091,7 +4091,7 @@
           "Name": "libdebconfclient0",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libdebconfclient0@0.271ubuntu3?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "b7b4d21663dfd994"
+            "UID": "5ad035306ceec7df"
           },
           "Version": "0.271ubuntu3",
           "Arch": "amd64",
@@ -4107,11 +4107,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libdebconfclient.so.0.0.0",
@@ -4125,7 +4125,7 @@
           "Name": "libexpat1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libexpat1@2.6.1-2ubuntu0.4?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "d9a4519dd4643aac"
+            "UID": "c1f908c206466a25"
           },
           "Version": "2.6.1",
           "Release": "2ubuntu0.4",
@@ -4141,11 +4141,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1",
@@ -4161,7 +4161,7 @@
           "Name": "libext2fs2t64",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libext2fs2t64@1.47.0-2.4~exp1ubuntu4.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "fa63c5a5b47cdc21"
+            "UID": "b64099285c4204a1"
           },
           "Version": "1.47.0",
           "Release": "2.4~exp1ubuntu4.1",
@@ -4186,11 +4186,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libe2p.so.2.3",
@@ -4206,7 +4206,7 @@
           "Name": "libffi8",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libffi8@3.4.6-1build1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "1d4f54b35eeb2458"
+            "UID": "753d75af3fe95c6"
           },
           "Version": "3.4.6",
           "Release": "1build1",
@@ -4228,11 +4228,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libffi.so.8.1.4",
@@ -4246,7 +4246,7 @@
           "Name": "libfontconfig1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libfontconfig1@2.15.0-1.1ubuntu2?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "50af4fcfb236de14"
+            "UID": "8e81daba27795277"
           },
           "Version": "2.15.0",
           "Release": "1.1ubuntu2",
@@ -4260,13 +4260,13 @@
           },
           "DependsOn": [
             "fontconfig-config@2.15.0-1.1ubuntu2",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libexpat1@2.6.1-2ubuntu0.4",
             "libfreetype6@2.13.2+dfsg-1ubuntu0.1"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.1",
@@ -4279,7 +4279,7 @@
           "Name": "libfreetype6",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libfreetype6@2.13.2%2Bdfsg-1ubuntu0.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "38939b8a941f756f"
+            "UID": "909948d12544a58c"
           },
           "Version": "2.13.2+dfsg",
           "Release": "1ubuntu0.1",
@@ -4310,13 +4310,13 @@
           "DependsOn": [
             "libbrotli1@1.1.0-2build2",
             "libbz2-1.0@1.0.8-5.1ubuntu0.1",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libpng16-16t64@1.6.43-5ubuntu0.6",
             "zlib1g@1:1.3.dfsg-3.1ubuntu2.2"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libfreetype.so.6.20.1",
@@ -4331,7 +4331,7 @@
           "Name": "libgcc-s1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libgcc-s1@14.2.0-4ubuntu2~24.04.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "662bba9b14fa2bdb"
+            "UID": "ff1c6279ef802eaf"
           },
           "Version": "14.2.0",
           "Release": "4ubuntu2~24.04.1",
@@ -4345,11 +4345,11 @@
           },
           "DependsOn": [
             "gcc-14-base@14.2.0-4ubuntu2~24.04.1",
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
@@ -4362,7 +4362,7 @@
           "Name": "libgcrypt20",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libgcrypt20@1.10.3-2ubuntu0.2?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "24c87e56c89d2b43"
+            "UID": "add23310e7a60151"
           },
           "Version": "1.10.3",
           "Release": "2ubuntu0.2",
@@ -4379,12 +4379,12 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgpg-error0@1.47-3build2.1"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libgcrypt.so.20.4.3",
@@ -4403,7 +4403,7 @@
           "Name": "libgmp10",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libgmp10@6.3.0%2Bdfsg-2ubuntu6.1?arch=amd64\u0026distro=ubuntu-24.04\u0026epoch=2",
-            "UID": "1e4c656d01d5fda5"
+            "UID": "2a584a4001f13a4b"
           },
           "Version": "6.3.0+dfsg",
           "Release": "2ubuntu6.1",
@@ -4427,11 +4427,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libgmp.so.10.5.0",
@@ -4446,7 +4446,7 @@
           "Name": "libgnutls30t64",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libgnutls30t64@3.8.3-1.1ubuntu3.6?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "fe127045ff8dd8d1"
+            "UID": "d344ada471797e95"
           },
           "Version": "3.8.3",
           "Release": "1.1ubuntu3.6",
@@ -4474,7 +4474,7 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgmp10@2:6.3.0+dfsg-2ubuntu6.1",
             "libhogweed6t64@3.9.1-2.2build1.1",
             "libidn2-0@2.3.7-2build1.1",
@@ -4484,8 +4484,8 @@
             "libunistring5@1.1-2build1.1"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libgnutls.so.30.37.1",
@@ -4504,7 +4504,7 @@
           "Name": "libgpg-error0",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libgpg-error0@1.47-3build2.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "83495729e6e5a379"
+            "UID": "2602f7d685bc4c92"
           },
           "Version": "1.47",
           "Release": "3build2.1",
@@ -4525,11 +4525,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libgpg-error.so.0.34.0",
@@ -4540,18 +4540,18 @@
           "AnalyzedBy": "dpkg"
         },
         {
-          "ID": "libgssapi-krb5-2@1.20.1-6ubuntu2.8",
+          "ID": "libgssapi-krb5-2@1.20.1-6ubuntu2.10",
           "Name": "libgssapi-krb5-2",
           "Identifier": {
-            "PURL": "pkg:deb/ubuntu/libgssapi-krb5-2@1.20.1-6ubuntu2.8?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "4c7769fe2b3425f4"
+            "PURL": "pkg:deb/ubuntu/libgssapi-krb5-2@1.20.1-6ubuntu2.10?arch=amd64\u0026distro=ubuntu-24.04",
+            "UID": "72c1a46c7f5ce29b"
           },
           "Version": "1.20.1",
-          "Release": "6ubuntu2.8",
+          "Release": "6ubuntu2.10",
           "Arch": "amd64",
           "SrcName": "krb5",
           "SrcVersion": "1.20.1",
-          "SrcRelease": "6ubuntu2.8",
+          "SrcRelease": "6ubuntu2.10",
           "Licenses": [
             "GPL-2.0-only"
           ],
@@ -4560,15 +4560,15 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libcom-err2@1.47.0-2.4~exp1ubuntu4.1",
-            "libk5crypto3@1.20.1-6ubuntu2.8",
-            "libkrb5-3@1.20.1-6ubuntu2.8",
-            "libkrb5support0@1.20.1-6ubuntu2.8"
+            "libk5crypto3@1.20.1-6ubuntu2.10",
+            "libkrb5-3@1.20.1-6ubuntu2.10",
+            "libkrb5support0@1.20.1-6ubuntu2.10"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libgssapi_krb5.so.2.2",
@@ -4582,7 +4582,7 @@
           "Name": "libhogweed6t64",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libhogweed6t64@3.9.1-2.2build1.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "2d6cf217349a0342"
+            "UID": "8894bfc418b325ab"
           },
           "Version": "3.9.1",
           "Release": "2.2build1.1",
@@ -4606,13 +4606,13 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgmp10@2:6.3.0+dfsg-2ubuntu6.1",
             "libnettle8t64@3.9.1-2.2build1.1"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libhogweed.so.6.8",
@@ -4626,7 +4626,7 @@
           "Name": "libidn2-0",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libidn2-0@2.3.7-2build1.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "3bd8380129a5bddf"
+            "UID": "bc9648c41415d6f8"
           },
           "Version": "2.3.7",
           "Release": "2build1.1",
@@ -4648,12 +4648,12 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libunistring5@1.1-2build1.1"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libidn2.so.0.4.0",
@@ -4667,18 +4667,18 @@
           "AnalyzedBy": "dpkg"
         },
         {
-          "ID": "libk5crypto3@1.20.1-6ubuntu2.8",
+          "ID": "libk5crypto3@1.20.1-6ubuntu2.10",
           "Name": "libk5crypto3",
           "Identifier": {
-            "PURL": "pkg:deb/ubuntu/libk5crypto3@1.20.1-6ubuntu2.8?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "235d846299b1026c"
+            "PURL": "pkg:deb/ubuntu/libk5crypto3@1.20.1-6ubuntu2.10?arch=amd64\u0026distro=ubuntu-24.04",
+            "UID": "7ec6446b24d948dd"
           },
           "Version": "1.20.1",
-          "Release": "6ubuntu2.8",
+          "Release": "6ubuntu2.10",
           "Arch": "amd64",
           "SrcName": "krb5",
           "SrcVersion": "1.20.1",
-          "SrcRelease": "6ubuntu2.8",
+          "SrcRelease": "6ubuntu2.10",
           "Licenses": [
             "GPL-2.0-only"
           ],
@@ -4687,12 +4687,12 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
-            "libkrb5support0@1.20.1-6ubuntu2.8"
+            "libc6@2.39-0ubuntu8.9",
+            "libkrb5support0@1.20.1-6ubuntu2.10"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libk5crypto.so.3.1",
@@ -4705,7 +4705,7 @@
           "Name": "libkeyutils1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libkeyutils1@1.6.3-3build1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "b425a4145fffc8e"
+            "UID": "8dafee971fdf99ea"
           },
           "Version": "1.6.3",
           "Release": "3build1",
@@ -4724,11 +4724,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libkeyutils.so.1.10",
@@ -4738,18 +4738,18 @@
           "AnalyzedBy": "dpkg"
         },
         {
-          "ID": "libkrb5-3@1.20.1-6ubuntu2.8",
+          "ID": "libkrb5-3@1.20.1-6ubuntu2.10",
           "Name": "libkrb5-3",
           "Identifier": {
-            "PURL": "pkg:deb/ubuntu/libkrb5-3@1.20.1-6ubuntu2.8?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "2fee46856f961040"
+            "PURL": "pkg:deb/ubuntu/libkrb5-3@1.20.1-6ubuntu2.10?arch=amd64\u0026distro=ubuntu-24.04",
+            "UID": "55d31cab70c706a6"
           },
           "Version": "1.20.1",
-          "Release": "6ubuntu2.8",
+          "Release": "6ubuntu2.10",
           "Arch": "amd64",
           "SrcName": "krb5",
           "SrcVersion": "1.20.1",
-          "SrcRelease": "6ubuntu2.8",
+          "SrcRelease": "6ubuntu2.10",
           "Licenses": [
             "GPL-2.0-only"
           ],
@@ -4758,16 +4758,16 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libcom-err2@1.47.0-2.4~exp1ubuntu4.1",
-            "libk5crypto3@1.20.1-6ubuntu2.8",
+            "libk5crypto3@1.20.1-6ubuntu2.10",
             "libkeyutils1@1.6.3-3build1",
-            "libkrb5support0@1.20.1-6ubuntu2.8",
+            "libkrb5support0@1.20.1-6ubuntu2.10",
             "libssl3t64@3.0.13-0ubuntu3.15"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/krb5/plugins/preauth/spake.so",
@@ -4780,18 +4780,18 @@
           "AnalyzedBy": "dpkg"
         },
         {
-          "ID": "libkrb5support0@1.20.1-6ubuntu2.8",
+          "ID": "libkrb5support0@1.20.1-6ubuntu2.10",
           "Name": "libkrb5support0",
           "Identifier": {
-            "PURL": "pkg:deb/ubuntu/libkrb5support0@1.20.1-6ubuntu2.8?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "95f1d7ca0aa8226e"
+            "PURL": "pkg:deb/ubuntu/libkrb5support0@1.20.1-6ubuntu2.10?arch=amd64\u0026distro=ubuntu-24.04",
+            "UID": "d053238e8a0ae06e"
           },
           "Version": "1.20.1",
-          "Release": "6ubuntu2.8",
+          "Release": "6ubuntu2.10",
           "Arch": "amd64",
           "SrcName": "krb5",
           "SrcVersion": "1.20.1",
-          "SrcRelease": "6ubuntu2.8",
+          "SrcRelease": "6ubuntu2.10",
           "Licenses": [
             "GPL-2.0-only"
           ],
@@ -4800,11 +4800,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libkrb5support.so.0.1",
@@ -4819,7 +4819,7 @@
           "Name": "libksba8",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libksba8@1.6.6-1build1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "d521a4d1fa8f5910"
+            "UID": "a5ec57e0f215c691"
           },
           "Version": "1.6.6",
           "Release": "1build1",
@@ -4837,12 +4837,12 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgpg-error0@1.47-3build2.1"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libksba.so.8.14.6",
@@ -4859,7 +4859,7 @@
           "Name": "libldap2",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libldap2@2.6.10%2Bdfsg-0ubuntu0.24.04.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "1481275222e2b59d"
+            "UID": "6b285256b5267d47"
           },
           "Version": "2.6.10+dfsg",
           "Release": "0ubuntu0.24.04.1",
@@ -4898,13 +4898,13 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgnutls30t64@3.8.3-1.1ubuntu3.6",
             "libsasl2-2@2.1.28+dfsg1-5ubuntu3.1"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/liblber.so.2.0.200",
@@ -4920,7 +4920,7 @@
           "Name": "liblz4-1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/liblz4-1@1.9.4-1build1.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "a5c4bbc97b9f5d8"
+            "UID": "83c795581437675f"
           },
           "Version": "1.9.4",
           "Release": "1build1.1",
@@ -4938,11 +4938,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/liblz4.so.1.9.4",
@@ -4956,7 +4956,7 @@
           "Name": "liblzma5",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/liblzma5@5.6.1%2Breally5.4.5-1ubuntu0.3?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "42c359055862bca5"
+            "UID": "2c08fc3d1ba3b412"
           },
           "Version": "5.6.1+really5.4.5",
           "Release": "1ubuntu0.3",
@@ -4986,11 +4986,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5",
@@ -5007,7 +5007,7 @@
           "Name": "libmd0",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libmd0@1.1.0-2build1.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "85451790c7aebf75"
+            "UID": "3eae4ac27d6f37e0"
           },
           "Version": "1.1.0",
           "Release": "2build1.1",
@@ -5031,11 +5031,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libmd.so.0.1.0",
@@ -5049,7 +5049,7 @@
           "Name": "libmount1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libmount1@2.39.3-9ubuntu6.6?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "ec50be6d066f7337"
+            "UID": "15ea0c9a7779b3cc"
           },
           "Version": "2.39.3",
           "Release": "9ubuntu6.6",
@@ -5080,12 +5080,12 @@
           },
           "DependsOn": [
             "libblkid1@2.39.3-9ubuntu6.6",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libselinux1@3.5-2ubuntu2.1"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libmount.so.1.1.0",
@@ -5099,7 +5099,7 @@
           "Name": "libncursesw6",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libncursesw6@6.4%2B20240113-1ubuntu2.2?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "2fba9dd2b2ac0c9a"
+            "UID": "9f099d748695403a"
           },
           "Version": "6.4+20240113",
           "Release": "1ubuntu2.2",
@@ -5112,12 +5112,12 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libtinfo6@6.4+20240113-1ubuntu2.2"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libformw.so.6.4",
@@ -5132,7 +5132,7 @@
           "Name": "libnettle8t64",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libnettle8t64@3.9.1-2.2build1.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "d3f353bd4be0d3a8"
+            "UID": "330262dd2ba77e23"
           },
           "Version": "3.9.1",
           "Release": "2.2build1.1",
@@ -5156,11 +5156,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libnettle.so.8.8",
@@ -5177,7 +5177,7 @@
           "Name": "libnghttp2-14",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libnghttp2-14@1.59.0-1ubuntu0.4?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "2051858fe5151630"
+            "UID": "b430fd6ddeee5213"
           },
           "Version": "1.59.0",
           "Release": "1ubuntu0.4",
@@ -5197,11 +5197,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libnghttp2.so.14.26.0",
@@ -5217,7 +5217,7 @@
           "Name": "libnpth0t64",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libnpth0t64@1.6-3.1build1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "9605157b0896ddf4"
+            "UID": "db474641d817ae75"
           },
           "Version": "1.6",
           "Release": "3.1build1",
@@ -5234,11 +5234,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libnpth.so.0.1.2",
@@ -5253,7 +5253,7 @@
           "Name": "libp11-kit0",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libp11-kit0@0.25.3-4ubuntu2.2?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "450260b3308034c0"
+            "UID": "895ef0cf87b5a4a6"
           },
           "Version": "0.25.3",
           "Release": "4ubuntu2.2",
@@ -5280,12 +5280,12 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libffi8@3.4.6-1build1"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.1",
@@ -5325,8 +5325,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/security/pam_access.so",
@@ -5439,7 +5439,7 @@
           "Name": "libpam-modules-bin",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libpam-modules-bin@1.5.3-5ubuntu5.7?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "487575f39964fb9e"
+            "UID": "e4b1e5ad7f88ebaa"
           },
           "Version": "1.5.3",
           "Release": "5ubuntu5.7",
@@ -5465,15 +5465,15 @@
           },
           "DependsOn": [
             "libaudit1@1:3.1.2-2.1build1.1",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libcrypt1@1:4.4.36-4build1",
             "libpam0g@1.5.3-5ubuntu5.7",
             "libselinux1@3.5-2ubuntu2.1",
             "libsystemd0@255.4-1ubuntu8.17"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/systemd/system/pam_namespace.service",
@@ -5533,8 +5533,8 @@
             "libpam-modules@1.5.3-5ubuntu5.7"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/sbin/pam-auth-update",
@@ -5564,7 +5564,7 @@
           "Name": "libpam0g",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libpam0g@1.5.3-5ubuntu5.7?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "f3dddb7e9c1734ec"
+            "UID": "60991a9ba90f92e0"
           },
           "Version": "1.5.3",
           "Release": "5ubuntu5.7",
@@ -5591,11 +5591,11 @@
           "DependsOn": [
             "debconf@1.5.86ubuntu1",
             "libaudit1@1:3.1.2-2.1build1.1",
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libpam.so.0.85.1",
@@ -5616,7 +5616,7 @@
           "Name": "libpcre2-8-0",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libpcre2-8-0@10.42-4ubuntu2.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "b592e3fe7ad90e73"
+            "UID": "a44a3b3974962052"
           },
           "Version": "10.42",
           "Release": "4ubuntu2.1",
@@ -5636,11 +5636,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libpcre2-8.so.0.11.2",
@@ -5655,7 +5655,7 @@
           "Name": "libpng16-16t64",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libpng16-16t64@1.6.43-5ubuntu0.6?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "34b7ae7bae756996"
+            "UID": "51e2b68722e1aca"
           },
           "Version": "1.6.43",
           "Release": "5ubuntu0.6",
@@ -5678,12 +5678,12 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "zlib1g@1:1.3.dfsg-3.1ubuntu2.2"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libpng16.so.16.43.0",
@@ -5703,7 +5703,7 @@
           "Name": "libproc2-0",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libproc2-0@4.0.4-4ubuntu3.3?arch=amd64\u0026distro=ubuntu-24.04\u0026epoch=2",
-            "UID": "553a52f84b1a17e4"
+            "UID": "1e8226d15c847b20"
           },
           "Version": "4.0.4",
           "Release": "4ubuntu3.3",
@@ -5726,12 +5726,12 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libsystemd0@255.4-1ubuntu8.17"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libproc2.so.0.0.2",
@@ -5746,7 +5746,7 @@
           "Name": "libpsl5t64",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libpsl5t64@0.21.2-1.1build1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "c7fa9a5b986972b5"
+            "UID": "e35e182cf0b7b444"
           },
           "Version": "0.21.2",
           "Release": "1.1build1",
@@ -5764,13 +5764,13 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libidn2-0@2.3.7-2build1.1",
             "libunistring5@1.1-2build1.1"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libpsl.so.5.3.4",
@@ -5785,7 +5785,7 @@
           "Name": "libreadline8t64",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libreadline8t64@8.2-4build1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "27a0183b9e1c3c59"
+            "UID": "9012624e1b561897"
           },
           "Version": "8.2",
           "Release": "4build1",
@@ -5807,13 +5807,13 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libtinfo6@6.4+20240113-1ubuntu2.2",
             "readline-common@8.2-4build1"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libhistory.so.8.2",
@@ -5832,7 +5832,7 @@
           "Name": "librtmp1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/librtmp1@2.4%2B20151223.gitfa8646d.1-2build7?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "424f28e187836baf"
+            "UID": "8fa484a91805ddc4"
           },
           "Version": "2.4+20151223.gitfa8646d.1",
           "Release": "2build7",
@@ -5849,13 +5849,13 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgmp10@2:6.3.0+dfsg-2ubuntu6.1",
             "zlib1g@1:1.3.dfsg-3.1ubuntu2.2"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/librtmp.so.1",
@@ -5869,7 +5869,7 @@
           "Name": "libsasl2-2",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libsasl2-2@2.1.28%2Bdfsg1-5ubuntu3.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "a603937af814d14b"
+            "UID": "8f4b3a7668293871"
           },
           "Version": "2.1.28+dfsg1",
           "Release": "5ubuntu3.1",
@@ -5901,13 +5901,13 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libsasl2-modules-db@2.1.28+dfsg1-5ubuntu3.1",
             "libssl3t64@3.0.13-0ubuntu3.15"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libsasl2.so.2.0.25",
@@ -5922,7 +5922,7 @@
           "Name": "libsasl2-modules-db",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libsasl2-modules-db@2.1.28%2Bdfsg1-5ubuntu3.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "95ba5ba363a333a0"
+            "UID": "be8a3ded87fe871a"
           },
           "Version": "2.1.28+dfsg1",
           "Release": "5ubuntu3.1",
@@ -5954,12 +5954,12 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libdb5.3t64@5.3.28+dfsg2-7"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/sasl2/libsasldb.so.2.0.25",
@@ -5973,7 +5973,7 @@
           "Name": "libseccomp2",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libseccomp2@2.5.5-1ubuntu3.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "fdac532a57eb595b"
+            "UID": "2ca27f063b7f3454"
           },
           "Version": "2.5.5",
           "Release": "1ubuntu3.1",
@@ -5989,11 +5989,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libseccomp.so.2.5.5",
@@ -6007,7 +6007,7 @@
           "Name": "libselinux1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libselinux1@3.5-2ubuntu2.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "381e7cbe40745ef9"
+            "UID": "4eaa03d1fdef9463"
           },
           "Version": "3.5",
           "Release": "2ubuntu2.1",
@@ -6024,12 +6024,12 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libpcre2-8-0@10.42-4ubuntu2.1"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/tmpfiles.d/libselinux1.conf",
@@ -6062,8 +6062,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/share/doc/libsemanage-common/changelog.Debian.gz",
@@ -6078,7 +6078,7 @@
           "Name": "libsemanage2",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libsemanage2@3.5-1build5?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "ffe45ce0bfa22003"
+            "UID": "e1a5add066a0985a"
           },
           "Version": "3.5",
           "Release": "1build5",
@@ -6098,14 +6098,14 @@
           "DependsOn": [
             "libaudit1@1:3.1.2-2.1build1.1",
             "libbz2-1.0@1.0.8-5.1ubuntu0.1",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libselinux1@3.5-2ubuntu2.1",
             "libsemanage-common@3.5-1build5",
             "libsepol2@3.5-2build1"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libsemanage.so.2",
@@ -6119,7 +6119,7 @@
           "Name": "libsepol2",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libsepol2@3.5-2build1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "ad4e60acbda54f7"
+            "UID": "9d91a48ec141cf5c"
           },
           "Version": "3.5",
           "Release": "2build1",
@@ -6139,11 +6139,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libsepol.so.2",
@@ -6157,7 +6157,7 @@
           "Name": "libsmartcols1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libsmartcols1@2.39.3-9ubuntu6.6?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "66d67cef914f8efe"
+            "UID": "e09cc1c6e521133c"
           },
           "Version": "2.39.3",
           "Release": "9ubuntu6.6",
@@ -6187,11 +6187,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libsmartcols.so.1.1.0",
@@ -6206,7 +6206,7 @@
           "Name": "libsqlite3-0",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libsqlite3-0@3.45.1-1ubuntu2.7?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "2d142f147bf52911"
+            "UID": "31bf890568c6f4ec"
           },
           "Version": "3.45.1",
           "Release": "1ubuntu2.7",
@@ -6224,11 +6224,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0.8.6",
@@ -6243,7 +6243,7 @@
           "Name": "libss2",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libss2@1.47.0-2.4~exp1ubuntu4.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "f6c210e439c71c27"
+            "UID": "3b202e9da3015630"
           },
           "Version": "1.47.0",
           "Release": "2.4~exp1ubuntu4.1",
@@ -6268,12 +6268,12 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libcom-err2@1.47.0-2.4~exp1ubuntu4.1"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libss.so.2.0",
@@ -6286,7 +6286,7 @@
           "Name": "libssh-4",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libssh-4@0.10.6-2ubuntu0.5?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "34031d65013a7baa"
+            "UID": "15daf9eeb50e9f56"
           },
           "Version": "0.10.6",
           "Release": "2ubuntu0.5",
@@ -6306,14 +6306,14 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
-            "libgssapi-krb5-2@1.20.1-6ubuntu2.8",
+            "libc6@2.39-0ubuntu8.9",
+            "libgssapi-krb5-2@1.20.1-6ubuntu2.10",
             "libssl3t64@3.0.13-0ubuntu3.15",
             "zlib1g@1:1.3.dfsg-3.1ubuntu2.2"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libssh.so.4.9.6",
@@ -6329,7 +6329,7 @@
           "Name": "libssl3t64",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libssl3t64@3.0.13-0ubuntu3.15?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "3f7ece955cf3ff65"
+            "UID": "1c03d36fbe0c59f9"
           },
           "Version": "3.0.13",
           "Release": "0ubuntu3.15",
@@ -6348,11 +6348,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/engines-3/afalg.so",
@@ -6372,7 +6372,7 @@
           "Name": "libstdc++6",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libstdc%2B%2B6@14.2.0-4ubuntu2~24.04.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "22820accc4fa54d8"
+            "UID": "5e187145fb15f562"
           },
           "Version": "14.2.0",
           "Release": "4ubuntu2~24.04.1",
@@ -6386,12 +6386,12 @@
           },
           "DependsOn": [
             "gcc-14-base@14.2.0-4ubuntu2~24.04.1",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgcc-s1@14.2.0-4ubuntu2~24.04.1"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33",
@@ -6408,7 +6408,7 @@
           "Name": "libsystemd0",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libsystemd0@255.4-1ubuntu8.17?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "c50dbb70587dcf78"
+            "UID": "2ad1c53b361128bb"
           },
           "Version": "255.4",
           "Release": "1ubuntu8.17",
@@ -6431,7 +6431,7 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libcap2@1:2.66-5ubuntu2.4",
             "libgcrypt20@1.10.3-2ubuntu0.2",
             "liblz4-1@1.9.4-1build1.1",
@@ -6439,8 +6439,8 @@
             "libzstd1@1.5.5+dfsg2-2build1.1"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libsystemd.so.0.38.0",
@@ -6455,7 +6455,7 @@
           "Name": "libtasn1-6",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libtasn1-6@4.19.0-3ubuntu0.24.04.2?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "9a850c7a32b628b0"
+            "UID": "b52569ce05e04fa6"
           },
           "Version": "4.19.0",
           "Release": "3ubuntu0.24.04.2",
@@ -6474,11 +6474,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libtasn1.so.6.6.3",
@@ -6495,7 +6495,7 @@
           "Name": "libtinfo6",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libtinfo6@6.4%2B20240113-1ubuntu2.2?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "66277e38bc93754c"
+            "UID": "5c9fdab344501e80"
           },
           "Version": "6.4+20240113",
           "Release": "1ubuntu2.2",
@@ -6513,11 +6513,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libtic.so.6.4",
@@ -6532,7 +6532,7 @@
           "Name": "libudev1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libudev1@255.4-1ubuntu8.17?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "7e1821514b330208"
+            "UID": "2afb6f2705244e"
           },
           "Version": "255.4",
           "Release": "1ubuntu8.17",
@@ -6555,12 +6555,12 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libcap2@1:2.66-5ubuntu2.4"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libudev.so.1.7.8",
@@ -6575,7 +6575,7 @@
           "Name": "libunistring5",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libunistring5@1.1-2build1.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "653cc58cafc12d60"
+            "UID": "c3b13452a0da85f4"
           },
           "Version": "1.1",
           "Release": "2build1.1",
@@ -6602,11 +6602,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libunistring.so.5.0.0",
@@ -6620,7 +6620,7 @@
           "Name": "libuuid1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libuuid1@2.39.3-9ubuntu6.6?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "b4104d767bad29d6"
+            "UID": "fb3a96a54ad2c695"
           },
           "Version": "2.39.3",
           "Release": "9ubuntu6.6",
@@ -6650,11 +6650,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libuuid.so.1.3.0",
@@ -6668,7 +6668,7 @@
           "Name": "libxxhash0",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libxxhash0@0.8.2-2build1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "f5a05c570575dda"
+            "UID": "d3ec2e5979689ba1"
           },
           "Version": "0.8.2",
           "Release": "2build1",
@@ -6686,11 +6686,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libxxhash.so.0.8.2",
@@ -6704,7 +6704,7 @@
           "Name": "libzstd1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libzstd1@1.5.5%2Bdfsg2-2build1.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "e977105f1c286b3f"
+            "UID": "8fcf5a6c77134390"
           },
           "Version": "1.5.5+dfsg2",
           "Release": "2build1.1",
@@ -6723,11 +6723,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5",
@@ -6737,18 +6737,18 @@
           "AnalyzedBy": "dpkg"
         },
         {
-          "ID": "locales@2.39-0ubuntu8.8",
+          "ID": "locales@2.39-0ubuntu8.9",
           "Name": "locales",
           "Identifier": {
-            "PURL": "pkg:deb/ubuntu/locales@2.39-0ubuntu8.8?arch=all\u0026distro=ubuntu-24.04",
-            "UID": "a65ebce039ba9408"
+            "PURL": "pkg:deb/ubuntu/locales@2.39-0ubuntu8.9?arch=all\u0026distro=ubuntu-24.04",
+            "UID": "4af0aee5ba222de"
           },
           "Version": "2.39",
-          "Release": "0ubuntu8.8",
+          "Release": "0ubuntu8.9",
           "Arch": "all",
           "SrcName": "glibc",
           "SrcVersion": "2.39",
-          "SrcRelease": "0ubuntu8.8",
+          "SrcRelease": "0ubuntu8.9",
           "Licenses": [
             "LGPL-2.1-only",
             "GPL-2.0-only",
@@ -6760,11 +6760,11 @@
           },
           "DependsOn": [
             "debconf@1.5.86ubuntu1",
-            "libc-bin@2.39-0ubuntu8.8"
+            "libc-bin@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/sbin/locale-gen",
@@ -7419,8 +7419,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/faillog",
@@ -7528,7 +7528,7 @@
           "Name": "logsave",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/logsave@1.47.0-2.4~exp1ubuntu4.1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "bd1f6bfd22d5bf36"
+            "UID": "a7dfa99d349390f"
           },
           "Version": "1.47.0",
           "Release": "2.4~exp1ubuntu4.1",
@@ -7553,11 +7553,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/sbin/logsave",
@@ -7572,7 +7572,7 @@
           "Name": "mawk",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/mawk@1.3.4.20240123-1build1?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "9663cb31df238237"
+            "UID": "33f511537488a8d5"
           },
           "Version": "1.3.4.20240123",
           "Release": "1build1",
@@ -7590,11 +7590,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/mawk",
@@ -7653,8 +7653,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/mount",
@@ -7704,8 +7704,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/share/doc/ncurses-base/FAQ",
@@ -7784,8 +7784,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/clear",
@@ -7818,7 +7818,7 @@
           "Name": "openssl",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/openssl@3.0.13-0ubuntu3.15?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "89feec056cc593c5"
+            "UID": "66536347e55f99f3"
           },
           "Version": "3.0.13",
           "Release": "0ubuntu3.15",
@@ -7831,12 +7831,12 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libssl3t64@3.0.13-0ubuntu3.15"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/bin/c_rehash",
@@ -8050,7 +8050,7 @@
           "Name": "p11-kit",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/p11-kit@0.25.3-4ubuntu2.2?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "3eb7da1da282c03c"
+            "UID": "26f600ed21016df0"
           },
           "Version": "0.25.3",
           "Release": "4ubuntu2.2",
@@ -8077,14 +8077,14 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libp11-kit0@0.25.3-4ubuntu2.2",
             "libtasn1-6@4.19.0-3ubuntu0.24.04.2",
             "p11-kit-modules@0.25.3-4ubuntu2.2"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/bin/p11-kit",
@@ -8105,7 +8105,7 @@
           "Name": "p11-kit-modules",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/p11-kit-modules@0.25.3-4ubuntu2.2?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "c65f0dae2c70f9dc"
+            "UID": "9b380f0bb72218eb"
           },
           "Version": "0.25.3",
           "Release": "4ubuntu2.2",
@@ -8118,14 +8118,14 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libffi8@3.4.6-1build1",
             "libp11-kit0@0.25.3-4ubuntu2.2",
             "libtasn1-6@4.19.0-3ubuntu0.24.04.2"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/pkcs11/p11-kit-client.so",
@@ -8138,7 +8138,7 @@
           "Name": "passwd",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/passwd@4.13%2Bdfsg1-4ubuntu3.2?arch=amd64\u0026distro=ubuntu-24.04\u0026epoch=1",
-            "UID": "405ad344e719871a"
+            "UID": "4e276d1a70ba3fe6"
           },
           "Version": "4.13+dfsg1",
           "Release": "4ubuntu3.2",
@@ -8161,7 +8161,7 @@
           },
           "DependsOn": [
             "libaudit1@1:3.1.2-2.1build1.1",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libcrypt1@1:4.4.36-4build1",
             "libpam-modules@1.5.3-5ubuntu5.7",
             "libpam0g@1.5.3-5ubuntu5.7",
@@ -8169,8 +8169,8 @@
             "libsemanage2@3.5-1build5"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/chage",
@@ -8516,8 +8516,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/perl",
@@ -9151,7 +9151,7 @@
           "Name": "pinentry-curses",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/pinentry-curses@1.2.1-3ubuntu5?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "76fd811dd95b8167"
+            "UID": "2cf9ed8057f95220"
           },
           "Version": "1.2.1",
           "Release": "3ubuntu5",
@@ -9172,14 +9172,14 @@
           },
           "DependsOn": [
             "libassuan0@2.5.6-1build1",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libgpg-error0@1.47-3build2.1",
             "libncursesw6@6.4+20240113-1ubuntu2.2",
             "libtinfo6@6.4+20240113-1ubuntu2.2"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/bin/pinentry-curses",
@@ -9197,7 +9197,7 @@
           "Name": "procps",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/procps@4.0.4-4ubuntu3.3?arch=amd64\u0026distro=ubuntu-24.04\u0026epoch=2",
-            "UID": "427cd7412972ebb5"
+            "UID": "89cff3536a279c69"
           },
           "Version": "4.0.4",
           "Release": "4ubuntu3.3",
@@ -9221,15 +9221,15 @@
           },
           "DependsOn": [
             "init-system-helpers@1.66ubuntu1",
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libncursesw6@6.4+20240113-1ubuntu2.2",
             "libproc2-0@2:4.0.4-4ubuntu3.3",
             "libsystemd0@255.4-1ubuntu8.17",
             "libtinfo6@6.4+20240113-1ubuntu2.2"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/free",
@@ -9416,8 +9416,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/share/doc/readline-common/changelog.Debian.gz",
@@ -9460,8 +9460,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/sed",
@@ -9503,8 +9503,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/select-editor",
@@ -9540,7 +9540,7 @@
           "Name": "sysvinit-utils",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/sysvinit-utils@3.08-6ubuntu3?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "5b09e302e149ba05"
+            "UID": "92e40a59808c10bb"
           },
           "Version": "3.08",
           "Release": "6ubuntu3",
@@ -9560,11 +9560,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/init/init-d-script",
@@ -9612,8 +9612,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/tar",
@@ -9657,8 +9657,8 @@
             "debconf@1.5.86ubuntu1"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/share/doc/tzdata/NEWS.Debian.gz",
@@ -10143,8 +10143,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg",
@@ -10179,8 +10179,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/unminimize",
@@ -10224,8 +10224,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/bin/addpart",
@@ -10517,7 +10517,7 @@
           "Name": "wget",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/wget@1.21.4-1ubuntu4.5?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "436f03cd6e8fd6e0"
+            "UID": "2851d7f97d475b9c"
           },
           "Version": "1.21.4",
           "Release": "1ubuntu4.5",
@@ -10534,7 +10534,7 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8",
+            "libc6@2.39-0ubuntu8.9",
             "libidn2-0@2.3.7-2build1.1",
             "libpcre2-8-0@10.42-4ubuntu2.1",
             "libpsl5t64@0.21.2-1.1build1",
@@ -10543,8 +10543,8 @@
             "zlib1g@1:1.3.dfsg-3.1ubuntu2.2"
           ],
           "Layer": {
-            "Digest": "sha256:772850025094b770302a690dad677c0341d7733bbd4387f964b1a816a6bc3080",
-            "DiffID": "sha256:81e28496bf4ba69ec53bd0681fcf8f2e2334d5ebc0aa84b596bd16536094f3c6"
+            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
+            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
           },
           "InstalledFiles": [
             "/usr/bin/wget",
@@ -10564,7 +10564,7 @@
           "Name": "zlib1g",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/zlib1g@1.3.dfsg-3.1ubuntu2.2?arch=amd64\u0026distro=ubuntu-24.04\u0026epoch=1",
-            "UID": "61d0b9411c6f5c22"
+            "UID": "95e2d584960563ef"
           },
           "Version": "1.3.dfsg",
           "Release": "3.1ubuntu2.2",
@@ -10582,11 +10582,11 @@
             "Class": "official"
           },
           "DependsOn": [
-            "libc6@2.39-0ubuntu8.8"
+            "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:e51aee9c82ec5dd5ba2add49c45c6d85d460512757e2615b69bcdf9469c7cb58",
-            "DiffID": "sha256:6078cde548a521a729def2ee7875e9f65513c18f0d4bac4db817417617d7006a"
+            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
+            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libz.so.1.3",
@@ -10610,8 +10610,8 @@
           },
           "Version": "2.4.240",
           "Layer": {
-            "Digest": "sha256:d3370a9ddc78ceebb67048d7e3d142a678e032736e4068dba210f8c413999da0",
-            "DiffID": "sha256:7b6eba8d24aeedfa243e545c392db2a0bb1ceedf2ba85f19d2c0fde061deab74"
+            "Digest": "sha256:6adeb703030415895fbfe2d84e96523d38c0bc7f0bd1b9083bb20004cebae86b",
+            "DiffID": "sha256:301b588e2f99c5783c44ccb4be673b24bc9a77086d28c94f200d50655a469522"
           },
           "FilePath": "liquibase/internal/lib/h2.jar",
           "AnalyzedBy": "jar"
@@ -10624,8 +10624,8 @@
           },
           "Version": "5.12.0",
           "Layer": {
-            "Digest": "sha256:d3370a9ddc78ceebb67048d7e3d142a678e032736e4068dba210f8c413999da0",
-            "DiffID": "sha256:7b6eba8d24aeedfa243e545c392db2a0bb1ceedf2ba85f19d2c0fde061deab74"
+            "Digest": "sha256:6adeb703030415895fbfe2d84e96523d38c0bc7f0bd1b9083bb20004cebae86b",
+            "DiffID": "sha256:301b588e2f99c5783c44ccb4be673b24bc9a77086d28c94f200d50655a469522"
           },
           "FilePath": "liquibase/internal/lib/opencsv.jar",
           "AnalyzedBy": "jar"
@@ -10638,8 +10638,8 @@
           },
           "Version": "2.22.0",
           "Layer": {
-            "Digest": "sha256:d3370a9ddc78ceebb67048d7e3d142a678e032736e4068dba210f8c413999da0",
-            "DiffID": "sha256:7b6eba8d24aeedfa243e545c392db2a0bb1ceedf2ba85f19d2c0fde061deab74"
+            "Digest": "sha256:6adeb703030415895fbfe2d84e96523d38c0bc7f0bd1b9083bb20004cebae86b",
+            "DiffID": "sha256:301b588e2f99c5783c44ccb4be673b24bc9a77086d28c94f200d50655a469522"
           },
           "FilePath": "liquibase/internal/lib/commons-io.jar",
           "AnalyzedBy": "jar"
@@ -10652,8 +10652,8 @@
           },
           "Version": "4.7.7",
           "Layer": {
-            "Digest": "sha256:d3370a9ddc78ceebb67048d7e3d142a678e032736e4068dba210f8c413999da0",
-            "DiffID": "sha256:7b6eba8d24aeedfa243e545c392db2a0bb1ceedf2ba85f19d2c0fde061deab74"
+            "Digest": "sha256:6adeb703030415895fbfe2d84e96523d38c0bc7f0bd1b9083bb20004cebae86b",
+            "DiffID": "sha256:301b588e2f99c5783c44ccb4be673b24bc9a77086d28c94f200d50655a469522"
           },
           "FilePath": "liquibase/internal/lib/picocli.jar",
           "AnalyzedBy": "jar"
@@ -10666,8 +10666,8 @@
           },
           "Version": "4.6.0",
           "Layer": {
-            "Digest": "sha256:d3370a9ddc78ceebb67048d7e3d142a678e032736e4068dba210f8c413999da0",
-            "DiffID": "sha256:7b6eba8d24aeedfa243e545c392db2a0bb1ceedf2ba85f19d2c0fde061deab74"
+            "Digest": "sha256:6adeb703030415895fbfe2d84e96523d38c0bc7f0bd1b9083bb20004cebae86b",
+            "DiffID": "sha256:301b588e2f99c5783c44ccb4be673b24bc9a77086d28c94f200d50655a469522"
           },
           "FilePath": "liquibase/internal/lib/commons-collections4.jar",
           "AnalyzedBy": "jar"
@@ -10680,8 +10680,8 @@
           },
           "Version": "3.20.0",
           "Layer": {
-            "Digest": "sha256:d3370a9ddc78ceebb67048d7e3d142a678e032736e4068dba210f8c413999da0",
-            "DiffID": "sha256:7b6eba8d24aeedfa243e545c392db2a0bb1ceedf2ba85f19d2c0fde061deab74"
+            "Digest": "sha256:6adeb703030415895fbfe2d84e96523d38c0bc7f0bd1b9083bb20004cebae86b",
+            "DiffID": "sha256:301b588e2f99c5783c44ccb4be673b24bc9a77086d28c94f200d50655a469522"
           },
           "FilePath": "liquibase/internal/lib/commons-lang3.jar",
           "AnalyzedBy": "jar"
@@ -10694,8 +10694,8 @@
           },
           "Version": "1.15.0",
           "Layer": {
-            "Digest": "sha256:d3370a9ddc78ceebb67048d7e3d142a678e032736e4068dba210f8c413999da0",
-            "DiffID": "sha256:7b6eba8d24aeedfa243e545c392db2a0bb1ceedf2ba85f19d2c0fde061deab74"
+            "Digest": "sha256:6adeb703030415895fbfe2d84e96523d38c0bc7f0bd1b9083bb20004cebae86b",
+            "DiffID": "sha256:301b588e2f99c5783c44ccb4be673b24bc9a77086d28c94f200d50655a469522"
           },
           "FilePath": "liquibase/internal/lib/commons-text.jar",
           "AnalyzedBy": "jar"
@@ -10708,8 +10708,8 @@
           },
           "Version": "5.0.4",
           "Layer": {
-            "Digest": "sha256:d3370a9ddc78ceebb67048d7e3d142a678e032736e4068dba210f8c413999da0",
-            "DiffID": "sha256:7b6eba8d24aeedfa243e545c392db2a0bb1ceedf2ba85f19d2c0fde061deab74"
+            "Digest": "sha256:6adeb703030415895fbfe2d84e96523d38c0bc7f0bd1b9083bb20004cebae86b",
+            "DiffID": "sha256:301b588e2f99c5783c44ccb4be673b24bc9a77086d28c94f200d50655a469522"
           },
           "FilePath": "liquibase/internal/lib/liquibase-core.jar",
           "AnalyzedBy": "jar"
@@ -10722,8 +10722,8 @@
           },
           "Version": "2.6",
           "Layer": {
-            "Digest": "sha256:d3370a9ddc78ceebb67048d7e3d142a678e032736e4068dba210f8c413999da0",
-            "DiffID": "sha256:7b6eba8d24aeedfa243e545c392db2a0bb1ceedf2ba85f19d2c0fde061deab74"
+            "Digest": "sha256:6adeb703030415895fbfe2d84e96523d38c0bc7f0bd1b9083bb20004cebae86b",
+            "DiffID": "sha256:301b588e2f99c5783c44ccb4be673b24bc9a77086d28c94f200d50655a469522"
           },
           "FilePath": "liquibase/internal/lib/snakeyaml.jar",
           "AnalyzedBy": "jar"
@@ -10745,8 +10745,8 @@
           "Version": "v1.26.5",
           "Relationship": "direct",
           "Layer": {
-            "Digest": "sha256:f581114f50955c925f7fe98703bf9d44216ed200b2368bb30e410de90ffac517",
-            "DiffID": "sha256:da34c69cba640c90e3a5b7a87a57c2e38ebe88d7c59d8532d4d8b170500e4a52"
+            "Digest": "sha256:ed0c847507dabe1d370d5dbf9b27210335776229b8cdc21d626bb33dacf808c1",
+            "DiffID": "sha256:f774294133bc176325bd1f586374bdb1f4fdc014574c0541397a98d0542fc75a"
           },
           "AnalyzedBy": "gobinary"
         },
@@ -10759,8 +10759,8 @@
           },
           "Version": "v1.9.0",
           "Layer": {
-            "Digest": "sha256:f581114f50955c925f7fe98703bf9d44216ed200b2368bb30e410de90ffac517",
-            "DiffID": "sha256:da34c69cba640c90e3a5b7a87a57c2e38ebe88d7c59d8532d4d8b170500e4a52"
+            "Digest": "sha256:ed0c847507dabe1d370d5dbf9b27210335776229b8cdc21d626bb33dacf808c1",
+            "DiffID": "sha256:f774294133bc176325bd1f586374bdb1f4fdc014574c0541397a98d0542fc75a"
           },
           "AnalyzedBy": "gobinary"
         },
@@ -10773,8 +10773,8 @@
           },
           "Version": "v1.10.2",
           "Layer": {
-            "Digest": "sha256:f581114f50955c925f7fe98703bf9d44216ed200b2368bb30e410de90ffac517",
-            "DiffID": "sha256:da34c69cba640c90e3a5b7a87a57c2e38ebe88d7c59d8532d4d8b170500e4a52"
+            "Digest": "sha256:ed0c847507dabe1d370d5dbf9b27210335776229b8cdc21d626bb33dacf808c1",
+            "DiffID": "sha256:f774294133bc176325bd1f586374bdb1f4fdc014574c0541397a98d0542fc75a"
           },
           "AnalyzedBy": "gobinary"
         },
@@ -10787,8 +10787,8 @@
           },
           "Version": "v1.0.9",
           "Layer": {
-            "Digest": "sha256:f581114f50955c925f7fe98703bf9d44216ed200b2368bb30e410de90ffac517",
-            "DiffID": "sha256:da34c69cba640c90e3a5b7a87a57c2e38ebe88d7c59d8532d4d8b170500e4a52"
+            "Digest": "sha256:ed0c847507dabe1d370d5dbf9b27210335776229b8cdc21d626bb33dacf808c1",
+            "DiffID": "sha256:f774294133bc176325bd1f586374bdb1f4fdc014574c0541397a98d0542fc75a"
           },
           "AnalyzedBy": "gobinary"
         },
@@ -10800,8 +10800,8 @@
             "UID": "13ea817821fe4afd"
           },
           "Layer": {
-            "Digest": "sha256:f581114f50955c925f7fe98703bf9d44216ed200b2368bb30e410de90ffac517",
-            "DiffID": "sha256:da34c69cba640c90e3a5b7a87a57c2e38ebe88d7c59d8532d4d8b170500e4a52"
+            "Digest": "sha256:ed0c847507dabe1d370d5dbf9b27210335776229b8cdc21d626bb33dacf808c1",
+            "DiffID": "sha256:f774294133bc176325bd1f586374bdb1f4fdc014574c0541397a98d0542fc75a"
           },
           "AnalyzedBy": "gobinary"
         }
@@ -10822,8 +10822,8 @@
           "FixedVersion": "1.25.13, 1.26.6, 1.27.0-rc.3",
           "Status": "fixed",
           "Layer": {
-            "Digest": "sha256:f581114f50955c925f7fe98703bf9d44216ed200b2368bb30e410de90ffac517",
-            "DiffID": "sha256:da34c69cba640c90e3a5b7a87a57c2e38ebe88d7c59d8532d4d8b170500e4a52"
+            "Digest": "sha256:ed0c847507dabe1d370d5dbf9b27210335776229b8cdc21d626bb33dacf808c1",
+            "DiffID": "sha256:f774294133bc176325bd1f586374bdb1f4fdc014574c0541397a98d0542fc75a"
           },
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-33818",
           "DataSource": {
@@ -10831,7 +10831,7 @@
             "Name": "The Go Vulnerability Database",
             "URL": "https://pkg.go.dev/vuln/"
           },
-          "Fingerprint": "sha256:bd8418a0af189ca69083bc62f761729e98ec2ffa4358b92dec9d683b7f5bb107",
+          "Fingerprint": "sha256:d690032553998bb1dbeb50843e82cc70044e4dd755018fd6e10e5f6c74281903",
           "Title": "encoding/asn1: golang: Go encoding/asn1: Denial of Service via excessive recursion in Unmarshal",
           "Description": "Enforce a recursion limit in Unmarshal to prevent stack exhaustion when parsing deeply-nested, recursive structures.",
           "Severity": "HIGH",
@@ -10859,6 +10859,7 @@
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2026:66364",
+            "https://access.redhat.com/errata/RHSA-2026:67161",
             "https://access.redhat.com/security/cve/CVE-2026-33818",
             "https://bugzilla.redhat.com/2515815",
             "https://bugzilla.redhat.com/2515820",
@@ -10870,13 +10871,13 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-33818",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56860",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56862",
-            "https://errata.almalinux.org/9/ALSA-2026-66364.html",
+            "https://errata.almalinux.org/8/ALSA-2026-67161.html",
             "https://errata.rockylinux.org/RLSA-2026:66364",
             "https://go.dev/cl/814980",
             "https://go.dev/issue/80405",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://linux.oracle.com/cve/CVE-2026-33818.html",
-            "https://linux.oracle.com/errata/ELSA-2026-66364-0.html",
+            "https://linux.oracle.com/errata/ELSA-2026-67161-0.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-33818",
             "https://pkg.go.dev/vuln/GO-2026-5972",
             "https://www.cve.org/CVERecord?id=CVE-2026-33818"
@@ -10899,8 +10900,8 @@
           "FixedVersion": "1.25.13, 1.26.6, 1.27.0-rc.3",
           "Status": "fixed",
           "Layer": {
-            "Digest": "sha256:f581114f50955c925f7fe98703bf9d44216ed200b2368bb30e410de90ffac517",
-            "DiffID": "sha256:da34c69cba640c90e3a5b7a87a57c2e38ebe88d7c59d8532d4d8b170500e4a52"
+            "Digest": "sha256:ed0c847507dabe1d370d5dbf9b27210335776229b8cdc21d626bb33dacf808c1",
+            "DiffID": "sha256:f774294133bc176325bd1f586374bdb1f4fdc014574c0541397a98d0542fc75a"
           },
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-39821",
           "DataSource": {
@@ -10908,7 +10909,7 @@
             "Name": "The Go Vulnerability Database",
             "URL": "https://pkg.go.dev/vuln/"
           },
-          "Fingerprint": "sha256:825a3333373bb90c8ec0cde685709ac4b21208257f80694fbeebc5a8012f08f2",
+          "Fingerprint": "sha256:c5e9e732e098cb2e8bf1fb0232006c8e36d3846d9c2209e3fbb41b854e549b13",
           "Title": "golang.org/x/net/idna: golang: net/http: golang.org/x/net/idna: Privilege escalation via incorrect Punycode label processing",
           "Description": "The ToASCII and ToUnicode functions incorrectly accept Punycode-encoded labels that decode to an ASCII-only label. For example, ToUnicode(\"xn--example-.com\") incorrectly returns the name \"example.com\" rather than an error. This behavior can lead to privilege escalation in programs using the idna package. For example, a program which performs privilege checks on the ASCII hostname may reject \"example.com\" but permit \"xn--example-.com\". If that program subsequently converts the ASCII hostname to Unicode, it will inadvertently permits access to the Unicode name \"example.com\".",
           "Severity": "HIGH",
@@ -11072,9 +11073,25 @@
             "https://access.redhat.com/errata/RHSA-2026:65886",
             "https://access.redhat.com/errata/RHSA-2026:66016",
             "https://access.redhat.com/errata/RHSA-2026:66022",
+            "https://access.redhat.com/errata/RHSA-2026:66350",
             "https://access.redhat.com/errata/RHSA-2026:66432",
+            "https://access.redhat.com/errata/RHSA-2026:67149",
+            "https://access.redhat.com/errata/RHSA-2026:67159",
+            "https://access.redhat.com/errata/RHSA-2026:67160",
+            "https://access.redhat.com/errata/RHSA-2026:67287",
+            "https://access.redhat.com/errata/RHSA-2026:67319",
+            "https://access.redhat.com/errata/RHSA-2026:67517",
             "https://access.redhat.com/security/cve/CVE-2026-39821",
+            "https://bugzilla.redhat.com/2315719",
+            "https://bugzilla.redhat.com/2341751",
+            "https://bugzilla.redhat.com/2467820",
             "https://bugzilla.redhat.com/2480756",
+            "https://bugzilla.redhat.com/2515815",
+            "https://bugzilla.redhat.com/2515820",
+            "https://bugzilla.redhat.com/2515827",
+            "https://bugzilla.redhat.com/2515838",
+            "https://bugzilla.redhat.com/2515839",
+            "https://bugzilla.redhat.com/2515840",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456333",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456339",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2467809",
@@ -11102,7 +11119,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56859",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56860",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56862",
-            "https://errata.almalinux.org/9/ALSA-2026-37435.html",
+            "https://errata.almalinux.org/8/ALSA-2026-66016.html",
             "https://errata.rockylinux.org/RLSA-2026:65886",
             "https://github.com/golang/go/issues/78760",
             "https://go.dev/cl/767220",
@@ -11110,7 +11127,7 @@
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://groups.google.com/g/golang-announce/c/iI-mYSI0lu8",
             "https://linux.oracle.com/cve/CVE-2026-39821.html",
-            "https://linux.oracle.com/errata/ELSA-2026-65886-0.html",
+            "https://linux.oracle.com/errata/ELSA-2026-66432-0.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-39821",
             "https://pkg.go.dev/vuln/GO-2026-5026",
             "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-39821.json",
@@ -11118,7 +11135,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-39821"
           ],
           "PublishedDate": "2026-05-22T16:16:20.41Z",
-          "LastModifiedDate": "2026-09-11T13:17:49.237Z"
+          "LastModifiedDate": "2026-09-15T12:17:34.803Z"
         },
         {
           "VulnerabilityID": "CVE-2026-46600",
@@ -11135,8 +11152,8 @@
           "FixedVersion": "1.26.6, 1.27.0-rc.3",
           "Status": "fixed",
           "Layer": {
-            "Digest": "sha256:f581114f50955c925f7fe98703bf9d44216ed200b2368bb30e410de90ffac517",
-            "DiffID": "sha256:da34c69cba640c90e3a5b7a87a57c2e38ebe88d7c59d8532d4d8b170500e4a52"
+            "Digest": "sha256:ed0c847507dabe1d370d5dbf9b27210335776229b8cdc21d626bb33dacf808c1",
+            "DiffID": "sha256:f774294133bc176325bd1f586374bdb1f4fdc014574c0541397a98d0542fc75a"
           },
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-46600",
           "DataSource": {
@@ -11144,7 +11161,7 @@
             "Name": "The Go Vulnerability Database",
             "URL": "https://pkg.go.dev/vuln/"
           },
-          "Fingerprint": "sha256:2fa70f8c0c103a408b56a68c3667b4a7510de98cfc9594c7a697da96f59b1883",
+          "Fingerprint": "sha256:4ca097b8f8ef9f5e8e43578d1da428de63f748e13d21d372df20542e68516fee",
           "Title": "golang.org/x/net/dns/dnsmessage: golang.org/x/net/dns/dnsmessage: Denial of Service via invalid DNS record parsing",
           "Description": "Parsing an invalid SVCB or HTTPS RR can panic when the size of a parameter value overflows the message buffer.",
           "Severity": "HIGH",
@@ -11193,8 +11210,8 @@
           "FixedVersion": "1.25.13, 1.26.6, 1.27.0-rc.3",
           "Status": "fixed",
           "Layer": {
-            "Digest": "sha256:f581114f50955c925f7fe98703bf9d44216ed200b2368bb30e410de90ffac517",
-            "DiffID": "sha256:da34c69cba640c90e3a5b7a87a57c2e38ebe88d7c59d8532d4d8b170500e4a52"
+            "Digest": "sha256:ed0c847507dabe1d370d5dbf9b27210335776229b8cdc21d626bb33dacf808c1",
+            "DiffID": "sha256:f774294133bc176325bd1f586374bdb1f4fdc014574c0541397a98d0542fc75a"
           },
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-56853",
           "DataSource": {
@@ -11202,7 +11219,7 @@
             "Name": "The Go Vulnerability Database",
             "URL": "https://pkg.go.dev/vuln/"
           },
-          "Fingerprint": "sha256:ae762ba6809249f7e41cef67c0562561f312b04f8765b792b7a45ceecf6257cc",
+          "Fingerprint": "sha256:8efda0d72af39304d9a04a4ef471b42ac2367a12201048ea63c1e09ad7ba559b",
           "Title": "net/http: golang: Go net/http: Unencrypted HTTP/2 connections vulnerable to Denial of Service",
           "Description": "When a server is configured to support unencrypted HTTP/2, it reads a few bytes from each new connection to see if they contain the HTTP/2 client preface. ReadHeaderTimeout is unexpectedly not being applied when doing this.",
           "Severity": "HIGH",
@@ -11229,13 +11246,13 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:65117",
             "https://access.redhat.com/errata/RHSA-2026:65886",
+            "https://access.redhat.com/errata/RHSA-2026:66016",
             "https://access.redhat.com/security/cve/CVE-2026-56853",
-            "https://bugzilla.redhat.com/2467809",
+            "https://bugzilla.redhat.com/2315719",
+            "https://bugzilla.redhat.com/2341751",
             "https://bugzilla.redhat.com/2467820",
-            "https://bugzilla.redhat.com/2484204",
-            "https://bugzilla.redhat.com/2484830",
+            "https://bugzilla.redhat.com/2480756",
             "https://bugzilla.redhat.com/2515815",
             "https://bugzilla.redhat.com/2515820",
             "https://bugzilla.redhat.com/2515827",
@@ -11269,7 +11286,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56859",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56860",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56862",
-            "https://errata.almalinux.org/9/ALSA-2026-65117.html",
+            "https://errata.almalinux.org/8/ALSA-2026-66016.html",
             "https://errata.rockylinux.org/RLSA-2026:65886",
             "https://go.dev/cl/795540",
             "https://go.dev/issue/80205",
@@ -11298,8 +11315,8 @@
           "FixedVersion": "1.25.13, 1.26.6, 1.27.0-rc.3",
           "Status": "fixed",
           "Layer": {
-            "Digest": "sha256:f581114f50955c925f7fe98703bf9d44216ed200b2368bb30e410de90ffac517",
-            "DiffID": "sha256:da34c69cba640c90e3a5b7a87a57c2e38ebe88d7c59d8532d4d8b170500e4a52"
+            "Digest": "sha256:ed0c847507dabe1d370d5dbf9b27210335776229b8cdc21d626bb33dacf808c1",
+            "DiffID": "sha256:f774294133bc176325bd1f586374bdb1f4fdc014574c0541397a98d0542fc75a"
           },
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-56858",
           "DataSource": {
@@ -11307,7 +11324,7 @@
             "Name": "The Go Vulnerability Database",
             "URL": "https://pkg.go.dev/vuln/"
           },
-          "Fingerprint": "sha256:89d66c1087a44dd281d3d27788c7c2ab1ca985a015e838c2b6bc250835f0784b",
+          "Fingerprint": "sha256:09ffcc48f20cc5fbaf6462bada3126629104b14cff5d89423c7c40049b084b67",
           "Title": "html/template: golang: Go html/template: Cross-Site Scripting via pathological input",
           "Description": "Previously, pathological inputs could close an unescaped '/' early, allowing for attack-controlled data to inject arbitrary content, potentially leading to XSS.",
           "Severity": "HIGH",
@@ -11334,13 +11351,13 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:65117",
             "https://access.redhat.com/errata/RHSA-2026:65886",
+            "https://access.redhat.com/errata/RHSA-2026:66016",
             "https://access.redhat.com/security/cve/CVE-2026-56858",
-            "https://bugzilla.redhat.com/2467809",
+            "https://bugzilla.redhat.com/2315719",
+            "https://bugzilla.redhat.com/2341751",
             "https://bugzilla.redhat.com/2467820",
-            "https://bugzilla.redhat.com/2484204",
-            "https://bugzilla.redhat.com/2484830",
+            "https://bugzilla.redhat.com/2480756",
             "https://bugzilla.redhat.com/2515815",
             "https://bugzilla.redhat.com/2515820",
             "https://bugzilla.redhat.com/2515827",
@@ -11374,7 +11391,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56859",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56860",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56862",
-            "https://errata.almalinux.org/9/ALSA-2026-65117.html",
+            "https://errata.almalinux.org/8/ALSA-2026-66016.html",
             "https://errata.rockylinux.org/RLSA-2026:65886",
             "https://go.dev/cl/807100",
             "https://go.dev/issue/80435",
@@ -11403,8 +11420,8 @@
           "FixedVersion": "1.25.13, 1.26.6, 1.27.0-rc.3",
           "Status": "fixed",
           "Layer": {
-            "Digest": "sha256:f581114f50955c925f7fe98703bf9d44216ed200b2368bb30e410de90ffac517",
-            "DiffID": "sha256:da34c69cba640c90e3a5b7a87a57c2e38ebe88d7c59d8532d4d8b170500e4a52"
+            "Digest": "sha256:ed0c847507dabe1d370d5dbf9b27210335776229b8cdc21d626bb33dacf808c1",
+            "DiffID": "sha256:f774294133bc176325bd1f586374bdb1f4fdc014574c0541397a98d0542fc75a"
           },
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-56859",
           "DataSource": {
@@ -11412,7 +11429,7 @@
             "Name": "The Go Vulnerability Database",
             "URL": "https://pkg.go.dev/vuln/"
           },
-          "Fingerprint": "sha256:a5d06191ea058f3d41a7be96ca8ea2c5bc54da9e73087335cae00a2ac9b16671",
+          "Fingerprint": "sha256:47abb34ede00d4f59722f7db3c21146597140bb39bc36330c86becbc5930d405",
           "Title": "encoding/xml: golang: Go: Denial of Service via XML decoding recursion depth issue",
           "Description": "Previously, DecodeElement would reset the depth counter causing it to never fire; this could lead to stack exhaustion.",
           "Severity": "HIGH",
@@ -11439,13 +11456,13 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:65117",
             "https://access.redhat.com/errata/RHSA-2026:65886",
+            "https://access.redhat.com/errata/RHSA-2026:66016",
             "https://access.redhat.com/security/cve/CVE-2026-56859",
-            "https://bugzilla.redhat.com/2467809",
+            "https://bugzilla.redhat.com/2315719",
+            "https://bugzilla.redhat.com/2341751",
             "https://bugzilla.redhat.com/2467820",
-            "https://bugzilla.redhat.com/2484204",
-            "https://bugzilla.redhat.com/2484830",
+            "https://bugzilla.redhat.com/2480756",
             "https://bugzilla.redhat.com/2515815",
             "https://bugzilla.redhat.com/2515820",
             "https://bugzilla.redhat.com/2515827",
@@ -11479,7 +11496,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56859",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56860",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56862",
-            "https://errata.almalinux.org/9/ALSA-2026-65117.html",
+            "https://errata.almalinux.org/8/ALSA-2026-66016.html",
             "https://errata.rockylinux.org/RLSA-2026:65886",
             "https://go.dev/cl/803320",
             "https://go.dev/issue/80481",
@@ -11508,8 +11525,8 @@
           "FixedVersion": "1.25.13, 1.26.6, 1.27.0-rc.3",
           "Status": "fixed",
           "Layer": {
-            "Digest": "sha256:f581114f50955c925f7fe98703bf9d44216ed200b2368bb30e410de90ffac517",
-            "DiffID": "sha256:da34c69cba640c90e3a5b7a87a57c2e38ebe88d7c59d8532d4d8b170500e4a52"
+            "Digest": "sha256:ed0c847507dabe1d370d5dbf9b27210335776229b8cdc21d626bb33dacf808c1",
+            "DiffID": "sha256:f774294133bc176325bd1f586374bdb1f4fdc014574c0541397a98d0542fc75a"
           },
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-56860",
           "DataSource": {
@@ -11517,7 +11534,7 @@
             "Name": "The Go Vulnerability Database",
             "URL": "https://pkg.go.dev/vuln/"
           },
-          "Fingerprint": "sha256:ae87f3c8eeddabbbeebd5a6aa6149a6c23bf73d29e2357133bb6fd2e876dab91",
+          "Fingerprint": "sha256:8da3a778b1c2bb2edc6cd52ed95d4435da033b1d92e95cbbfffc899ce30c8530",
           "Title": "net/url: golang: golang net/url: Denial of Service from quadratic complexity in path resolution",
           "Description": "Previously, resolving relative paths containing parent directory ('..') segments performed string conversions and buffer rewrites on each step, resulting in quadratic time complexity and high memory allocation overhead. Now, path resolution operates on a byte buffer using index-based backtracking for '..' segments, eliminating the quadratic time complexity and significantly reducing memory allocations.",
           "Severity": "HIGH",
@@ -11545,6 +11562,7 @@
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2026:66364",
+            "https://access.redhat.com/errata/RHSA-2026:67161",
             "https://access.redhat.com/security/cve/CVE-2026-56860",
             "https://bugzilla.redhat.com/2515815",
             "https://bugzilla.redhat.com/2515820",
@@ -11556,13 +11574,13 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-33818",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56860",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56862",
-            "https://errata.almalinux.org/9/ALSA-2026-66364.html",
+            "https://errata.almalinux.org/8/ALSA-2026-67161.html",
             "https://errata.rockylinux.org/RLSA-2026:66364",
             "https://go.dev/cl/803681",
             "https://go.dev/issue/80494",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://linux.oracle.com/cve/CVE-2026-56860.html",
-            "https://linux.oracle.com/errata/ELSA-2026-66364-0.html",
+            "https://linux.oracle.com/errata/ELSA-2026-67161-0.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-56860",
             "https://pkg.go.dev/vuln/GO-2026-6218",
             "https://www.cve.org/CVERecord?id=CVE-2026-56860"
@@ -11585,8 +11603,8 @@
           "FixedVersion": "1.25.13, 1.26.6, 1.27.0-rc.3",
           "Status": "fixed",
           "Layer": {
-            "Digest": "sha256:f581114f50955c925f7fe98703bf9d44216ed200b2368bb30e410de90ffac517",
-            "DiffID": "sha256:da34c69cba640c90e3a5b7a87a57c2e38ebe88d7c59d8532d4d8b170500e4a52"
+            "Digest": "sha256:ed0c847507dabe1d370d5dbf9b27210335776229b8cdc21d626bb33dacf808c1",
+            "DiffID": "sha256:f774294133bc176325bd1f586374bdb1f4fdc014574c0541397a98d0542fc75a"
           },
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-56862",
           "DataSource": {
@@ -11594,7 +11612,7 @@
             "Name": "The Go Vulnerability Database",
             "URL": "https://pkg.go.dev/vuln/"
           },
-          "Fingerprint": "sha256:82a47441dd0fd6c18517f1739241ec403a10c740e0bf5d004dee1ef94636c0c5",
+          "Fingerprint": "sha256:0e9bb2b9d5c9319eb2d2311d9574b46b4d216e0ca2cafa26272b707943a80073",
           "Title": "crypto/tls: golang: Golang crypto/tls: Denial of Service via indefinite KeyUpdate messages",
           "Description": "Handshake messages, such as KeyUpdate, are always considered as state-advancing, regardless of whether a handshake has been completed or not. As a result, a malicious client can keep sending KeyUpdate messages to force the server to keep performing key derivation operations indefinitely.",
           "Severity": "HIGH",
@@ -11622,6 +11640,7 @@
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2026:66364",
+            "https://access.redhat.com/errata/RHSA-2026:67161",
             "https://access.redhat.com/security/cve/CVE-2026-56862",
             "https://bugzilla.redhat.com/2515815",
             "https://bugzilla.redhat.com/2515820",
@@ -11633,13 +11652,13 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-33818",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56860",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56862",
-            "https://errata.almalinux.org/9/ALSA-2026-66364.html",
+            "https://errata.almalinux.org/8/ALSA-2026-67161.html",
             "https://errata.rockylinux.org/RLSA-2026:66364",
             "https://go.dev/cl/804261",
             "https://go.dev/issue/80528",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://linux.oracle.com/cve/CVE-2026-56862.html",
-            "https://linux.oracle.com/errata/ELSA-2026-66364-0.html",
+            "https://linux.oracle.com/errata/ELSA-2026-67161-0.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-56862",
             "https://pkg.go.dev/vuln/GO-2026-6090",
             "https://www.cve.org/CVERecord?id=CVE-2026-56862"
