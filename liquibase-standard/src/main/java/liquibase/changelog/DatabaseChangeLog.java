@@ -37,6 +37,8 @@ import liquibase.util.FileUtil;
 import liquibase.util.LiquibaseLauncherSettings;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -95,11 +97,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     private final PreconditionContainer preconditionContainer = new GlobalPreconditionContainer();
 
-    @Getter
+    @Getter @Setter
     private String physicalFilePath;
+    @Setter
     private String logicalFilePath;
 
-    @Getter
+    @Getter @Setter
     private ObjectQuotingStrategy objectQuotingStrategy;
 
     @Getter
@@ -118,10 +121,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     @Getter
     private final List<ChangeSet> skippedBecauseOfPreconditionsChangeSets = new ArrayList<>();
 
-    @Getter
+    @Getter  @Setter @Accessors(chain = true)
     private ChangeLogParameters changeLogParameters;
 
-    @Getter
+    @Getter @Setter
     private RuntimeEnvironment runtimeEnvironment;
 
     private DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
@@ -129,7 +132,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     @Getter
     private DatabaseChangeLog parentChangeLog = PARENT_CHANGE_LOG.get();
 
-    @Getter
+    @Setter
+	 @Getter
     private ContextExpression contextFilter;
 
     @Getter
@@ -145,9 +149,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private ParsedNode currentlyLoadedChangeSetNode;
 
     public DatabaseChangeLog() {
+        preconditionContainer.setChangeLog(this);
     }
 
     public DatabaseChangeLog(String physicalFilePath) {
+        this();
         this.physicalFilePath = physicalFilePath;
     }
 
@@ -163,10 +169,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         this.parentChangeLog = parentChangeLog;
     }
 
-    public void setRuntimeEnvironment(RuntimeEnvironment runtimeEnvironment) {
-        this.runtimeEnvironment = runtimeEnvironment;
-    }
-
     @Override
     public PreconditionContainer getPreconditions() {
         return preconditionContainer;
@@ -175,15 +177,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     @Override
     public void setPreconditions(PreconditionContainer precondition) {
         this.preconditionContainer.addNestedPrecondition(precondition);
-    }
-
-
-    public void setChangeLogParameters(ChangeLogParameters changeLogParameters) {
-        this.changeLogParameters = changeLogParameters;
-    }
-
-    public void setPhysicalFilePath(String physicalFilePath) {
-        this.physicalFilePath = physicalFilePath;
     }
 
     public String getRawLogicalFilePath() {
@@ -202,20 +195,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return SLASH_PATTERN.matcher(path).replaceFirst("");
     }
 
-    public void setLogicalFilePath(String logicalFilePath) {
-        this.logicalFilePath = logicalFilePath;
-    }
-
     public String getFilePath() {
         if (logicalFilePath == null) {
             return physicalFilePath;
         } else {
             return getLogicalFilePath();
         }
-    }
-
-    public void setObjectQuotingStrategy(ObjectQuotingStrategy objectQuotingStrategy) {
-        this.objectQuotingStrategy = objectQuotingStrategy;
     }
 
     /**
@@ -234,15 +219,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         setContextFilter(contexts);
     }
 
-    public void setContextFilter(ContextExpression contextFilter) {
-        this.contextFilter = contextFilter;
-    }
-
-    /**
+	/**
      * @deprecated Correct version is {@link #setIncludeLabels(Labels)}. Kept for backwards compatibility.
      */
-
-
     @Deprecated
     public void setIncludeLabels(LabelExpression labels) {
         this.includeLabels = new Labels(labels.toString());
