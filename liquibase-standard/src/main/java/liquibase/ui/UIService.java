@@ -8,12 +8,47 @@ import liquibase.plugin.Plugin;
  */
 public interface UIService extends ExtensibleObject, Plugin {
 
+    /**
+     * Semantic type for a message, allowing UI implementations to apply
+     * presentation-layer treatment (e.g. colour) without the caller needing
+     * to know how or whether the terminal supports it.
+     *
+     * <p>The set of values is intentionally small.  Only distinct visual
+     * outcomes that are broadly useful across all CLI commands are listed here.
+     * A plain/untyped message should use {@link #sendMessage(String)} directly.
+     *
+     * @since 5.2
+     */
+    enum MessageType {
+        /**
+         * A command completed without errors.  Rendered green when the
+         * terminal supports colour and colour output is enabled.
+         */
+        SUCCESS
+    }
+
     int getPriority();
 
     /**
      * Send a "normal" message to the user.
      */
     void sendMessage(String message);
+
+    /**
+     * Send a typed message to the user.
+     *
+     * <p>Implementations that support coloured or otherwise styled output may
+     * use the {@code type} hint to apply the appropriate presentation.  The
+     * default implementation simply delegates to {@link #sendMessage(String)}
+     * so that existing {@link UIService} implementations are unaffected.
+     *
+     * @param message the text to display
+     * @param type    the semantic classification of the message
+     * @since 5.2
+     */
+    default void sendMessage(String message, MessageType type) {
+        sendMessage(message);
+    }
 
     /**
      * Send an "error" message to the user.
