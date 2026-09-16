@@ -454,6 +454,14 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         getDatabase().commit();
 
         if (this.ranChangeSetList != null) {
+            // Clear the tag off whichever entry already carries it, mirroring what the SQL above just did
+            // to the DATABASECHANGELOG table -- otherwise a re-tag leaves two in-memory entries with the
+            // same tag until the cache is next rebuilt (#3763).
+            for (RanChangeSet ranChangeSet : ranChangeSetList) {
+                if (tagString.equals(ranChangeSet.getTag())) {
+                    ranChangeSet.setTag(null);
+                }
+            }
             ranChangeSetList.get(ranChangeSetList.size() - 1).setTag(tagString);
         }
     }
