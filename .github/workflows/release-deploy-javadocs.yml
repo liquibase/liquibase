@@ -104,3 +104,73 @@ jobs:
 
           rm -rf *.jar *.zip
           aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors
+
+      # TECHOPS-1318: javadocs.liquibase.com is served from Cloudflare R2, and the
+      # only thing carrying these files from S3 to R2 was Sippy — a lazy
+      # copy-on-first-read bridge that liquibase-infrastructure#4391 removes. Without
+      # an R2 write here the next release lands in S3 and never reaches the edge,
+      # freezing the published javadocs silently. That is the TECHOPS-805 failure mode.
+      #
+      # Everything R2 comes AFTER the S3 sync above and is continue-on-error, on
+      # purpose. release-published-orchestrator.yml gates deploy-maven on this job's
+      # result, so a hard failure here would skip the Maven Central deployment for the
+      # release. The S3 publish is the path that works today and must not become
+      # dependent on R2 credential availability; a broken R2 leg degrades to stale
+      # javadocs and a warning, never a failed release.
+      - name: Configure AWS credentials for devops vault access
+        id: r2-auth
+        continue-on-error: true
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        with:
+          role-to-assume: ${{ secrets.DEVOPS_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Load Cloudflare R2 credentials from devops vault
+        id: r2-creds
+        continue-on-error: true
+        if: steps.r2-auth.outcome == 'success'
+        # The R2 keys live in /vault/devops; every other secret stays in
+        # /vault/liquibase, read above. Pull ONLY these three and mask them rather
+        # than bulk-importing the vault. The mask escaping mirrors the vault step
+        # above: the runner unescapes %0D, %0A and %25 in command data, so a value
+        # carrying those literals would register a mask that never matches it.
+        run: |
+          set -euo pipefail
+          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/devops --region us-east-1 --query SecretString --output text)
+          for k in CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_R2_ACCESS_KEY_ID CLOUDFLARE_R2_SECRET_ACCESS_KEY; do
+            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
+            v=${v%X}
+            if [ -z "$v" ]; then echo "::error::$k missing from /vault/devops"; exit 1; fi
+            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
+            printf '::add-mask::%s\n' "$e"
+            D="VAULT_EOF_${RANDOM}${RANDOM}"
+            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
+          done
+          unset JSON
+
+      - name: Publish javadocs to Cloudflare R2
+        continue-on-error: true
+        if: steps.r2-creds.outcome == 'success'
+        env:
+          R2_AKID: ${{ env.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          R2_SECRET: ${{ env.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: https://${{ env.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
+        run: |
+          set -euo pipefail
+          if [ -z "${R2_AKID:-}" ] || [ -z "${R2_SECRET:-}" ] || [ "$R2_ENDPOINT" = "https://.r2.cloudflarestorage.com" ]; then
+            echo "::warning::R2 credentials unavailable; javadocs published to S3 only and will not reach the edge."
+            exit 1
+          fi
+          # env -u drops the assumed-role session token: R2 does not recognise it and
+          # SigV4 fails when it is present. --checksum-algorithm CRC32 because the
+          # newer AWS CLI default checksum trailer is not supported by R2.
+          env -u AWS_SESSION_TOKEN \
+            AWS_ACCESS_KEY_ID="$R2_AKID" AWS_SECRET_ACCESS_KEY="$R2_SECRET" \
+            aws s3 sync . "s3://javadocs-liquibase-com" \
+              --endpoint-url "$R2_ENDPOINT" \
+              --checksum-algorithm CRC32 \
+              --only-show-errors
+
+      - name: Warn if the R2 publish did not run
+        if: steps.r2-creds.outcome != 'success' || steps.r2-auth.outcome != 'success'
+        run: echo "::warning::javadocs were published to S3 but NOT to Cloudflare R2. javadocs.liquibase.com will serve the previous release until this is re-run."
