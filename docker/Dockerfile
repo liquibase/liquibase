@@ -32,7 +32,11 @@ LABEL org.opencontainers.image.version="${LIQUIBASE_VERSION}"
 LABEL org.opencontainers.image.documentation="https://docs.liquibase.com"
 
 # Download and Install lpm
+# `apt-get upgrade` first: the eclipse-temurin:21-jre-noble tag is rebuilt on Adoptium's
+# cadence, so it ships Ubuntu packages whose fixes are already in noble-security (5.0.4
+# went out with vulnerable perl and openssl). Mirrors the alpine image. [TECHOPS-1244]
 RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -yqq upgrade && \
     apt-get -yqq install unzip --no-install-recommends && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir /liquibase/bin && \
