@@ -39,7 +39,7 @@ permissions:
 
 jobs:
   deploy-javadocs:
-    name: Upload Javadocs to S3 and R2
+    name: Upload Javadocs to S3
     runs-on: ubuntu-22.04
     if: ${{ inputs.dry_run == false }}
     # `approved` is `workflow_call`-only, so a direct dispatch cannot claim it and still meets the
@@ -54,37 +54,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ inputs.tag }}
         run: gh release download "$TAG" --repo liquibase/liquibase --pattern "liquibase-additional*.zip" --dir "."
-
-      - name: Configure AWS credentials for devops vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
-        with:
-          role-to-assume: ${{ secrets.DEVOPS_VAULT_OIDC_ROLE_ARN }}
-          aws-region: us-east-1
-
-      - name: Load Cloudflare R2 credentials from devops vault
-        # TECHOPS-1318: javadocs.liquibase.com is served from Cloudflare R2. Until now
-        # the only thing carrying these files from S3 to R2 was Sippy, a lazy
-        # copy-on-first-read bridge that TECHOPS-923 removes. Without an R2 write in
-        # this workflow the next release would land in S3 and never reach the edge —
-        # the TECHOPS-805 failure mode. The sync itself is at the end of the upload
-        # step below.
-        #
-        # The R2 keys live in /vault/devops (shared source of truth); every other
-        # secret stays in /vault/liquibase, read further down. Pull ONLY these three
-        # and mask them, rather than bulk-importing the DevOps vault into this job.
-        # This runs first because each configure-aws-credentials call replaces the
-        # ambient credentials. Mirrors liquibase-pro publish-to-s3.yml.
-        run: |
-          set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/devops --region us-east-1 --query SecretString --output text)
-          for k in CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_R2_ACCESS_KEY_ID CLOUDFLARE_R2_SECRET_ACCESS_KEY; do
-            v=$(printf '%s' "$JSON" | jq -r --arg k "$k" '.[$k] // ""')
-            if [ -z "$v" ] || [ "$v" = "null" ]; then echo "::error::$k missing from /vault/devops"; exit 1; fi
-            echo "::add-mask::$v"
-            echo "$k=$v" >> "$GITHUB_ENV"
-          done
-          echo "Loaded CLOUDFLARE_ACCOUNT_ID + R2 access/secret keys from /vault/devops."
-          unset JSON
 
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
@@ -121,15 +90,9 @@ jobs:
           role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
           aws-region: us-east-1
 
-      - name: Unpack javadoc files and upload to S3 and R2
-        # unzip archives, create directory for each jar, and extract jar contents to directory.  Then delete the jar and zip files.  Then upload to s3 and r2.
-        env:
-          R2_AKID: ${{ env.CLOUDFLARE_R2_ACCESS_KEY_ID }}
-          R2_SECRET: ${{ env.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
-          R2_ENDPOINT: https://${{ env.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
+      - name: Unpack javadoc files and upload to s3
+        # unzip archives, create directory for each jar, and extract jar contents to directory.  Then delete the jar and zip files.  Then upload to s3.
         run: |
-          set -euo pipefail
-
           unzip -j '*.zip' '*javadoc*.jar'
 
           for jar in *liquibase*.jar; do
@@ -140,15 +103,62 @@ jobs:
           done
 
           rm -rf *.jar *.zip
-
-          # S3 stays for now. The origin bucket retires separately under TECHOPS-876,
-          # and keeping this write means javadocs publish correctly whether or not the
-          # Sippy removal has landed yet. Drop this line together with the bucket.
           aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors
 
-          # R2 is what javadocs.liquibase.com actually serves.
+      # TECHOPS-1318: javadocs.liquibase.com is served from Cloudflare R2, and the
+      # only thing carrying these files from S3 to R2 was Sippy — a lazy
+      # copy-on-first-read bridge that liquibase-infrastructure#4391 removes. Without
+      # an R2 write here the next release lands in S3 and never reaches the edge,
+      # freezing the published javadocs silently. That is the TECHOPS-805 failure mode.
+      #
+      # Everything R2 comes AFTER the S3 sync above and is continue-on-error, on
+      # purpose. release-published-orchestrator.yml gates deploy-maven on this job's
+      # result, so a hard failure here would skip the Maven Central deployment for the
+      # release. The S3 publish is the path that works today and must not become
+      # dependent on R2 credential availability; a broken R2 leg degrades to stale
+      # javadocs and a warning, never a failed release.
+      - name: Configure AWS credentials for devops vault access
+        id: r2-auth
+        continue-on-error: true
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        with:
+          role-to-assume: ${{ secrets.DEVOPS_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Load Cloudflare R2 credentials from devops vault
+        id: r2-creds
+        continue-on-error: true
+        if: steps.r2-auth.outcome == 'success'
+        # The R2 keys live in /vault/devops; every other secret stays in
+        # /vault/liquibase, read above. Pull ONLY these three and mask them rather
+        # than bulk-importing the vault. The mask escaping mirrors the vault step
+        # above: the runner unescapes %0D, %0A and %25 in command data, so a value
+        # carrying those literals would register a mask that never matches it.
+        run: |
+          set -euo pipefail
+          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/devops --region us-east-1 --query SecretString --output text)
+          for k in CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_R2_ACCESS_KEY_ID CLOUDFLARE_R2_SECRET_ACCESS_KEY; do
+            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
+            v=${v%X}
+            if [ -z "$v" ]; then echo "::error::$k missing from /vault/devops"; exit 1; fi
+            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
+            printf '::add-mask::%s\n' "$e"
+            D="VAULT_EOF_${RANDOM}${RANDOM}"
+            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
+          done
+          unset JSON
+
+      - name: Publish javadocs to Cloudflare R2
+        continue-on-error: true
+        if: steps.r2-creds.outcome == 'success'
+        env:
+          R2_AKID: ${{ env.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          R2_SECRET: ${{ env.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: https://${{ env.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
+        run: |
+          set -euo pipefail
           if [ -z "${R2_AKID:-}" ] || [ -z "${R2_SECRET:-}" ] || [ "$R2_ENDPOINT" = "https://.r2.cloudflarestorage.com" ]; then
-            echo "::error::CLOUDFLARE_R2_ACCESS_KEY_ID / CLOUDFLARE_R2_SECRET_ACCESS_KEY / CLOUDFLARE_ACCOUNT_ID missing from /vault/devops — cannot publish to R2."
+            echo "::warning::R2 credentials unavailable; javadocs published to S3 only and will not reach the edge."
             exit 1
           fi
           # env -u drops the assumed-role session token: R2 does not recognise it and
@@ -160,3 +170,7 @@ jobs:
               --endpoint-url "$R2_ENDPOINT" \
               --checksum-algorithm CRC32 \
               --only-show-errors
+
+      - name: Warn if the R2 publish did not run
+        if: steps.r2-creds.outcome != 'success' || steps.r2-auth.outcome != 'success'
+        run: echo "::warning::javadocs were published to S3 but NOT to Cloudflare R2. javadocs.liquibase.com will serve the previous release until this is re-run."
