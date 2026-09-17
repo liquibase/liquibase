@@ -68,11 +68,16 @@ jobs:
       - name: Get secrets from vault
         # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
         # parse-json-secrets: true put every credential in /vault/liquibase into this
-        # job's environment; read only the prod role ARN and the WPEngine SFTP keys.
+        # job's environment; read only the WPEngine SFTP keys.
+        # TECHOPS-1320: this used to also read AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC to
+        # assume a role for writing the xsds to an S3 bucket. That S3 write was a vestigial
+        # double-write: WPEngine is what customers actually read, the bucket was not publicly
+        # readable, and this job already SFTPs the same files to WPEngine below. Removed
+        # rather than migrated to R2; see the PR description for the evidence.
         run: |
           set -euo pipefail
           JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
-          for k in AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC WPENGINE_SFTP_HOST WPENGINE_SFTP_HOST_KEY WPENGINE_SFTP_PASSWORD WPENGINE_SFTP_PORT WPENGINE_SFTP_USER; do
+          for k in WPENGINE_SFTP_HOST WPENGINE_SFTP_HOST_KEY WPENGINE_SFTP_PASSWORD WPENGINE_SFTP_PORT WPENGINE_SFTP_USER; do
             # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
             # which would silently alter a value that legitimately ends in one.
             v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
@@ -87,30 +92,6 @@ jobs:
             { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
           done
           unset JSON
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
-        with:
-          role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
-          aws-region: us-east-1
-
-      - name: Upload to s3
-        # aws s3 sync syncs directories and S3 prefixes.
-        run: |
-          aws s3 sync liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
-
-      - name: Index.htm file upload
-        # get the major.minor xsd version. grab the index.htm from s3, add the new verison of xsd and sync with the s3 again
-        run: |
-          version=${{ inputs.version }}
-          arr=(${version//./ })
-          xsd_version=${arr[0]}"."${arr[1]}
-          mkdir index-file
-          aws s3 cp s3://liquibaseorg-origin/xml/ns/dbchangelog/index.htm index-file
-          if ! grep -q ${xsd_version} index-file/index.htm ; then
-            sed -ie "s/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${xsd_version}.xsd\">dbchangelog-${xsd_version}.xsd<\/a><\/li>\n<\/ul>/" index-file/index.htm
-            aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
-          fi
 
       # WPEngine only accepts files via SFTP, so S3-direct is not an option here.
       # Replaced third-party SFTP action with sshpass + sftp CLI to reduce supply chain risk.
@@ -135,6 +116,30 @@ jobs:
           put -r liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/* /xml/ns/dbchangelog/
           bye
           SFTP_EOF
+
+      - name: Prepare updated index.htm
+        # get the major.minor xsd version, fetch the live index.htm from WPEngine (the
+        # actual origin customers read) and add the new xsd version to it if not already
+        # listed. TECHOPS-1320: this used to round-trip index.htm through the old S3
+        # bucket, which nothing read; fetching straight from WPEngine over SFTP removes
+        # that dead hop and reads the one copy that is actually live.
+        env:
+          SSHPASS: ${{ env.WPENGINE_SFTP_PASSWORD }}
+          SFTP_USER: ${{ env.WPENGINE_SFTP_USER }}
+          SFTP_HOST: ${{ env.WPENGINE_SFTP_HOST }}
+          SFTP_PORT: ${{ env.WPENGINE_SFTP_PORT }}
+        run: |
+          version=${{ inputs.version }}
+          arr=(${version//./ })
+          xsd_version=${arr[0]}"."${arr[1]}
+          mkdir index-file
+          sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=yes "$SFTP_USER@$SFTP_HOST" <<'SFTP_EOF'
+          get /xml/ns/dbchangelog/index.htm index-file/index.htm
+          bye
+          SFTP_EOF
+          if ! grep -q ${xsd_version} index-file/index.htm ; then
+            sed -ie "s/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${xsd_version}.xsd\">dbchangelog-${xsd_version}.xsd<\/a><\/li>\n<\/ul>/" index-file/index.htm
+          fi
 
       - name: Liquibase index.htm SFTP upload
         env:
