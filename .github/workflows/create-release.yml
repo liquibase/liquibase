@@ -13,9 +13,6 @@ on:
         description: "Branch to release (Defaults to main)"
         required: false
         default: "main"
-      runId:
-        description: "RunId of liquibase/liquibase artifacts to attach"
-        required: true
       standalone_zip:
         description: "Flag to indicate if the workflow is triggered to create a standalone zip"
         required: false
@@ -37,10 +34,6 @@ on:
         required: false
         default: "main"
         type: string
-      runId:
-        description: "RunId of liquibase/liquibase artifacts to attach"
-        required: true
-        type: string
       standalone_zip:
         description: "Flag to indicate if the workflow is triggered to create a standalone zip"
         required: true
@@ -60,40 +53,186 @@ on:
         value: ${{ jobs.build-installers.outputs.dry_run_tar_gz_url }}
 
 jobs:
+  # [TECHOPS-1223] Trust flows commit -> build -> tag, never tag -> artifact. This job is
+  # the resolution and admission gate: it turns `inputs.branch` into an immutable 40-hex
+  # SHA, validates `inputs.version`, and rejects a pre-existing tag before any build minute
+  # is spent. Every downstream job checks out this SHA; none of them re-resolves a ref.
   setup:
     name: Setup
     runs-on: ubuntu-22.04
+    permissions:
+      contents: read              # workflow-level is `permissions: {}`; gh api needs this
     outputs:
       version: ${{ inputs.version }}
-      branch: ${{ inputs.branch }}
-      runId: ${{ inputs.runId }}
-      uber_jar_runId: ${{ steps.get_run_id.outputs.run_id }}
+      sha: ${{ steps.resolve.outputs.sha }}
+      build_timestamp: ${{ steps.resolve.outputs.build_timestamp }}
     steps:
-      - run: |
-          echo "Creating version ${{ inputs.version }} from ${{ inputs.branch }} with artifacts from build ${{ inputs.runId }} "
+      - id: resolve
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          REF: ${{ inputs.branch }}
+          VERSION: ${{ inputs.version }}
+          # This workflow's own display name, so the gate below can exclude its own runs.
+          SELF: ${{ github.workflow }}
+        run: |
+          set -euo pipefail
+          # Injection sink: REF/VERSION are dispatch inputs. Passed via env, never
+          # interpolated into the script body, and VERSION is charset-validated
+          # because it becomes a git ref and a filename below.
+          [[ "$VERSION" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::bad version"; exit 1; }
+          # The charset alone still admits refs git rejects, `1..0` and names ending in
+          # `.lock` among them. The tag is not created until the end of the run, so without
+          # this the pipeline would build and sign before discovering the name is unusable.
+          git check-ref-format "refs/tags/v$VERSION" || {
+            echo "::error::v$VERSION is not a valid tag name"; exit 1; }
 
-  # owasp-scanner:
-  #   needs: [setup]
-  #   uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
-  #   with:
-  #     branch: ${{ needs.setup.outputs.branch }}
-  #   secrets: inherit
+          sha=$(gh api "repos/$REPO/commits/$REF" --jq .sha)
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::$REF did not resolve"; exit 1; }
+          if gh api "repos/$REPO/git/ref/tags/v$VERSION" >/dev/null 2>&1; then
+            echo "::error::tag v$VERSION already exists"; exit 1
+          fi
+
+          # Nothing else asserts the commit is releasable, and the build runs -DskipTests,
+          # so without this a red commit ships. A commit with no completed run is refused
+          # as well: "never tested" and "tested green" must not look the same here.
+          #
+          # Judged on workflow runs rather than check runs. Reading check-runs was wrong
+          # three separate ways, all found in review:
+          #   - It is paginated and main commits routinely carry 187 to 830 check runs, so
+          #     one page of 100 reported "none failing" on 7a9a3413, which had three.
+          #   - Check runs accumulate across attempts, so a job that failed and was then
+          #     re-run green leaves its failure in the list forever.
+          #   - Scheduled image scans attach to the commit hours later. They fail on the
+          #     CVE feed moving, which says nothing about whether this commit builds.
+          # So: drop `schedule` and `dynamic` events, drop this workflow's own runs,
+          # keep only the newest run per workflow, and require all finished and none failing.
+          #
+          # Dropping SELF is load-bearing, not tidiness. This workflow is dispatched with
+          # `--ref main` and `branch: main` (that is exactly what dry-run-release.yml does),
+          # so its own in-flight run carries the very head_sha being judged and reports
+          # `conclusion: null`. Without this the gate sees itself as "still running" and
+          # refuses every single time, which deadlocks the weekly dry run. Excluding the
+          # release workflow is also right on its own terms: a previous release attempt on
+          # this commit says nothing about whether the commit builds.
+          runs=$(gh api --paginate "repos/$REPO/actions/runs?head_sha=$sha&per_page=100" \
+                   --jq '.workflow_runs[] | {name, event, conclusion, created_at}' | jq -s '.')
+          verdict=$(jq -r --arg self "$SELF" '
+            [ .[] | select(.event != "schedule" and .event != "dynamic" and .name != $self) ]
+            | group_by(.name) | map(sort_by(.created_at) | last)
+            | { bad:     [ .[] | select(.conclusion=="failure" or .conclusion=="timed_out" or .conclusion=="cancelled") | .name ],
+                running: [ .[] | select(.conclusion == null) | .name ],
+                ok:      [ .[] | select(.conclusion=="success") ] | length }' <<<"$runs")
+          bad=$(jq -r '.bad | join(", ")' <<<"$verdict")
+          running=$(jq -r '.running | join(", ")' <<<"$verdict")
+          ok=$(jq -r '.ok' <<<"$verdict")
+          [ -z "$bad" ] || { echo "::error::$sha has failing workflows: $bad"; exit 1; }
+          # Still in flight is "not yet red", which is not the same as green.
+          [ -z "$running" ] || { echo "::error::$sha still has workflows running: $running"; exit 1; }
+          [ "$ok" -gt 0 ] || { echo "::error::$sha has no successful workflow runs"; exit 1; }
+          echo "$sha: $ok successful workflows, none failing or in flight"
+
+          # Taken from the commit rather than the clock, so re-running the same tag yields
+          # the same value. Byte-for-byte reproducibility additionally needs
+          # project.build.outputTimestamp in the poms, which is a separate change.
+          committed=$(gh api "repos/$REPO/commits/$sha" --jq .commit.committer.date)
+          echo "build_timestamp=$(date -u -d "$committed" +'%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_OUTPUT"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
 
   reversion:
     needs: [setup]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
+    # [TECHOPS-1223] Same expression release-deploy-maven.yml uses, but keyed on dry_run
+    # instead of approved: this job is reached directly through workflow_dispatch (via
+    # dispatch-and-wait), never through this repo's own workflow_call chain, so dry_run
+    # is the input that actually distinguishes a rehearsal from a real release here.
+    # `release-publish` has 0 reviewers so the weekly cron is not blocked; `release` has
+    # 5. See .github/workflows/README.md for the broad-role OIDC trust this depends on.
+    environment:
+      # `release-publish` has 0 reviewers, which the weekly rehearsal needs so the cron
+      # does not hang. It is reachable only for a dry run that is BOTH building `main` and
+      # running `main`'s own workflow file.
+      #
+      # `inputs.branch` alone was not enough. The YAML executing here comes from
+      # `github.ref`, set by the dispatch `--ref`, while the conditional keyed only on
+      # `inputs.branch`. Modified workflow code on any branch could therefore reach the
+      # 0-reviewer environment with the vault and the GPG key, and `release-publish` has
+      # `can_admins_bypass: true`, so an admin was not stopped by the branch policy either.
+      # All 7 deployments in its history came from a feature branch. Requiring `github.ref`
+      # as well makes the sentence above true for everyone, admins included.
+      name: ${{ (inputs.dry_run && inputs.branch == 'main' && github.ref == 'refs/heads/main') && 'release-publish' || 'release' }}
     permissions:
-      # contents: push the release tag; actions: read the source run's artifacts; id-token: AWS OIDC for vault.
-      contents: write
-      actions: read
+      # contents: read for checkout; packages: read for the GitHub Packages Maven repo
+      # (mirrors ci-test.yml); id-token: AWS OIDC for vault.
+      contents: read
+      packages: read
       id-token: write
     steps:
-
-      # Credentials stay persisted here: "Set repository tags" below pushes the tag over this remote.
+      # No git credential is persisted here: the tag is created through the API, below,
+      # with a token minted after the build finishes. [TECHOPS-1223]
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: true
+          ref: ${{ needs.setup.outputs.sha }}
+          persist-credentials: false
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+          server-id: liquibase
+
+      - name: Build release distribution
+        # Fully-qualified goal, not the `versions:set` prefix: resolving a plugin prefix
+        # makes Maven fetch org/codehaus/mojo/maven-metadata.xml from Central on every run,
+        # and a 429 there fails the build outright. [TECHOPS-1222]
+        #
+        # -pl is liquibase-dist,liquibase-maven-plugin -am: liquibase-extension-testing is
+        # dropped because its artifacts are never a release asset, and source:jar is dropped
+        # because maven-source-plugin is already bound to package for these modules and
+        # `clean` would delete a standalone source:jar output anyway.
+        env:
+          GITHUB_TOKEN: ${{ github.token }}        # setup-java server-id credential
+          VERSION: ${{ needs.setup.outputs.version }}
+          SHA: ${{ needs.setup.outputs.sha }}
+          REF: ${{ inputs.branch }}
+          RUN_NUMBER: ${{ github.run_number }}
+          BUILD_TS: ${{ needs.setup.outputs.build_timestamp }}
+        run: |
+          set -euo pipefail
+          ./mvnw -B org.codehaus.mojo:versions-maven-plugin:2.21.0:set -DnewVersion="$VERSION"
+          ./mvnw -B -DskipTests \
+            -Dbuild.repository.owner=liquibase -Dbuild.repository.name=liquibase \
+            -Dbuild.branch="$REF" -Dbuild.number="$RUN_NUMBER" \
+            -Dbuild.commit="$SHA" -Dbuild.version="$VERSION" \
+            "-Dbuild.timestamp=$BUILD_TS" \
+            -pl liquibase-dist,liquibase-maven-plugin -am clean package
+
+      - name: Stage release artifacts
+        # No credential is involved in staging, so it runs immediately after the build
+        # rather than being interleaved with the vault reads below. re-version/final holds
+        # the three primary release assets; artifacts-additional holds everything that
+        # ships inside the additional zip, signed in the next step.
+        env:
+          VERSION: ${{ needs.setup.outputs.version }}
+        run: |
+          set -euo pipefail
+          mkdir -p re-version/final artifacts-additional
+
+          cp liquibase-dist/target/liquibase-$VERSION.tar.gz re-version/final/
+          cp liquibase-dist/target/liquibase-$VERSION.zip re-version/final/
+          cp liquibase-core/target/liquibase-core-$VERSION.jar re-version/final/
+
+          cp liquibase-core/target/liquibase-core-$VERSION-sources.jar artifacts-additional/
+          cp target/liquibase-$VERSION-javadoc.jar artifacts-additional/liquibase-core-$VERSION-javadoc.jar
+          cp liquibase-maven-plugin/target/liquibase-maven-plugin-$VERSION.jar artifacts-additional/
+          cp liquibase-maven-plugin/target/liquibase-maven-plugin-$VERSION-sources.jar artifacts-additional/
+          cp liquibase-maven-plugin/target/liquibase-maven-plugin-$VERSION-javadoc.jar artifacts-additional/
+          cp liquibase-cli/target/liquibase-cli-$VERSION.jar artifacts-additional/
+          cp liquibase-cli/target/liquibase-cli-$VERSION-sources.jar artifacts-additional/
+          cp liquibase-cli/target/liquibase-cli-$VERSION-javadoc.jar artifacts-additional/
 
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
@@ -104,13 +243,11 @@ jobs:
       - name: Get secrets from vault
         # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
         # parse-json-secrets: true put every credential in /vault/liquibase into this
-        # job's environment; read only the three keys this job uses. This also retires
-        # the TECHOPS-1048 workaround that blanked the KeyLocker keys afterwards: they
-        # are never loaded here now, and nothing in `reversion` signs anything.
+        # job's environment; read only the two GPG keys this step signs with.
         run: |
           set -euo pipefail
           JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
-          for k in GPG_SECRET GPG_PASSPHRASE LIQUIBOT_PAT_GPM_ACCESS; do
+          for k in GPG_SECRET GPG_PASSPHRASE; do
             # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
             # which would silently alter a value that legitimately ends in one.
             v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
@@ -126,20 +263,6 @@ jobs:
           done
           unset JSON
 
-      - name: Download liquibase-artifacts
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: liquibase-artifacts
-          path: download/liquibase-artifacts
-          run-id: ${{ needs.setup.outputs.runId }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Get Current Run ID
-        id: get_run_id
-        run: |
-          run_id=${{ github.run_id }}
-          echo "uber_jar_runId=${run_id}" >> $GITHUB_OUTPUT
-
       - name: Convert escaped newlines and set GPG key
         run: |
           GPG_KEY_CONTENT="$(printf '%b' "${{ env.GPG_SECRET }}")"
@@ -154,52 +277,26 @@ jobs:
           GPG_KEY_CONTENT="${GPG_KEY_CONTENT//$'\n'/%0A}"
           echo "::add-mask::${GPG_KEY_CONTENT}"
 
-      - name: Set up JDK
+      - name: Set up JDK for GPG
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
-          java-version: "8"
+          java-version: '21'
           distribution: "temurin"
           gpg-private-key: ${{ env.GPG_KEY_CONTENT }}
           gpg-passphrase: GPG_PASSPHRASE
         env:
           GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
 
-
-      - name: Configure Maven settings
-        run: |
-          mkdir -p ~/.m2
-          cp .github/maven/settings-releases.xml ~/.m2/settings.xml
-          echo "MAVEN_GPM_PASSWORD=${{ env.LIQUIBOT_PAT_GPM_ACCESS }}" >> $GITHUB_ENV
-
-      - name: Re-version Artifacts
+      - name: Sign additional artifacts
+        # Runs from the checked-out tree: sign-artifacts.sh is a tracked file at the pinned
+        # SHA, not a script fetched over the network. [TECHOPS-1223]
         env:
           GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
+          VERSION: ${{ needs.setup.outputs.version }}
         run: |
-          scripts_branch=${{ github.ref }}
-          mkdir -p $PWD/.github/util/
-          # Download a script (re-version.sh) from a URL and save it to the specified directory
-          curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
-
-          # Download another script (sign-artifacts.sh) from a URL and save it to the specified directory
-          curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/sign-artifacts.sh
-          curl -o $PWD/.github/util/ManifestReversion.java https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/ManifestReversion.java
-          chmod +x $PWD/.github/util/re-version.sh
-          chmod +x $PWD/.github/util/ManifestReversion.java
-          chmod +x $PWD/.github/util/sign-artifacts.sh
-          $PWD/.github/util/re-version.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}" "${{ needs.setup.outputs.branch }}"
-
-          # Execute the sign-artifacts.sh script with specific arguments
-          $PWD/.github/util/sign-artifacts.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}" "${{ needs.setup.outputs.branch }}"
-
-          $PWD/.github/util/sign-artifacts.sh re-version/out
-
-          # Move files to a specific directory
-          mkdir re-version/final
-          mv re-version/out/liquibase-core-${{ needs.setup.outputs.version }}.jar re-version/final
-          mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
-          mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
-          (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
-          mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
+          set -euo pipefail
+          bash .github/util/sign-artifacts.sh artifacts-additional
+          (cd artifacts-additional && zip -q ../re-version/final/liquibase-additional-$VERSION.zip *)
 
       - name: Upload Completed Artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -208,16 +305,24 @@ jobs:
           path: re-version/final
           retention-days: 1
 
-      - name: Set repository tags
-        if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
-        run: |
-          git tag -f v${{ needs.setup.outputs.version }}
-          git push -f origin v${{ needs.setup.outputs.version }}
-
   build-installers:
     needs: [setup, reversion]
     name: Build Installers
     runs-on: ubuntu-22.04
+    # [TECHOPS-1223] See the comment on `reversion`, above.
+    environment:
+      # `release-publish` has 0 reviewers, which the weekly rehearsal needs so the cron
+      # does not hang. It is reachable only for a dry run that is BOTH building `main` and
+      # running `main`'s own workflow file.
+      #
+      # `inputs.branch` alone was not enough. The YAML executing here comes from
+      # `github.ref`, set by the dispatch `--ref`, while the conditional keyed only on
+      # `inputs.branch`. Modified workflow code on any branch could therefore reach the
+      # 0-reviewer environment with the vault and the GPG key, and `release-publish` has
+      # `can_admins_bypass: true`, so an admin was not stopped by the branch policy either.
+      # All 7 deployments in its history came from a feature branch. Requiring `github.ref`
+      # as well makes the sentence above true for everyone, admins included.
+      name: ${{ (inputs.dry_run && inputs.branch == 'main' && github.ref == 'refs/heads/main') && 'release-publish' || 'release' }}
     permissions:
       # contents: attach assets to the draft release; id-token: AWS OIDC for vault.
       contents: write
@@ -227,6 +332,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ needs.setup.outputs.sha }}
           # This job runs no networked git command, so the token does not need to sit in .git/config.
           persist-credentials: false
 
@@ -290,7 +396,7 @@ jobs:
           name: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
 
-       # https://github.com/actions/setup-java/tree/v4/?tab=readme-ov-file#install-multiple-jdks   
+       # https://github.com/actions/setup-java/tree/v4/?tab=readme-ov-file#install-multiple-jdks
       - name: Set up JDK for GPG
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
@@ -348,20 +454,20 @@ jobs:
           ANDROID_SDK_ROOT=$HOME/android-sdk
           mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
           cd "$ANDROID_SDK_ROOT/cmdline-tools"
-          
+
           wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
           unzip tools.zip -d temp
           rm tools.zip
           mv temp/cmdline-tools "$ANDROID_SDK_ROOT/cmdline-tools/latest"
-      
+
           echo "y" | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
             --sdk_root="$ANDROID_SDK_ROOT" \
             "platform-tools" "build-tools;30.0.2"
-      
+
           echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
           echo "$ANDROID_SDK_ROOT/build-tools/30.0.2" >> $GITHUB_PATH
-          
+
       - name: Install DigiCert KeyLocker Client Tools
         if: ${{ inputs.dry_run == false }}
         uses: digicert/code-signing-software-trust-action@fae23a455ba4bde62b64fd7cb2f81ade788f5a95 # v1.2.1
@@ -402,7 +508,7 @@ jobs:
       - name: Verify Windows Installer Signature
         if: ${{ inputs.dry_run == false }}
         run: osslsigncode verify -CAfile /etc/ssl/certs/ca-certificates.crt -in "$INSTALLER_PATH"
-        
+
       - name: Re-version Installers
         env:
           GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
@@ -410,7 +516,7 @@ jobs:
           version="${{ needs.setup.outputs.version }}"
 
           ##Sign Files
-          $PWD/.github/util/sign-artifacts.sh re-version/final
+          bash .github/util/sign-artifacts.sh re-version/final
 
           (cd re-version/final && zip liquibase-additional-$version.zip *.asc *.md5 *.sha1 *.sha256)
           rm re-version/final/*.asc
@@ -418,21 +524,15 @@ jobs:
           rm re-version/final/*.sha1
           rm re-version/final/*.sha256
 
-        # Check if the tag already exists in OSS repository, if it does, exit with error. This is to prevent the artifacts from being attached to the already released tag.
-      - name: Check OSS release tag existence, if tag exists, exit with error
-        run: |
-          tag="v${{ needs.setup.outputs.version }}"
-          if git show-ref --tags --quiet --verify -- "refs/tags/$tag"
-          then
-              echo "Tag $tag already exists"
-              exit 1
-          fi
-
       - name: Attach Files to Draft Release
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
+          # `draft: true` creates no git ref, so the tag is not made here. The commitish
+          # still decides which base `generate_release_notes` diffs against, which without
+          # it is the default branch rather than the commit these assets were built from.
+          target_commitish: ${{ needs.setup.outputs.sha }}
           fail_on_unmatched_files: true
           body: Liquibase ${{ needs.setup.outputs.version }}
           generate_release_notes: true
@@ -447,6 +547,10 @@ jobs:
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
+          # `draft: true` creates no git ref, so the tag is not made here. The commitish
+          # still decides which base `generate_release_notes` diffs against, which without
+          # it is the default branch rather than the commit these assets were built from.
+          target_commitish: ${{ needs.setup.outputs.sha }}
           fail_on_unmatched_files: true
           body: Liquibase ${{ needs.setup.outputs.version }} (Dry-Run)
           generate_release_notes: true
@@ -462,3 +566,95 @@ jobs:
           name: liquibase-installers-${{ needs.setup.outputs.version }}
           path: re-version/final/*
 
+  tag-release:
+    name: Create release tag
+    needs: [setup, reversion, build-installers]
+    # The tag is the last thing a release does. Creating it inside `reversion`, before the
+    # installers existed, left `v$VERSION` pointing at a commit with no release whenever
+    # `build-installers` failed, and because the API call is deliberately non-forcing the
+    # retry then died on setup's pre-existing-tag check instead of recovering the way
+    # `git push -f` used to. Nothing is tagged now until every asset is built. [TECHOPS-1223]
+    if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
+    runs-on: ubuntu-22.04
+    # `release`, not `release-publish`. This is the one irreversible step in the pipeline
+    # and the only job holding an App token with `contents: write`, so it belongs behind the
+    # 5 reviewers rather than behind an environment with none.
+    #
+    # It costs no extra prompt: approval is per environment per run, not per job (the
+    # pending-deployments API takes `environment_ids` and returns one object per
+    # environment), and `reversion` and `build-installers` are already on `release` for a
+    # real release. Established in TECHOPS-1214.
+    environment:
+      name: release
+    permissions:
+      id-token: write
+    steps:
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get App credentials from vault
+        id: app-vault
+        run: |
+          set -euo pipefail
+          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
+          for k in LIQUIBASE_GITHUB_APP_ID LIQUIBASE_GITHUB_APP_PRIVATE_KEY; do
+            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
+            # which would silently alter a value that legitimately ends in one.
+            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
+            v=${v%X}
+            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
+            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
+            # those literals registers a mask that never matches it; % is escaped first
+            # so the escapes the next two produce are not escaped again.
+            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
+            printf '::add-mask::%s\n' "$e"
+            D="VAULT_EOF_${RANDOM}${RANDOM}"
+            # Step outputs, not GITHUB_ENV: only the token step needs these, and GITHUB_ENV
+            # would hand them to every later step in the job.
+            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_OUTPUT"
+          done
+          unset JSON
+
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ steps.app-vault.outputs.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ steps.app-vault.outputs.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          # Without `repositories` the token would cover every repo in the org, since the
+          # app is installed on all of them.
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write        # only scope; no permission-actions
+
+      - name: Create release tag
+        # Atomic and non-forcing: POST /git/refs has no `force` parameter, so it 422s on a
+        # pre-existing ref instead of silently repointing an already-released tag. A re-run
+        # against the same version therefore fails fast here rather than repointing history.
+        env:
+          GH_TOKEN: ${{ steps.get-token.outputs.token }}
+          REPO: ${{ github.repository }}
+          VERSION: ${{ needs.setup.outputs.version }}
+          SHA: ${{ needs.setup.outputs.sha }}
+        run: |
+          set -euo pipefail
+          gh api --method POST "repos/$REPO/git/refs" \
+            -f ref="refs/tags/v$VERSION" -f sha="$SHA"
+
+      - name: Verify the tag points at the built commit
+        # No dry run reaches this job, so a real release is the first execution of every
+        # step above. Reading the tag back turns a silent mistake into a failed release.
+        env:
+          GH_TOKEN: ${{ steps.get-token.outputs.token }}
+          REPO: ${{ github.repository }}
+          VERSION: ${{ needs.setup.outputs.version }}
+          SHA: ${{ needs.setup.outputs.sha }}
+        run: |
+          set -euo pipefail
+          got=$(gh api "repos/$REPO/git/ref/tags/v$VERSION" --jq .object.sha)
+          [ "$got" = "$SHA" ] || {
+            echo "::error::tag v$VERSION points at $got, expected $SHA"; exit 1; }
+          echo "v$VERSION -> $SHA"

@@ -117,7 +117,10 @@ jobs:
       - name: Build distribution (main-SNAPSHOT)
         run: |
           set -euo pipefail
-          ./mvnw -B versions:set -DnewVersion=main-SNAPSHOT
+          # Fully-qualified goal, not the `versions:set` prefix: resolving a plugin prefix
+          # makes Maven fetch org/codehaus/mojo/maven-metadata.xml from Central on every run,
+          # and a 429 there fails the build outright (main run 33716558208). [TECHOPS-1222]
+          ./mvnw -B org.codehaus.mojo:versions-maven-plugin:2.21.0:set -DnewVersion=main-SNAPSHOT
 
           # keep temp-artifact's tested 0-SNAPSHOT jars; the build below cleans these modules
           mkdir -p prebuilt
@@ -170,18 +173,39 @@ jobs:
           path: artifacts-named/*
 
       - name: Publish main-SNAPSHOT and <sha>-SNAPSHOT to GitHub Packages
+        # Not on push. TECHOPS-1224 AC1 allows publishing only from the nightly schedule,
+        # a maintainer dispatch, or the gated release pipeline, and a package per push is
+        # none of those. Traced every consumer first: build-logic's `os-extension-test`
+        # reads `main-SNAPSHOT` only behind `if: inputs.nightly`, liquibase-neo4j reads it
+        # from a nightly workflow, liquibase-test-harness resolves run artifacts rather
+        # than packages, and liquibase-pro renames locally with `versions:set` instead of
+        # downloading. A daily snapshot is therefore enough for everyone who actually
+        # consumes one. A specific commit is still reachable: `snapshot-branch.yml`
+        # publishes `<full-sha>-SNAPSHOT` on maintainer dispatch.
+        #
+        # The guard is on this step and not on the job, because the three uploads above
+        # feed dry-run-release.yml's scan of recent main.yml runs and liquibase-test-harness,
+        # and both still need an artifact from every push.
+        if: ${{ github.event_name != 'push' }}
         run: |
           set -euo pipefail
           # No `clean` between deploys: the reactor is already compiled, only versions change.
           # shellcheck disable=SC2086 # MAVEN_BUILD_ARGS is intentionally word-split
           ./mvnw -B $MAVEN_BUILD_ARGS "-Dbuild.timestamp=$BUILD_TIMESTAMP" -DskipTests -pl '!liquibase-dist' deploy
-          ./mvnw -B versions:set -DnewVersion="${BUILD_SHA}-SNAPSHOT"
+          ./mvnw -B org.codehaus.mojo:versions-maven-plugin:2.21.0:set -DnewVersion="${BUILD_SHA}-SNAPSHOT"
           # shellcheck disable=SC2086
           ./mvnw -B $MAVEN_BUILD_ARGS "-Dbuild.timestamp=$BUILD_TIMESTAMP" -DskipTests deploy
 
   nightly-release:
     name: Nightly Release
     needs: publish-snapshot
+    # [TECHOPS-1224] Not on push. This job runs `gh release delete nightly
+    # --cleanup-tag` and recreates the public `nightly` pre-release with three
+    # assets, so leaving it unguarded republished artifacts from the public repo
+    # on every merge to main, which is the build-server role this ticket removes.
+    # The cron and maintainer dispatch still produce it, once a day, as the name
+    # already implied. Same guard as the GitHub Packages step above.
+    if: ${{ github.event_name != 'push' }}
     runs-on: ubuntu-24.04
     permissions:
       contents: write
