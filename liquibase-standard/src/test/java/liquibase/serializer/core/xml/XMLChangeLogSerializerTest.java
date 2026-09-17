@@ -1025,6 +1025,24 @@ public class XMLChangeLogSerializerTest {
                 "        tableName=\"c\"/>", out);
     }
 
+    @Test
+    public void serialize_pretty_showNullValues() {
+        CreateTableChange change = new CreateTableChange();
+        change.setCatalogName("a");
+        change.setSchemaName("b");
+        change.setTableName("c");
+        change.addColumn(new ColumnConfig().setName("x").setValue(null));
+        change.addColumn(new ColumnConfig().setName("y").setValue(null));
+
+        String actualOutput = new XMLChangeLogSerializer().serialize(change, true);
+        assertEquals("<createTable catalogName=\"a\"\n" +
+                "        schemaName=\"b\"\n" +
+                "        tableName=\"c\">\n" +
+                "    <column name=\"x\" value=\"null\"/>\n" +
+                "    <column name=\"y\" value=\"null\"/>\n" +
+                "</createTable>", actualOutput);
+    }
+
     private static Map<String, String> attsMap(String... values) {
         Map<String, String> map = new LinkedHashMap<>();
         for (int i = 0; i < values.length; i += 2) {
