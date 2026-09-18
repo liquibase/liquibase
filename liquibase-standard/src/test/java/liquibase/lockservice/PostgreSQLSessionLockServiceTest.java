@@ -15,6 +15,7 @@ import java.util.Date;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.database.core.CockroachDatabase;
+import liquibase.database.core.EnterpriseDBDatabase;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -73,6 +74,10 @@ public class PostgreSQLSessionLockServiceTest {
             assertThat(lockService.supports(new CockroachDatabase())).isFalse();
             assertThat(new CockroachDatabase().supportsAdvisoryLocks()).isFalse();
             assertThat(new PostgresDatabase().supportsAdvisoryLocks()).isTrue();
+            // EnterpriseDB is real PostgreSQL and opts in by inheriting from PostgresDatabase,
+            // which is where the capability is turned on (AbstractPostgresDatabase defaults false,
+            // like the snapshot-ability hooks beside it).
+            assertThat(new EnterpriseDBDatabase().supportsAdvisoryLocks()).isTrue();
         });
     }
 
