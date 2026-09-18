@@ -317,4 +317,9 @@ public class PostgresDatabase extends AbstractPostgresDatabase {
     public boolean supportsStoredLogicSnapshot() {
         return true;
     }
+
+    @Override
+    public boolean supportsAdvisoryLocks() {
+        return true;
+    }
 }
