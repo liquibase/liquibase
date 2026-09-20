@@ -122,30 +122,23 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 Scope.getCurrentScope().getLog(getClass()).info("Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
             }
         }
-        Statement statement = null;
         String sql = "select" +
                 " sys_context( 'userenv', 'current_schema' ) as current_schema " +
                 ",sys_context( 'userenv', 'session_user' )   as session_user " +
                 ",sys_context( 'userenv', 'current_user' )   as current_user " +
                 ",sys_context( 'userenv', 'proxy_user' )     as proxy_user " +
                 "from dual";
-        try {
-            statement = con.createStatement();
-            ResultSet resultSet = statement.executeQuery(sql);
+        try (Statement statement = con.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
             while (resultSet.next()) {
-                //String currentSchema = resultSet.getString(1);
-                //String sessionUser = resultSet.getString(2);
                 String currentUser = resultSet.getString(3);
                 String proxyUser = resultSet.getString(4);
                 if (!java.util.Objects.equals(proxyUser, currentUser)) {
                     Scope.getCurrentScope().getLog(getClass()).info("Proxy session switched from: " + proxyUser + " to: " + currentUser);
                 }
             }
-            resultSet.close();
         } catch (SQLException e) {
             Scope.getCurrentScope().getLog(getClass()).warning("Proxy session - error executing whoami: " + e.getMessage());
-        } finally {
-            JdbcUtil.closeStatement(statement);
         }
     }
 
