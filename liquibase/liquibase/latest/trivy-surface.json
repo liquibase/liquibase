@@ -3,18 +3,18 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a0c2d6-8450-7999-8877-c64ee564c3e7",
-  "CreatedAt": "2026-09-21T07:20:33.616630082Z",
-  "ArtifactID": "sha256:cc009da8d873dc5e5a75a696b4eb93ee0eb99ff6607363c2eeaf48a96b18b6be",
-  "ArtifactName": "ghcr.io/liquibase/liquibase/liquibase-liquibase:944e1c2cba0e2c19f6125ef7a72eeda07b5e5b4e",
+  "ReportID": "01a0c55c-e9b1-7851-8328-1d50e47ac8ff",
+  "CreatedAt": "2026-09-21T19:06:35.825546709Z",
+  "ArtifactID": "sha256:7861fc28b62137300433542722eb31de90c7183a7067f524327c8068d7837170",
+  "ArtifactName": "ghcr.io/liquibase/liquibase/liquibase-liquibase:079659dff0f22d83223740d55f07db93c132c495",
   "ArtifactType": "container_image",
   "Metadata": {
-    "Size": 312150528,
+    "Size": 322327552,
     "OS": {
       "Family": "ubuntu",
       "Name": "24.04"
     },
-    "ImageID": "sha256:cbdbe120968263754e4391dd287fb2c74670b94e49bd0e85064feac8a5a1e675",
+    "ImageID": "sha256:5368bcc5bda90a96a273fa95b04a2f7ea98116e520c26b78c2d560b8987baf96",
     "DiffIDs": [
       "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1",
       "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f",
@@ -24,20 +24,20 @@
       "sha256:5dd66a8215ed01fc3982c5c56066415e06d3da1c62493eaea1edd4c40dafda3f",
       "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
       "sha256:771b2e913ba477d918d4e29e18824d961651a7898d03cab7906af272c978f486",
-      "sha256:80cfa19abd80fa2f016684f877b4de065d0a327333d8cfde6e27ae54028f25a5",
-      "sha256:e3a4e9c780838a621051862e8f4747f5f02ad23dbe08919c26d6b37be5f3162d",
-      "sha256:072c5de753a48f382bc8234295d6b02d296df62f0311ee7efe177e7a3687a7dc"
+      "sha256:92cce291f9f56829e74bf3737a3e61e9fdd573aaae26715d3de742cb31e14eae",
+      "sha256:cd113b8ede3d0d70928163c470251575934fa081f0eb4b3e38a1390dd613327c",
+      "sha256:78efe1da5f19f3bdfa33e2163425ba234410a5088c78d80c03f5a01739273e71"
     ],
     "RepoTags": [
-      "ghcr.io/liquibase/liquibase/liquibase-liquibase:944e1c2cba0e2c19f6125ef7a72eeda07b5e5b4e"
+      "ghcr.io/liquibase/liquibase/liquibase-liquibase:079659dff0f22d83223740d55f07db93c132c495"
     ],
     "RepoDigests": [
-      "ghcr.io/liquibase/liquibase/liquibase-liquibase@sha256:dfe60864f904b986c18774c4bfe6d994a45055e353e1b4a34e79cceec52a603f"
+      "ghcr.io/liquibase/liquibase/liquibase-liquibase@sha256:1fa837707bff4b829a311aa2bdf5fa44fca9d092c9258889c9c61c452a565a1b"
     ],
-    "Reference": "ghcr.io/liquibase/liquibase/liquibase-liquibase:944e1c2cba0e2c19f6125ef7a72eeda07b5e5b4e",
+    "Reference": "ghcr.io/liquibase/liquibase/liquibase-liquibase:079659dff0f22d83223740d55f07db93c132c495",
     "ImageConfig": {
       "architecture": "amd64",
-      "created": "2026-09-21T07:19:18.745108166Z",
+      "created": "2026-09-21T19:05:49.479325288Z",
       "history": [
         {
           "created": "2026-09-11T11:44:03.605540158Z",
@@ -189,46 +189,46 @@
           "empty_layer": true
         },
         {
-          "created": "2026-09-21T07:19:18.721728251Z",
-          "created_by": "RUN |5 LIQUIBASE_VERSION=5.0.4 LB_SHA256=bb08638d70dddd6af8cca6e033148576f8214b5996831b1f8864eb3528f4cfce LPM_VERSION=0.3.7 LPM_SHA256=329eafbe9289d1e83a62cb89844ac461bb5b9d4c5f5f184c8f26244e350e8a95 LPM_SHA256_ARM=893abdadeb08fd7e8b9caa46cdd0bc6d0b43ccd02c2f6761638b69b29a19fe14 /bin/sh -c apt-get update \u0026\u0026     apt-get -yqq install unzip --no-install-recommends \u0026\u0026     rm -rf /var/lib/apt/lists/* \u0026\u0026     mkdir /liquibase/bin \u0026\u0026     arch=\"$(dpkg --print-architecture)\" \u0026\u0026     case \"$arch\" in     amd64)  DOWNLOAD_ARCH=\"\"  ;;     arm64)  DOWNLOAD_ARCH=\"-arm64\" \u0026\u0026 LPM_SHA256=$LPM_SHA256_ARM ;;     *) echo \u003e\u00262 \"error: unsupported architecture '$arch'\" \u0026\u0026 exit 1 ;;     esac \u0026\u0026 wget -q -O lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip \"https://github.com/liquibase/liquibase-package-manager/releases/download/v${LPM_VERSION}/lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip\" \u0026\u0026     echo \"$LPM_SHA256 *lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip\" | sha256sum -c - \u0026\u0026     unzip lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip -d bin/ \u0026\u0026     rm lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip \u0026\u0026     apt-get purge -y --auto-remove unzip \u0026\u0026     ln -s /liquibase/bin/lpm /usr/local/bin/lpm \u0026\u0026     lpm --version # buildkit",
+          "created": "2026-09-21T19:05:49.454125154Z",
+          "created_by": "RUN |5 LIQUIBASE_VERSION=5.0.4 LB_SHA256=bb08638d70dddd6af8cca6e033148576f8214b5996831b1f8864eb3528f4cfce LPM_VERSION=0.3.7 LPM_SHA256=329eafbe9289d1e83a62cb89844ac461bb5b9d4c5f5f184c8f26244e350e8a95 LPM_SHA256_ARM=893abdadeb08fd7e8b9caa46cdd0bc6d0b43ccd02c2f6761638b69b29a19fe14 /bin/sh -c apt-get update \u0026\u0026     DEBIAN_FRONTEND=noninteractive apt-get -yqq upgrade \u0026\u0026     apt-get -yqq install unzip --no-install-recommends \u0026\u0026     rm -rf /var/lib/apt/lists/* \u0026\u0026     mkdir /liquibase/bin \u0026\u0026     arch=\"$(dpkg --print-architecture)\" \u0026\u0026     case \"$arch\" in     amd64)  DOWNLOAD_ARCH=\"\"  ;;     arm64)  DOWNLOAD_ARCH=\"-arm64\" \u0026\u0026 LPM_SHA256=$LPM_SHA256_ARM ;;     *) echo \u003e\u00262 \"error: unsupported architecture '$arch'\" \u0026\u0026 exit 1 ;;     esac \u0026\u0026 wget -q -O lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip \"https://github.com/liquibase/liquibase-package-manager/releases/download/v${LPM_VERSION}/lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip\" \u0026\u0026     echo \"$LPM_SHA256 *lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip\" | sha256sum -c - \u0026\u0026     unzip lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip -d bin/ \u0026\u0026     rm lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip \u0026\u0026     apt-get purge -y --auto-remove unzip \u0026\u0026     ln -s /liquibase/bin/lpm /usr/local/bin/lpm \u0026\u0026     lpm --version # buildkit",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-21T07:19:18.721728251Z",
+          "created": "2026-09-21T19:05:49.454125154Z",
           "created_by": "ENV LIQUIBASE_HOME=/liquibase",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-21T07:19:18.721728251Z",
+          "created": "2026-09-21T19:05:49.454125154Z",
           "created_by": "ENV DOCKER_LIQUIBASE=true",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-21T07:19:18.735589932Z",
+          "created": "2026-09-21T19:05:49.470459137Z",
           "created_by": "COPY docker-entrypoint.sh ./ # buildkit",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-21T07:19:18.745108166Z",
+          "created": "2026-09-21T19:05:49.479325288Z",
           "created_by": "COPY liquibase.docker.properties ./ # buildkit",
           "comment": "buildkit.dockerfile.v0"
         },
         {
-          "created": "2026-09-21T07:19:18.745108166Z",
+          "created": "2026-09-21T19:05:49.479325288Z",
           "created_by": "USER liquibase:liquibase",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-21T07:19:18.745108166Z",
+          "created": "2026-09-21T19:05:49.479325288Z",
           "created_by": "ENTRYPOINT [\"/liquibase/docker-entrypoint.sh\"]",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
         },
         {
-          "created": "2026-09-21T07:19:18.745108166Z",
+          "created": "2026-09-21T19:05:49.479325288Z",
           "created_by": "CMD [\"--help\"]",
           "comment": "buildkit.dockerfile.v0",
           "empty_layer": true
@@ -246,9 +246,9 @@
           "sha256:5dd66a8215ed01fc3982c5c56066415e06d3da1c62493eaea1edd4c40dafda3f",
           "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
           "sha256:771b2e913ba477d918d4e29e18824d961651a7898d03cab7906af272c978f486",
-          "sha256:80cfa19abd80fa2f016684f877b4de065d0a327333d8cfde6e27ae54028f25a5",
-          "sha256:e3a4e9c780838a621051862e8f4747f5f02ad23dbe08919c26d6b37be5f3162d",
-          "sha256:072c5de753a48f382bc8234295d6b02d296df62f0311ee7efe177e7a3687a7dc"
+          "sha256:92cce291f9f56829e74bf3737a3e61e9fdd573aaae26715d3de742cb31e14eae",
+          "sha256:cd113b8ede3d0d70928163c470251575934fa081f0eb4b3e38a1390dd613327c",
+          "sha256:78efe1da5f19f3bdfa33e2163425ba234410a5088c78d80c03f5a01739273e71"
         ]
       },
       "config": {
@@ -322,25 +322,25 @@
         "DiffID": "sha256:771b2e913ba477d918d4e29e18824d961651a7898d03cab7906af272c978f486"
       },
       {
-        "Size": 10220544,
-        "Digest": "sha256:654cd316db072429189da85602bf742fe7d8463a52ff2efceb72b7e74a3e2fa1",
-        "DiffID": "sha256:80cfa19abd80fa2f016684f877b4de065d0a327333d8cfde6e27ae54028f25a5"
+        "Size": 20397568,
+        "Digest": "sha256:c03f968cf7b851aef76120bae983df46295e87ff05b374619489b012cdd7e83a",
+        "DiffID": "sha256:92cce291f9f56829e74bf3737a3e61e9fdd573aaae26715d3de742cb31e14eae"
       },
       {
         "Size": 7168,
-        "Digest": "sha256:e219675fa9dadb64b045fa1f9329958fe86becc1e61e99a54a81d86a812e8195",
-        "DiffID": "sha256:e3a4e9c780838a621051862e8f4747f5f02ad23dbe08919c26d6b37be5f3162d"
+        "Digest": "sha256:24b2fafb66d0404c0e292c4ca74b147c1aef72eb572215752bbbca59249c06a1",
+        "DiffID": "sha256:cd113b8ede3d0d70928163c470251575934fa081f0eb4b3e38a1390dd613327c"
       },
       {
         "Size": 2560,
-        "Digest": "sha256:fd14b6ec04bf754ea5c6b030482ebf83827e37436d5c1d65ec8ab7093aa5a134",
-        "DiffID": "sha256:072c5de753a48f382bc8234295d6b02d296df62f0311ee7efe177e7a3687a7dc"
+        "Digest": "sha256:6201e6a212482fe8c2f6e3ac4392bac1cd1f3a4d22624d5adbc28914d4c61406",
+        "DiffID": "sha256:78efe1da5f19f3bdfa33e2163425ba234410a5088c78d80c03f5a01739273e71"
       }
     ]
   },
   "Results": [
     {
-      "Target": "ghcr.io/liquibase/liquibase/liquibase-liquibase:944e1c2cba0e2c19f6125ef7a72eeda07b5e5b4e (ubuntu 24.04)",
+      "Target": "ghcr.io/liquibase/liquibase/liquibase-liquibase:079659dff0f22d83223740d55f07db93c132c495 (ubuntu 24.04)",
       "Class": "os-pkgs",
       "Type": "ubuntu",
       "Packages": [
@@ -2519,7 +2519,7 @@
           "Name": "gpg",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/gpg@2.4.4-2ubuntu17.6?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "90b9a075aefcd401"
+            "UID": "199c889c4a4598b0"
           },
           "Version": "2.4.4",
           "Release": "2ubuntu17.6",
@@ -2556,7 +2556,7 @@
             "libgpg-error0@1.47-3build2.1",
             "libnpth0t64@1.6-3.1build1",
             "libreadline8t64@8.2-4build1",
-            "libsqlite3-0@3.45.1-1ubuntu2.7",
+            "libsqlite3-0@3.45.1-1ubuntu2.8",
             "zlib1g@1:1.3.dfsg-3.1ubuntu2.2"
           ],
           "Layer": {
@@ -2988,7 +2988,7 @@
           "Name": "keyboxd",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/keyboxd@2.4.4-2ubuntu17.6?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "91a86875412e598d"
+            "UID": "fad7df50779251f1"
           },
           "Version": "2.4.4",
           "Release": "2ubuntu17.6",
@@ -3025,7 +3025,7 @@
             "libgpg-error0@1.47-3build2.1",
             "libksba8@1.6.6-1build1",
             "libnpth0t64@1.6-3.1build1",
-            "libsqlite3-0@3.45.1-1ubuntu2.7"
+            "libsqlite3-0@3.45.1-1ubuntu2.8"
           ],
           "Layer": {
             "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
@@ -4121,18 +4121,18 @@
           "AnalyzedBy": "dpkg"
         },
         {
-          "ID": "libexpat1@2.6.1-2ubuntu0.4",
+          "ID": "libexpat1@2.6.1-2ubuntu0.5",
           "Name": "libexpat1",
           "Identifier": {
-            "PURL": "pkg:deb/ubuntu/libexpat1@2.6.1-2ubuntu0.4?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "c1f908c206466a25"
+            "PURL": "pkg:deb/ubuntu/libexpat1@2.6.1-2ubuntu0.5?arch=amd64\u0026distro=ubuntu-24.04",
+            "UID": "a2b545714b68d13c"
           },
           "Version": "2.6.1",
-          "Release": "2ubuntu0.4",
+          "Release": "2ubuntu0.5",
           "Arch": "amd64",
           "SrcName": "expat",
           "SrcVersion": "2.6.1",
-          "SrcRelease": "2ubuntu0.4",
+          "SrcRelease": "2ubuntu0.5",
           "Licenses": [
             "MIT"
           ],
@@ -4144,8 +4144,8 @@
             "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
-            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
+            "Digest": "sha256:c03f968cf7b851aef76120bae983df46295e87ff05b374619489b012cdd7e83a",
+            "DiffID": "sha256:92cce291f9f56829e74bf3737a3e61e9fdd573aaae26715d3de742cb31e14eae"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1",
@@ -4246,7 +4246,7 @@
           "Name": "libfontconfig1",
           "Identifier": {
             "PURL": "pkg:deb/ubuntu/libfontconfig1@2.15.0-1.1ubuntu2?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "8e81daba27795277"
+            "UID": "cb30635493ded629"
           },
           "Version": "2.15.0",
           "Release": "1.1ubuntu2",
@@ -4261,7 +4261,7 @@
           "DependsOn": [
             "fontconfig-config@2.15.0-1.1ubuntu2",
             "libc6@2.39-0ubuntu8.9",
-            "libexpat1@2.6.1-2ubuntu0.4",
+            "libexpat1@2.6.1-2ubuntu0.5",
             "libfreetype6@2.13.2+dfsg-1ubuntu0.1"
           ],
           "Layer": {
@@ -6202,18 +6202,18 @@
           "AnalyzedBy": "dpkg"
         },
         {
-          "ID": "libsqlite3-0@3.45.1-1ubuntu2.7",
+          "ID": "libsqlite3-0@3.45.1-1ubuntu2.8",
           "Name": "libsqlite3-0",
           "Identifier": {
-            "PURL": "pkg:deb/ubuntu/libsqlite3-0@3.45.1-1ubuntu2.7?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "31bf890568c6f4ec"
+            "PURL": "pkg:deb/ubuntu/libsqlite3-0@3.45.1-1ubuntu2.8?arch=amd64\u0026distro=ubuntu-24.04",
+            "UID": "f25bfac6d5edc64c"
           },
           "Version": "3.45.1",
-          "Release": "1ubuntu2.7",
+          "Release": "1ubuntu2.8",
           "Arch": "amd64",
           "SrcName": "sqlite3",
           "SrcVersion": "3.45.1",
-          "SrcRelease": "1ubuntu2.7",
+          "SrcRelease": "1ubuntu2.8",
           "Licenses": [
             "public-domain",
             "GPL-2.0-or-later",
@@ -6227,8 +6227,8 @@
             "libc6@2.39-0ubuntu8.9"
           ],
           "Layer": {
-            "Digest": "sha256:d6d10bcdd9a8ad2f2737d6760230c9cafe0fdb255ac82917ff8d7fbe174dec97",
-            "DiffID": "sha256:5f2a2eb1014040ff886510dffdb63f17b25fcfe58a7f8b0c71634974ffe7319f"
+            "Digest": "sha256:c03f968cf7b851aef76120bae983df46295e87ff05b374619489b012cdd7e83a",
+            "DiffID": "sha256:92cce291f9f56829e74bf3737a3e61e9fdd573aaae26715d3de742cb31e14eae"
           },
           "InstalledFiles": [
             "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0.8.6",
@@ -8474,18 +8474,18 @@
           "AnalyzedBy": "dpkg"
         },
         {
-          "ID": "perl-base@5.38.2-3.2ubuntu0.4",
+          "ID": "perl-base@5.38.2-3.2ubuntu0.6",
           "Name": "perl-base",
           "Identifier": {
-            "PURL": "pkg:deb/ubuntu/perl-base@5.38.2-3.2ubuntu0.4?arch=amd64\u0026distro=ubuntu-24.04",
-            "UID": "26330697d84809a0"
+            "PURL": "pkg:deb/ubuntu/perl-base@5.38.2-3.2ubuntu0.6?arch=amd64\u0026distro=ubuntu-24.04",
+            "UID": "6c5bb756978fc0e5"
           },
           "Version": "5.38.2",
-          "Release": "3.2ubuntu0.4",
+          "Release": "3.2ubuntu0.6",
           "Arch": "amd64",
           "SrcName": "perl",
           "SrcVersion": "5.38.2",
-          "SrcRelease": "3.2ubuntu0.4",
+          "SrcRelease": "3.2ubuntu0.6",
           "Licenses": [
             "GPL-1.0-or-later",
             "Artistic-2.0",
@@ -8516,8 +8516,8 @@
             "Class": "official"
           },
           "Layer": {
-            "Digest": "sha256:edd1ed89f0d443580bd42e5a10cd8736aba5a3438b2a0645c2ebb50119bb0eba",
-            "DiffID": "sha256:65e5d715ea720349e6475f91651a0956279fc295a45fd73aa04f1cec046281a1"
+            "Digest": "sha256:c03f968cf7b851aef76120bae983df46295e87ff05b374619489b012cdd7e83a",
+            "DiffID": "sha256:92cce291f9f56829e74bf3737a3e61e9fdd573aaae26715d3de742cb31e14eae"
           },
           "InstalledFiles": [
             "/usr/bin/perl",
@@ -10745,8 +10745,8 @@
           "Version": "v1.26.8",
           "Relationship": "direct",
           "Layer": {
-            "Digest": "sha256:654cd316db072429189da85602bf742fe7d8463a52ff2efceb72b7e74a3e2fa1",
-            "DiffID": "sha256:80cfa19abd80fa2f016684f877b4de065d0a327333d8cfde6e27ae54028f25a5"
+            "Digest": "sha256:c03f968cf7b851aef76120bae983df46295e87ff05b374619489b012cdd7e83a",
+            "DiffID": "sha256:92cce291f9f56829e74bf3737a3e61e9fdd573aaae26715d3de742cb31e14eae"
           },
           "AnalyzedBy": "gobinary"
         },
@@ -10759,8 +10759,8 @@
           },
           "Version": "v1.9.0",
           "Layer": {
-            "Digest": "sha256:654cd316db072429189da85602bf742fe7d8463a52ff2efceb72b7e74a3e2fa1",
-            "DiffID": "sha256:80cfa19abd80fa2f016684f877b4de065d0a327333d8cfde6e27ae54028f25a5"
+            "Digest": "sha256:c03f968cf7b851aef76120bae983df46295e87ff05b374619489b012cdd7e83a",
+            "DiffID": "sha256:92cce291f9f56829e74bf3737a3e61e9fdd573aaae26715d3de742cb31e14eae"
           },
           "AnalyzedBy": "gobinary"
         },
@@ -10773,8 +10773,8 @@
           },
           "Version": "v1.10.2",
           "Layer": {
-            "Digest": "sha256:654cd316db072429189da85602bf742fe7d8463a52ff2efceb72b7e74a3e2fa1",
-            "DiffID": "sha256:80cfa19abd80fa2f016684f877b4de065d0a327333d8cfde6e27ae54028f25a5"
+            "Digest": "sha256:c03f968cf7b851aef76120bae983df46295e87ff05b374619489b012cdd7e83a",
+            "DiffID": "sha256:92cce291f9f56829e74bf3737a3e61e9fdd573aaae26715d3de742cb31e14eae"
           },
           "AnalyzedBy": "gobinary"
         },
@@ -10787,8 +10787,8 @@
           },
           "Version": "v1.0.9",
           "Layer": {
-            "Digest": "sha256:654cd316db072429189da85602bf742fe7d8463a52ff2efceb72b7e74a3e2fa1",
-            "DiffID": "sha256:80cfa19abd80fa2f016684f877b4de065d0a327333d8cfde6e27ae54028f25a5"
+            "Digest": "sha256:c03f968cf7b851aef76120bae983df46295e87ff05b374619489b012cdd7e83a",
+            "DiffID": "sha256:92cce291f9f56829e74bf3737a3e61e9fdd573aaae26715d3de742cb31e14eae"
           },
           "AnalyzedBy": "gobinary"
         },
@@ -10800,8 +10800,8 @@
             "UID": "13ea817821fe4afd"
           },
           "Layer": {
-            "Digest": "sha256:654cd316db072429189da85602bf742fe7d8463a52ff2efceb72b7e74a3e2fa1",
-            "DiffID": "sha256:80cfa19abd80fa2f016684f877b4de065d0a327333d8cfde6e27ae54028f25a5"
+            "Digest": "sha256:c03f968cf7b851aef76120bae983df46295e87ff05b374619489b012cdd7e83a",
+            "DiffID": "sha256:92cce291f9f56829e74bf3737a3e61e9fdd573aaae26715d3de742cb31e14eae"
           },
           "AnalyzedBy": "gobinary"
         }
