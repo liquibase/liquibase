@@ -233,7 +233,7 @@ For a detailed guide on reading vulnerability reports, see [SECURITY.md](https:/
 
 The Alpine image runs `apk upgrade` at build time. Alpine rebuilds its published image tags on its own schedule, so a tag can lag security fixes that are already available in the package index for that release. Upgrading during the build applies those patches instead of waiting for a rebuild. This stays within the pinned Alpine release and is not a distribution upgrade.
 
-The Debian-based community image does not do this. Its base is refreshed often enough that operating system packages have not fallen behind.
+The Debian-based community image runs `apt-get upgrade` for the same reason. The `eclipse-temurin` base is rebuilt on Adoptium's schedule, so a published tag can ship Ubuntu packages whose fixes are already in `noble-security`. This stays within the pinned Ubuntu release and is not a distribution upgrade.
 
 ---
 
