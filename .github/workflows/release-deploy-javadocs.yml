@@ -149,6 +149,11 @@ jobs:
           unset JSON
 
       - name: Publish javadocs to Cloudflare R2
+        # TECHOPS-1318: the id is what makes the warn step below able to see a
+        # failed sync. continue-on-error rewrites this step's *conclusion* to
+        # success while leaving its *outcome* as failure, so without an id there
+        # is no way to read the real result and a broken sync goes green.
+        id: r2-publish
         continue-on-error: true
         if: steps.r2-creds.outcome == 'success'
         env:
@@ -172,5 +177,12 @@ jobs:
               --only-show-errors
 
       - name: Warn if the R2 publish did not run
-        if: steps.r2-creds.outcome != 'success' || steps.r2-auth.outcome != 'success'
+        # Checks the publish outcome, not just the credential steps. A failed
+        # `aws s3 sync` (wrong bucket, SigV4 rejection, R2 5xx, token scope)
+        # leaves r2-auth and r2-creds both successful, so the first two clauses
+        # alone would stay false and the job would report green with javadocs in
+        # S3 only. A skipped publish also has a non-success outcome, so the third
+        # clause subsumes the other two; they are kept for legibility about what
+        # can go wrong.
+        if: steps.r2-creds.outcome != 'success' || steps.r2-auth.outcome != 'success' || steps.r2-publish.outcome != 'success'
         run: echo "::warning::javadocs were published to S3 but NOT to Cloudflare R2. javadocs.liquibase.com will serve the previous release until this is re-run."
