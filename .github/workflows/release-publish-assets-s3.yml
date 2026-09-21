@@ -68,27 +68,19 @@ jobs:
           aws-region: us-east-1
 
       - name: Load Cloudflare R2 credentials from devops vault
-        # TECHOPS-1320: oss-released-assets now publishes to the Cloudflare R2 bucket
-        # liquibase-org-assets instead of the S3 bucket liquibaseorg-origin, which is
-        # being decommissioned (TECHOPS-969). The R2 S3-API creds live in /vault/devops
-        # (single source of truth, shared with build-logic and analytics-config); pull
-        # only the three keys this job needs and mask them, same as build-logic's
-        # package.yml and liquibase-pro's publish-to-s3.yml.
         # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
-        # parse-json-secrets: true put every credential in /vault/devops into this
-        # job's environment; read only the three Cloudflare R2 keys instead.
+        # read the JSON directly and pull only the three keys this job needs instead.
         run: |
           set -euo pipefail
           JSON=$(aws secretsmanager get-secret-value --secret-id /vault/devops --region us-east-1 --query SecretString --output text)
           for k in CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_R2_ACCESS_KEY_ID CLOUDFLARE_R2_SECRET_ACCESS_KEY; do
-            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
-            # which would silently alter a value that legitimately ends in one.
+            # jq -j + sentinel: command substitution strips trailing newlines, which
+            # would otherwise silently alter a value that legitimately ends in one.
             v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
             v=${v%X}
             if [ -z "$v" ]; then echo "::error::$k missing from /vault/devops"; exit 1; fi
-            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
-            # those literals registers a mask that never matches it; % is escaped first
-            # so the escapes the next two produce are not escaped again.
+            # Escape % before \r/\n: the runner unescapes %0D/%0A/%25 in mask text,
+            # so escaping out of order means the mask never matches the secret.
             e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
             printf '::add-mask::%s\n' "$e"
             D="VAULT_EOF_${RANDOM}${RANDOM}"
@@ -104,17 +96,13 @@ jobs:
           R2_ENDPOINT: https://${{ env.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
         run: |
           set -euo pipefail
-          # R2 rejects any request carrying an OIDC session token: the devops-vault
-          # configure-aws-credentials step above exports AWS_SESSION_TOKEN, and every
-          # aws call in this step targets R2, not real S3, so drop the token (and the
-          # legacy alias) up front, same fix as build-logic's package.yml and
-          # liquibase-pro's publish-to-s3.yml.
+          # R2 rejects a request carrying a session token; OIDC creds export one, so
+          # drop it (and its legacy alias) before calling R2.
           unset AWS_SESSION_TOKEN AWS_SECURITY_TOKEN
           if [ -z "${R2_AKID:-}" ] || [ -z "${R2_SECRET:-}" ] || [ "$R2_ENDPOINT" = "https://.r2.cloudflarestorage.com" ]; then
             echo "::error::CLOUDFLARE_R2_ACCESS_KEY_ID / CLOUDFLARE_R2_SECRET_ACCESS_KEY / CLOUDFLARE_ACCOUNT_ID missing from /vault/devops, cannot publish to R2."
             exit 1
           fi
-          # --checksum-algorithm CRC32: newer aws-cli defaults to a CRC64NVME checksum
-          # that R2 rejects, failing the upload.
+          # CRC32: newer aws-cli defaults to a CRC64NVME checksum, which R2 rejects.
           AWS_ACCESS_KEY_ID="$R2_AKID" AWS_SECRET_ACCESS_KEY="$R2_SECRET" \
             aws s3 sync "./${{ inputs.version }}-released-assets" "s3://liquibase-org-assets/oss-released-assets/${{ inputs.version }}-released-assets-${{ env.timestamp }}/" --endpoint-url "$R2_ENDPOINT" --checksum-algorithm CRC32 --only-show-errors
