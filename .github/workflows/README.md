@@ -147,13 +147,11 @@ Here you can see all the stuff which is tested:
 
 ![](./doc/img/dry-run.png)
 
-The process will conclude with the `dryRun` artifacts published in our Maven repository (`https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging`), `deb`, `rpm` and `sdkman` packages published in `s3://repo.liquibase.com.dry.run` and the `docker` image pushed to our internal `ecr` repo (`812559712860.dkr.ecr.us-east-1.amazonaws.com/liquibase-dry-run`):
+The process will conclude with the `dryRun` artifacts published in our Maven repository (`https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging`) and the `deb`, `rpm` and `sdkman` packages published in `s3://repo.liquibase.com.dry.run`. Docker images are not part of a dryRun release: `release-published-orchestrator.yml` skips `docker-release.yml` on a dryRun, and a `docker-release.yml` run dispatched with `dryRun: true` builds every platform and pushes to no registry.
 
 ![](./doc/img/nexus.png)
 
 ![](./doc/img/s3.png)
-
-![](./doc/img/ecr.png)
 
 ---
 
