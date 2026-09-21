@@ -362,7 +362,7 @@ flowchart LR
     package("package<br/>build-logic@main"):::broad --> s3
 
     maven("deploy-maven"):::scoped --> docker("release-docker"):::broad
-    s3("publish-assets-s3"):::scoped
+    s3("publish-assets-s3"):::broad
 
     docker --> summary
     s3 --> summary
