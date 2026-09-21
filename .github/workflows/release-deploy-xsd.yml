@@ -130,6 +130,7 @@ jobs:
           SFTP_HOST: ${{ env.WPENGINE_SFTP_HOST }}
           SFTP_PORT: ${{ env.WPENGINE_SFTP_PORT }}
         run: |
+          set -euo pipefail
           # inputs.version is dispatch-controlled; pass it through env and validate
           # before use so it can never be interpolated straight into the script.
           version="$VERSION"
@@ -140,11 +141,33 @@ jobs:
           fi
           xsd_version="${major}.${minor}"
           mkdir index-file
-          sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=yes "$SFTP_USER@$SFTP_HOST" <<'SFTP_EOF'
+          # -b - runs the heredoc in sftp batch mode, so a failed/partial `get` makes
+          # sftp itself exit non-zero (plain stdin-piped commands do not: sftp prints
+          # the error and carries on to `bye`, exiting 0). With set -e that abort stops
+          # this step, which stops the unconditional upload step after it from ever
+          # running on a truncated index.htm.
+          sshpass -e sftp -b - -P "$SFTP_PORT" -oStrictHostKeyChecking=yes "$SFTP_USER@$SFTP_HOST" <<'SFTP_EOF'
           get /xml/ns/dbchangelog/index.htm index-file/index.htm
           bye
           SFTP_EOF
-          if ! grep -q ${xsd_version} index-file/index.htm ; then
+          # Defense in depth on top of -b -: refuse to proceed unless the download
+          # looks like the real listing, since this file gets SFTP'd back to the live
+          # site in the next step.
+          if [ ! -s index-file/index.htm ]; then
+            echo "::error::downloaded index.htm is empty or missing, refusing to publish"
+            exit 1
+          fi
+          if ! grep -q '</ul>' index-file/index.htm; then
+            echo "::error::downloaded index.htm is missing the expected </ul> listing marker, refusing to publish"
+            exit 1
+          fi
+          # Match the complete filename, not a version substring: a plain substring
+          # check on "4.2" also matches "dbchangelog-4.20.xsd", so a 4.2.x deployment
+          # would wrongly skip adding its own index entry. The full "dbchangelog-X.Y.xsd"
+          # string does not have that problem for any major.minor pair (e.g. "4.1" vs
+          # "4.10".."4.19"): the trailing ".xsd" only lines up when the version matches
+          # exactly.
+          if ! grep -Fq "dbchangelog-${xsd_version}.xsd" index-file/index.htm ; then
             sed -ie "s/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${xsd_version}.xsd\">dbchangelog-${xsd_version}.xsd<\/a><\/li>\n<\/ul>/" index-file/index.htm
           fi
 
