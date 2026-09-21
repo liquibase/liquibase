@@ -124,14 +124,21 @@ jobs:
         # bucket, which nothing read; fetching straight from WPEngine over SFTP removes
         # that dead hop and reads the one copy that is actually live.
         env:
+          VERSION: ${{ inputs.version }}
           SSHPASS: ${{ env.WPENGINE_SFTP_PASSWORD }}
           SFTP_USER: ${{ env.WPENGINE_SFTP_USER }}
           SFTP_HOST: ${{ env.WPENGINE_SFTP_HOST }}
           SFTP_PORT: ${{ env.WPENGINE_SFTP_PORT }}
         run: |
-          version=${{ inputs.version }}
-          arr=(${version//./ })
-          xsd_version=${arr[0]}"."${arr[1]}
+          # inputs.version is dispatch-controlled; pass it through env and validate
+          # before use so it can never be interpolated straight into the script.
+          version="$VERSION"
+          IFS='.' read -r major minor _ <<< "$version"
+          if [[ ! $major =~ ^[0-9]+$ || ! $minor =~ ^[0-9]+$ ]]; then
+            echo "::error::version must start with numeric major.minor components, got '$version'"
+            exit 1
+          fi
+          xsd_version="${major}.${minor}"
           mkdir index-file
           sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=yes "$SFTP_USER@$SFTP_HOST" <<'SFTP_EOF'
           get /xml/ns/dbchangelog/index.htm index-file/index.htm
