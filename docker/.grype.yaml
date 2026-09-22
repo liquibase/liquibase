@@ -26,10 +26,17 @@ ignore:
   #     the distro-vs-upstream split, not a difference of opinion about
   #     severity.
   #
-  # `fix-state: not-fixed` is the safety catch. The moment Alpine ships a fixed
-  # zlib the finding stops matching this rule, the scan goes red again, and the
-  # image gets patched on the next build. The suppression cannot outlive the
+  # The pinned package version is the safety catch. The moment Alpine ships any
+  # other zlib build the finding stops matching this rule, the scan goes red
+  # again, and the image gets patched. The suppression cannot outlive the
   # condition that justifies it.
+  #
+  # Do NOT reach for `fix-state: not-fixed` here, which is what the first
+  # attempt used and why it silently matched nothing. Grype emits
+  # `fix: {"versions": [], "state": ""}` for this finding, an EMPTY state
+  # rather than `not-fixed`, because no advisory exists to describe a fix
+  # state at all. Pinning name + version + type matches on fields Grype
+  # actually populates.
   #
   # Reachability, for context but NOT relied on here: the vulnerable path is
   # gz_vacate() reached through gzprintf()/gzvprintf() on a NON-BLOCKING gzFile
@@ -42,9 +49,10 @@ ignore:
   - vulnerability: CVE-2026-85091
     package:
       name: zlib
-    fix-state: not-fixed
+      version: 1.3.2-r0
+      type: apk
     reason: >
       No fixed package exists. Alpine has published no advisory and no patched
       zlib, and Dockerfile.alpine already runs apk upgrade, so there is no
-      remediation to apply. Scoped to fix-state not-fixed so the rule stops
-      applying as soon as a fix ships. See TECHOPS-929.
+      remediation to apply. Pinned to the exact vulnerable build so the rule
+      stops applying as soon as any other zlib ships. See TECHOPS-929.
