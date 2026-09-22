@@ -172,7 +172,7 @@ jobs:
     # dispatch-and-wait), never through this repo's own workflow_call chain, so dry_run
     # is the input that actually distinguishes a rehearsal from a real release here.
     # `release-publish` has 0 reviewers so the weekly cron is not blocked; `release` has
-    # 5. See .github/workflows/README.md for the broad-role OIDC trust this depends on.
+    # 5. Both names are also the whole OIDC trust on the release-scoped role this job assumes.
     environment:
       # `release-publish` has 0 reviewers, which the weekly rehearsal needs so the cron
       # does not hang. It is reachable only for a dry run that is BOTH building `main` and
@@ -261,7 +261,7 @@ jobs:
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.LIQUIBASE_RELEASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
 
       - name: Get secrets from vault
@@ -363,7 +363,7 @@ jobs:
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.LIQUIBASE_RELEASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
 
       - name: Get secrets from vault
@@ -616,7 +616,7 @@ jobs:
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.LIQUIBASE_RELEASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
 
       - name: Get App credentials from vault

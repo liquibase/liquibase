@@ -151,6 +151,8 @@ jobs:
     with:
       liquibaseVersion: ${{ needs.setup.outputs.version }}
       dryRun: ${{ inputs.dry_run || false }}
+      # Gate cleared above, so the callee uses `release-publish` and does not prompt again.
+      approved: true
     secrets: inherit
 
   deploy-maven:
