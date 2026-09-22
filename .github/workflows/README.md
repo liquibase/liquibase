@@ -180,7 +180,7 @@ The main coordinator that triggers all release steps in the proper sequence. Sup
 | `release-deploy-maven.yml` | Deploy artifacts to Maven Central | ✅ Yes, with one approval |
 | `release-deploy-javadocs.yml` | Upload javadocs to R2 | ✅ Yes, with one approval |
 | `release-publish-github-packages.yml` | Publish to GitHub Packages | ✅ Yes |
-| `release-deploy-xsd.yml` | Deploy XSD files to S3 and SFTP | ✅ Yes, with one approval |
+| `release-deploy-xsd.yml` | Deploy XSD files to WPEngine over SFTP | ✅ Yes, with one approval |
 | `docker-release.yml` | Build and push release Docker images | ✅ Yes |
 | `release-publish-assets-s3.yml` | Publish release assets to R2 | ✅ Yes, with one approval |
 
@@ -224,7 +224,7 @@ The table above says what each workflow does. This one says what stands in front
 | `manual-approval` | `release-manual-approval.yml` | **`release`**, 5 reviewers | none | nothing; the gate makes no AWS call |
 | `deploy-javadocs` | `release-deploy-javadocs.yml` | via `needs` | release-scoped | `/vault/liquibase`, then assumes the build-logic prod role read out of it |
 | `publish-github-packages` | `release-publish-github-packages.yml` | via `needs` | none | `GITHUB_TOKEN` with `packages: write` |
-| `deploy-xsd` | `release-deploy-xsd.yml` | via `needs` | release-scoped | `/vault/liquibase`, then the build-logic role plus five WPEngine SFTP secrets |
+| `deploy-xsd` | `release-deploy-xsd.yml` | via `needs` | release-scoped | `/vault/liquibase`, then five WPEngine SFTP secrets [TECHOPS-1320] |
 | `package` | `build-logic/package.yml@main` | via `needs` | **broad** | `/vault/liquibase`; shared workflow, so it cannot take this repo's environment |
 | `publish-assets-s3` | `release-publish-assets-s3.yml` | via `needs` | **broad** | `/vault/devops`; only the Cloudflare R2 credentials, no `/vault/liquibase` read [TECHOPS-1320] |
 | `deploy-maven-production` | `release-deploy-maven.yml` | via `needs` | release-scoped | `/vault/liquibase`; holds the Maven Central credentials |
@@ -622,7 +622,7 @@ dry_run: false
 
 ### 6. Deploy XSD Files (`release-deploy-xsd.yml`)
 
-**When to use:** If XSD file deployment to S3 or SFTP fails.
+**When to use:** If XSD file deployment to WPEngine over SFTP fails.
 
 **Required inputs:**
 - `version`: Version to deploy (e.g., `4.28.0`)
