@@ -172,9 +172,7 @@ jobs:
     # dispatch-and-wait), never through this repo's own workflow_call chain, so dry_run
     # is the input that actually distinguishes a rehearsal from a real release here.
     # `release-publish` has 0 reviewers so the weekly cron is not blocked; `release` has
-    # 5. Both names are also the whole OIDC trust on the release-scoped role this job
-    # assumes, so the environment is load-bearing twice over: drop it and the job emits a
-    # ref subject instead and cannot reach the vault at all. [TECHOPS-1265]
+    # 5. Both names are also the whole OIDC trust on the release-scoped role this job assumes.
     environment:
       # `release-publish` has 0 reviewers, which the weekly rehearsal needs so the cron
       # does not hang. It is reachable only for a dry run that is BOTH building `main` and

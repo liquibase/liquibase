@@ -73,16 +73,8 @@ jobs:
   update-dockerfiles:
     name: Update Dockerfile versions
     runs-on: ubuntu-latest
-    # `approved` is `workflow_call`-only, so a direct dispatch cannot claim it and still meets the
-    # reviewers on `release`. An orchestrated run cleared that gate once already.
-    # Keep it that way: on `workflow_dispatch` anyone who can dispatch could pick `release-publish`,
-    # and a non-`boolean` input would do it silently because the string "false" is truthy.
-    #
-    # This is the only job here that touches the vault, and the environment is what makes that
-    # possible: `release` and `release-publish` are the entire OIDC trust on the release-scoped
-    # role below, so a job declaring no environment emits a ref subject and is refused. The other
-    # three jobs call build-logic reusables and reach no Liquibase vault, so they need none.
-    # [TECHOPS-1265]
+    # These two names are the entire OIDC trust on the release-scoped role below, so dropping the
+    # environment does not just skip a gate, it stops this job reaching the vault at all.
     environment:
       name: ${{ inputs.approved && 'release-publish' || 'release' }}
     outputs:
