@@ -74,7 +74,13 @@ jobs:
         with:
           workflow: create-release.yml
           ref: main
-          inputs: '{"version": "dry-run-${{ github.run_id }}", "standalone_zip": "false", "dry_run": "true", "branch": "main"}'
+          # caller_workflow lets create-release's green-SHA gate exclude THIS run.
+          # This workflow dispatches create-release and then waits on it, so it is always
+          # in flight on the same head_sha the gate judges. On the weekly schedule the
+          # gate's `event != "schedule"` filter hid that; on workflow_dispatch nothing did,
+          # so a manual dry run always failed with "still has workflows running: Dry run
+          # release". See the gate comment in create-release.yml.
+          inputs: '{"version": "dry-run-${{ github.run_id }}", "standalone_zip": "false", "dry_run": "true", "branch": "main", "caller_workflow": "${{ github.workflow }}"}'
           wait: 'true'
           gh-token: ${{ steps.get-token.outputs.token }}
 

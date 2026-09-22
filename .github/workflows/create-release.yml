@@ -23,6 +23,11 @@ on:
         required: false
         type: boolean
         default: false
+      caller_workflow:
+        description: "Display name of the workflow that dispatched this one, so the green-SHA gate can exclude it. See the gate comment in the setup job."
+        required: false
+        type: string
+        default: ""
   workflow_call:
     inputs:
       version:
@@ -44,6 +49,11 @@ on:
         required: true
         type: boolean
         default: false
+      caller_workflow:
+        description: "Display name of the workflow that dispatched this one, so the green-SHA gate can exclude it. See the gate comment in the setup job."
+        required: false
+        type: string
+        default: ""
     outputs:
       dry_run_zip_url:
         description: "The URL of the created zip file"
@@ -75,6 +85,8 @@ jobs:
           VERSION: ${{ inputs.version }}
           # This workflow's own display name, so the gate below can exclude its own runs.
           SELF: ${{ github.workflow }}
+          # The dispatching workflow's display name, excluded for the same reason as SELF.
+          CALLER: ${{ inputs.caller_workflow }}
         run: |
           set -euo pipefail
           # Injection sink: REF/VERSION are dispatch inputs. Passed via env, never
@@ -115,10 +127,22 @@ jobs:
           # refuses every single time, which deadlocks the weekly dry run. Excluding the
           # release workflow is also right on its own terms: a previous release attempt on
           # this commit says nothing about whether the commit builds.
+          #
+          # CALLER is the same problem one level up, and it bit exactly as described.
+          # dry-run-release.yml dispatches this workflow and then waits on it, so the
+          # caller is always in flight on this same head_sha while the gate runs. On the
+          # weekly schedule that run is dropped by the `event != "schedule"` filter and
+          # nobody noticed. Trigger the dry run by hand and nothing drops it, so the gate
+          # reports `still has workflows running: Dry run release` and the dispatch can
+          # never succeed. workflow_dispatch of dry-run-release.yml was therefore
+          # permanently broken while the scheduled path stayed green. The caller now names
+          # itself and is excluded on the same grounds as SELF: the workflow driving this
+          # release attempt is not evidence about whether the commit builds. Empty by
+          # default, and `.name != ""` excludes nothing, so a direct dispatch is unchanged.
           runs=$(gh api --paginate "repos/$REPO/actions/runs?head_sha=$sha&per_page=100" \
                    --jq '.workflow_runs[] | {name, event, conclusion, created_at}' | jq -s '.')
-          verdict=$(jq -r --arg self "$SELF" '
-            [ .[] | select(.event != "schedule" and .event != "dynamic" and .name != $self) ]
+          verdict=$(jq -r --arg self "$SELF" --arg caller "${CALLER:-}" '
+            [ .[] | select(.event != "schedule" and .event != "dynamic" and .name != $self and .name != $caller) ]
             | group_by(.name) | map(sort_by(.created_at) | last)
             | { bad:     [ .[] | select(.conclusion=="failure" or .conclusion=="timed_out" or .conclusion=="cancelled") | .name ],
                 running: [ .[] | select(.conclusion == null) | .name ],
