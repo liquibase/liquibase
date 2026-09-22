@@ -1,6 +1,6 @@
-name: Release Publish Assets to S3
+name: Release Publish Assets to R2
 
-run-name: "Publish Assets to S3 - v${{ inputs.version }}${{ inputs.dry_run && ' (Dry Run)' || '' }}"
+run-name: "Publish Assets to R2 - v${{ inputs.version }}${{ inputs.dry_run && ' (Dry Run)' || '' }}"
 
 on:
   workflow_call:
@@ -39,7 +39,7 @@ permissions:
 
 jobs:
   publish-assets-s3:
-    name: Publish OSS released assets to s3 bucket liquibaseorg-origin
+    name: Publish OSS released assets to R2 bucket liquibase-org-assets
     runs-on: ubuntu-22.04
     if: ${{ inputs.dry_run == false }}
     # `approved` is `workflow_call`-only, so a direct dispatch cannot claim it and still meets the
@@ -61,41 +61,48 @@ jobs:
         id: timestamp
         run: echo "timestamp=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
 
-      - name: Configure AWS credentials for vault access
+      - name: Configure AWS credentials for devops vault access
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_RELEASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.DEVOPS_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Get secrets from vault
+      - name: Load Cloudflare R2 credentials from devops vault
         # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
-        # parse-json-secrets: true put every credential in /vault/liquibase into this
-        # job's environment; this job only needs the prod role ARN to assume next.
+        # read the JSON directly and pull only the three keys this job needs instead.
         run: |
           set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
-          for k in AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC; do
-            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
-            # which would silently alter a value that legitimately ends in one.
+          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/devops --region us-east-1 --query SecretString --output text)
+          for k in CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_R2_ACCESS_KEY_ID CLOUDFLARE_R2_SECRET_ACCESS_KEY; do
+            # jq -j + sentinel: command substitution strips trailing newlines, which
+            # would otherwise silently alter a value that legitimately ends in one.
             v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
             v=${v%X}
-            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
-            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
-            # those literals registers a mask that never matches it; % is escaped first
-            # so the escapes the next two produce are not escaped again.
+            if [ -z "$v" ]; then echo "::error::$k missing from /vault/devops"; exit 1; fi
+            # Escape % before \r/\n: the runner unescapes %0D/%0A/%25 in mask text,
+            # so escaping out of order means the mask never matches the secret.
             e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
             printf '::add-mask::%s\n' "$e"
             D="VAULT_EOF_${RANDOM}${RANDOM}"
             { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
           done
           unset JSON
+          echo "Loaded CLOUDFLARE_ACCOUNT_ID + R2 access/secret keys from /vault/devops."
 
-      - name: Configure AWS credentials for prod account access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
-        with:
-          role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
-          aws-region: us-east-1
-
-      - name: Publish released assets to s3 bucket
+      - name: Publish released assets to R2 bucket
+        env:
+          R2_AKID: ${{ env.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          R2_SECRET: ${{ env.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: https://${{ env.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
         run: |
-          aws s3 sync "./${{ inputs.version }}-released-assets" s3://liquibaseorg-origin/oss-released-assets/${{ inputs.version }}-released-assets-${{ env.timestamp }}/ --only-show-errors
+          set -euo pipefail
+          # R2 rejects a request carrying a session token; OIDC creds export one, so
+          # drop it (and its legacy alias) before calling R2.
+          unset AWS_SESSION_TOKEN AWS_SECURITY_TOKEN
+          if [ -z "${R2_AKID:-}" ] || [ -z "${R2_SECRET:-}" ] || [ "$R2_ENDPOINT" = "https://.r2.cloudflarestorage.com" ]; then
+            echo "::error::CLOUDFLARE_R2_ACCESS_KEY_ID / CLOUDFLARE_R2_SECRET_ACCESS_KEY / CLOUDFLARE_ACCOUNT_ID missing from /vault/devops, cannot publish to R2."
+            exit 1
+          fi
+          # CRC32: newer aws-cli defaults to a CRC64NVME checksum, which R2 rejects.
+          AWS_ACCESS_KEY_ID="$R2_AKID" AWS_SECRET_ACCESS_KEY="$R2_SECRET" \
+            aws s3 sync "./${{ inputs.version }}-released-assets" "s3://liquibase-org-assets/oss-released-assets/${{ inputs.version }}-released-assets-${{ env.timestamp }}/" --endpoint-url "$R2_ENDPOINT" --checksum-algorithm CRC32 --only-show-errors
