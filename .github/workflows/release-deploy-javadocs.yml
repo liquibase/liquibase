@@ -39,7 +39,7 @@ permissions:
 
 jobs:
   deploy-javadocs:
-    name: Upload Javadocs to S3
+    name: Upload Javadocs to R2
     runs-on: ubuntu-22.04
     if: ${{ inputs.dry_run == false }}
     # `approved` is `workflow_call`-only, so a direct dispatch cannot claim it and still meets the
@@ -55,43 +55,8 @@ jobs:
           TAG: ${{ inputs.tag }}
         run: gh release download "$TAG" --repo liquibase/liquibase --pattern "liquibase-additional*.zip" --dir "."
 
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
-        with:
-          role-to-assume: ${{ secrets.LIQUIBASE_RELEASE_VAULT_OIDC_ROLE_ARN }}
-          aws-region: us-east-1
-
-      - name: Get secrets from vault
-        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
-        # parse-json-secrets: true put every credential in /vault/liquibase into this
-        # job's environment; this job only needs the prod role ARN to assume next.
-        run: |
-          set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
-          for k in AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC; do
-            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
-            # which would silently alter a value that legitimately ends in one.
-            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
-            v=${v%X}
-            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
-            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
-            # those literals registers a mask that never matches it; % is escaped first
-            # so the escapes the next two produce are not escaped again.
-            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
-            printf '::add-mask::%s\n' "$e"
-            D="VAULT_EOF_${RANDOM}${RANDOM}"
-            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
-          done
-          unset JSON
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
-        with:
-          role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
-          aws-region: us-east-1
-
-      - name: Unpack javadoc files and upload to s3
-        # unzip archives, create directory for each jar, and extract jar contents to directory.  Then delete the jar and zip files.  Then upload to s3.
+      - name: Unpack javadoc files
+        # unzip archives, create directory for each jar, and extract jar contents to directory.  Then delete the jar and zip files.
         run: |
           unzip -j '*.zip' '*javadoc*.jar'
 
@@ -103,20 +68,18 @@ jobs:
           done
 
           rm -rf *.jar *.zip
-          aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors
 
-      # TECHOPS-1318: javadocs.liquibase.com is served from Cloudflare R2, and the
-      # only thing carrying these files from S3 to R2 was Sippy — a lazy
-      # copy-on-first-read bridge that liquibase-infrastructure#4391 removes. Without
-      # an R2 write here the next release lands in S3 and never reaches the edge,
-      # freezing the published javadocs silently. That is the TECHOPS-805 failure mode.
+      # TECHOPS-921: the S3 origin (javadocsliquibasecom-origin) is decommissioned by
+      # liquibase-infrastructure#4397, so Cloudflare R2 is now the only publish target.
+      # javadocs.liquibase.com has been served from R2 since the TECHOPS-876 cutover;
+      # this workflow's S3 write and the vault/build-logic-role steps that fed it only
+      # existed to keep Sippy's lazy copy-on-first-read bridge stocked, and TECHOPS-923
+      # already tore Sippy down for this bucket.
       #
-      # Everything R2 comes AFTER the S3 sync above and is continue-on-error, on
-      # purpose. release-published-orchestrator.yml gates deploy-maven on this job's
-      # result, so a hard failure here would skip the Maven Central deployment for the
-      # release. The S3 publish is the path that works today and must not become
-      # dependent on R2 credential availability; a broken R2 leg degrades to stale
-      # javadocs and a warning, never a failed release.
+      # The R2 publish stays continue-on-error, same as before: release-published-orchestrator.yml
+      # gates deploy-maven on this job's result, so a hard failure here would skip the
+      # Maven Central deployment for the whole release. A broken R2 leg degrades to a
+      # warning and no published javadocs, never a failed release.
       - name: Configure AWS credentials for devops vault access
         id: r2-auth
         continue-on-error: true
@@ -129,11 +92,10 @@ jobs:
         id: r2-creds
         continue-on-error: true
         if: steps.r2-auth.outcome == 'success'
-        # The R2 keys live in /vault/devops; every other secret stays in
-        # /vault/liquibase, read above. Pull ONLY these three and mask them rather
-        # than bulk-importing the vault. The mask escaping mirrors the vault step
-        # above: the runner unescapes %0D, %0A and %25 in command data, so a value
-        # carrying those literals would register a mask that never matches it.
+        # The R2 keys live in /vault/devops. Pull ONLY these three and mask them
+        # rather than bulk-importing the vault. The runner unescapes %0D, %0A and
+        # %25 in command data, so a value carrying those literals would register a
+        # mask that never matches it; hence the same escaping below.
         run: |
           set -euo pipefail
           JSON=$(aws secretsmanager get-secret-value --secret-id /vault/devops --region us-east-1 --query SecretString --output text)
@@ -163,7 +125,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${R2_AKID:-}" ] || [ -z "${R2_SECRET:-}" ] || [ "$R2_ENDPOINT" = "https://.r2.cloudflarestorage.com" ]; then
-            echo "::warning::R2 credentials unavailable; javadocs published to S3 only and will not reach the edge."
+            echo "::warning::R2 credentials unavailable; javadocs were NOT published this release."
             exit 1
           fi
           # env -u drops the assumed-role session token: R2 does not recognise it and
@@ -180,9 +142,9 @@ jobs:
         # Checks the publish outcome, not just the credential steps. A failed
         # `aws s3 sync` (wrong bucket, SigV4 rejection, R2 5xx, token scope)
         # leaves r2-auth and r2-creds both successful, so the first two clauses
-        # alone would stay false and the job would report green with javadocs in
-        # S3 only. A skipped publish also has a non-success outcome, so the third
+        # alone would stay false and the job would report green having published
+        # nothing. A skipped publish also has a non-success outcome, so the third
         # clause subsumes the other two; they are kept for legibility about what
         # can go wrong.
         if: steps.r2-creds.outcome != 'success' || steps.r2-auth.outcome != 'success' || steps.r2-publish.outcome != 'success'
-        run: echo "::warning::javadocs were published to S3 but NOT to Cloudflare R2. javadocs.liquibase.com will serve the previous release until this is re-run."
+        run: echo "::warning::javadocs were NOT published to Cloudflare R2. javadocs.liquibase.com will serve the previous release until this is re-run."
