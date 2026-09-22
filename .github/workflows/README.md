@@ -102,7 +102,7 @@ The following actions are identical to those in a regular Liquibase release, wit
 
 - Generate PRO tags
 - Generate install packages: `deb`, `rpm`, `brew` and the rest of them.
-- Upload `javadocs` and `xsds` to `S3`
+- Upload `javadocs` to `R2` and `xsds` to `S3`
 - Deploy artifacts to `GPM`
 
 ## :wrench: How a DryRun Release works?
@@ -178,7 +178,7 @@ The main coordinator that triggers all release steps in the proper sequence. Sup
 | `release-setup.yml` | Extract release metadata (version, tag, branch) | ✅ Yes |
 | `release-manual-approval.yml` | Hold the release for approval on the `release` environment | ✅ Yes |
 | `release-deploy-maven.yml` | Deploy artifacts to Maven Central | ✅ Yes, with one approval |
-| `release-deploy-javadocs.yml` | Upload javadocs to S3 | ✅ Yes, with one approval |
+| `release-deploy-javadocs.yml` | Upload javadocs to R2 | ✅ Yes, with one approval |
 | `release-publish-github-packages.yml` | Publish to GitHub Packages | ✅ Yes |
 | `release-deploy-xsd.yml` | Deploy XSD files to S3 and SFTP | ✅ Yes, with one approval |
 | `docker-release.yml` | Build and push release Docker images | ✅ Yes |
@@ -582,7 +582,7 @@ dry_run_release_id: (leave empty)
 
 ### 4. Deploy Javadocs (`release-deploy-javadocs.yml`)
 
-**When to use:** If javadoc upload to S3 fails.
+**When to use:** If javadoc upload to R2 fails.
 
 **Required inputs:**
 - `version`: Version to deploy (e.g., `4.28.0`)
