@@ -39,7 +39,7 @@ permissions:
 
 jobs:
   publish-assets-s3:
-    name: Publish OSS released assets to R2 bucket liquibase-org-assets
+    name: Publish OSS released assets to R2 bucket liquibase-oss-released-assets
     runs-on: ubuntu-22.04
     if: ${{ inputs.dry_run == false }}
     # `approved` is `workflow_call`-only, so a direct dispatch cannot claim it and still meets the
@@ -105,4 +105,4 @@ jobs:
           fi
           # CRC32: newer aws-cli defaults to a CRC64NVME checksum, which R2 rejects.
           AWS_ACCESS_KEY_ID="$R2_AKID" AWS_SECRET_ACCESS_KEY="$R2_SECRET" \
-            aws s3 sync "./${{ inputs.version }}-released-assets" "s3://liquibase-org-assets/oss-released-assets/${{ inputs.version }}-released-assets-${{ env.timestamp }}/" --endpoint-url "$R2_ENDPOINT" --checksum-algorithm CRC32 --only-show-errors
+            aws s3 sync "./${{ inputs.version }}-released-assets" "s3://liquibase-oss-released-assets/oss-released-assets/${{ inputs.version }}-released-assets-${{ env.timestamp }}/" --endpoint-url "$R2_ENDPOINT" --checksum-algorithm CRC32 --only-show-errors
