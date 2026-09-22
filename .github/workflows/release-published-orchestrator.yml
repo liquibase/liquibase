@@ -151,6 +151,9 @@ jobs:
     with:
       liquibaseVersion: ${{ needs.setup.outputs.version }}
       dryRun: ${{ inputs.dry_run || false }}
+      # Gate cleared above, so the callee uses `release-publish` and does not prompt again.
+      # That makes `needs: manual-approval` the only thing holding reviewers in front of this job.
+      approved: true
     secrets: inherit
 
   deploy-maven:
