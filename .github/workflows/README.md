@@ -102,7 +102,7 @@ The following actions are identical to those in a regular Liquibase release, wit
 
 - Generate PRO tags
 - Generate install packages: `deb`, `rpm`, `brew` and the rest of them.
-- Upload `javadocs` and `xsds` to `S3`
+- Upload `javadocs` to `R2` and `xsds` to `S3`
 - Deploy artifacts to `GPM`
 
 ## :wrench: How a DryRun Release works?
@@ -147,13 +147,11 @@ Here you can see all the stuff which is tested:
 
 ![](./doc/img/dry-run.png)
 
-The process will conclude with the `dryRun` artifacts published in our Maven repository (`https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging`), `deb`, `rpm` and `sdkman` packages published in `s3://repo.liquibase.com.dry.run` and the `docker` image pushed to our internal `ecr` repo (`812559712860.dkr.ecr.us-east-1.amazonaws.com/liquibase-dry-run`):
+The process will conclude with the `dryRun` artifacts published in our Maven repository (`https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging`) and the `deb`, `rpm` and `sdkman` packages published in `s3://repo.liquibase.com.dry.run`. Docker images are not part of a dryRun release: `release-published-orchestrator.yml` skips `docker-release.yml` on a dryRun, and a `docker-release.yml` run dispatched with `dryRun: true` builds every platform and pushes to no registry.
 
 ![](./doc/img/nexus.png)
 
 ![](./doc/img/s3.png)
-
-![](./doc/img/ecr.png)
 
 ---
 
@@ -180,11 +178,11 @@ The main coordinator that triggers all release steps in the proper sequence. Sup
 | `release-setup.yml` | Extract release metadata (version, tag, branch) | ✅ Yes |
 | `release-manual-approval.yml` | Hold the release for approval on the `release` environment | ✅ Yes |
 | `release-deploy-maven.yml` | Deploy artifacts to Maven Central | ✅ Yes, with one approval |
-| `release-deploy-javadocs.yml` | Upload javadocs to S3 | ✅ Yes, with one approval |
+| `release-deploy-javadocs.yml` | Upload javadocs to R2 | ✅ Yes, with one approval |
 | `release-publish-github-packages.yml` | Publish to GitHub Packages | ✅ Yes |
-| `release-deploy-xsd.yml` | Deploy XSD files to S3 and SFTP | ✅ Yes, with one approval |
+| `release-deploy-xsd.yml` | Deploy XSD files to WPEngine over SFTP | ✅ Yes, with one approval |
 | `docker-release.yml` | Build and push release Docker images | ✅ Yes |
-| `release-publish-assets-s3.yml` | Publish release assets to S3 | ✅ Yes, with one approval |
+| `release-publish-assets-s3.yml` | Publish release assets to R2 | ✅ Yes, with one approval |
 
 ## :footprints: How a release actually goes
 
@@ -196,7 +194,7 @@ Three moments need a person: starting `create-release.yml`, publishing the draft
 | 2 | **A person** | Publishes the draft release. This is what starts the orchestrator, which listens for `release: published`, so nothing runs while the release is still a draft. |
 | 3 | Automatic | `setup` resolves the version, then the run **parks**. GitHub marks it `waiting` and notifies the reviewers. Nothing has been published and no release credential has been issued yet. |
 | 4 | **A person** | One reviewer approves. Self-approval is prevented, so it cannot be whoever started the run, and admins are not exempt. |
-| 5 | Automatic | Everything else: GitHub Packages, javadocs, XSDs, Maven Central, S3 assets, Docker images, then `generate-summary`. |
+| 5 | Automatic | Everything else: GitHub Packages, javadocs, XSDs, Maven Central, R2 assets, Docker images, then `generate-summary`. |
 
 **One approval covers the whole release.** GitHub approves per job rather than per run, which is why only `manual-approval` sits on the reviewer-gated environment while the four publishing jobs sit on a reviewer-less one. Putting all five on `release` would stop a release once per wave of the `needs` graph instead of once, and a release that stops four times gets rubber-stamped.
 
@@ -226,9 +224,9 @@ The table above says what each workflow does. This one says what stands in front
 | `manual-approval` | `release-manual-approval.yml` | **`release`**, 5 reviewers | none | nothing; the gate makes no AWS call |
 | `deploy-javadocs` | `release-deploy-javadocs.yml` | via `needs` | release-scoped | `/vault/liquibase`, then assumes the build-logic prod role read out of it |
 | `publish-github-packages` | `release-publish-github-packages.yml` | via `needs` | none | `GITHUB_TOKEN` with `packages: write` |
-| `deploy-xsd` | `release-deploy-xsd.yml` | via `needs` | release-scoped | `/vault/liquibase`, then the build-logic role plus five WPEngine SFTP secrets |
+| `deploy-xsd` | `release-deploy-xsd.yml` | via `needs` | release-scoped | `/vault/liquibase`, then five WPEngine SFTP secrets [TECHOPS-1320] |
 | `package` | `build-logic/package.yml@main` | via `needs` | **broad** | `/vault/liquibase`; shared workflow, so it cannot take this repo's environment |
-| `publish-assets-s3` | `release-publish-assets-s3.yml` | via `needs` | release-scoped | `/vault/liquibase`, then the build-logic prod role |
+| `publish-assets-s3` | `release-publish-assets-s3.yml` | via `needs` | **broad** | `/vault/devops`; only the Cloudflare R2 credentials, no `/vault/liquibase` read [TECHOPS-1320] |
 | `deploy-maven-production` | `release-deploy-maven.yml` | via `needs` | release-scoped | `/vault/liquibase`; holds the Maven Central credentials |
 | `deploy-maven-dryrun` | `release-deploy-maven.yml` | none, by design | **broad** | `/vault/liquibase`; dry runs skip the gate deliberately |
 | `release-docker` | `docker-release.yml` | via `needs` | **broad** | its `update-dockerfiles` job reads the vault |
@@ -362,7 +360,7 @@ flowchart LR
     package("package<br/>build-logic@main"):::broad --> s3
 
     maven("deploy-maven"):::scoped --> docker("release-docker"):::broad
-    s3("publish-assets-s3"):::scoped
+    s3("publish-assets-s3"):::broad
 
     docker --> summary
     s3 --> summary
@@ -584,7 +582,7 @@ dry_run_release_id: (leave empty)
 
 ### 4. Deploy Javadocs (`release-deploy-javadocs.yml`)
 
-**When to use:** If javadoc upload to S3 fails.
+**When to use:** If javadoc upload to R2 fails.
 
 **Required inputs:**
 - `version`: Version to deploy (e.g., `4.28.0`)
@@ -624,7 +622,7 @@ dry_run: false
 
 ### 6. Deploy XSD Files (`release-deploy-xsd.yml`)
 
-**When to use:** If XSD file deployment to S3 or SFTP fails.
+**When to use:** If XSD file deployment to WPEngine over SFTP fails.
 
 **Required inputs:**
 - `version`: Version to deploy (e.g., `4.28.0`)
@@ -659,9 +657,9 @@ dryRun: false
 wrap this workflow and only renamed two inputs, so it was removed in TECHOPS-1099.
 An older note here claimed the build ran in `liquibase/docker`; that was not true.
 
-### 8. Publish Assets to S3 (`release-publish-assets-s3.yml`)
+### 8. Publish Assets to R2 (`release-publish-assets-s3.yml`)
 
-**When to use:** If S3 asset upload fails.
+**When to use:** If R2 asset upload fails.
 
 **Required inputs:**
 - `version`: Version to publish (e.g., `4.28.0`)
