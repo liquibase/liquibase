@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a0c36f-f334-73af-8ccc-f5446c6b21f1",
-  "CreatedAt": "2026-09-21T10:08:09.01224272Z",
+  "ReportID": "01a0cdbd-07ec-7b44-b298-426436961a22",
+  "CreatedAt": "2026-09-23T10:08:32.748739423Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -376,7 +376,8 @@
             "nvd": 4,
             "oracle-oval": 3,
             "redhat": 3,
-            "rocky": 3
+            "rocky": 3,
+            "ubuntu": 2
           },
           "CVSS": {
             "bitnami": {
@@ -408,7 +409,13 @@
             "https://errata.rockylinux.org/RLSA-2024:1436",
             "https://github.com/pgjdbc/pgjdbc",
             "https://github.com/pgjdbc/pgjdbc/commit/06abfb78a627277a580d4df825f210e96a4e14ee",
+            "https://github.com/pgjdbc/pgjdbc/commit/06abfb78a627277a580d4df825f210e96a4e14ee%20%28REL42.7.2%29",
+            "https://github.com/pgjdbc/pgjdbc/commit/1b1d6b53eca90409af0069d5327d4fdf8d40a255%20%28REL42.5.5%29",
+            "https://github.com/pgjdbc/pgjdbc/commit/475e3e2af3033c666fc1c0015159b35455118ae5%20%28REL42.5.5%29",
             "https://github.com/pgjdbc/pgjdbc/commit/93b0fcb2711d9c1e3a2a03134369738a02a58b40",
+            "https://github.com/pgjdbc/pgjdbc/commit/93b0fcb2711d9c1e3a2a03134369738a02a58b40%20%28REL42.7.2%29",
+            "https://github.com/pgjdbc/pgjdbc/commit/990d63f6be401ab40de5eb303a75924c9e71903c%20%28REL42.2.28%29",
+            "https://github.com/pgjdbc/pgjdbc/commit/b9b3777671c8a5cc580e1985f61337d39d47c730%20%28REL42.2.28%29",
             "https://github.com/pgjdbc/pgjdbc/security/advisories/GHSA-24rp-q3w6-vc56",
             "https://linux.oracle.com/cve/CVE-2024-1597.html",
             "https://linux.oracle.com/errata/ELSA-2024-1436.html",

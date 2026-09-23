@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a0c36f-c7d8-72f1-be9b-cd3eba78ed81",
-  "CreatedAt": "2026-09-21T10:07:57.912194403Z",
+  "ReportID": "01a0cdbc-bb9a-7368-85a9-b3aa32e2d362",
+  "CreatedAt": "2026-09-23T10:08:13.210224742Z",
   "ArtifactID": "sha256:bf7ce50f23859177936ce770dbf0ae1da2c29b452fdc16a1ce87fa2d261e8efb",
   "ArtifactName": "liquibase/liquibase:4.25.0",
   "ArtifactType": "container_image",
@@ -12073,7 +12073,8 @@
             "nvd": 4,
             "oracle-oval": 3,
             "redhat": 3,
-            "rocky": 3
+            "rocky": 3,
+            "ubuntu": 2
           },
           "CVSS": {
             "bitnami": {
@@ -12105,7 +12106,13 @@
             "https://errata.rockylinux.org/RLSA-2024:1436",
             "https://github.com/pgjdbc/pgjdbc",
             "https://github.com/pgjdbc/pgjdbc/commit/06abfb78a627277a580d4df825f210e96a4e14ee",
+            "https://github.com/pgjdbc/pgjdbc/commit/06abfb78a627277a580d4df825f210e96a4e14ee%20%28REL42.7.2%29",
+            "https://github.com/pgjdbc/pgjdbc/commit/1b1d6b53eca90409af0069d5327d4fdf8d40a255%20%28REL42.5.5%29",
+            "https://github.com/pgjdbc/pgjdbc/commit/475e3e2af3033c666fc1c0015159b35455118ae5%20%28REL42.5.5%29",
             "https://github.com/pgjdbc/pgjdbc/commit/93b0fcb2711d9c1e3a2a03134369738a02a58b40",
+            "https://github.com/pgjdbc/pgjdbc/commit/93b0fcb2711d9c1e3a2a03134369738a02a58b40%20%28REL42.7.2%29",
+            "https://github.com/pgjdbc/pgjdbc/commit/990d63f6be401ab40de5eb303a75924c9e71903c%20%28REL42.2.28%29",
+            "https://github.com/pgjdbc/pgjdbc/commit/b9b3777671c8a5cc580e1985f61337d39d47c730%20%28REL42.2.28%29",
             "https://github.com/pgjdbc/pgjdbc/security/advisories/GHSA-24rp-q3w6-vc56",
             "https://linux.oracle.com/cve/CVE-2024-1597.html",
             "https://linux.oracle.com/errata/ELSA-2024-1436.html",
@@ -12748,7 +12755,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 2,
             "bitnami": 3,
             "cbl-mariner": 2,
@@ -13185,7 +13192,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 2,
+            "amazon": 3,
             "azure": 3,
             "bitnami": 3,
             "oracle-oval": 3,
@@ -14724,7 +14731,7 @@
             "https://go.dev/issue/80405",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://linux.oracle.com/cve/CVE-2026-33818.html",
-            "https://linux.oracle.com/errata/ELSA-2026-67161-0.html",
+            "https://linux.oracle.com/errata/ELSA-2026-69308.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-33818",
             "https://pkg.go.dev/vuln/GO-2026-5972",
             "https://www.cve.org/CVERecord?id=CVE-2026-33818"
@@ -15648,7 +15655,7 @@
             "https://go.dev/issue/79217",
             "https://groups.google.com/g/golang-announce/c/tKs3rmcBcKw",
             "https://linux.oracle.com/cve/CVE-2026-42504.html",
-            "https://linux.oracle.com/errata/ELSA-2026-65895-0.html",
+            "https://linux.oracle.com/errata/ELSA-2026-69308.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-42504",
             "https://pkg.go.dev/vuln/GO-2026-5038",
             "https://www.cve.org/CVERecord?id=CVE-2026-42504"
@@ -15963,7 +15970,7 @@
             "https://go.dev/issue/80481",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://linux.oracle.com/cve/CVE-2026-56859.html",
-            "https://linux.oracle.com/errata/ELSA-2026-65895-0.html",
+            "https://linux.oracle.com/errata/ELSA-2026-69308.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-56859",
             "https://pkg.go.dev/vuln/GO-2026-6088",
             "https://www.cve.org/CVERecord?id=CVE-2026-56859"
@@ -16040,7 +16047,7 @@
             "https://go.dev/issue/80494",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://linux.oracle.com/cve/CVE-2026-56860.html",
-            "https://linux.oracle.com/errata/ELSA-2026-67161-0.html",
+            "https://linux.oracle.com/errata/ELSA-2026-69308.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-56860",
             "https://pkg.go.dev/vuln/GO-2026-6218",
             "https://www.cve.org/CVERecord?id=CVE-2026-56860"
@@ -16117,7 +16124,7 @@
             "https://go.dev/issue/80528",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://linux.oracle.com/cve/CVE-2026-56862.html",
-            "https://linux.oracle.com/errata/ELSA-2026-67161-0.html",
+            "https://linux.oracle.com/errata/ELSA-2026-69308.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-56862",
             "https://pkg.go.dev/vuln/GO-2026-6090",
             "https://www.cve.org/CVERecord?id=CVE-2026-56862"
