@@ -1,6 +1,7 @@
 package liquibase.serializer.core.yaml;
 
 import liquibase.change.Change;
+import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RollbackContainer;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -40,9 +41,14 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
     public static final Map<String, Object> EMPTY_MAP_DO_NOT_SERIALIZE = new HashMap<>(0);
 
     protected boolean noSnapshotIdFound = false;
+    protected boolean preserveNullValues = true;
 
     public YamlSerializer() {
         yaml = createYaml();
+    }
+
+    public void preserveNullValues(boolean preserveNullValues) {
+        this.preserveNullValues = preserveNullValues;
     }
 
     protected DumperOptions createDumperOptions() {
@@ -215,6 +221,12 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         for (int i = 0; i < valueAsList.size(); i++) {
             if (valueAsList.get(i) instanceof LiquibaseSerializable) {
                 Object m = convertToMap(valueAsList, i);
+                if (!preserveNullValues && m instanceof ColumnConfig) {
+                    ColumnConfig columnConfig = (ColumnConfig) m;
+                    if (columnConfig.isNull()) {
+                        continue;
+                    }
+                }
                 valueAsList.set(i, m);
             }
         }
