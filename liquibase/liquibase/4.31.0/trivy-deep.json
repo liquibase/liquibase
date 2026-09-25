@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a0d2e4-1590-7cf2-9c0f-3a986aea8fe4",
-  "CreatedAt": "2026-09-24T10:09:18.224850468Z",
+  "ReportID": "01a0d809-ff9a-719b-b7ac-49f371b97434",
+  "CreatedAt": "2026-09-25T10:08:49.050106525Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -1988,6 +1988,7 @@
             "https://github.com/andialbrecht/sqlparse/commit/939b129e24c0ad5d51368b1aa72fffcaca76f06f",
             "https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-pwgv-4x5q-6m9f",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-54284",
+            "https://ubuntu.com/security/notices/USN-8808-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-54284"
           ],
           "PublishedDate": "2026-08-17T18:17:11.4Z",
@@ -2043,6 +2044,7 @@
             "https://github.com/andialbrecht/sqlparse/commit/939b129e24c0ad5d51368b1aa72fffcaca76f06f",
             "https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-pwgv-4x5q-6m9f",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-54284",
+            "https://ubuntu.com/security/notices/USN-8808-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-54284"
           ],
           "PublishedDate": "2026-08-17T18:17:11.4Z",
@@ -2098,6 +2100,7 @@
             "https://github.com/andialbrecht/sqlparse/commit/939b129e24c0ad5d51368b1aa72fffcaca76f06f",
             "https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-pwgv-4x5q-6m9f",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-54284",
+            "https://ubuntu.com/security/notices/USN-8808-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-54284"
           ],
           "PublishedDate": "2026-08-17T18:17:11.4Z",
@@ -2152,6 +2155,7 @@
             "https://github.com/andialbrecht/sqlparse/commit/d1d80602741f77ec78e5a04ce4719244cf32352e",
             "https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-prg7-hcfm-mfcr",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-59893",
+            "https://ubuntu.com/security/notices/USN-8808-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-59893"
           ],
           "PublishedDate": "2026-08-17T18:17:35.73Z",
@@ -2206,6 +2210,7 @@
             "https://github.com/andialbrecht/sqlparse/commit/d1d80602741f77ec78e5a04ce4719244cf32352e",
             "https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-prg7-hcfm-mfcr",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-59893",
+            "https://ubuntu.com/security/notices/USN-8808-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-59893"
           ],
           "PublishedDate": "2026-08-17T18:17:35.73Z",
@@ -2260,6 +2265,7 @@
             "https://github.com/andialbrecht/sqlparse/commit/d1d80602741f77ec78e5a04ce4719244cf32352e",
             "https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-prg7-hcfm-mfcr",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-59893",
+            "https://ubuntu.com/security/notices/USN-8808-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-59893"
           ],
           "PublishedDate": "2026-08-17T18:17:35.73Z",
@@ -2315,6 +2321,7 @@
             "https://github.com/andialbrecht/sqlparse/commit/ef2012a5eeb491e604dea2b00d516904a3830c87",
             "https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-f2ff-p2ww-7p4p",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-71491",
+            "https://ubuntu.com/security/notices/USN-8808-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-71491"
           ],
           "PublishedDate": "2026-08-17T18:18:12.12Z",
@@ -2370,6 +2377,7 @@
             "https://github.com/andialbrecht/sqlparse/commit/ef2012a5eeb491e604dea2b00d516904a3830c87",
             "https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-f2ff-p2ww-7p4p",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-71491",
+            "https://ubuntu.com/security/notices/USN-8808-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-71491"
           ],
           "PublishedDate": "2026-08-17T18:18:12.12Z",
@@ -2425,6 +2433,7 @@
             "https://github.com/andialbrecht/sqlparse/commit/ef2012a5eeb491e604dea2b00d516904a3830c87",
             "https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-f2ff-p2ww-7p4p",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-71491",
+            "https://ubuntu.com/security/notices/USN-8808-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-71491"
           ],
           "PublishedDate": "2026-08-17T18:18:12.12Z",
@@ -2763,7 +2772,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2849,7 +2858,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -2935,7 +2944,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -3021,7 +3030,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -3110,7 +3119,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -3199,7 +3208,7 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
@@ -3930,6 +3939,7 @@
             "https://lists.debian.org/debian-lts-announce/2026/06/msg00040.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-44431",
             "https://ubuntu.com/security/notices/USN-8379-1",
+            "https://ubuntu.com/security/notices/USN-8811-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-44431"
           ],
           "PublishedDate": "2026-05-13T16:16:57.15Z",
@@ -4010,6 +4020,7 @@
             "https://lists.debian.org/debian-lts-announce/2026/06/msg00040.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-44431",
             "https://ubuntu.com/security/notices/USN-8379-1",
+            "https://ubuntu.com/security/notices/USN-8811-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-44431"
           ],
           "PublishedDate": "2026-05-13T16:16:57.15Z",
@@ -4090,6 +4101,7 @@
             "https://lists.debian.org/debian-lts-announce/2026/06/msg00040.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-44431",
             "https://ubuntu.com/security/notices/USN-8379-1",
+            "https://ubuntu.com/security/notices/USN-8811-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-44431"
           ],
           "PublishedDate": "2026-05-13T16:16:57.15Z",
