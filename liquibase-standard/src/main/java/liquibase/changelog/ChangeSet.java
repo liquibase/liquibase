@@ -731,6 +731,16 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     public ExecType execute(DatabaseChangeLog databaseChangeLog, ChangeExecListener listener, Database database)
             throws MigrationFailedException {
+        return execute(databaseChangeLog, listener, database, false);
+    }
+
+    /**
+     * Same as {@link #execute(DatabaseChangeLog, ChangeExecListener, Database)}, but when deferCommit is true
+     * and the changeset runs in a transaction, the transaction is left open on success. The caller is then
+     * responsible for committing it (for example together with the DATABASECHANGELOG row) or rolling it back.
+     */
+    public ExecType execute(DatabaseChangeLog databaseChangeLog, ChangeExecListener listener, Database database,
+                            boolean deferCommit) throws MigrationFailedException {
         Logger log = getCurrentScope().getLog(getClass());
         addChangeSetMdcProperties();
         Boolean failOnError = getFailOnError();
@@ -869,7 +879,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     }
                 }
 
-                if (runInTransaction) {
+                if (runInTransaction && !deferCommit) {
                     database.commit();
                 }
                 if (skippedAllChanges) {
@@ -1010,6 +1020,15 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
+        rollback(database, listener, false);
+    }
+
+    /**
+     * Same as {@link #rollback(Database, ChangeExecListener)}, but when deferCommit is true and the changeset runs
+     * in a transaction, the transaction is left open on success. The caller is then responsible for committing it
+     * (for example together with removing the DATABASECHANGELOG row) or rolling it back.
+     */
+    public void rollback(Database database, ChangeExecListener listener, boolean deferCommit) throws RollbackFailedException {
         setStartTime();
         getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, startInstant.toString());
         addChangeSetMdcProperties();
@@ -1073,7 +1092,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 }
             }
 
-            if (runInTransaction) {
+            if (runInTransaction && !deferCommit) {
                 database.commit();
             }
             setStopTime();

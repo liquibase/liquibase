@@ -397,6 +397,11 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     }
 
     @Override
+    public boolean supportsAtomicHistoryUpdates() {
+        return true;
+    }
+
+    @Override
     public void setExecType(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
         SqlStatement markChangeSetRanStatement = new MarkChangeSetRanStatement(changeSet, execType);
         try {

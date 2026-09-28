@@ -8,6 +8,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RollbackContainer;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -59,14 +60,28 @@ public class RollbackVisitor implements ChangeSetVisitor {
             Scope.getCurrentScope().getUI().sendMessage("Rolling Back Changeset: " + changeSet);
         }
         sendRollbackWillRunEvent(changeSet, databaseChangeLog, database);
+        // Leave the rollback transaction open so removing the history row commits with it, when that is safe
+        boolean deferCommit = HistoryTransactionSupport.commitsWithHistory(changeSet, this.database);
         try {
-            changeSet.rollback(this.database, this.execListener);
+            changeSet.rollback(this.database, this.execListener, deferCommit);
         }
         catch (Exception e) {
             fireRollbackFailed(changeSet, databaseChangeLog, database, e);
             throw e;
         }
-        this.database.removeRanStatus(changeSet);
+        try {
+            this.database.removeRanStatus(changeSet);
+        } catch (DatabaseException | RuntimeException e) {
+            if (deferCommit) {
+                // the rollback was not committed yet: undo it so the history row still matches the schema
+                try {
+                    this.database.rollback();
+                } catch (DatabaseException rollbackException) {
+                    e.addSuppressed(rollbackException);
+                }
+            }
+            throw e;
+        }
         sendRollbackEvent(changeSet, databaseChangeLog, database);
         this.database.commit();
         checkForEmptyRollbackFile(changeSet);
