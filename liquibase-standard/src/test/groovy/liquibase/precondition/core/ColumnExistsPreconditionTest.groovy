@@ -80,6 +80,28 @@ class ColumnExistsPreconditionTest extends Specification {
         database?.close()
     }
 
+    def "columnExists finds a snapshot-only H2 column when default catalog is the schema name"() {
+        given:
+        def database = h2Database()
+        database.setDefaultCatalogName("eocs")
+        def statement = ((JdbcConnection) database.connection).createStatement()
+        try {
+            statement.execute("CREATE TABLE eocs.ex_incident_type (e_id VARCHAR(36) PRIMARY KEY, _id VARCHAR(36))")
+        } finally {
+            statement.close()
+        }
+        def precondition = columnExists("eocs", "eocs", "ex_incident_type", "_id")
+
+        when:
+        precondition.check(database, null, null, null)
+
+        then:
+        noExceptionThrown()
+
+        cleanup:
+        database?.close()
+    }
+
     def "columnExists still fails for a snapshot-only H2 name when the column is absent"() {
         given:
         def database = h2Database()

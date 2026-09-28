@@ -138,17 +138,35 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
      * H2's JDBC catalog is the database name. A changelog catalog that does not match
      * it is not a different database on this connection, and using it as the snapshot
      * catalog makes an existing column look absent.
+     * <p>
+     * Compare with the JDBC catalog, not {@link Database#getDefaultCatalogName()}.
+     * That setting is often the schema name. Passing it, or passing null (which the
+     * snapshot replaces with the configured default), makes the column look absent.
+     * Use the JDBC catalog instead.
      */
     private String catalogForSnapshot(Database database) {
         String catalogName = getCatalogName();
         if (!(database instanceof H2Database) || catalogName == null) {
             return catalogName;
         }
-        String connectionCatalog = database.getDefaultCatalogName();
+        String connectionCatalog = jdbcCatalog(database);
         if (connectionCatalog != null && !connectionCatalog.equalsIgnoreCase(catalogName)) {
-            return null;
+            // Null would be replaced with the configured default catalog, which is
+            // often the schema name and makes the column look absent.
+            return connectionCatalog;
         }
         return catalogName;
+    }
+
+    private String jdbcCatalog(Database database) {
+        if (database.getConnection() == null) {
+            return null;
+        }
+        try {
+            return database.getConnection().getCatalog();
+        } catch (DatabaseException e) {
+            return null;
+        }
     }
 
     private void checkFast(Database database, DatabaseChangeLog changeLog)
