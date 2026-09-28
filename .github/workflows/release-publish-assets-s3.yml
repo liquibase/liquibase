@@ -62,7 +62,7 @@ jobs:
         run: echo "timestamp=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
 
       - name: Configure AWS credentials for devops vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           role-to-assume: ${{ secrets.DEVOPS_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
