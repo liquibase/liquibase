@@ -4,8 +4,9 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
-import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.AbstractPostgresDatabase;
+import liquibase.database.core.FirebirdDatabase;
+import liquibase.database.core.H2Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.*;
 import liquibase.precondition.AbstractPrecondition;
@@ -94,7 +95,7 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
             if (schemaName == null) {
                 schemaName = database.getDefaultSchemaName();
             }
-            example.setRelation(new Table().setName(database.correctObjectName(getTableName(), Table.class)).setSchema(new Schema(getCatalogName(), schemaName)));
+            example.setRelation(new Table().setName(database.correctObjectName(getTableName(), Table.class)).setSchema(new Schema(catalogForSnapshot(database), schemaName)));
         }
         example.setName(database.correctObjectName(getColumnName(), Column.class));
 
@@ -108,8 +109,9 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
     }
 
     private boolean canCheckFast(Database database) {
-        if (getCatalogName() != null)
+        if (getCatalogName() != null && !fastCheckIgnoresCatalog(database)) {
             return false;
+        }
 
         if (database.getConnection() == null || !(database.getConnection() instanceof JdbcConnection))
             return false;
@@ -121,6 +123,32 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
             return false;
 
         return (getSchemaName() != null) || (database.getDefaultSchemaName() != null);
+    }
+
+    /**
+     * The fast check selects {@code schema.table} and does not qualify a catalog.
+     * H2's JDBC catalog is the database name, so a changelog catalogName (often the
+     * same value as schemaName) must not force the snapshot lookup that misses the column.
+     */
+    private boolean fastCheckIgnoresCatalog(Database database) {
+        return database instanceof H2Database;
+    }
+
+    /**
+     * H2's JDBC catalog is the database name. A changelog catalog that does not match
+     * it is not a different database on this connection, and using it as the snapshot
+     * catalog makes an existing column look absent.
+     */
+    private String catalogForSnapshot(Database database) {
+        String catalogName = getCatalogName();
+        if (!(database instanceof H2Database) || catalogName == null) {
+            return catalogName;
+        }
+        String connectionCatalog = database.getDefaultCatalogName();
+        if (connectionCatalog != null && !connectionCatalog.equalsIgnoreCase(catalogName)) {
+            return null;
+        }
+        return catalogName;
     }
 
     private void checkFast(Database database, DatabaseChangeLog changeLog)
