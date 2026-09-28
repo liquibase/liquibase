@@ -75,6 +75,8 @@ jobs:
     runs-on: ubuntu-latest
     # These two names are the entire OIDC trust on the release-scoped role below, so dropping the
     # environment does not just skip a gate, it stops this job reaching the vault at all.
+    # `approved` must stay `workflow_call`-only: on `workflow_dispatch` anyone who can dispatch
+    # could pick `release-publish` and skip the reviewers.
     environment:
       name: ${{ inputs.approved && 'release-publish' || 'release' }}
     outputs:

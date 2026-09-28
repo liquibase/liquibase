@@ -229,13 +229,13 @@ The table above says what each workflow does. This one says what stands in front
 | `publish-assets-s3` | `release-publish-assets-s3.yml` | via `needs` | **devops** | `/vault/devops`; only the Cloudflare R2 credentials, no `/vault/liquibase` read [TECHOPS-1320] |
 | `deploy-maven-production` | `release-deploy-maven.yml` | via `needs` | release-scoped | `/vault/liquibase`; holds the Maven Central credentials |
 | `deploy-maven-dryrun` | `release-deploy-maven.yml` | none, by design | **broad** | `/vault/liquibase`; dry runs skip the gate deliberately |
-| `release-docker` | `docker-release.yml` | via `needs` | release-scoped | its `update-dockerfiles` job reads `/vault/liquibase` for the App key only [TECHOPS-1265] |
+| `release-docker` | `docker-release.yml` | via `needs` | **broad** | `update-dockerfiles` reads `/vault/liquibase` for the App key only, through the release-scoped role [TECHOPS-1265]; `build-community` and `build-alpine` call build-logic's `reusable-docker-build.yml`, which loads it whole through the broad role |
 | `reversion`, `build-installers` | `create-release.yml` | `release`, or `release-publish` only for a dry run of `main` [TECHOPS-1223] | release-scoped | `/vault/liquibase`; holds the GPG and DigiCert signing credentials |
 | `tag-release` | `create-release.yml` | `release`, the same approval `reversion` already took | release-scoped | `/vault/liquibase` for the App key only; mints a `contents: write` token scoped to this repo |
 
 "release-scoped" is `liquibase-release-vault-oidc-role`, whose trust is the two `environment:` subjects above and nothing else, so only a job that declares one of those environments can assume it. "broad" is `liquibase-vault-oidc-role`, whose GitHub OIDC trust matches any repo in the `liquibase`, `Datical` and `datical` orgs, in both the classic and the immutable `owner@ownerId/repo@repoId` subject formats: six globs, not one. It carries a second statement besides, unrelated to GitHub: any principal inside the AWS org whose ARN matches the Spacelift role shapes can `sts:AssumeRole` into it. "devops" is `devops-vault-oidc-role`, which reaches `/vault/devops` rather than `/vault/liquibase`; its trust is a named list of nine repositories, but each entry is `repo:<owner>/<repo>:*`, so it still admits every subject this repository can emit rather than just the release environments.
 
-`package` chains a second role: build-logic's `package.yml` loads `/vault/liquibase` whole with `parse-json-secrets: true`, reads `AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC` out of it and assumes that. The vault read is not the end of the blast radius, and it is the only place on this pipeline where the whole blob still lands in a job environment. Nothing in this repository chains a second role any more [TECHOPS-1320].
+Two shared build-logic workflows still load `/vault/liquibase` whole with `parse-json-secrets: true` through the broad role, and both chain a second role read out of it. `package.yml` assumes `AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC`. `reusable-docker-build.yml`, called by `release-docker` for the community and Alpine images, assumes `AWS_PROD_GITHUB_OIDC_ROLE_ARN_INFRASTRUCTURE` in its `build` job, and its `notify` job loads the vault whole again when a build fails or leaves an image unsigned. The vault read is not the end of the blast radius, and these are the only places on this pipeline where the whole blob still lands in a job environment. No workflow in this repository chains a second role itself any more [TECHOPS-1320].
 
 ### :twisted_rightwards_arrows: Which environment a publishing job gets
 
@@ -359,7 +359,7 @@ flowchart LR
     xsd("deploy-xsd"):::scoped --> maven
     package("package<br/>build-logic@main"):::broad --> s3
 
-    maven("deploy-maven"):::scoped --> docker("release-docker"):::scoped
+    maven("deploy-maven"):::scoped --> docker("release-docker"):::broad
     s3("publish-assets-s3"):::devops
 
     docker --> summary
