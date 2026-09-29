@@ -615,20 +615,35 @@ jobs:
           aws-region: us-east-1
 
       - name: Get the GitHub App credentials from vault
-        # TECHOPS-1295: /vault/grouped/github-app-liquibase holds exactly the keys this job uses,
-        # so the whole secret is parsed into the job env and nothing else comes along.
-        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
-        with:
-          secret-ids: |
-            ,/vault/grouped/github-app-liquibase
-          parse-json-secrets: true
+        id: app-vault
+        # /vault/grouped/github-app-liquibase holds exactly these two keys, but they go to
+        # step outputs, not GITHUB_ENV: only the token step needs them, and GITHUB_ENV would
+        # hand the private key to every later step of the one `contents: write` job.
+        run: |
+          set -euo pipefail
+          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/grouped/github-app-liquibase --region us-east-1 --query SecretString --output text)
+          for k in LIQUIBASE_GITHUB_APP_ID LIQUIBASE_GITHUB_APP_PRIVATE_KEY; do
+            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
+            # which would silently alter a value that legitimately ends in one.
+            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
+            v=${v%X}
+            if [ -z "$v" ]; then echo "::error::$k missing from /vault/grouped/github-app-liquibase"; exit 1; fi
+            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
+            # those literals registers a mask that never matches it; % is escaped first
+            # so the escapes the next two produce are not escaped again.
+            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
+            printf '::add-mask::%s\n' "$e"
+            D="VAULT_EOF_${RANDOM}${RANDOM}"
+            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_OUTPUT"
+          done
+          unset JSON
 
       - name: Get GitHub App token
         id: get-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ steps.app-vault.outputs.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ steps.app-vault.outputs.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           # Without `repositories` the token would cover every repo in the org, since the
           # app is installed on all of them.

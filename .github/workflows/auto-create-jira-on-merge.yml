@@ -5,18 +5,18 @@ name: "Auto-create Jira ticket on Community PR merge"
 # queue of every shipping change without scraping merged PRs at release
 # time. Full process: https://github.com/liquibase/liquibase-infrastructure/blob/main/jira/docs/community-release-process.md
 #
-# Three triggers cover real-world merge patterns:
+# Four triggers cover real-world merge patterns:
 #   1. push to main → the merge itself. Squash is the only merge strategy
 #      enabled on this repo, so one pushed commit maps to exactly one PR.
-#   2. Milestone renamed (e.g. 1NEXT → 5.0.4) → backfill Fix Version on
+#   2. PR milestoned AFTER merge (forgot-to-set case) → re-enters as trigger 4
+#   3. Milestone renamed (e.g. 1NEXT → 5.0.4) → backfill Fix Version on
 #      every auto-created ticket in that milestone
-#   3. workflow_dispatch with a PR number → manual backfill for one PR,
-#      including a PR milestoned only after it merged.
+#   4. workflow_dispatch with a PR number → backfill for one PR
 #
-# TECHOPS-1295: there used to be a `pull_request: milestoned` arm for that last
-# case. A `pull_request` job without an environment presents the `:pull_request`
-# OIDC subject, which the grouped vault roles deny, so it can no longer reach
-# the Jira credentials and was dropped rather than have the roles relaxed.
+# TECHOPS-1295: trigger 2 no longer reads the vault itself. A `pull_request` job
+# presents the `:pull_request` OIDC subject, which the grouped vault roles deny,
+# so the `relay-milestoned` job holds no credential and dispatches trigger 4 for
+# the PR instead; a GITHUB_TOKEN dispatch does start a run.
 #
 # TECHOPS-1307: trigger 1 used to be `pull_request: closed`, and that never
 # worked for the contributions this workflow exists to track. A `pull_request`
@@ -61,6 +61,8 @@ concurrency:
 on:
   push:
     branches: [main]
+  pull_request:
+    types: [milestoned]
   milestone:
     types: [edited]
   workflow_dispatch:
@@ -79,6 +81,24 @@ permissions:
   issues: read
 
 jobs:
+  relay-milestoned:
+    runs-on: ubuntu-latest
+    # Same-repo merged PRs only: a fork PR has a read-only token here, and the
+    # push arm already covered it at merge time.
+    if: |
+      github.event_name == 'pull_request' &&
+      github.event.action == 'milestoned' &&
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      actions: write
+    steps:
+      - name: Dispatch the backfill for this PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh workflow run auto-create-jira-on-merge.yml --repo "$GITHUB_REPOSITORY" --ref main -f pr_number="$PR_NUMBER"
+
   auto-create:
     runs-on: ubuntu-latest
     if: |
@@ -93,26 +113,13 @@ jobs:
           aws-region: us-east-1
 
       - name: Get the Jira service-account credentials from vault
-        # TECHOPS-1295: only JIRA_USER and JIRA_API_TOKEN of /vault/grouped/jira-automation are used
-        # here, so pick them out rather than parsing the whole group into the env.
-        run: |
-          set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/grouped/jira-automation --region us-east-1 --query SecretString --output text)
-          for k in JIRA_USER JIRA_API_TOKEN; do
-            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
-            # which would silently alter a value that legitimately ends in one.
-            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
-            v=${v%X}
-            if [ -z "$v" ]; then echo "::error::$k missing from /vault/grouped/jira-automation"; exit 1; fi
-            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
-            # those literals registers a mask that never matches it; % is escaped first
-            # so the escapes the next two produce are not escaped again.
-            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
-            printf '::add-mask::%s\n' "$e"
-            D="VAULT_EOF_${RANDOM}${RANDOM}"
-            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
-          done
-          unset JSON
+        # TECHOPS-1295: /vault/grouped/jira-automation holds exactly JIRA_USER and
+        # JIRA_API_TOKEN, so the whole secret is parsed into the job env.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/jira-automation
+          parse-json-secrets: true
 
       - name: Auto-create / update tickets
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
@@ -235,7 +242,7 @@ jobs:
               return null;
             }
 
-            // ---- Triggers 1 and 3: a merged PR ------------------------------
+            // ---- Triggers 1 and 4: a merged PR ------------------------------
             // Takes the PR as an argument: on the push and dispatch paths there
             // is no pull_request in the payload and the PR has to be fetched.
             async function handlePullRequest(pr) {
@@ -303,7 +310,7 @@ jobs:
                 .write();
             }
 
-            // ---- Trigger 2: milestone renamed -------------------------------
+            // ---- Trigger 3: milestone renamed -------------------------------
             async function handleMilestoneEdit() {
               const milestone = context.payload.milestone;
               const before = (context.payload.changes && context.payload.changes.title && context.payload.changes.title.from) || null;
@@ -437,7 +444,7 @@ jobs:
               }
             }
 
-            // ---- Trigger 3: manual backfill ---------------------------------
+            // ---- Trigger 4: backfill one PR ---------------------------------
             async function handleDispatch() {
               const raw = process.env.BACKFILL_PR_NUMBER || '';
               if (!/^\d+$/.test(raw)) {
