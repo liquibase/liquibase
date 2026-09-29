@@ -1019,6 +1019,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         rollback(database, null);
     }
 
+    /**
+     * Rolls back the changes in this changeset against the given database and, if the changeset runs in a
+     * transaction, commits the rollback.
+     */
     public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
         rollback(database, listener, false);
     }

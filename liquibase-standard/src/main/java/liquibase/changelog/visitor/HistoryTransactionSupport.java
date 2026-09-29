@@ -9,6 +9,7 @@ import liquibase.database.Database;
 
 final class HistoryTransactionSupport {
 
+    /** Static helpers only; not meant to be instantiated. */
     private HistoryTransactionSupport() {
     }
 

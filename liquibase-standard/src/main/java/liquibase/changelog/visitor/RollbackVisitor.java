@@ -51,6 +51,10 @@ public class RollbackVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.REVERSE;
     }
 
+    /**
+     * Rolls back the given changeset and removes its DATABASECHANGELOG row. When
+     * {@code HistoryTransactionSupport.commitsWithHistory} allows it, both are committed in one transaction.
+     */
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         logMdcData(changeSet);

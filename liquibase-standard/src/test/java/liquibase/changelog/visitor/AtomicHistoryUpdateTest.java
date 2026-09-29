@@ -52,6 +52,7 @@ class AtomicHistoryUpdateTest {
 
     private String url;
 
+    /** Points each test at a fresh SQLite file and writes the changelogs the tests use. */
     @BeforeEach
     void setUp() throws Exception {
         url = "jdbc:sqlite:" + dir.resolve("test.db");
@@ -64,6 +65,7 @@ class AtomicHistoryUpdateTest {
                 changeSet("2", "", "<createTable tableName=\"t2\"><column name=\"id\" type=\"int\"/></createTable>"));
     }
 
+    /** Disables the non-atomic test history service and resets the history and lock service factories. */
     @AfterEach
     void tearDown() {
         NonAtomicTestChangeLogHistoryService.enabled = false;
@@ -73,6 +75,7 @@ class AtomicHistoryUpdateTest {
 
     // --- liquibase.atomicHistoryUpdates=true ---
 
+    /** With the setting on, a failed history insert rolls back the changeset's changes, and a retry succeeds. */
     @Test
     void updateRollsBackChangeSetWhenHistoryRowCannotBeWritten() throws Exception {
         withAtomicHistoryUpdates(true, () -> {
@@ -92,6 +95,7 @@ class AtomicHistoryUpdateTest {
         });
     }
 
+    /** With the setting on, a failed history delete undoes the rollback's changes, and a retry succeeds. */
     @Test
     void rollbackIsUndoneWhenHistoryRowCannotBeRemoved() throws Exception {
         withAtomicHistoryUpdates(true, () -> {
@@ -111,6 +115,7 @@ class AtomicHistoryUpdateTest {
         });
     }
 
+    /** With the setting on, a runInTransaction="false" changeset still commits its changes as they run. */
     @Test
     void updateKeepsChangesOfNonTransactionalChangeSetWhenHistoryRowCannotBeWritten() throws Exception {
         withAtomicHistoryUpdates(true, () -> {
@@ -124,6 +129,7 @@ class AtomicHistoryUpdateTest {
         });
     }
 
+    /** With the setting on, a history service that doesn't opt in keeps the two-commit behavior. */
     @Test
     void updateKeepsTwoCommitsWhenHistoryServiceDoesNotSupportAtomicUpdates() throws Exception {
         withAtomicHistoryUpdates(true, () -> {
@@ -140,6 +146,7 @@ class AtomicHistoryUpdateTest {
         });
     }
 
+    /** With the setting on, the helper also requires runInTransaction=true and a database with transactional DDL. */
     @Test
     void commitsWithHistoryOnlyForTransactionalChangeSetsOnDatabasesWithTransactionalDdl() throws Exception {
         ChangeSet inTransaction = new ChangeSet("1", "test", false, false, "test.xml", null, null, true, null);
@@ -156,12 +163,16 @@ class AtomicHistoryUpdateTest {
 
     // --- liquibase.atomicHistoryUpdates=false (the default) ---
 
+    /** The setting defaults to false. */
     @Test
     void atomicHistoryUpdatesIsDisabledByDefault() {
         assertFalse(GlobalConfiguration.ATOMIC_HISTORY_UPDATES.getDefaultValue());
         assertFalse(GlobalConfiguration.ATOMIC_HISTORY_UPDATES.getCurrentValue());
     }
 
+    /**
+     * With the setting at its default, a failed history insert leaves the changes applied and a re-run fails, as before.
+     */
     @Test
     void updateLeavesChangeSetAppliedWithoutHistoryRowByDefault() throws Exception {
         update("step1.xml");
@@ -177,6 +188,9 @@ class AtomicHistoryUpdateTest {
                 "re-running re-issues the addColumn against a column that already exists");
     }
 
+    /**
+     * With the setting explicitly off, a failed history delete leaves the rollback committed and a retry fails, as before.
+     */
     @Test
     void rollbackLeavesChangeSetRolledBackWithHistoryRowWhenDisabled() throws Exception {
         withAtomicHistoryUpdates(false, () -> {
@@ -194,6 +208,9 @@ class AtomicHistoryUpdateTest {
         });
     }
 
+    /**
+     * With the setting off, by default or explicitly, the helper returns false even when every other condition holds.
+     */
     @Test
     void commitsWithHistoryIsFalseWhenDisabled() throws Exception {
         ChangeSet inTransaction = new ChangeSet("1", "test", false, false, "test.xml", null, null, true, null);
@@ -204,53 +221,63 @@ class AtomicHistoryUpdateTest {
                 assertFalse(HistoryTransactionSupport.commitsWithHistory(inTransaction, transactionalDdl), "explicitly false"));
     }
 
+    /** Runs {@code test} with liquibase.atomicHistoryUpdates set to {@code enabled}. */
     private static void withAtomicHistoryUpdates(boolean enabled, Scope.ScopedRunner<?> test) throws Exception {
         Scope.child(GlobalConfiguration.ATOMIC_HISTORY_UPDATES.getKey(), enabled, test);
     }
 
+    /** Returns a mock database whose supportsDDLInTransaction() returns {@code supported}. */
     private static Database databaseWithTransactionalDdl(boolean supported) {
         Database database = mock(Database.class);
         when(database.supportsDDLInTransaction()).thenReturn(supported);
         return database;
     }
 
+    /** Runs update with the given changelog against the test database. */
     private void update(String changeLog) throws Exception {
         try (Liquibase liquibase = liquibase(changeLog)) {
             liquibase.update("");
         }
     }
 
+    /** Rolls back the most recent changeset in the given changelog. */
     private void rollbackOne(String changeLog) throws Exception {
         try (Liquibase liquibase = liquibase(changeLog)) {
             liquibase.rollback(1, (String) null);
         }
     }
 
+    /** Creates a Liquibase instance for the given changelog on a new connection to the test database. */
     private Liquibase liquibase(String changeLog) throws Exception {
         Database database = DatabaseFactory.getInstance()
                 .findCorrectDatabaseImplementation(new JdbcConnection(DriverManager.getConnection(url)));
         return new Liquibase(changeLog, new DirectoryResourceAccessor(dir), database);
     }
 
+    /** Executes a statement on its own connection, outside Liquibase. */
     private void sql(String statement) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url); Statement s = connection.createStatement()) {
             s.execute(statement);
         }
     }
 
+    /** Returns the column names of the given table. */
     private List<String> columns(String table) throws SQLException {
         return query("PRAGMA table_info(" + table + ")", "name");
     }
 
+    /** Returns whether the given table exists. */
     private boolean tableExists(String table) throws SQLException {
         return query("SELECT name FROM sqlite_master WHERE type = 'table' AND name = '" + table + "'", "name")
                 .contains(table);
     }
 
+    /** Returns the DATABASECHANGELOG ids in execution order. */
     private List<String> historyIds() throws SQLException {
         return query("SELECT ID FROM DATABASECHANGELOG ORDER BY ORDEREXECUTED", "ID");
     }
 
+    /** Runs a query on its own connection and returns the given column from every row. */
     private List<String> query(String sql, String column) throws SQLException {
         List<String> values = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection(url);
@@ -263,11 +290,13 @@ class AtomicHistoryUpdateTest {
         return values;
     }
 
+    /** Returns the XML for a changeset with the given id, extra attributes and body. */
     private static String changeSet(String id, String attributes, String body) {
         return "<changeSet id=\"" + id + "\" author=\"test\" logicalFilePath=\"changelog.xml\"" + attributes + ">" +
                 body + "</changeSet>";
     }
 
+    /** Writes a changelog file with the given changesets into the test directory. */
     private void writeChangeLog(String name, String... changeSets) throws Exception {
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\n" +

@@ -396,6 +396,10 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         return super.getRanChangeSet(changeSet);
     }
 
+    /**
+     * Returns true: {@link #setExecType} and {@link #removeFromHistory} write on the same connection as the
+     * changeset and commit it.
+     */
     @Override
     public boolean supportsAtomicHistoryUpdates() {
         return true;
