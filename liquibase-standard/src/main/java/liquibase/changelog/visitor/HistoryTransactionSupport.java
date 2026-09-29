@@ -1,5 +1,6 @@
 package liquibase.changelog.visitor;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
@@ -16,6 +17,9 @@ final class HistoryTransactionSupport {
      * so that the changes and the history update are committed (or rolled back) together.
      */
     static boolean commitsWithHistory(ChangeSet changeSet, Database database) {
+        if (!GlobalConfiguration.ATOMIC_HISTORY_UPDATES.getCurrentValue()) {
+            return false;
+        }
         if (!changeSet.isRunInTransaction() || !database.supportsDDLInTransaction()) {
             return false;
         }

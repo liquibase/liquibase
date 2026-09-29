@@ -1,5 +1,6 @@
 package liquibase.changelog.visitor;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
@@ -70,78 +71,147 @@ class AtomicHistoryUpdateTest {
         LockServiceFactory.getInstance().resetAll();
     }
 
+    // --- liquibase.atomicHistoryUpdates=true ---
+
     @Test
     void updateRollsBackChangeSetWhenHistoryRowCannotBeWritten() throws Exception {
-        update("step1.xml");
-        sql(FAIL_HISTORY_INSERT);
+        withAtomicHistoryUpdates(true, () -> {
+            update("step1.xml");
+            sql(FAIL_HISTORY_INSERT);
 
-        assertThrows(Exception.class, () -> update("add-column.xml"));
+            assertThrows(Exception.class, () -> update("add-column.xml"));
 
-        assertFalse(columns("t1").contains("c2"), "the addColumn must be rolled back together with the failed history row");
-        assertEquals(Arrays.asList("1"), historyIds());
+            assertFalse(columns("t1").contains("c2"), "the addColumn must be rolled back together with the failed history row");
+            assertEquals(Arrays.asList("1"), historyIds());
 
-        sql("DROP TRIGGER fail_history");
-        update("add-column.xml");
+            sql("DROP TRIGGER fail_history");
+            update("add-column.xml");
 
-        assertTrue(columns("t1").contains("c2"));
-        assertEquals(Arrays.asList("1", "2"), historyIds());
-    }
-
-    @Test
-    void updateKeepsChangesOfNonTransactionalChangeSetWhenHistoryRowCannotBeWritten() throws Exception {
-        update("step1.xml");
-        sql(FAIL_HISTORY_INSERT);
-
-        assertThrows(Exception.class, () -> update("add-column-no-tx.xml"));
-
-        assertTrue(columns("t1").contains("c2"), "runInTransaction=false changes are committed as they run, as before");
-        assertEquals(Arrays.asList("1"), historyIds());
-    }
-
-    @Test
-    void updateKeepsTwoCommitsWhenHistoryServiceDoesNotSupportAtomicUpdates() throws Exception {
-        NonAtomicTestChangeLogHistoryService.enabled = true;
-        NonAtomicTestChangeLogHistoryService.used = false;
-        update("step1.xml");
-        sql(FAIL_HISTORY_INSERT);
-
-        assertThrows(Exception.class, () -> update("add-column.xml"));
-
-        assertTrue(NonAtomicTestChangeLogHistoryService.used, "the non-atomic history service should have been selected");
-        assertTrue(columns("t1").contains("c2"), "history services that do not opt in keep the existing behavior");
-        assertEquals(Arrays.asList("1"), historyIds());
+            assertTrue(columns("t1").contains("c2"));
+            assertEquals(Arrays.asList("1", "2"), historyIds());
+        });
     }
 
     @Test
     void rollbackIsUndoneWhenHistoryRowCannotBeRemoved() throws Exception {
-        update("create-t2.xml");
-        sql(FAIL_HISTORY_DELETE);
+        withAtomicHistoryUpdates(true, () -> {
+            update("create-t2.xml");
+            sql(FAIL_HISTORY_DELETE);
 
-        assertThrows(Exception.class, () -> rollbackOne("create-t2.xml"));
+            assertThrows(Exception.class, () -> rollbackOne("create-t2.xml"));
 
-        assertTrue(tableExists("t2"), "the rollback DDL must be undone together with the failed history delete");
-        assertEquals(Arrays.asList("1", "2"), historyIds());
+            assertTrue(tableExists("t2"), "the rollback DDL must be undone together with the failed history delete");
+            assertEquals(Arrays.asList("1", "2"), historyIds());
 
-        sql("DROP TRIGGER fail_history");
-        rollbackOne("create-t2.xml");
+            sql("DROP TRIGGER fail_history");
+            rollbackOne("create-t2.xml");
 
-        assertFalse(tableExists("t2"));
-        assertEquals(Arrays.asList("1"), historyIds());
+            assertFalse(tableExists("t2"));
+            assertEquals(Arrays.asList("1"), historyIds());
+        });
     }
 
     @Test
-    void commitsWithHistoryOnlyForTransactionalChangeSetsOnDatabasesWithTransactionalDdl() {
+    void updateKeepsChangesOfNonTransactionalChangeSetWhenHistoryRowCannotBeWritten() throws Exception {
+        withAtomicHistoryUpdates(true, () -> {
+            update("step1.xml");
+            sql(FAIL_HISTORY_INSERT);
+
+            assertThrows(Exception.class, () -> update("add-column-no-tx.xml"));
+
+            assertTrue(columns("t1").contains("c2"), "runInTransaction=false changes are committed as they run, as before");
+            assertEquals(Arrays.asList("1"), historyIds());
+        });
+    }
+
+    @Test
+    void updateKeepsTwoCommitsWhenHistoryServiceDoesNotSupportAtomicUpdates() throws Exception {
+        withAtomicHistoryUpdates(true, () -> {
+            NonAtomicTestChangeLogHistoryService.enabled = true;
+            NonAtomicTestChangeLogHistoryService.used = false;
+            update("step1.xml");
+            sql(FAIL_HISTORY_INSERT);
+
+            assertThrows(Exception.class, () -> update("add-column.xml"));
+
+            assertTrue(NonAtomicTestChangeLogHistoryService.used, "the non-atomic history service should have been selected");
+            assertTrue(columns("t1").contains("c2"), "history services that do not opt in keep the existing behavior");
+            assertEquals(Arrays.asList("1"), historyIds());
+        });
+    }
+
+    @Test
+    void commitsWithHistoryOnlyForTransactionalChangeSetsOnDatabasesWithTransactionalDdl() throws Exception {
         ChangeSet inTransaction = new ChangeSet("1", "test", false, false, "test.xml", null, null, true, null);
         ChangeSet notInTransaction = new ChangeSet("2", "test", false, false, "test.xml", null, null, false, null);
+        Database transactionalDdl = databaseWithTransactionalDdl(true);
+        Database nonTransactionalDdl = databaseWithTransactionalDdl(false);
 
-        Database transactionalDdl = mock(Database.class);
-        when(transactionalDdl.supportsDDLInTransaction()).thenReturn(true);
-        Database nonTransactionalDdl = mock(Database.class);
-        when(nonTransactionalDdl.supportsDDLInTransaction()).thenReturn(false);
+        withAtomicHistoryUpdates(true, () -> {
+            assertTrue(HistoryTransactionSupport.commitsWithHistory(inTransaction, transactionalDdl));
+            assertFalse(HistoryTransactionSupport.commitsWithHistory(notInTransaction, transactionalDdl));
+            assertFalse(HistoryTransactionSupport.commitsWithHistory(inTransaction, nonTransactionalDdl));
+        });
+    }
 
-        assertTrue(HistoryTransactionSupport.commitsWithHistory(inTransaction, transactionalDdl));
-        assertFalse(HistoryTransactionSupport.commitsWithHistory(notInTransaction, transactionalDdl));
-        assertFalse(HistoryTransactionSupport.commitsWithHistory(inTransaction, nonTransactionalDdl));
+    // --- liquibase.atomicHistoryUpdates=false (the default) ---
+
+    @Test
+    void atomicHistoryUpdatesIsDisabledByDefault() {
+        assertFalse(GlobalConfiguration.ATOMIC_HISTORY_UPDATES.getDefaultValue());
+        assertFalse(GlobalConfiguration.ATOMIC_HISTORY_UPDATES.getCurrentValue());
+    }
+
+    @Test
+    void updateLeavesChangeSetAppliedWithoutHistoryRowByDefault() throws Exception {
+        update("step1.xml");
+        sql(FAIL_HISTORY_INSERT);
+
+        assertThrows(Exception.class, () -> update("add-column.xml"));
+
+        assertTrue(columns("t1").contains("c2"), "without the setting the addColumn is committed before the history row");
+        assertEquals(Arrays.asList("1"), historyIds());
+
+        sql("DROP TRIGGER fail_history");
+        assertThrows(Exception.class, () -> update("add-column.xml"),
+                "re-running re-issues the addColumn against a column that already exists");
+    }
+
+    @Test
+    void rollbackLeavesChangeSetRolledBackWithHistoryRowWhenDisabled() throws Exception {
+        withAtomicHistoryUpdates(false, () -> {
+            update("create-t2.xml");
+            sql(FAIL_HISTORY_DELETE);
+
+            assertThrows(Exception.class, () -> rollbackOne("create-t2.xml"));
+
+            assertFalse(tableExists("t2"), "with the setting off the DROP TABLE is committed before the history delete");
+            assertEquals(Arrays.asList("1", "2"), historyIds());
+
+            sql("DROP TRIGGER fail_history");
+            assertThrows(Exception.class, () -> rollbackOne("create-t2.xml"),
+                    "retrying re-issues the DROP TABLE against a table that no longer exists");
+        });
+    }
+
+    @Test
+    void commitsWithHistoryIsFalseWhenDisabled() throws Exception {
+        ChangeSet inTransaction = new ChangeSet("1", "test", false, false, "test.xml", null, null, true, null);
+        Database transactionalDdl = databaseWithTransactionalDdl(true);
+
+        assertFalse(HistoryTransactionSupport.commitsWithHistory(inTransaction, transactionalDdl), "default");
+        withAtomicHistoryUpdates(false, () ->
+                assertFalse(HistoryTransactionSupport.commitsWithHistory(inTransaction, transactionalDdl), "explicitly false"));
+    }
+
+    private static void withAtomicHistoryUpdates(boolean enabled, Scope.ScopedRunner<?> test) throws Exception {
+        Scope.child(GlobalConfiguration.ATOMIC_HISTORY_UPDATES.getKey(), enabled, test);
+    }
+
+    private static Database databaseWithTransactionalDdl(boolean supported) {
+        Database database = mock(Database.class);
+        when(database.supportsDDLInTransaction()).thenReturn(supported);
+        return database;
     }
 
     private void update(String changeLog) throws Exception {

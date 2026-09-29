@@ -243,6 +243,21 @@ Global Options
                                environment variable:
                                'LIQUIBASE_ANALYTICS_ENABLED')
 
+      --atomic-history-updates=PARAM
+                             If true, a changeset that runs in a transaction is
+                               committed together with its DATABASECHANGELOG
+                               update (the row added by update or removed by
+                               rollback), so losing the connection between the
+                               two can no longer leave the schema and
+                               DATABASECHANGELOG out of sync. Applies only to
+                               databases that support DDL inside transactions,
+                               such as PostgreSQL; changesets with
+                               runInTransaction=false are unaffected.
+                             DEFAULT: false
+                             (defaults file: 'liquibase.atomicHistoryUpdates',
+                               environment variable:
+                               'LIQUIBASE_ATOMIC_HISTORY_UPDATES')
+
       --auto-reorg=PARAM     Should Liquibase automatically include REORG TABLE
                                commands when needed?
                              DEFAULT: true
