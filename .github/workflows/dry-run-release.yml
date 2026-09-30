@@ -56,7 +56,7 @@ jobs:
 
       - name: Invoke Create Release
         id: trigger-step
-        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@d12b38713b9a20a72f95468749ee5031137689a6 # main
+        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@c83344cd9cb81aba475fd8b00a43e3c711acee5c # main
         with:
           workflow: create-release.yml
           ref: main
@@ -200,7 +200,7 @@ jobs:
           permission-actions: write
 
       - name: Trigger release-published-orchestrator workflow
-        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@d12b38713b9a20a72f95468749ee5031137689a6 # main
+        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@c83344cd9cb81aba475fd8b00a43e3c711acee5c # main
         with:
           workflow: release-published-orchestrator.yml
           ref: main
