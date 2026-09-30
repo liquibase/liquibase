@@ -172,7 +172,7 @@ jobs:
     # dispatch-and-wait), never through this repo's own workflow_call chain, so dry_run
     # is the input that actually distinguishes a rehearsal from a real release here.
     # `release-publish` has 0 reviewers so the weekly cron is not blocked; `release` has
-    # 5. See .github/workflows/README.md for the broad-role OIDC trust this depends on.
+    # 5. See .github/workflows/README.md for the grouped-role OIDC trust this depends on.
     environment:
       # `release-publish` has 0 reviewers, which the weekly rehearsal needs so the cron
       # does not hang. It is reachable only for a dry run that is BOTH building `main` and
@@ -258,34 +258,20 @@ jobs:
           cp liquibase-cli/target/liquibase-cli-$VERSION-sources.jar artifacts-additional/
           cp liquibase-cli/target/liquibase-cli-$VERSION-javadoc.jar artifacts-additional/
 
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+      - name: Configure AWS credentials for the gpg-signing secret
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Get secrets from vault
-        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
-        # parse-json-secrets: true put every credential in /vault/liquibase into this
-        # job's environment; read only the two GPG keys this step signs with.
-        run: |
-          set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
-          for k in GPG_SECRET GPG_PASSPHRASE; do
-            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
-            # which would silently alter a value that legitimately ends in one.
-            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
-            v=${v%X}
-            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
-            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
-            # those literals registers a mask that never matches it; % is escaped first
-            # so the escapes the next two produce are not escaped again.
-            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
-            printf '::add-mask::%s\n' "$e"
-            D="VAULT_EOF_${RANDOM}${RANDOM}"
-            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
-          done
-          unset JSON
+      - name: Get the GPG signing key from vault
+        # TECHOPS-1295: /vault/grouped/gpg-signing holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/gpg-signing
+          parse-json-secrets: true
 
       - name: Convert escaped newlines and set GPG key
         run: |
@@ -360,45 +346,54 @@ jobs:
           # This job runs no networked git command, so the token does not need to sit in .git/config.
           persist-credentials: false
 
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+      - name: Configure AWS credentials for the gpg-signing secret
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Get secrets from vault
-        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
-        # parse-json-secrets: true put every credential in /vault/liquibase into this
-        # job's environment; read only what this job signs and builds with. Replaces the
-        # TECHOPS-1048 workaround that loaded the KeyLocker keys and blanked them again
-        # on dry runs: a dry run never reaches the signing steps, so it never loads them.
-        env:
-          DRY_RUN: ${{ inputs.dry_run }}
-        run: |
-          set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
-          KEYS="GPG_SECRET GPG_PASSPHRASE INSTALL4J_LICENSE_KEY"
-          if [ "$DRY_RUN" != "true" ]; then
-            # The DigiCert KeyLocker client tools and jsign read SM_* straight from the
-            # environment rather than through named inputs, so load that whole family by
-            # prefix; naming them individually would silently drop any key added later.
-            KEYS="$KEYS $(printf '%s' "$JSON" | jq -r 'keys[] | select(startswith("SM_"))' | tr '\n' ' ')"
-          fi
-          for k in $KEYS; do
-            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
-            # which would silently alter a value that legitimately ends in one.
-            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
-            v=${v%X}
-            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
-            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
-            # those literals registers a mask that never matches it; % is escaped first
-            # so the escapes the next two produce are not escaped again.
-            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
-            printf '::add-mask::%s\n' "$e"
-            D="VAULT_EOF_${RANDOM}${RANDOM}"
-            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
-          done
-          unset JSON
+      - name: Get the GPG signing key from vault
+        # TECHOPS-1295: /vault/grouped/gpg-signing holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/gpg-signing
+          parse-json-secrets: true
+
+      # Next group, next role: this assume replaces the previous one for the rest of the job.
+      - name: Configure AWS credentials for the install4j secret
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ secrets.VAULT_GROUPED_INSTALL4J_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get the install4j licence from vault
+        # TECHOPS-1295: /vault/grouped/install4j holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/install4j
+          parse-json-secrets: true
+
+      # Next group, next role: this assume replaces the previous one for the rest of the job.
+      - name: Configure AWS credentials for the code-signing-digicert secret
+        if: ${{ inputs.dry_run == false }}
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ secrets.VAULT_GROUPED_CODE_SIGNING_DIGICERT_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get the DigiCert KeyLocker credentials from vault
+        if: ${{ inputs.dry_run == false }}
+        # TECHOPS-1295: /vault/grouped/code-signing-digicert holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/code-signing-digicert
+          parse-json-secrets: true
 
       - name: Convert escaped newlines and set GPG key
         run: |
@@ -438,7 +433,7 @@ jobs:
         run: |
           # Read the secret from the shell environment rather than expanding
           # ${{ env.SM_CLIENT_CERT_FILE_B64 }} into the generated script (zizmor
-          # template-injection). "Get secrets from vault" above already exports it
+          # template-injection). The KeyLocker vault step above already exports it
           # into the job env via parse-json-secrets, so the value is identical.
           printf '%s' "$SM_CLIENT_CERT_FILE_B64" | base64 --decode > /tmp/client-auth.p12
 
@@ -446,8 +441,8 @@ jobs:
         if: ${{ inputs.dry_run == false }}
         run: |
           # SM_HOST, SM_API_KEY, SM_CLIENT_CERT_PASSWORD, SM_CODE_SIGNING_CERT_SHA1_HASH
-          # and SM_KEY_PAIR_ALIAS are already in the job environment — "Get secrets from
-          # vault" exports every field of /vault/liquibase via parse-json-secrets. Copying
+          # and SM_KEY_PAIR_ALIAS are already in the job environment: the KeyLocker vault
+          # step exports every field of /vault/grouped/code-signing-digicert. Copying
           # them onto themselves through ${{ env.X }} only re-expanded five more secrets
           # into a generated shell script (TECHOPS-1048). SM_CLIENT_CERT_FILE is the one
           # value the vault can't supply: it points at the cert decoded in the step above.
@@ -613,31 +608,32 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+      - name: Configure AWS credentials for the github-app-liquibase secret
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.VAULT_GROUPED_GITHUB_APP_LIQUIBASE_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Get App credentials from vault
+      - name: Get the GitHub App credentials from vault
         id: app-vault
+        # /vault/grouped/github-app-liquibase holds exactly these two keys, but they go to
+        # step outputs, not GITHUB_ENV: only the token step needs them, and GITHUB_ENV would
+        # hand the private key to every later step of the one `contents: write` job.
         run: |
           set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
+          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/grouped/github-app-liquibase --region us-east-1 --query SecretString --output text)
           for k in LIQUIBASE_GITHUB_APP_ID LIQUIBASE_GITHUB_APP_PRIVATE_KEY; do
             # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
             # which would silently alter a value that legitimately ends in one.
             v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
             v=${v%X}
-            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
+            if [ -z "$v" ]; then echo "::error::$k missing from /vault/grouped/github-app-liquibase"; exit 1; fi
             # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
             # those literals registers a mask that never matches it; % is escaped first
             # so the escapes the next two produce are not escaped again.
             e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
             printf '::add-mask::%s\n' "$e"
             D="VAULT_EOF_${RANDOM}${RANDOM}"
-            # Step outputs, not GITHUB_ENV: only the token step needs these, and GITHUB_ENV
-            # would hand them to every later step in the job.
             { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_OUTPUT"
           done
           unset JSON

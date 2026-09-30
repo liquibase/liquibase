@@ -61,33 +61,20 @@ jobs:
         id: timestamp
         run: echo "timestamp=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
 
-      - name: Configure AWS credentials for devops vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+      - name: Configure AWS credentials for the cloudflare-r2 secret
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.DEVOPS_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.VAULT_GROUPED_CLOUDFLARE_R2_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Load Cloudflare R2 credentials from devops vault
-        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
-        # read the JSON directly and pull only the three keys this job needs instead.
-        run: |
-          set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/devops --region us-east-1 --query SecretString --output text)
-          for k in CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_R2_ACCESS_KEY_ID CLOUDFLARE_R2_SECRET_ACCESS_KEY; do
-            # jq -j + sentinel: command substitution strips trailing newlines, which
-            # would otherwise silently alter a value that legitimately ends in one.
-            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
-            v=${v%X}
-            if [ -z "$v" ]; then echo "::error::$k missing from /vault/devops"; exit 1; fi
-            # Escape % before \r/\n: the runner unescapes %0D/%0A/%25 in mask text,
-            # so escaping out of order means the mask never matches the secret.
-            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
-            printf '::add-mask::%s\n' "$e"
-            D="VAULT_EOF_${RANDOM}${RANDOM}"
-            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
-          done
-          unset JSON
-          echo "Loaded CLOUDFLARE_ACCOUNT_ID + R2 access/secret keys from /vault/devops."
+      - name: Get the R2 access keys from vault
+        # TECHOPS-1295: /vault/grouped/cloudflare-r2 holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/cloudflare-r2
+          parse-json-secrets: true
 
       - name: Publish released assets to R2 bucket
         env:
@@ -100,7 +87,7 @@ jobs:
           # drop it (and its legacy alias) before calling R2.
           unset AWS_SESSION_TOKEN AWS_SECURITY_TOKEN
           if [ -z "${R2_AKID:-}" ] || [ -z "${R2_SECRET:-}" ] || [ "$R2_ENDPOINT" = "https://.r2.cloudflarestorage.com" ]; then
-            echo "::error::CLOUDFLARE_R2_ACCESS_KEY_ID / CLOUDFLARE_R2_SECRET_ACCESS_KEY / CLOUDFLARE_ACCOUNT_ID missing from /vault/devops, cannot publish to R2."
+            echo "::error::CLOUDFLARE_R2_ACCESS_KEY_ID / CLOUDFLARE_R2_SECRET_ACCESS_KEY / CLOUDFLARE_ACCOUNT_ID missing, cannot publish to R2."
             exit 1
           fi
           # CRC32: newer aws-cli defaults to a CRC64NVME checksum, which R2 rejects.
