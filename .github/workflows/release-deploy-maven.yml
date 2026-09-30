@@ -87,34 +87,36 @@ jobs:
           TAG: ${{ inputs.tag }}
         run: gh release download "$TAG" --repo liquibase/liquibase --dir "."
 
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+      - name: Configure AWS credentials for the gpg-signing secret
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_RELEASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Get secrets from vault
-        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
-        # parse-json-secrets: true put every credential in /vault/liquibase into this
-        # job's environment; read only the four keys this job signs and publishes with.
-        run: |
-          set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
-          for k in GPG_SECRET GPG_PASSPHRASE SONATYPE_USERNAME SONATYPE_TOKEN; do
-            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
-            # which would silently alter a value that legitimately ends in one.
-            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
-            v=${v%X}
-            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
-            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
-            # those literals registers a mask that never matches it; % is escaped first
-            # so the escapes the next two produce are not escaped again.
-            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
-            printf '::add-mask::%s\n' "$e"
-            D="VAULT_EOF_${RANDOM}${RANDOM}"
-            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
-          done
-          unset JSON
+      - name: Get the GPG signing key from vault
+        # TECHOPS-1295: /vault/grouped/gpg-signing holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/gpg-signing
+          parse-json-secrets: true
+
+      # Next group, next role: this assume replaces the previous one for the rest of the job.
+      - name: Configure AWS credentials for the sonatype secret
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ secrets.VAULT_GROUPED_SONATYPE_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get the Maven Central credentials from vault
+        # TECHOPS-1295: /vault/grouped/sonatype holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/sonatype
+          parse-json-secrets: true
 
       - name: Convert escaped newlines and set GPG key
         run: |
@@ -264,6 +266,11 @@ jobs:
     name: Deploy to Maven Central (Dry Run)
     runs-on: ubuntu-22.04
     if: ${{ inputs.dry_run == true }}
+    # TECHOPS-1295: the gpg-signing and sonatype roles only trust the two release
+    # environments. `release-publish` has 0 reviewers, so the weekly rehearsal still
+    # runs unattended; the environment's branch policy keeps it to main and v* tags.
+    environment:
+      name: release-publish
     steps:
       - name: Download dry-run release assets
         env:
@@ -275,34 +282,36 @@ jobs:
             --pattern "*" \
             --dir "."
 
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+      - name: Configure AWS credentials for the gpg-signing secret
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Get secrets from vault
-        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
-        # parse-json-secrets: true put every credential in /vault/liquibase into this
-        # job's environment; read only the four keys this job signs and publishes with.
-        run: |
-          set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
-          for k in GPG_SECRET GPG_PASSPHRASE SONATYPE_USERNAME SONATYPE_TOKEN; do
-            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
-            # which would silently alter a value that legitimately ends in one.
-            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
-            v=${v%X}
-            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
-            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
-            # those literals registers a mask that never matches it; % is escaped first
-            # so the escapes the next two produce are not escaped again.
-            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
-            printf '::add-mask::%s\n' "$e"
-            D="VAULT_EOF_${RANDOM}${RANDOM}"
-            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
-          done
-          unset JSON
+      - name: Get the GPG signing key from vault
+        # TECHOPS-1295: /vault/grouped/gpg-signing holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/gpg-signing
+          parse-json-secrets: true
+
+      # Next group, next role: this assume replaces the previous one for the rest of the job.
+      - name: Configure AWS credentials for the sonatype secret
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ secrets.VAULT_GROUPED_SONATYPE_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get the Maven Central credentials from vault
+        # TECHOPS-1295: /vault/grouped/sonatype holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/sonatype
+          parse-json-secrets: true
 
       - name: Convert escaped newlines and set GPG key
         run: |
