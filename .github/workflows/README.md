@@ -196,7 +196,7 @@ Three moments need a person: starting `create-release.yml`, publishing the draft
 | 4 | **A person** | One reviewer approves. Self-approval is prevented, so it cannot be whoever started the run, and admins are not exempt. |
 | 5 | Automatic | Everything else: GitHub Packages, javadocs, XSDs, Maven Central, R2 assets, Docker images, then `generate-summary`. |
 
-**One approval covers the whole release.** GitHub approves per job rather than per run, which is why only `manual-approval` sits on the reviewer-gated environment while the four publishing jobs sit on a reviewer-less one. Putting all five on `release` would stop a release once per wave of the `needs` graph instead of once, and a release that stops four times gets rubber-stamped.
+**One approval covers the whole release.** GitHub approves per job rather than per run, which is why only `manual-approval` sits on the reviewer-gated environment while the five publishing jobs sit on a reviewer-less one. Putting all six on `release` would stop a release once per wave of the `needs` graph instead of once, and a release that stops four times gets rubber-stamped.
 
 ## :traffic_light: The guards, and which ones need a human
 
@@ -207,7 +207,7 @@ Two guards need a person; the third human moment above, starting `create-release
 | One approval on the `release` environment | **Person** | A release going out unseen. Five reviewers, self-approval prevented, admins not exempt. | `liquibase-infrastructure` |
 | Publishing the draft release | **Person** | The pipeline starting on its own. A tag on its own does nothing. | the GitHub release UI |
 | `needs: manual-approval` | Automatic | Any publishing job running before the approval. Every one of them depends on that job. | `release-published-orchestrator.yml` |
-| The `approved` input | Automatic | A hand-dispatched publishing workflow skipping the reviewers. Only the orchestrator can set it, so a direct dispatch lands on the reviewed environment instead. | the four publishing callees |
+| The `approved` input | Automatic | A hand-dispatched publishing workflow skipping the reviewers. Only the orchestrator can set it, so a direct dispatch lands on the reviewed environment instead. | the five publishing callees |
 | Environment branch and tag policies | Automatic | A release credential being reachable from a feature branch. Both environments accept only `main` or a `v*` tag. | `liquibase-infrastructure` |
 | Role trust on the per-group roles | Automatic | Any repository not in the group's shard from assuming its `vault-grouped-<group>` role. The other repositories in the shard share the role, unpinned. For the four signing and publishing groups (`gpg-signing`, `sonatype`, `wpengine-sftp`, `code-signing-digicert`) this repository is pinned to the `release` and `release-publish` environment subjects, so a job here on `main` or a feature branch cannot reach them. The pin covers this repository only [TECHOPS-1295]. | `liquibase-infrastructure` (`vault-manager/grouped-secrets.json`) |
 | `refs/tags/v*` tag ruleset | Automatic, **watch-only** | Who may create a release tag. Currently at `enforcement = "evaluate"`, so it records rather than blocks, while the tagging identity is moved onto an app the ruleset can grant a bypass to. | `liquibase-infrastructure` |
@@ -231,7 +231,7 @@ Since TECHOPS-1295 no job in this repository reads the legacy `/vault/liquibase`
 | `publish-assets-s3` | `release-publish-assets-s3.yml` | via `needs` | `cloudflare-r2` | the two R2 access keys and the Cloudflare account id for the R2 endpoint [TECHOPS-1320] |
 | `deploy-maven-production` | `release-deploy-maven.yml` | via `needs` | `gpg-signing`, `sonatype` | the GPG key, then the Maven Central credentials |
 | `deploy-maven-dryrun` | `release-deploy-maven.yml` | `release-publish`, no reviewers [TECHOPS-1295] | `gpg-signing`, `sonatype` | the same two; the environment is there because both groups trust only the release environments, and `release-publish` costs the rehearsal no approval |
-| `release-docker` | `docker-release.yml` | via `needs` | `github-app-liquibase` | its `update-dockerfiles` job mints an App token to push the Dockerfile bump |
+| `release-docker` | `docker-release.yml` | `release-publish` via `approved`, or `release` on a direct dispatch | `github-app-liquibase` | its `update-dockerfiles` job mints an App token to push the Dockerfile bump |
 | `reversion`, `build-installers` | `create-release.yml` | `release`, or `release-publish` only for a dry run of `main` [TECHOPS-1223] | `gpg-signing`; `build-installers` also `install4j` and, on a real release only, `code-signing-digicert` | the GPG key; the installer job adds the install4j licence and the DigiCert KeyLocker credentials |
 | `tag-release` | `create-release.yml` | `release-publish`, after `reversion` cleared `release` | `github-app-liquibase` | the App id and key only, as step outputs; mints a `contents: write` token scoped to this repo |
 
@@ -241,7 +241,7 @@ No job chains a second role out of a secret any more: the javadocs and XSD jobs 
 
 ### :twisted_rightwards_arrows: Which environment a publishing job gets
 
-The four publishing jobs resolve their environment at run time:
+The five publishing jobs resolve their environment at run time:
 
 ```yaml
 environment:
@@ -372,7 +372,7 @@ If a specific step fails, you can re-run just that workflow:
    - `dry_run`: false (for production)
 5. Click **Run workflow**
 
-For the four publishing workflows, a direct dispatch runs in the `release` environment and waits for one reviewer before it starts. That is deliberate: `manual-approval` is a job in the orchestrator, so a workflow dispatched on its own never passes it.
+For the five publishing workflows, a direct dispatch runs in the `release` environment and waits for one reviewer before it starts. That is deliberate: `manual-approval` is a job in the orchestrator, so a workflow dispatched on its own never passes it.
 
 ## Deployment Pipeline
 
