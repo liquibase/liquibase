@@ -209,7 +209,7 @@ Two guards need a person; the third human moment above, starting `create-release
 | `needs: manual-approval` | Automatic | Any publishing job running before the approval. Every one of them depends on that job. | `release-published-orchestrator.yml` |
 | The `approved` input | Automatic | A hand-dispatched publishing workflow skipping the reviewers. Only the orchestrator can set it, so a direct dispatch lands on the reviewed environment instead. | the four publishing callees |
 | Environment branch and tag policies | Automatic | A release credential being reachable from a feature branch. Both environments accept only `main` or a `v*` tag. | `liquibase-infrastructure` |
-| Role trust on the per-group roles | Automatic | Any repository not in the group's shard from assuming its `vault-grouped-<group>` role. The other repositories in the shard share the role, unpinned. For the four signing and publishing groups (`gpg-signing`, `sonatype`, `wpengine-sftp`, `code-signing-digicert`) this repository is pinned to the `release` and `release-publish` environment subjects, so a job here on `main` or a feature branch cannot reach them. The pin covers this repository only [TECHOPS-1295]. | `liquibase-infrastructure` (`vault-manager/grouped-secrets.json`) |
+| Role trust on the per-group roles | Automatic | Any repository not in the group's shard from assuming its `vault-grouped-<group>` role. The other repositories in the shard share the role, unpinned. For the four signing and publishing groups (`gpg-signing`, `sonatype`, `wpengine-sftp`, `code-signing-digicert`) this repository is pinned to the `release` and `release-publish` environment subjects, and for `repo-liquibase-net` (the dry-run Nexus credentials) to `release-publish` only, so a job here on `main` or a feature branch cannot reach them. The pin covers this repository only [TECHOPS-1295, TECHOPS-1416]. | `liquibase-infrastructure` (`vault-manager/grouped-secrets.json`) |
 | `refs/tags/v*` tag ruleset | Automatic, **watch-only** | Who may create a release tag. Currently at `enforcement = "evaluate"`, so it records rather than blocks, while the tagging identity is moved onto an app the ruleset can grant a bypass to. | `liquibase-infrastructure` |
 
 `needs: manual-approval` is load-bearing and worth calling out on its own: because the publishing jobs no longer sit behind reviewers themselves, that edge is the only thing keeping the gate in front of them. Removing it would not change any environment or any infrastructure code.
@@ -230,7 +230,7 @@ Since TECHOPS-1295 no job in this repository reads the legacy `/vault/liquibase`
 | `package` | `build-logic/package.yml@main` | via `needs` | **broad** | the legacy `/vault/liquibase` blob; shared workflow, so it cannot take this repo's environment, and it moves to grouped secrets with build-logic (TECHOPS-1108) |
 | `publish-assets-s3` | `release-publish-assets-s3.yml` | via `needs` | `cloudflare-r2` | the two R2 access keys and the Cloudflare account id for the R2 endpoint [TECHOPS-1320] |
 | `deploy-maven-production` | `release-deploy-maven.yml` | via `needs` | `gpg-signing`, `sonatype` | the GPG key, then the Maven Central credentials |
-| `deploy-maven-dryrun` | `release-deploy-maven.yml` | `release-publish`, no reviewers [TECHOPS-1295] | `gpg-signing`, `sonatype` | the same two; the environment is there because both groups trust only the release environments, and `release-publish` costs the rehearsal no approval |
+| `deploy-maven-dryrun` | `release-deploy-maven.yml` | `release-publish`, no reviewers [TECHOPS-1295] | `gpg-signing`, `repo-liquibase-net` | the GPG key, then the Nexus credentials; it publishes to `https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging`, never to Maven Central [TECHOPS-1416]. The environment is there because both groups trust only the release environments, and `release-publish` costs the rehearsal no approval |
 | `release-docker` | `docker-release.yml` | via `needs` | `github-app-liquibase` | its `update-dockerfiles` job mints an App token to push the Dockerfile bump |
 | `reversion`, `build-installers` | `create-release.yml` | `release`, or `release-publish` only for a dry run of `main` [TECHOPS-1223] | `gpg-signing`; `build-installers` also `install4j` and, on a real release only, `code-signing-digicert` | the GPG key; the installer job adds the install4j licence and the DigiCert KeyLocker credentials |
 | `tag-release` | `create-release.yml` | `release-publish`, after `reversion` cleared `release` | `github-app-liquibase` | the App id and key only, as step outputs; mints a `contents: write` token scoped to this repo |
@@ -295,7 +295,7 @@ This is the pattern TECHOPS-1295 established here and the later steps of TECHOPS
    The leading comma is the empty alias: keys land in the job env under their own names, `GPG_SECRET` and `GPG_PASSPHRASE`, exactly as the old blob read exported them, so nothing downstream changes. `aws-secretsmanager-get-secrets` was the wrong tool against a 200-key blob (TECHOPS-1107); against a secret that holds one credential it is the right one.
 4. **A job that needs fewer keys than the group holds is a grouping bug.** Split the group in `grouped-secrets.json` rather than filtering in the workflow: that is how `docs-agent-jira` came out of `jira-automation`. The `jq` loop from TECHOPS-1107 survives only where the values must go to step outputs instead of the job env (`tag-release`, the one `contents: write` job).
 5. **Several groups, several assumes.** Repeat the pair per group. A second `configure-aws-credentials` replaces the first job-wide, which is what you want: the job holds one role at a time.
-6. **Pinned groups need an environment.** `gpg-signing`, `sonatype`, `wpengine-sftp` and `code-signing-digicert` trust only `environment:release` and `environment:release-publish` from this repository. A job without an `environment:` gets `AccessDenied` from STS, which is how `deploy-maven-dryrun` came to declare `release-publish`.
+6. **Pinned groups need an environment.** `gpg-signing`, `sonatype`, `wpengine-sftp` and `code-signing-digicert` trust only `environment:release` and `environment:release-publish` from this repository, and `repo-liquibase-net` only `environment:release-publish`. A job without an `environment:` gets `AccessDenied` from STS, which is how `deploy-maven-dryrun` came to declare `release-publish`.
 7. **Pull requests never qualify.** Every grouped role denies the `:pull_request` subject, same as the legacy roles.
 
 Still on the old vault: build-logic's `package.yml` (called by this repo's `package` job) reads the whole `/vault/liquibase` secret through the broad `LIQUIBASE_VAULT_OIDC_ROLE_ARN` role, plus its R2 and cache-purge keys from `/vault/devops`; build-logic's `claude.yml`, which this repo's `claude.yml` calls, reads `/vault/liquibase` the same way. Both switch to grouped secrets when build-logic itself is migrated (TECHOPS-1108, step 3); nothing in this repository changes for them.
@@ -356,7 +356,7 @@ For testing the release process without actually deploying:
 Dry run mode:
 - Skips manual approval
 - Skips actual deployments to production
-- Uses USER_MANAGED publishing for Maven (requires manual confirmation)
+- Publishes the Maven artifacts to the internal Nexus (`https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging`), never to Maven Central
 - Logs what would be done without executing
 
 ### Manual Trigger (Re-run Failed Steps)
@@ -602,7 +602,7 @@ cannot be the person who started the run (`prevent_self_review`).
 - `tag`: Release tag (e.g., `v4.28.0`)
 
 **Optional inputs:**
-- `dry_run`: false (default) or true for USER_MANAGED publishing
+- `dry_run`: false (default) or true to publish to the internal Nexus instead of Maven Central
 - `dry_run_release_id`: Release ID for dry-run (only if dry_run=true)
 
 **Example (Production):**
