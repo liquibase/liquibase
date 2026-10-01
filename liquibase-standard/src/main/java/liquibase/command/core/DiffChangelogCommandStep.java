@@ -91,6 +91,7 @@ public class DiffChangelogCommandStep extends AbstractChangelogCommandStep {
             PrintStream outputStream = new PrintStream(resultsBuilder.getOutputStream());
 
             ObjectQuotingStrategy originalStrategy = referenceDatabase.getObjectQuotingStrategy();
+            commandScope.addArgumentValue(DiffOutputControlCommandStep.PRESERVE_NULL_VALUES, diffOutputControl.getPreserveNullValues());
             try {
                 String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
                 Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_CHANGELOG_FILE, changeLogFile);

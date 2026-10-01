@@ -165,6 +165,11 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
     }
 
     @Override
+    public void preserveNullValues(boolean doPreserveNullValues) {
+
+    }
+
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
