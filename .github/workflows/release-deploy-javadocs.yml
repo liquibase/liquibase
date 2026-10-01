@@ -80,35 +80,25 @@ jobs:
       # gates deploy-maven on this job's result, so a hard failure here would skip the
       # Maven Central deployment for the whole release. A broken R2 leg degrades to a
       # warning and no published javadocs, never a failed release.
-      - name: Configure AWS credentials for devops vault access
+      - name: Configure AWS credentials for the cloudflare-r2 secret
         id: r2-auth
         continue-on-error: true
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.DEVOPS_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.VAULT_GROUPED_CLOUDFLARE_R2_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Load Cloudflare R2 credentials from devops vault
+      - name: Get the R2 access keys from vault
         id: r2-creds
         continue-on-error: true
         if: steps.r2-auth.outcome == 'success'
-        # The R2 keys live in /vault/devops. Pull ONLY these three and mask them
-        # rather than bulk-importing the vault. The runner unescapes %0D, %0A and
-        # %25 in command data, so a value carrying those literals would register a
-        # mask that never matches it; hence the same escaping below.
-        run: |
-          set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/devops --region us-east-1 --query SecretString --output text)
-          for k in CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_R2_ACCESS_KEY_ID CLOUDFLARE_R2_SECRET_ACCESS_KEY; do
-            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
-            v=${v%X}
-            if [ -z "$v" ]; then echo "::error::$k missing from /vault/devops"; exit 1; fi
-            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
-            printf '::add-mask::%s\n' "$e"
-            D="VAULT_EOF_${RANDOM}${RANDOM}"
-            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
-          done
-          unset JSON
+        # TECHOPS-1295: /vault/grouped/cloudflare-r2 holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/cloudflare-r2
+          parse-json-secrets: true
 
       - name: Publish javadocs to Cloudflare R2
         # TECHOPS-1318: the id is what makes the warn step below able to see a
@@ -141,10 +131,9 @@ jobs:
       - name: Warn if the R2 publish did not run
         # Checks the publish outcome, not just the credential steps. A failed
         # `aws s3 sync` (wrong bucket, SigV4 rejection, R2 5xx, token scope)
-        # leaves r2-auth and r2-creds both successful, so the first two clauses
-        # alone would stay false and the job would report green having published
-        # nothing. A skipped publish also has a non-success outcome, so the third
-        # clause subsumes the other two; they are kept for legibility about what
-        # can go wrong.
-        if: steps.r2-creds.outcome != 'success' || steps.r2-auth.outcome != 'success' || steps.r2-publish.outcome != 'success'
+        # leaves every credential step successful, so those clauses alone would
+        # stay false and the job would report green having published nothing. A
+        # skipped publish also has a non-success outcome, so the last clause
+        # subsumes the others; they are kept for legibility about what can go wrong.
+        if: steps.r2-auth.outcome != 'success' || steps.r2-creds.outcome != 'success' || steps.r2-publish.outcome != 'success'
         run: echo "::warning::javadocs were NOT published to Cloudflare R2. javadocs.liquibase.com will serve the previous release until this is re-run."
