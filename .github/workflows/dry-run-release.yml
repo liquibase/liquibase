@@ -29,34 +29,20 @@ jobs:
       dry_run_release_id: ${{ steps.wait_and_get_outputs.outputs.dry_run_release_id }}
     steps:
 
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+      - name: Configure AWS credentials for the github-app-liquibase secret
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.VAULT_GROUPED_GITHUB_APP_LIQUIBASE_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Get secrets from vault
-        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
-        # parse-json-secrets: true put every credential in /vault/liquibase into this
-        # job's environment; read only the two App keys the token mint below needs.
-        run: |
-          set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
-          for k in LIQUIBASE_GITHUB_APP_ID LIQUIBASE_GITHUB_APP_PRIVATE_KEY; do
-            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
-            # which would silently alter a value that legitimately ends in one.
-            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
-            v=${v%X}
-            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
-            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
-            # those literals registers a mask that never matches it; % is escaped first
-            # so the escapes the next two produce are not escaped again.
-            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
-            printf '::add-mask::%s\n' "$e"
-            D="VAULT_EOF_${RANDOM}${RANDOM}"
-            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
-          done
-          unset JSON
+      - name: Get the GitHub App credentials from vault
+        # TECHOPS-1295: /vault/grouped/github-app-liquibase holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/github-app-liquibase
+          parse-json-secrets: true
 
       - name: Get GitHub App token
         id: get-token
@@ -74,7 +60,13 @@ jobs:
         with:
           workflow: create-release.yml
           ref: main
-          inputs: '{"version": "dry-run-${{ github.run_id }}", "standalone_zip": "false", "dry_run": "true", "branch": "main"}'
+          # caller_workflow lets create-release's green-SHA gate exclude THIS run.
+          # This workflow dispatches create-release and then waits on it, so it is always
+          # in flight on the same head_sha the gate judges. On the weekly schedule the
+          # gate's `event != "schedule"` filter hid that; on workflow_dispatch nothing did,
+          # so a manual dry run always failed with "still has workflows running: Dry run
+          # release". See the gate comment in create-release.yml.
+          inputs: '{"version": "dry-run-${{ github.run_id }}", "standalone_zip": "false", "dry_run": "true", "branch": "main", "caller_workflow": "${{ github.workflow }}"}'
           wait: 'true'
           gh-token: ${{ steps.get-token.outputs.token }}
 
@@ -182,34 +174,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+      - name: Configure AWS credentials for the github-app-liquibase secret
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.VAULT_GROUPED_GITHUB_APP_LIQUIBASE_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Get secrets from vault
-        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
-        # parse-json-secrets: true put every credential in /vault/liquibase into this
-        # job's environment; read only the two App keys the token mint below needs.
-        run: |
-          set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
-          for k in LIQUIBASE_GITHUB_APP_ID LIQUIBASE_GITHUB_APP_PRIVATE_KEY; do
-            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
-            # which would silently alter a value that legitimately ends in one.
-            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
-            v=${v%X}
-            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
-            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
-            # those literals registers a mask that never matches it; % is escaped first
-            # so the escapes the next two produce are not escaped again.
-            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
-            printf '::add-mask::%s\n' "$e"
-            D="VAULT_EOF_${RANDOM}${RANDOM}"
-            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
-          done
-          unset JSON
+      - name: Get the GitHub App credentials from vault
+        # TECHOPS-1295: /vault/grouped/github-app-liquibase holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/github-app-liquibase
+          parse-json-secrets: true
 
       - name: Get GitHub App token
         id: get-token
@@ -256,34 +234,36 @@ jobs:
     needs: [dry-run-create-release, dry-run-release-published, cleanup]
     steps:
 
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+      - name: Configure AWS credentials for the dry-run-slack-bot-token secret
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.VAULT_GROUPED_DRY_RUN_SLACK_BOT_TOKEN_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Get secrets from vault
-        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
-        # parse-json-secrets: true put every credential in /vault/liquibase into this
-        # job's environment; read only the Slack bot token and channel id.
-        run: |
-          set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
-          for k in DRY_RUN_SLACK_BOT_TOKEN DRYRUN_RELEASES_SLACK_ID; do
-            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
-            # which would silently alter a value that legitimately ends in one.
-            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
-            v=${v%X}
-            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
-            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
-            # those literals registers a mask that never matches it; % is escaped first
-            # so the escapes the next two produce are not escaped again.
-            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
-            printf '::add-mask::%s\n' "$e"
-            D="VAULT_EOF_${RANDOM}${RANDOM}"
-            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
-          done
-          unset JSON
+      - name: Get the dry-run Slack bot token from vault
+        # TECHOPS-1295: /vault/grouped/dry-run-slack-bot-token holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/dry-run-slack-bot-token
+          parse-json-secrets: true
+
+      # Next group, next role: this assume replaces the previous one for the rest of the job.
+      - name: Configure AWS credentials for the dryrun-releases-slack-id secret
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ secrets.VAULT_GROUPED_DRYRUN_RELEASES_SLACK_ID_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get the dry-run Slack channel id from vault
+        # TECHOPS-1295: /vault/grouped/dryrun-releases-slack-id holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/dryrun-releases-slack-id
+          parse-json-secrets: true
 
       - name: Notify Slack on Build Failure
         uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0

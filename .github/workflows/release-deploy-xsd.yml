@@ -59,58 +59,20 @@ jobs:
           path: liquibase-core-repo
           repository: "liquibase/liquibase"
 
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+      - name: Configure AWS credentials for the wpengine-sftp secret
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_RELEASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.VAULT_GROUPED_WPENGINE_SFTP_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Get secrets from vault
-        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
-        # parse-json-secrets: true put every credential in /vault/liquibase into this
-        # job's environment; read only the prod role ARN and the WPEngine SFTP keys.
-        run: |
-          set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
-          for k in AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC WPENGINE_SFTP_HOST WPENGINE_SFTP_HOST_KEY WPENGINE_SFTP_PASSWORD WPENGINE_SFTP_PORT WPENGINE_SFTP_USER; do
-            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
-            # which would silently alter a value that legitimately ends in one.
-            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
-            v=${v%X}
-            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
-            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
-            # those literals registers a mask that never matches it; % is escaped first
-            # so the escapes the next two produce are not escaped again.
-            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
-            printf '::add-mask::%s\n' "$e"
-            D="VAULT_EOF_${RANDOM}${RANDOM}"
-            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
-          done
-          unset JSON
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+      - name: Get the WPEngine SFTP credentials from vault
+        # TECHOPS-1295: /vault/grouped/wpengine-sftp holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
         with:
-          role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
-          aws-region: us-east-1
-
-      - name: Upload to s3
-        # aws s3 sync syncs directories and S3 prefixes.
-        run: |
-          aws s3 sync liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
-
-      - name: Index.htm file upload
-        # get the major.minor xsd version. grab the index.htm from s3, add the new verison of xsd and sync with the s3 again
-        run: |
-          version=${{ inputs.version }}
-          arr=(${version//./ })
-          xsd_version=${arr[0]}"."${arr[1]}
-          mkdir index-file
-          aws s3 cp s3://liquibaseorg-origin/xml/ns/dbchangelog/index.htm index-file
-          if ! grep -q ${xsd_version} index-file/index.htm ; then
-            sed -ie "s/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${xsd_version}.xsd\">dbchangelog-${xsd_version}.xsd<\/a><\/li>\n<\/ul>/" index-file/index.htm
-            aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
-          fi
+          secret-ids: |
+            ,/vault/grouped/wpengine-sftp
+          parse-json-secrets: true
 
       # WPEngine only accepts files via SFTP, so S3-direct is not an option here.
       # Replaced third-party SFTP action with sshpass + sftp CLI to reduce supply chain risk.
@@ -135,6 +97,51 @@ jobs:
           put -r liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/* /xml/ns/dbchangelog/
           bye
           SFTP_EOF
+
+      - name: Prepare updated index.htm
+        # Fetches index.htm from WPEngine (customers' actual copy) and adds the new
+        # xsd version if not listed; previously round-tripped through S3, which nothing read.
+        env:
+          VERSION: ${{ inputs.version }}
+          SSHPASS: ${{ env.WPENGINE_SFTP_PASSWORD }}
+          SFTP_USER: ${{ env.WPENGINE_SFTP_USER }}
+          SFTP_HOST: ${{ env.WPENGINE_SFTP_HOST }}
+          SFTP_PORT: ${{ env.WPENGINE_SFTP_PORT }}
+        run: |
+          set -euo pipefail
+          # inputs.version is dispatch-controlled; read via env and validated before
+          # use, never interpolated straight into the script.
+          version="$VERSION"
+          IFS='.' read -r major minor _ <<< "$version"
+          if [[ ! $major =~ ^[0-9]+$ || ! $minor =~ ^[0-9]+$ ]]; then
+            echo "::error::version must start with numeric major.minor components, got '$version'"
+            exit 1
+          fi
+          xsd_version="${major}.${minor}"
+          mkdir index-file
+          # -b - makes a failed/partial `get` exit non-zero; plain stdin-piped sftp
+          # prints the error and continues to `bye`, exiting 0 regardless. set -e then
+          # stops this step, and the unconditional upload after it, on a truncated file.
+          sshpass -e sftp -b - -P "$SFTP_PORT" -oStrictHostKeyChecking=yes "$SFTP_USER@$SFTP_HOST" <<'SFTP_EOF'
+          get /xml/ns/dbchangelog/index.htm index-file/index.htm
+          bye
+          SFTP_EOF
+          # Defense in depth on top of -b -: refuse unless the download looks like the
+          # real listing, since this file gets SFTP'd back to the live site next.
+          if [ ! -s index-file/index.htm ]; then
+            echo "::error::downloaded index.htm is empty or missing, refusing to publish"
+            exit 1
+          fi
+          if ! grep -q '</ul>' index-file/index.htm; then
+            echo "::error::downloaded index.htm is missing the expected </ul> listing marker, refusing to publish"
+            exit 1
+          fi
+          # Match the full filename, not a version substring: "4.2" would also match
+          # "dbchangelog-4.20.xsd" and wrongly skip that entry. The full ".xsd"-included
+          # string only lines up when the major.minor is exact.
+          if ! grep -Fq "dbchangelog-${xsd_version}.xsd" index-file/index.htm ; then
+            sed -ie "s/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${xsd_version}.xsd\">dbchangelog-${xsd_version}.xsd<\/a><\/li>\n<\/ul>/" index-file/index.htm
+          fi
 
       - name: Liquibase index.htm SFTP upload
         env:

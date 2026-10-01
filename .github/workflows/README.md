@@ -102,7 +102,7 @@ The following actions are identical to those in a regular Liquibase release, wit
 
 - Generate PRO tags
 - Generate install packages: `deb`, `rpm`, `brew` and the rest of them.
-- Upload `javadocs` and `xsds` to `S3`
+- Upload `javadocs` to `R2` and `xsds` to `S3`
 - Deploy artifacts to `GPM`
 
 ## :wrench: How a DryRun Release works?
@@ -147,13 +147,11 @@ Here you can see all the stuff which is tested:
 
 ![](./doc/img/dry-run.png)
 
-The process will conclude with the `dryRun` artifacts published in our Maven repository (`https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging`), `deb`, `rpm` and `sdkman` packages published in `s3://repo.liquibase.com.dry.run` and the `docker` image pushed to our internal `ecr` repo (`812559712860.dkr.ecr.us-east-1.amazonaws.com/liquibase-dry-run`):
+The process will conclude with the `dryRun` artifacts published in our Maven repository (`https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging`) and the `deb`, `rpm` and `sdkman` packages published in `s3://repo.liquibase.com.dry.run`. Docker images are not part of a dryRun release: `release-published-orchestrator.yml` skips `docker-release.yml` on a dryRun, and a `docker-release.yml` run dispatched with `dryRun: true` builds every platform and pushes to no registry.
 
 ![](./doc/img/nexus.png)
 
 ![](./doc/img/s3.png)
-
-![](./doc/img/ecr.png)
 
 ---
 
@@ -180,11 +178,11 @@ The main coordinator that triggers all release steps in the proper sequence. Sup
 | `release-setup.yml` | Extract release metadata (version, tag, branch) | ✅ Yes |
 | `release-manual-approval.yml` | Hold the release for approval on the `release` environment | ✅ Yes |
 | `release-deploy-maven.yml` | Deploy artifacts to Maven Central | ✅ Yes, with one approval |
-| `release-deploy-javadocs.yml` | Upload javadocs to S3 | ✅ Yes, with one approval |
+| `release-deploy-javadocs.yml` | Upload javadocs to R2 | ✅ Yes, with one approval |
 | `release-publish-github-packages.yml` | Publish to GitHub Packages | ✅ Yes |
-| `release-deploy-xsd.yml` | Deploy XSD files to S3 and SFTP | ✅ Yes, with one approval |
+| `release-deploy-xsd.yml` | Deploy XSD files to WPEngine over SFTP | ✅ Yes, with one approval |
 | `docker-release.yml` | Build and push release Docker images | ✅ Yes |
-| `release-publish-assets-s3.yml` | Publish release assets to S3 | ✅ Yes, with one approval |
+| `release-publish-assets-s3.yml` | Publish release assets to R2 | ✅ Yes, with one approval |
 
 ## :footprints: How a release actually goes
 
@@ -196,9 +194,9 @@ Three moments need a person: starting `create-release.yml`, publishing the draft
 | 2 | **A person** | Publishes the draft release. This is what starts the orchestrator, which listens for `release: published`, so nothing runs while the release is still a draft. |
 | 3 | Automatic | `setup` resolves the version, then the run **parks**. GitHub marks it `waiting` and notifies the reviewers. Nothing has been published and no release credential has been issued yet. |
 | 4 | **A person** | One reviewer approves. Self-approval is prevented, so it cannot be whoever started the run, and admins are not exempt. |
-| 5 | Automatic | Everything else: GitHub Packages, javadocs, XSDs, Maven Central, S3 assets, Docker images, then `generate-summary`. |
+| 5 | Automatic | Everything else: GitHub Packages, javadocs, XSDs, Maven Central, R2 assets, Docker images, then `generate-summary`. |
 
-**One approval covers the whole release.** GitHub approves per job rather than per run, which is why only `manual-approval` sits on the reviewer-gated environment while the four publishing jobs sit on a reviewer-less one. Putting all five on `release` would stop a release once per wave of the `needs` graph instead of once, and a release that stops four times gets rubber-stamped.
+**One approval covers the whole release.** GitHub approves per job rather than per run, which is why only `manual-approval` sits on the reviewer-gated environment while the five publishing jobs sit on a reviewer-less one. Putting all six on `release` would stop a release once per wave of the `needs` graph instead of once, and a release that stops four times gets rubber-stamped.
 
 ## :traffic_light: The guards, and which ones need a human
 
@@ -209,39 +207,41 @@ Two guards need a person; the third human moment above, starting `create-release
 | One approval on the `release` environment | **Person** | A release going out unseen. Five reviewers, self-approval prevented, admins not exempt. | `liquibase-infrastructure` |
 | Publishing the draft release | **Person** | The pipeline starting on its own. A tag on its own does nothing. | the GitHub release UI |
 | `needs: manual-approval` | Automatic | Any publishing job running before the approval. Every one of them depends on that job. | `release-published-orchestrator.yml` |
-| The `approved` input | Automatic | A hand-dispatched publishing workflow skipping the reviewers. Only the orchestrator can set it, so a direct dispatch lands on the reviewed environment instead. | the four publishing callees |
+| The `approved` input | Automatic | A hand-dispatched publishing workflow skipping the reviewers. Only the orchestrator can set it, so a direct dispatch lands on the reviewed environment instead. | the five publishing callees |
 | Environment branch and tag policies | Automatic | A release credential being reachable from a feature branch. Both environments accept only `main` or a `v*` tag. | `liquibase-infrastructure` |
-| Role trust on the release-scoped role | Automatic, **incomplete** | Any other repository, and any job on `main` or a feature branch, from assuming it. Not yet a job that declares no environment: the trust also accepts `refs/tags/v*`, and every `release: published` run is on a `v*` tag. All four jobs that read the role declare an environment today, so those two subjects can come out. | `liquibase-infrastructure` |
+| Role trust on the per-group roles | Automatic | Any repository not in the group's shard from assuming its `vault-grouped-<group>` role. The other repositories in the shard share the role, unpinned. For the four signing and publishing groups (`gpg-signing`, `sonatype`, `wpengine-sftp`, `code-signing-digicert`) this repository is pinned to the `release` and `release-publish` environment subjects, so a job here on `main` or a feature branch cannot reach them. The pin covers this repository only [TECHOPS-1295]. | `liquibase-infrastructure` (`vault-manager/grouped-secrets.json`) |
 | `refs/tags/v*` tag ruleset | Automatic, **watch-only** | Who may create a release tag. Currently at `enforcement = "evaluate"`, so it records rather than blocks, while the tagging identity is moved onto an app the ruleset can grant a bypass to. | `liquibase-infrastructure` |
 
 `needs: manual-approval` is load-bearing and worth calling out on its own: because the publishing jobs no longer sit behind reviewers themselves, that edge is the only thing keeping the gate in front of them. Removing it would not change any environment or any infrastructure code.
 
 ## :closed_lock_with_key: What guards each release workflow
 
-The table above says what each workflow does. This one says what stands in front of it. Read it before changing any job that touches `/vault/liquibase`.
+The table above says what each workflow does. This one says what stands in front of it. Read it before changing any job that reads a vault secret.
 
-| Job | Workflow | Gate | AWS role | Reads |
+Since TECHOPS-1295 no job in this repository reads the legacy `/vault/liquibase` or `/vault/devops` blobs. Each one assumes the role of the grouped secret it needs, `vault-grouped-<group>`, and reads `/vault/grouped/<group>`, which holds only the keys of that one credential. The "Groups" column names them; "broad" survives only on `package`, which is build-logic's workflow and migrates with build-logic.
+
+| Job | Workflow | Gate | Groups | Reads |
 |---|---|---|---|---|
 | `setup` | `release-setup.yml` | none | none | nothing |
 | `manual-approval` | `release-manual-approval.yml` | **`release`**, 5 reviewers | none | nothing; the gate makes no AWS call |
-| `deploy-javadocs` | `release-deploy-javadocs.yml` | via `needs` | release-scoped | `/vault/liquibase`, then assumes the build-logic prod role read out of it |
+| `deploy-javadocs` | `release-deploy-javadocs.yml` | via `needs` | `cloudflare-r2` | the two R2 access keys and the Cloudflare account id for the R2 endpoint; every credential step is `continue-on-error` |
 | `publish-github-packages` | `release-publish-github-packages.yml` | via `needs` | none | `GITHUB_TOKEN` with `packages: write` |
-| `deploy-xsd` | `release-deploy-xsd.yml` | via `needs` | release-scoped | `/vault/liquibase`, then the build-logic role plus five WPEngine SFTP secrets |
-| `package` | `build-logic/package.yml@main` | via `needs` | **broad** | `/vault/liquibase`; shared workflow, so it cannot take this repo's environment |
-| `publish-assets-s3` | `release-publish-assets-s3.yml` | via `needs` | release-scoped | `/vault/liquibase`, then the build-logic prod role |
-| `deploy-maven-production` | `release-deploy-maven.yml` | via `needs` | release-scoped | `/vault/liquibase`; holds the Maven Central credentials |
-| `deploy-maven-dryrun` | `release-deploy-maven.yml` | none, by design | **broad** | `/vault/liquibase`; dry runs skip the gate deliberately |
-| `release-docker` | `docker-release.yml` | via `needs` | **broad** | its `update-dockerfiles` job reads the vault |
-| `reversion`, `build-installers` | `create-release.yml` | `release`, or `release-publish` only for a dry run of `main` [TECHOPS-1223] | **broad** | `/vault/liquibase`; holds the GPG and DigiCert signing credentials |
-| `tag-release` | `create-release.yml` | `release-publish`, after `reversion` cleared `release` | none | `/vault/liquibase` for the App key only; mints a `contents: write` token scoped to this repo |
+| `deploy-xsd` | `release-deploy-xsd.yml` | via `needs` | `wpengine-sftp` | the five WPEngine SFTP secrets [TECHOPS-1320] |
+| `package` | `build-logic/package.yml@main` | via `needs` | **broad** | the legacy `/vault/liquibase` blob; shared workflow, so it cannot take this repo's environment, and it moves to grouped secrets with build-logic (TECHOPS-1108) |
+| `publish-assets-s3` | `release-publish-assets-s3.yml` | via `needs` | `cloudflare-r2` | the two R2 access keys and the Cloudflare account id for the R2 endpoint [TECHOPS-1320] |
+| `deploy-maven-production` | `release-deploy-maven.yml` | via `needs` | `gpg-signing`, `sonatype` | the GPG key, then the Maven Central credentials |
+| `deploy-maven-dryrun` | `release-deploy-maven.yml` | `release-publish`, no reviewers [TECHOPS-1295] | `gpg-signing`, `sonatype` | the same two; the environment is there because both groups trust only the release environments, and `release-publish` costs the rehearsal no approval |
+| `release-docker` | `docker-release.yml` | `release-publish` via `approved`, or `release` on a direct dispatch | `github-app-liquibase` | its `update-dockerfiles` job mints an App token to push the Dockerfile bump |
+| `reversion`, `build-installers` | `create-release.yml` | `release`, or `release-publish` only for a dry run of `main` [TECHOPS-1223] | `gpg-signing`; `build-installers` also `install4j` and, on a real release only, `code-signing-digicert` | the GPG key; the installer job adds the install4j licence and the DigiCert KeyLocker credentials |
+| `tag-release` | `create-release.yml` | `release-publish`, after `reversion` cleared `release` | `github-app-liquibase` | the App id and key only, as step outputs; mints a `contents: write` token scoped to this repo |
 
-"release-scoped" is `liquibase-release-vault-oidc-role`, whose trust lists explicit subjects. "broad" is `liquibase-vault-oidc-role`, whose GitHub OIDC trust matches any repo in the `liquibase`, `Datical` and `datical` orgs, in both the classic and the immutable `owner@ownerId/repo@repoId` subject formats: six globs, not one. It carries a second statement besides, unrelated to GitHub: any principal inside the AWS org whose ARN matches the Spacelift role shapes can `sts:AssumeRole` into it.
+"broad" is `liquibase-vault-oidc-role`, whose GitHub OIDC trust matches any repo in the `liquibase`, `Datical` and `datical` orgs, in both the classic and the immutable `owner@ownerId/repo@repoId` subject formats: six globs, not one. It carries a second statement besides, unrelated to GitHub: any principal inside the AWS org whose ARN matches the Spacelift role shapes can `sts:AssumeRole` into it. `liquibase-release-vault-oidc-role` (TECHOPS-1110) is no longer read by any job here; its environment pin lives on in the four pinned groups above.
 
-Three of the publishing jobs chain a second role: they read `AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC` **out of the vault** and then assume it. The vault read is not the end of the blast radius.
+No job chains a second role out of a secret any more: the javadocs and XSD jobs dropped their build-logic prod-role reads in TECHOPS-921 and TECHOPS-1320.
 
 ### :twisted_rightwards_arrows: Which environment a publishing job gets
 
-The four publishing jobs resolve their environment at run time:
+The five publishing jobs resolve their environment at run time:
 
 ```yaml
 environment:
@@ -255,7 +255,7 @@ environment:
 | orchestrated release | `true`, passed by the orchestrator after `manual-approval` clears | `release-publish`, no reviewers | one approval for the whole release |
 | direct `workflow_dispatch` of a callee | never set | `release`, 5 reviewers | one approval, from someone other than the dispatcher |
 
-Both names emit an `environment:` OIDC subject, and the release-scoped role trusts both. `manual-approval` lives in the orchestrator, not in a callee's `needs` graph, which is why a direct dispatch needs its own gate rather than inheriting one.
+Both names emit an `environment:` OIDC subject, and the pinned grouped roles trust both. `manual-approval` lives in the orchestrator, not in a callee's `needs` graph, which is why a direct dispatch needs its own gate rather than inheriting one.
 
 Both environments are defined in `liquibase-infrastructure`, not here, so they cannot be changed by editing a workflow:
 [`github/liquibase/repos/public/liquibase-release-environment.tf`](https://github.com/liquibase/liquibase-infrastructure/blob/main/github/liquibase/repos/public/liquibase-release-environment.tf)
@@ -268,6 +268,37 @@ environment:
 ```
 
 `dry_run` stays dispatch-settable on purpose. A dispatcher who sets `dry_run: true` to dodge the `release` reviewer list thereby also skips tag creation and signing-gated publishing, and gets a dry-run draft instead of a real release: they cannot use it to produce a real tag or a real published asset.
+
+## :key: Reading a grouped secret
+
+This is the pattern TECHOPS-1295 established here and the later steps of TECHOPS-1108 copy. The design is in `liquibase-infrastructure/vault-manager/GROUPED-SECRETS.md`; this section is the workflow side of it.
+
+1. **Find the group.** `liquibase-infrastructure/vault-manager/grouped-secrets.json` maps every key to its group. A job may read a group only if this repository is listed in one of the group's shards; that is what the role's trust policy is generated from.
+2. **Get the role ARN.** `liquibase-infrastructure/vault-manager/grouped-github-secrets.tf` writes one repository secret per group the repo is listed in, named `VAULT_GROUPED_<GROUP>_ROLE_ARN` with the group upper-cased and `-` turned into `_`. A repo that is not yet in that file's list has no secrets and cannot start migrating.
+3. **Assume, then read.** One `configure-aws-credentials` and one read step per group:
+
+   ```yaml
+   - name: Configure AWS credentials for the gpg-signing secret
+     uses: aws-actions/configure-aws-credentials@<sha> # v6.3.0
+     with:
+       role-to-assume: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
+       aws-region: us-east-1
+
+   - name: Get the GPG signing key from vault
+     uses: aws-actions/aws-secretsmanager-get-secrets@<sha> # v3.0.2
+     with:
+       secret-ids: |
+         ,/vault/grouped/gpg-signing
+       parse-json-secrets: true
+   ```
+
+   The leading comma is the empty alias: keys land in the job env under their own names, `GPG_SECRET` and `GPG_PASSPHRASE`, exactly as the old blob read exported them, so nothing downstream changes. `aws-secretsmanager-get-secrets` was the wrong tool against a 200-key blob (TECHOPS-1107); against a secret that holds one credential it is the right one.
+4. **A job that needs fewer keys than the group holds is a grouping bug.** Split the group in `grouped-secrets.json` rather than filtering in the workflow: that is how `docs-agent-jira` came out of `jira-automation`. The `jq` loop from TECHOPS-1107 survives only where the values must go to step outputs instead of the job env (`tag-release`, the one `contents: write` job).
+5. **Several groups, several assumes.** Repeat the pair per group. A second `configure-aws-credentials` replaces the first job-wide, which is what you want: the job holds one role at a time.
+6. **Pinned groups need an environment.** `gpg-signing`, `sonatype`, `wpengine-sftp` and `code-signing-digicert` trust only `environment:release` and `environment:release-publish` from this repository. A job without an `environment:` gets `AccessDenied` from STS, which is how `deploy-maven-dryrun` came to declare `release-publish`.
+7. **Pull requests never qualify.** Every grouped role denies the `:pull_request` subject, same as the legacy roles.
+
+Still on the old vault: build-logic's `package.yml` (called by this repo's `package` job) reads the whole `/vault/liquibase` secret through the broad `LIQUIBASE_VAULT_OIDC_ROLE_ARN` role, plus its R2 and cache-purge keys from `/vault/devops`; build-logic's `claude.yml`, which this repo's `claude.yml` calls, reads `/vault/liquibase` the same way. Both switch to grouped secrets when build-logic itself is migrated (TECHOPS-1108, step 3); nothing in this repository changes for them.
 
 ## Key Benefits
 
@@ -341,7 +372,7 @@ If a specific step fails, you can re-run just that workflow:
    - `dry_run`: false (for production)
 5. Click **Run workflow**
 
-For the four publishing workflows, a direct dispatch runs in the `release` environment and waits for one reviewer before it starts. That is deliberate: `manual-approval` is a job in the orchestrator, so a workflow dispatched on its own never passes it.
+For the five publishing workflows, a direct dispatch runs in the `release` environment and waits for one reviewer before it starts. That is deliberate: `manual-approval` is a job in the orchestrator, so a workflow dispatched on its own never passes it.
 
 ## Deployment Pipeline
 
@@ -361,7 +392,7 @@ flowchart LR
     xsd("deploy-xsd"):::scoped --> maven
     package("package<br/>build-logic@main"):::broad --> s3
 
-    maven("deploy-maven"):::scoped --> docker("release-docker"):::broad
+    maven("deploy-maven"):::scoped --> docker("release-docker"):::scoped
     s3("publish-assets-s3"):::scoped
 
     docker --> summary
@@ -378,8 +409,8 @@ flowchart LR
 | | meaning |
 |---|---|
 | :large_orange_diamond: amber | the reviewer gate |
-| :green_square: green | reads `/vault/liquibase` through the release-scoped role |
-| :red_square: red | reads `/vault/liquibase` through the broad `liquibase-vault-oidc-role` |
+| :green_square: green | reads its grouped secrets through their per-group roles [TECHOPS-1295] |
+| :red_square: red | reads the legacy `/vault/liquibase` blob through the broad `liquibase-vault-oidc-role`; build-logic's, migrates with it |
 | :white_large_square: white | no vault access |
 
 Three edges are easy to get backwards, so read them off the `needs:` keys rather than from memory:
@@ -584,7 +615,7 @@ dry_run_release_id: (leave empty)
 
 ### 4. Deploy Javadocs (`release-deploy-javadocs.yml`)
 
-**When to use:** If javadoc upload to S3 fails.
+**When to use:** If javadoc upload to R2 fails.
 
 **Required inputs:**
 - `version`: Version to deploy (e.g., `4.28.0`)
@@ -624,7 +655,7 @@ dry_run: false
 
 ### 6. Deploy XSD Files (`release-deploy-xsd.yml`)
 
-**When to use:** If XSD file deployment to S3 or SFTP fails.
+**When to use:** If XSD file deployment to WPEngine over SFTP fails.
 
 **Required inputs:**
 - `version`: Version to deploy (e.g., `4.28.0`)
@@ -659,9 +690,9 @@ dryRun: false
 wrap this workflow and only renamed two inputs, so it was removed in TECHOPS-1099.
 An older note here claimed the build ran in `liquibase/docker`; that was not true.
 
-### 8. Publish Assets to S3 (`release-publish-assets-s3.yml`)
+### 8. Publish Assets to R2 (`release-publish-assets-s3.yml`)
 
-**When to use:** If S3 asset upload fails.
+**When to use:** If R2 asset upload fails.
 
 **Required inputs:**
 - `version`: Version to publish (e.g., `4.28.0`)

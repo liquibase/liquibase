@@ -28,9 +28,9 @@ jobs:
   claude:
     # Trusted authors only. Every trigger below is public: issue_comment and
     # issues fire for any GitHub account. This job calls build-logic's
-    # claude.yml, which assumes the vault OIDC role and reads /vault/liquibase
-    # before invoking the action, so without an author gate anyone who writes
-    # "@claude" causes a credential load. Bot senders are excluded so a bot
+    # claude.yml, which owns the vault role and the secret read; this repo holds
+    # no credential of its own for it. So without an author gate anyone who writes
+    # "@claude" causes a credential load in build-logic. Bot senders are excluded so a bot
     # echoing the mention cannot chain into a run.
     #
     # author_association hangs off a different object per event (comment,
