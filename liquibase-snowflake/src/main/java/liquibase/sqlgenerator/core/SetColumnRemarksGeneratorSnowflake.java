@@ -9,6 +9,8 @@ import liquibase.executor.ExecutorService;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import liquibase.util.ColumnParentType;
 
 import java.util.List;
@@ -31,6 +33,10 @@ public class SetColumnRemarksGeneratorSnowflake extends SetColumnRemarksGenerato
     @Override
     public ValidationErrors validate(SetColumnRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = super.validate(statement, database, sqlGeneratorChain);
+        if (validationErrors.hasErrors()) {
+            // Without a table name there is nothing to look up, and the lookup below would fail on it.
+            return validationErrors;
+        }
         if (database instanceof SnowflakeDatabase) {
             if (statement.getColumnParentType() != null) {
                 // Snowflake doesn't support setting the column remarks on a view.
@@ -41,8 +47,7 @@ public class SetColumnRemarksGeneratorSnowflake extends SetColumnRemarksGenerato
                 // Check if we're trying to set the column remarks on a view, and if so, note that this is not supported.
                 try {
                     List<Map<String, ?>> viewList = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(
-                            new RawParameterizedSqlStatement(String.format("SHOW VIEWS LIKE '%s'",
-                                database.escapeStringForDatabase(statement.getTableName()))));
+                            buildShowViewsStatement(statement, database));
                     if (!viewList.isEmpty()) {
                         validationErrors.addError(SET_COLUMN_REMARKS_NOT_SUPPORTED_ON_VIEW_MSG);
                     }
@@ -52,5 +57,40 @@ public class SetColumnRemarksGeneratorSnowflake extends SetColumnRemarksGenerato
             }
         }
         return validationErrors;
+    }
+
+    /**
+     * Builds the SHOW VIEWS used to tell a table apart from a view.
+     * <p>
+     * The table name is a LIKE pattern, so {@code %} and {@code _} have to be escaped or a table
+     * named MY_TABLE also matches a view named MYXTABLE. The statement is also scoped to the
+     * schema being changed: an unscoped SHOW VIEWS searches every database the role can see, so a
+     * same-named view in an unrelated schema would make this look like a view. When no schema can
+     * be resolved the lookup is narrowed to the catalog instead.
+     */
+    protected RawParameterizedSqlStatement buildShowViewsStatement(SetColumnRemarksStatement statement, Database database) {
+        // Escape in one pass rather than via escapeStringForDatabase: that method leaves backslashes
+        // alone and skips a quote already preceded by one, so doubling backslashes around it would
+        // leave the quote unescaped and break the literal.
+        String pattern = statement.getTableName()
+                .replace("\\", "\\\\")
+                .replace("'", "\\'")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
+        StringBuilder sql = new StringBuilder(String.format("SHOW VIEWS LIKE '%s'", pattern));
+
+        String schemaName = statement.getSchemaName() != null ? statement.getSchemaName() : database.getDefaultSchemaName();
+        String catalogName = statement.getCatalogName() != null ? statement.getCatalogName() : database.getDefaultCatalogName();
+        if (schemaName != null) {
+            sql.append(" IN SCHEMA ");
+            if (catalogName != null) {
+                sql.append(database.escapeObjectName(catalogName, Catalog.class)).append('.');
+            }
+            sql.append(database.escapeObjectName(schemaName, Schema.class));
+        } else if (catalogName != null) {
+            sql.append(" IN DATABASE ").append(database.escapeObjectName(catalogName, Catalog.class));
+        }
+
+        return new RawParameterizedSqlStatement(sql.toString());
     }
 }
