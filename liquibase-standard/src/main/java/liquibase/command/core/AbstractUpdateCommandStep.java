@@ -208,8 +208,8 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         isDBLocked.remove();
-        LockServiceFactory.getInstance().resetAll();
         Database database = (Database) resultsBuilder.getCommandScope().getDependency(Database.class);
+        LockServiceFactory.getInstance().resetDatabase(database);
         Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetDatabase(database);
         ExecutorService executorService = Scope.getCurrentScope().getSingleton(ExecutorService.class);
         executorService.clearExecutor("jdbc", database);
