@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.SybaseASADatabase;
@@ -171,6 +172,34 @@ public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<Create
 
         sql = generatorUnderTest.generateSql(stmt, h2Database, new MockSqlGeneratorChain())[0].toSql();
         assertThat(sql).isEqualTo("CREATE SEQUENCE SCHEMA_NAME.SEQUENCE_NAME AS INT");
+    }
+
+    @Test
+    public void firebirdDatabaseSupportStartValueByVersion() throws Exception {
+        DatabaseConnection dbConnection = mock(DatabaseConnection.class);
+        FirebirdDatabase firebirdDatabase = spy(new FirebirdDatabase());
+        firebirdDatabase.setConnection(dbConnection);
+        doReturn(SEQUENCE_NAME).when(firebirdDatabase).escapeSequenceName(CATALOG_NAME, SCHEMA_NAME, SEQUENCE_NAME);
+
+        CreateSequenceStatement stmt = createSampleSqlStatement();
+        stmt.setStartValue(new BigInteger("1000"));
+        stmt.setIncrementBy(ONE);
+
+        // before 4.0 neither clause is supported
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(3);
+
+        ValidationErrors errors = generatorUnderTest.validate(stmt, firebirdDatabase, new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages())
+                .contains("startValue is not allowed on firebird", "incrementBy is not allowed on firebird");
+
+        // since 4.0 both are supported and end up in the generated statement
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(4);
+
+        errors = generatorUnderTest.validate(stmt, firebirdDatabase, new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages()).isEmpty();
+
+        String sql = generatorUnderTest.generateSql(stmt, firebirdDatabase, new MockSqlGeneratorChain())[0].toSql();
+        assertThat(sql).isEqualTo("CREATE SEQUENCE " + SEQUENCE_NAME + " START WITH 1000 INCREMENT BY 1");
     }
 
 //    @Before
