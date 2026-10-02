@@ -117,7 +117,14 @@ public class GrantSnapshotGenerator extends JdbcSnapshotGenerator {
             //roles. Reading pg_class.relacl directly via aclexplode() returns every privilege in the catalog
             //regardless of which role is connected. acldefault('r', relowner) fills in the implicit
             //full-privilege row for tables that have never had an explicit GRANT/REVOKE run (relacl IS NULL).
-            String sql = "SELECT grantee_role.rolname AS GRANTEE, " +
+            //
+            //grantee/grantor are LEFT JOINed rather than INNER JOINed: a grant TO PUBLIC has grantee OID 0,
+            //which matches no row in pg_roles, so an inner join would silently drop every PUBLIC grant from
+            //the results - the opposite of what a drift-detection query should ever do. OID 0 is mapped to
+            //the literal 'PUBLIC' explicitly since that's what it means; grantor is defensively left-joined
+            //the same way even though PUBLIC can't itself grant something, so a join mismatch here still
+            //surfaces the row (with a null grantor) instead of dropping it.
+            String sql = "SELECT CASE WHEN acl.grantee = 0 THEN 'PUBLIC' ELSE grantee_role.rolname END AS GRANTEE, " +
                     "acl.privilege_type AS PRIVILEGE_TYPE, " +
                     "c.relname AS OBJECT_NAME, " +
                     "CASE WHEN acl.is_grantable THEN 'YES' ELSE 'NO' END AS IS_GRANTABLE, " +
@@ -125,11 +132,11 @@ public class GrantSnapshotGenerator extends JdbcSnapshotGenerator {
                     "FROM pg_class c " +
                     "JOIN pg_namespace n ON n.oid = c.relnamespace " +
                     "CROSS JOIN LATERAL aclexplode(COALESCE(c.relacl, acldefault('r', c.relowner))) AS acl " +
-                    "JOIN pg_roles grantee_role ON grantee_role.oid = acl.grantee " +
-                    "JOIN pg_roles grantor_role ON grantor_role.oid = acl.grantor " +
+                    "LEFT JOIN pg_roles grantee_role ON grantee_role.oid = acl.grantee " +
+                    "LEFT JOIN pg_roles grantor_role ON grantor_role.oid = acl.grantor " +
                     "WHERE n.nspname = ? " +
                     "AND c.relkind IN ('r', 'v', 'm', 'f', 'p') " +
-                    "ORDER BY c.relname, grantee_role.rolname, acl.privilege_type";
+                    "ORDER BY c.relname, GRANTEE, acl.privilege_type";
             return new RawParameterizedSqlStatement(sql, schemaName);
         } else if (database instanceof MySQLDatabase) {
             //MySQL's information_schema.table_privileges has no grantor column

@@ -52,6 +52,18 @@ public class GrantSnapshotGeneratorTest {
     }
 
     @Test
+    public void getSelectGrantsStatement_postgres_doesNotDropPublicGrants() {
+        //a grant TO PUBLIC has grantee OID 0, which matches no pg_roles row - an inner join to pg_roles
+        //would silently drop those rows from drift-detection results, so the joins must be LEFT JOINs
+        //and OID 0 must be mapped to the literal 'PUBLIC'
+        SqlStatement statement = generator.getSelectGrantsStatement(new Schema("mydb", "public"), new PostgresDatabase());
+
+        String sql = ((RawParameterizedSqlStatement) statement).getSql();
+        assertTrue(sql.contains("LEFT JOIN pg_roles grantee_role"));
+        assertTrue(sql.contains("'PUBLIC'"));
+    }
+
+    @Test
     public void getSelectGrantsStatement_mysql_filtersBySchema() {
         Schema schema = new Schema("mydb", "public");
         SqlStatement statement = generator.getSelectGrantsStatement(schema, new MySQLDatabase());
