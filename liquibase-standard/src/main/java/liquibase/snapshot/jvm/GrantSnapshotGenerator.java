@@ -21,11 +21,11 @@ import java.util.Map;
 
 /**
  * Snapshot generator for table-level GRANT privileges, used to detect permission drift that happened outside of
- * Liquibase (a manual {@code GRANT}/{@code REVOKE}). Currently supports PostgreSQL and MySQL/MariaDB by reading
- * the standard {@code information_schema.table_privileges} view.
+ * Liquibase (a manual {@code GRANT}/{@code REVOKE}). Currently supports PostgreSQL (reading {@code pg_class.relacl}
+ * directly) and MySQL/MariaDB (reading {@code information_schema.table_privileges}).
  * <p>
  * Because {@link Grant#snapshotByDefault()} is {@code false}, this generator only runs when Grant is explicitly
- * requested, e.g. {@code liquibase diff --snapshot-types=grants} or {@code liquibase snapshot --snapshot-types=grants}.
+ * requested, e.g. {@code liquibase diff --diff-types=grants}.
  */
 public class GrantSnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -100,7 +100,8 @@ public class GrantSnapshotGenerator extends JdbcSnapshotGenerator {
                 (String) row.get("OBJECT_NAME"),
                 (String) row.get("PRIVILEGE_TYPE"),
                 (String) row.get("GRANTEE"),
-                "YES".equalsIgnoreCase(isGrantable)
+                "YES".equalsIgnoreCase(isGrantable),
+                (String) row.get("GRANTOR")
         );
     }
 
@@ -110,8 +111,30 @@ public class GrantSnapshotGenerator extends JdbcSnapshotGenerator {
             schemaName = database.getDefaultSchemaName();
         }
 
-        if ((database instanceof PostgresDatabase) || (database instanceof MySQLDatabase)) {
-            String sql = "SELECT grantee AS GRANTEE, privilege_type AS PRIVILEGE_TYPE, table_name AS OBJECT_NAME, is_grantable AS IS_GRANTABLE " +
+        if (database instanceof PostgresDatabase) {
+            //information_schema.table_privileges only shows rows where the *connected* role is the grantor,
+            //the grantee, or a member of one of those roles, so it silently hides grants between two other
+            //roles. Reading pg_class.relacl directly via aclexplode() returns every privilege in the catalog
+            //regardless of which role is connected. acldefault('r', relowner) fills in the implicit
+            //full-privilege row for tables that have never had an explicit GRANT/REVOKE run (relacl IS NULL).
+            String sql = "SELECT grantee_role.rolname AS GRANTEE, " +
+                    "acl.privilege_type AS PRIVILEGE_TYPE, " +
+                    "c.relname AS OBJECT_NAME, " +
+                    "CASE WHEN acl.is_grantable THEN 'YES' ELSE 'NO' END AS IS_GRANTABLE, " +
+                    "grantor_role.rolname AS GRANTOR " +
+                    "FROM pg_class c " +
+                    "JOIN pg_namespace n ON n.oid = c.relnamespace " +
+                    "CROSS JOIN LATERAL aclexplode(COALESCE(c.relacl, acldefault('r', c.relowner))) AS acl " +
+                    "JOIN pg_roles grantee_role ON grantee_role.oid = acl.grantee " +
+                    "JOIN pg_roles grantor_role ON grantor_role.oid = acl.grantor " +
+                    "WHERE n.nspname = ? " +
+                    "AND c.relkind IN ('r', 'v', 'm', 'f', 'p') " +
+                    "ORDER BY c.relname, grantee_role.rolname, acl.privilege_type";
+            return new RawParameterizedSqlStatement(sql, schemaName);
+        } else if (database instanceof MySQLDatabase) {
+            //MySQL's information_schema.table_privileges has no grantor column
+            String sql = "SELECT grantee AS GRANTEE, privilege_type AS PRIVILEGE_TYPE, table_name AS OBJECT_NAME, " +
+                    "is_grantable AS IS_GRANTABLE, NULL AS GRANTOR " +
                     "FROM information_schema.table_privileges " +
                     "WHERE table_schema = ? " +
                     "ORDER BY table_name, grantee, privilege_type";

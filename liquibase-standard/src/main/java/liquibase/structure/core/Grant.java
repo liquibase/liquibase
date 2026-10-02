@@ -3,6 +3,7 @@ package liquibase.structure.core;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -10,7 +11,7 @@ import java.util.Objects;
  * table or a schema. Unlike most {@link DatabaseObject} types, Grants are not returned as part of a standard
  * snapshot/diff ({@link #snapshotByDefault()} is {@code false}) because they are numerous, DBMS-specific, and
  * typically only of interest when explicitly auditing for permission drift, e.g. via
- * {@code liquibase diff --snapshot-types=grants} or {@code liquibase snapshot --snapshot-types=grants}.
+ * {@code liquibase diff --diff-types=grants}.
  */
 public class Grant extends AbstractDatabaseObject {
 
@@ -18,12 +19,17 @@ public class Grant extends AbstractDatabaseObject {
     }
 
     public Grant(String catalogName, String schemaName, String objectType, String objectName, String privilege, String granteeName, Boolean grantable) {
+        this(catalogName, schemaName, objectType, objectName, privilege, granteeName, grantable, null);
+    }
+
+    public Grant(String catalogName, String schemaName, String objectType, String objectName, String privilege, String granteeName, Boolean grantable, String grantorName) {
         this.setSchema(new Schema(catalogName, schemaName));
         this.setObjectType(objectType);
         this.setObjectName(objectName);
         this.setPrivilege(privilege);
         this.setGranteeName(granteeName);
         this.setGrantable(grantable);
+        this.setGrantorName(grantorName);
     }
 
     @Override
@@ -45,6 +51,9 @@ public class Grant extends AbstractDatabaseObject {
         name.append(getObjectName() == null ? "*" : getObjectName());
         name.append(" TO ");
         name.append(getGranteeName() == null ? "?" : getGranteeName());
+        if (getGrantorName() != null) {
+            name.append(" GRANTED BY ").append(getGrantorName());
+        }
         if (Boolean.TRUE.equals(getGrantable())) {
             name.append(" WITH GRANT OPTION");
         }
@@ -117,6 +126,20 @@ public class Grant extends AbstractDatabaseObject {
     }
 
     /**
+     * @return the name of the user or role that performed the grant, or null if the DBMS doesn't expose it
+     * (e.g. MySQL's {@code information_schema.table_privileges} has no grantor column). Part of a grant's
+     * identity: the same privilege/object/grantee granted by two different roles are two distinct grants.
+     */
+    public String getGrantorName() {
+        return getAttribute("grantorName", String.class);
+    }
+
+    public Grant setGrantorName(String grantorName) {
+        setAttribute("grantorName", grantorName);
+        return this;
+    }
+
+    /**
      * @return true if the grantee can, in turn, grant this privilege to others (e.g. "WITH GRANT OPTION")
      */
     public Boolean getGrantable() {
@@ -150,16 +173,19 @@ public class Grant extends AbstractDatabaseObject {
         return Objects.equals(lower(getObjectType()), lower(other.getObjectType()))
                 && Objects.equals(lower(getObjectName()), lower(other.getObjectName()))
                 && Objects.equals(lower(getPrivilege()), lower(other.getPrivilege()))
-                && Objects.equals(lower(getGranteeName()), lower(other.getGranteeName()));
+                && Objects.equals(lower(getGranteeName()), lower(other.getGranteeName()))
+                && Objects.equals(lower(getGrantorName()), lower(other.getGrantorName()));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(lower(getObjectType()), lower(getObjectName()), lower(getPrivilege()), lower(getGranteeName()));
+        return Objects.hash(lower(getObjectType()), lower(getObjectName()), lower(getPrivilege()), lower(getGranteeName()), lower(getGrantorName()));
     }
 
     private static String lower(String value) {
-        return value == null ? null : value.toLowerCase();
+        //Locale.ROOT, not the default locale: under a Turkish locale, "I".toLowerCase() yields a dotless
+        //ı, so e.g. the privilege "INSERT" would fail to hash/equal itself on a JVM running tr-TR.
+        return value == null ? null : value.toLowerCase(Locale.ROOT);
     }
 
     @Override

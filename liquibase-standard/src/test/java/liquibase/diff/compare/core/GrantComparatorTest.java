@@ -7,6 +7,7 @@ import liquibase.structure.core.Grant;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.Locale;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
@@ -59,5 +60,36 @@ public class GrantComparatorTest {
         Grant grant2 = new Grant(null, null, "table", "ORDERS", "select", "APP_USER", true);
 
         assertArrayEquals(comparator.hash(grant1, database, chain), comparator.hash(grant2, database, chain));
+    }
+
+    @Test
+    public void hash_turkishLocale_stillCaseInsensitive() {
+        Locale original = Locale.getDefault();
+        try {
+            Locale.setDefault(new Locale("tr", "TR"));
+
+            Grant grant1 = new Grant(null, null, "TABLE", "orders", "INSERT", "app_user", false);
+            Grant grant2 = new Grant(null, null, "table", "orders", "insert", "app_user", false);
+
+            assertArrayEquals(comparator.hash(grant1, database, chain), comparator.hash(grant2, database, chain));
+        } finally {
+            Locale.setDefault(original);
+        }
+    }
+
+    @Test
+    public void isSameObject_differentGrantor_areNotSame() {
+        Grant grant1 = new Grant(null, null, "TABLE", "orders", "SELECT", "app_user", false, "table_owner");
+        Grant grant2 = new Grant(null, null, "TABLE", "orders", "SELECT", "app_user", false, "other_owner");
+
+        assertFalse(comparator.isSameObject(grant1, grant2, database, chain));
+    }
+
+    @Test
+    public void isSameObject_sameGrantor_areSame() {
+        Grant grant1 = new Grant(null, null, "TABLE", "orders", "SELECT", "app_user", false, "table_owner");
+        Grant grant2 = new Grant(null, null, "TABLE", "orders", "SELECT", "app_user", true, "table_owner");
+
+        assertTrue(comparator.isSameObject(grant1, grant2, database, chain));
     }
 }

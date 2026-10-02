@@ -14,6 +14,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class GrantSnapshotGeneratorTest {
@@ -36,9 +37,24 @@ public class GrantSnapshotGeneratorTest {
     }
 
     @Test
-    public void getSelectGrantsStatement_postgres_filtersBySchema() {
+    public void getSelectGrantsStatement_postgres_readsCatalogAclDirectly() {
+        //must not go through information_schema.table_privileges: that view is filtered to grants
+        //visible to the *connected* role and silently hides grants between two other roles
         Schema schema = new Schema("mydb", "public");
         SqlStatement statement = generator.getSelectGrantsStatement(schema, new PostgresDatabase());
+
+        RawParameterizedSqlStatement rawStatement = (RawParameterizedSqlStatement) statement;
+        assertFalse(rawStatement.getSql().contains("information_schema"));
+        assertTrue(rawStatement.getSql().contains("pg_class"));
+        assertTrue(rawStatement.getSql().contains("aclexplode"));
+        assertEquals(1, rawStatement.getParameters().size());
+        assertEquals("public", rawStatement.getParameters().get(0));
+    }
+
+    @Test
+    public void getSelectGrantsStatement_mysql_filtersBySchema() {
+        Schema schema = new Schema("mydb", "public");
+        SqlStatement statement = generator.getSelectGrantsStatement(schema, new MySQLDatabase());
 
         RawParameterizedSqlStatement rawStatement = (RawParameterizedSqlStatement) statement;
         assertTrue(rawStatement.getSql().contains("information_schema.table_privileges"));
@@ -76,5 +92,36 @@ public class GrantSnapshotGeneratorTest {
         Grant grant = generator.mapToGrant(row, schema);
 
         assertFalse(grant.getGrantable());
+    }
+
+    @Test
+    public void mapToGrant_readsGrantorWhenPresent() {
+        Schema schema = new Schema("mydb", "public");
+        Map<String, Object> row = new HashMap<>();
+        row.put("GRANTEE", "app_user");
+        row.put("PRIVILEGE_TYPE", "SELECT");
+        row.put("OBJECT_NAME", "orders");
+        row.put("IS_GRANTABLE", "NO");
+        row.put("GRANTOR", "table_owner");
+
+        Grant grant = generator.mapToGrant(row, schema);
+
+        assertEquals("table_owner", grant.getGrantorName());
+    }
+
+    @Test
+    public void mapToGrant_grantorAbsent_isNull() {
+        //MySQL's information_schema.table_privileges has no grantor column
+        Schema schema = new Schema("mydb", "public");
+        Map<String, Object> row = new HashMap<>();
+        row.put("GRANTEE", "app_user");
+        row.put("PRIVILEGE_TYPE", "SELECT");
+        row.put("OBJECT_NAME", "orders");
+        row.put("IS_GRANTABLE", "NO");
+        row.put("GRANTOR", null);
+
+        Grant grant = generator.mapToGrant(row, schema);
+
+        assertNull(grant.getGrantorName());
     }
 }

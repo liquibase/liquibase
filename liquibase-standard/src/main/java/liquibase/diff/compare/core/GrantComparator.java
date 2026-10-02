@@ -12,12 +12,14 @@ import liquibase.structure.core.Grant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
- * Establishes identity for {@link Grant} objects using the tuple of (privilege, object type, object name, grantee)
- * rather than the synthesized {@link Grant#getName()}, so that a change to just the "WITH GRANT OPTION" flag is
- * reported as a "changed" grant instead of a missing/unexpected pair.
+ * Establishes identity for {@link Grant} objects using the tuple of (privilege, object type, object name, grantee,
+ * grantor) rather than the synthesized {@link Grant#getName()}, so that a change to just the "WITH GRANT OPTION"
+ * flag is reported as a "changed" grant instead of a missing/unexpected pair, while two otherwise-identical grants
+ * made by two different grantors are still treated as distinct grants rather than collapsed into one.
  */
 public class GrantComparator implements DatabaseObjectComparator {
 
@@ -38,6 +40,7 @@ public class GrantComparator implements DatabaseObjectComparator {
         hash.add(lower(grant.getObjectType()));
         hash.add(lower(grant.getObjectName()));
         hash.add(lower(grant.getGranteeName()));
+        hash.add(lower(grant.getGrantorName()));
         if (grant.getSchema() != null) {
             hash.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(grant.getSchema(), chain.getSchemaComparisons(), accordingTo)));
         }
@@ -64,7 +67,8 @@ public class GrantComparator implements DatabaseObjectComparator {
         return namesMatch(thisGrant.getPrivilege(), otherGrant.getPrivilege(), accordingTo)
                 && namesMatch(thisGrant.getObjectType(), otherGrant.getObjectType(), accordingTo)
                 && namesMatch(thisGrant.getObjectName(), otherGrant.getObjectName(), accordingTo)
-                && namesMatch(thisGrant.getGranteeName(), otherGrant.getGranteeName(), accordingTo);
+                && namesMatch(thisGrant.getGranteeName(), otherGrant.getGranteeName(), accordingTo)
+                && namesMatch(thisGrant.getGrantorName(), otherGrant.getGrantorName(), accordingTo);
     }
 
     @Override
@@ -75,6 +79,7 @@ public class GrantComparator implements DatabaseObjectComparator {
         exclude.add("objectName");
         exclude.add("privilege");
         exclude.add("granteeName");
+        exclude.add("grantorName");
 
         return chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl, exclude);
     }
@@ -84,6 +89,7 @@ public class GrantComparator implements DatabaseObjectComparator {
     }
 
     private static String lower(String value) {
-        return value == null ? null : value.toLowerCase();
+        //Locale.ROOT: see Grant#lower for why the default locale is unsafe here too.
+        return value == null ? null : value.toLowerCase(Locale.ROOT);
     }
 }
