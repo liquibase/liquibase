@@ -67,6 +67,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS;
     public static final ConfigurationDefinition<Boolean> ALLOW_INHERIT_LOGICAL_FILE_PATH;
     public static final ConfigurationDefinition<Boolean> DIFF_COLUMN_DEFAULT_VALUE_CONSTRAINT_NAME;
+    public static final ConfigurationDefinition<Boolean> ATOMIC_HISTORY_UPDATES;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -390,6 +391,15 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         DIFF_COLUMN_DEFAULT_VALUE_CONSTRAINT_NAME = builder.define("diffColumnDefaultValueConstraintName", Boolean.class)
                 .setDescription("Should Liquibase compare column default value constraint name in diff operation?")
                 .setDefaultValue(true)
+                .build();
+
+        ATOMIC_HISTORY_UPDATES = builder.define("atomicHistoryUpdates", Boolean.class)
+                .setDescription("If true, a changeset that runs in a transaction is committed together with its " +
+                        "DATABASECHANGELOG update (the row added by update or removed by rollback), so losing the " +
+                        "connection between the two can no longer leave the schema and DATABASECHANGELOG out of sync. " +
+                        "Applies only to databases that support DDL inside transactions, such as PostgreSQL; " +
+                        "changesets with runInTransaction=false are unaffected.")
+                .setDefaultValue(false)
                 .build();
     }
 
