@@ -47,6 +47,9 @@ class AtomicHistoryUpdateTest {
             "CREATE TRIGGER fail_history BEFORE DELETE ON DATABASECHANGELOG WHEN OLD.ID = '2' " +
             "BEGIN SELECT RAISE(ABORT, 'simulated failure removing history'); END";
 
+    /** The runWith value used by changesets that must not defer their commit; see withRunWithMappedToJdbc. */
+    private static final String RUN_WITH = "testexec";
+
     @TempDir
     Path dir;
 
@@ -63,6 +66,11 @@ class AtomicHistoryUpdateTest {
         writeChangeLog("add-column-no-tx.xml", createT1, changeSet("2", " runInTransaction=\"false\"", addColumn));
         writeChangeLog("create-t2.xml", createT1,
                 changeSet("2", "", "<createTable tableName=\"t2\"><column name=\"id\" type=\"int\"/></createTable>"));
+        writeChangeLog("add-column-run-with.xml", createT1,
+                changeSet("2", " runWith=\"" + RUN_WITH + "\"", addColumn));
+        writeChangeLog("create-t2-run-with.xml", createT1,
+                changeSet("2", " runWith=\"" + RUN_WITH + "\"",
+                        "<createTable tableName=\"t2\"><column name=\"id\" type=\"int\"/></createTable>"));
     }
 
     /** Disables the non-atomic test history service and resets the history and lock service factories. */
@@ -161,6 +169,53 @@ class AtomicHistoryUpdateTest {
         });
     }
 
+    /** With the setting on, the helper returns false for a changeset with runWith, but treats an empty runWith as unset. */
+    @Test
+    void commitsWithHistoryIsFalseForChangeSetWithRunWith() throws Exception {
+        Database transactionalDdl = databaseWithTransactionalDdl(true);
+        ChangeSet withRunWith = new ChangeSet("1", "test", false, false, "test.xml", null, null, true, null);
+        withRunWith.setRunWith("psql");
+        ChangeSet withEmptyRunWith = new ChangeSet("2", "test", false, false, "test.xml", null, null, true, null);
+        withEmptyRunWith.setRunWith("");
+        ChangeSet withoutRunWith = new ChangeSet("3", "test", false, false, "test.xml", null, null, true, null);
+
+        withAtomicHistoryUpdates(true, () -> {
+            assertFalse(HistoryTransactionSupport.commitsWithHistory(withRunWith, transactionalDdl),
+                    "a custom executor runs its changes outside this connection's transaction");
+            assertTrue(HistoryTransactionSupport.commitsWithHistory(withEmptyRunWith, transactionalDdl),
+                    "an empty runWith is treated as unset, as ChangeSet does");
+            assertTrue(HistoryTransactionSupport.commitsWithHistory(withoutRunWith, transactionalDdl));
+        });
+    }
+
+    /** With the setting on, an update of a changeset with runWith keeps the two-commit behavior. */
+    @Test
+    void updateKeepsTwoCommitsForChangeSetWithRunWith() throws Exception {
+        withAtomicHistoryUpdates(true, () -> withRunWithMappedToJdbc(() -> {
+            update("step1.xml");
+            sql(FAIL_HISTORY_INSERT);
+
+            assertThrows(Exception.class, () -> update("add-column-run-with.xml"));
+
+            assertTrue(columns("t1").contains("c2"), "a runWith changeset commits its changes before its history row");
+            assertEquals(Arrays.asList("1"), historyIds());
+        }));
+    }
+
+    /** With the setting on, a rollback of a changeset with runWith keeps the two-commit behavior. */
+    @Test
+    void rollbackKeepsTwoCommitsForChangeSetWithRunWith() throws Exception {
+        withAtomicHistoryUpdates(true, () -> withRunWithMappedToJdbc(() -> {
+            update("create-t2-run-with.xml");
+            sql(FAIL_HISTORY_DELETE);
+
+            assertThrows(Exception.class, () -> rollbackOne("create-t2-run-with.xml"));
+
+            assertFalse(tableExists("t2"), "a runWith changeset commits its rollback before removing its history row");
+            assertEquals(Arrays.asList("1", "2"), historyIds());
+        }));
+    }
+
     // --- liquibase.atomicHistoryUpdates=false (the default) ---
 
     /** The setting defaults to false. */
@@ -224,6 +279,15 @@ class AtomicHistoryUpdateTest {
     /** Runs {@code test} with liquibase.atomicHistoryUpdates set to {@code enabled}. */
     private static void withAtomicHistoryUpdates(boolean enabled, Scope.ScopedRunner<?> test) throws Exception {
         Scope.child(GlobalConfiguration.ATOMIC_HISTORY_UPDATES.getKey(), enabled, test);
+    }
+
+    /**
+     * Runs {@code test} with the runWith name {@link #RUN_WITH} mapped to the built-in jdbc executor. An external
+     * executor such as psql can't run in a unit test; mapping to jdbc keeps the changes on the same connection, so
+     * the only difference from a plain changeset is that its runWith is set.
+     */
+    private static void withRunWithMappedToJdbc(Scope.ScopedRunner<?> test) throws Exception {
+        Scope.child("liquibase." + RUN_WITH + ".executor", "jdbc", test);
     }
 
     /** Returns a mock database whose supportsDDLInTransaction() returns {@code supported}. */
