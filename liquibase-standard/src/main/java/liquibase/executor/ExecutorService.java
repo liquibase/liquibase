@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ExecutorService extends AbstractPluginFactory<Executor>  {
+    public static String JDBC = "jdbc";
 
     private final Map<Key, Executor> executors = new ConcurrentHashMap<>();
 
@@ -88,18 +89,18 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
      * @deprecated Please use {@link #getExecutor(String, Database) } instead.
      */
     public Executor getExecutor(Database database) {
-        return getExecutor("jdbc", database);
+        return getExecutor(JDBC, database);
     }
 
     /**
-     * Sets the executor for the given database with the default name "jdbc". If an executor with the same name and database already exists,
+     * Sets the executor for the given database with the default name JDBC. If an executor with the same name and database already exists,
      * it will be replaced by the new one.
      *
      * @param database the {@code Database} for which the executor is set
      * @param executor the {@code Executor} to set
      */
     public void setExecutor(Database database, Executor executor) {
-        setExecutor("jdbc", database, executor);
+        setExecutor(JDBC, database, executor);
     }
 
     public void setExecutor(String name, Database database, Executor executor) {
@@ -113,7 +114,7 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
      *
      */
     public void clearExecutor(Database database) {
-        clearExecutor("jdbc", database);
+        clearExecutor(JDBC, database);
     }
 
     public void clearExecutor(String name, Database database) {
