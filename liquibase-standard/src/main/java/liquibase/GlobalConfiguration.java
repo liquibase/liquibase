@@ -44,6 +44,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
     public static final ConfigurationDefinition<Boolean> TRIM_LOAD_DATA_FILE_HEADER;
 
+    public static final ConfigurationDefinition<Boolean> CLEAR_DUPLICATE_TAGS;
+
     /**
      * @deprecated No longer used
      */
@@ -374,6 +376,13 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
         TRIM_LOAD_DATA_FILE_HEADER = builder.define("trimLoadDataFileHeader", Boolean.class)
                 .setDescription("If true column headers will be trimmed in case they were specified with spaces in the file.")
+                .setDefaultValue(false)
+                .build();
+
+        CLEAR_DUPLICATE_TAGS = builder.define("clearDuplicateTags", Boolean.class)
+                .setDescription("If true, applying a tag that is already in use will clear it from the changeset that " +
+                        "previously held it, so the tag only ever identifies the latest changeset. If false (default), " +
+                        "duplicate tags are allowed and rollback by tag resolves to the oldest matching changeset.")
                 .setDefaultValue(false)
                 .build();
 

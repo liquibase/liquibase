@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.*;
@@ -35,11 +36,17 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
             String tagEscaped = DataTypeFactory.getInstance().fromObject(statement.getTag(), database).objectToSql(statement.getTag(), database);
 
             // Clear the tag off any row that already carries it before tagging the latest row, so re-using a
-            // tag name doesn't leave it applied to multiple changesets (#3763).
-            UpdateStatement clearOldTagStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-                    .addNewColumnValue("TAG", null)
-                    .setWhereClause(tagColumnNameEscaped + " = " + tagEscaped);
-            Sql[] clearOldTagSql = SqlGeneratorFactory.getInstance().generateSql(clearOldTagStatement, database);
+            // tag name doesn't leave it applied to multiple changesets (#3763). Opt-in only: duplicate tags are
+            // otherwise intentional (#4317), and rollback by tag defaults to resolving to the oldest match.
+            Sql[] clearOldTagSql;
+            if (GlobalConfiguration.CLEAR_DUPLICATE_TAGS.getCurrentValue()) {
+                UpdateStatement clearOldTagStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+                        .addNewColumnValue("TAG", null)
+                        .setWhereClause(tagColumnNameEscaped + " = " + tagEscaped);
+                clearOldTagSql = SqlGeneratorFactory.getInstance().generateSql(clearOldTagStatement, database);
+            } else {
+                clearOldTagSql = new Sql[0];
+            }
 
             if (database instanceof MySQLDatabase) {
                 return concat(clearOldTagSql,

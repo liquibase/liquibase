@@ -1,5 +1,7 @@
 package liquibase.changelog;
 
+import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -8,6 +10,7 @@ import liquibase.database.jvm.JdbcConnection;
 import org.junit.Test;
 
 import java.sql.DriverManager;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -40,13 +43,46 @@ public class StandardChangeLogHistoryServiceTest {
     }
 
     /**
-     * The service caches the deployed changesets in ranChangeSetList and keeps that cache across calls
-     * within the same JVM (ChangeLogHistoryServiceFactory reuses the same service per Database), so
-     * re-tagging has to clear the tag off whichever cached entry already carries it -- otherwise the
-     * in-memory history disagrees with DATABASECHANGELOG about which changeset the tag belongs to (#3763).
+     * By default, duplicate tags are intentional (#4317: rollback --tag-version defaults to resolving to the
+     * oldest match), so re-tagging must leave the earlier cached entry's tag untouched.
      */
     @Test
-    public void tagClearsTheTagFromAnyCachedRanChangeSetThatAlreadyCarriesIt() throws Exception {
+    public void tagLeavesEarlierCachedTagInPlaceByDefault() throws Exception {
+        withTaggedTwice((service, changeSet1Id, changeSet2Id) -> {
+            List<RanChangeSet> taggedEntries = service.getRanChangeSets().stream()
+                    .filter(ranChangeSet -> "release_tag".equals(ranChangeSet.getTag()))
+                    .collect(Collectors.toList());
+
+            assertThat(taggedEntries).extracting(RanChangeSet::getId)
+                    .containsExactlyInAnyOrder(changeSet1Id, changeSet2Id);
+        });
+    }
+
+    /**
+     * The service caches the deployed changesets in ranChangeSetList and keeps that cache across calls
+     * within the same JVM (ChangeLogHistoryServiceFactory reuses the same service per Database), so with
+     * liquibase.clearDuplicateTags enabled, re-tagging has to clear the tag off whichever cached entry
+     * already carries it, otherwise the in-memory history disagrees with DATABASECHANGELOG about which
+     * changeset the tag belongs to (#3763).
+     */
+    @Test
+    public void tagClearsTheTagFromAnyCachedRanChangeSetThatAlreadyCarriesItWhenEnabled() throws Exception {
+        Scope.child(Collections.singletonMap(GlobalConfiguration.CLEAR_DUPLICATE_TAGS.getKey(), "true"), () ->
+                withTaggedTwice((service, changeSet1Id, changeSet2Id) -> {
+                    List<RanChangeSet> taggedEntries = service.getRanChangeSets().stream()
+                            .filter(ranChangeSet -> "release_tag".equals(ranChangeSet.getTag()))
+                            .collect(Collectors.toList());
+
+                    assertThat(taggedEntries).hasSize(1);
+                    assertThat(taggedEntries.get(0).getId()).isEqualTo(changeSet2Id);
+                }));
+    }
+
+    private interface TaggedTwiceAssertion {
+        void accept(StandardChangeLogHistoryService service, String changeSet1Id, String changeSet2Id) throws Exception;
+    }
+
+    private void withTaggedTwice(TaggedTwiceAssertion assertion) throws Exception {
         java.sql.Connection jdbcConnection = DriverManager.getConnection("jdbc:h2:mem:" + UUID.randomUUID(), "sa", "");
         try {
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(jdbcConnection));
@@ -65,12 +101,7 @@ public class StandardChangeLogHistoryServiceTest {
             service.setExecType(changeSet2, ChangeSet.ExecType.EXECUTED);
             service.tag("release_tag");
 
-            List<RanChangeSet> taggedEntries = service.getRanChangeSets().stream()
-                    .filter(ranChangeSet -> "release_tag".equals(ranChangeSet.getTag()))
-                    .collect(Collectors.toList());
-
-            assertThat(taggedEntries).hasSize(1);
-            assertThat(taggedEntries.get(0).getId()).isEqualTo("2");
+            assertion.accept(service, "1", "2");
         } finally {
             jdbcConnection.close();
         }
