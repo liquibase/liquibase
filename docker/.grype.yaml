@@ -1,0 +1,58 @@
+# Grype ignore rules for the community Docker images.
+#
+# This is the community counterpart to liquibase-pro's vex/assessments.yaml,
+# which covers Liquibase Secure only. docker/.trivyignore suppresses Trivy
+# findings; this file suppresses Grype findings. Both are needed because the
+# two scanners read different data: Trivy reads the distro security database,
+# Grype reads upstream advisories, so they disagree whenever a distro has not
+# issued an advisory yet.
+#
+# Wired up by liquibase/build-logic#710 (TECHOPS-929). Keep every rule scoped
+# and justified; a bare `vulnerability:` with no package or fix-state bound is
+# a blanket suppression and should not be added here.
+
+ignore:
+  # CVE-2026-85091 — heap buffer overflow in zlib's gz_vacate().
+  #
+  # NOT a "we are not affected" claim. It is a "there is nothing to apply"
+  # suppression, and it is deliberately written so it expires by itself:
+  #
+  #   * Alpine has published no advisory for this CVE and no fixed zlib
+  #     package. The tracker returns an empty state for it.
+  #   * docker/Dockerfile.alpine already runs `apk upgrade --no-cache`, so the
+  #     image is on the newest zlib Alpine ships. There is no upgrade to take.
+  #   * Trivy reports it zero times (it follows Alpine's secdb, which has no
+  #     entry). Grype reports it once, from upstream data. The disagreement is
+  #     the distro-vs-upstream split, not a difference of opinion about
+  #     severity.
+  #
+  # The pinned package version is the safety catch. The moment Alpine ships any
+  # other zlib build the finding stops matching this rule, the scan goes red
+  # again, and the image gets patched. The suppression cannot outlive the
+  # condition that justifies it.
+  #
+  # Do NOT reach for `fix-state: not-fixed` here, which is what the first
+  # attempt used and why it silently matched nothing. Grype emits
+  # `fix: {"versions": [], "state": ""}` for this finding, an EMPTY state
+  # rather than `not-fixed`, because no advisory exists to describe a fix
+  # state at all. Pinning name + version + type matches on fields Grype
+  # actually populates.
+  #
+  # Reachability, for context but NOT relied on here: the vulnerable path is
+  # gz_vacate() reached through gzprintf()/gzvprintf() on a NON-BLOCKING gzFile
+  # stream after a write stall. Java's java.util.zip uses zlib's raw
+  # deflate/inflate entry points rather than the gzFile stream API, so a JRE
+  # image is unlikely to reach it. That argument has not been verified against
+  # the built image, so it is recorded as context rather than as the
+  # justification. If someone does verify it, this rule can be narrowed further
+  # or replaced with a reachability-based one.
+  - vulnerability: CVE-2026-85091
+    package:
+      name: zlib
+      version: 1.3.2-r0
+      type: apk
+    reason: >
+      No fixed package exists. Alpine has published no advisory and no patched
+      zlib, and Dockerfile.alpine already runs apk upgrade, so there is no
+      remediation to apply. Pinned to the exact vulnerable build so the rule
+      stops applying as soon as any other zlib ships. See TECHOPS-929.

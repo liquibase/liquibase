@@ -18,44 +18,10 @@ on:
     - cron: "0 6 * * 3"
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      dry_run_id: ${{ steps.get_run_id.outputs.dry_run_id }}
-      dry_run_branch_name: ${{ steps.get_run_id.outputs.dry_run_branch_name }}
-    steps:
-      - name: Get main.yml runId
-        id: get_run_id
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Find the most recent main.yml run on main that has a valid (non-expired) liquibase-artifacts artifact.
-          # main.yml took over as the producer of that artifact at the TECHOPS-1222 cutover.
-          # We scan up to 20 recent completed runs, so a single unrelated failing job
-          # cannot starve the dry-run of fresh build artifacts.
-          response=$(gh api "repos/${{ github.repository }}/actions/workflows/main.yml/runs?branch=main&status=completed&per_page=20")
-
-          run_id=""
-          while IFS= read -r candidate_id; do
-            valid=$(gh api "repos/${{ github.repository }}/actions/runs/${candidate_id}/artifacts" \
-              --jq 'any(.artifacts[]; .name == "liquibase-artifacts" and (.expired | not))') || continue
-            if [ "$valid" = "true" ]; then
-              run_id="$candidate_id"
-              echo "Found valid liquibase-artifacts in main.yml run $run_id"
-              break
-            fi
-          done < <(echo "$response" | jq -r '.workflow_runs[].id')
-
-          if [ -z "$run_id" ]; then
-            echo "ERROR: No main.yml run found with a valid liquibase-artifacts artifact in the last 20 completed runs on main"
-            exit 1
-          fi
-
-          echo "dry_run_id=$run_id" >> $GITHUB_OUTPUT
-          echo "dry_run_branch_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-
+  # [TECHOPS-1223] create-release.yml now builds from a pinned commit SHA instead of
+  # reusing another workflow run's uploaded artifact, so there is no run to scan for
+  # anymore. This job, and the 20-run scan it used to do, is deleted outright.
   dry-run-create-release:
-    needs: [setup]
     runs-on: ubuntu-latest
     outputs:
       dry_run_zip_url: ${{ steps.wait_and_get_outputs.outputs.dry_run_zip_url }}
@@ -63,34 +29,20 @@ jobs:
       dry_run_release_id: ${{ steps.wait_and_get_outputs.outputs.dry_run_release_id }}
     steps:
 
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+      - name: Configure AWS credentials for the github-app-liquibase secret
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.VAULT_GROUPED_GITHUB_APP_LIQUIBASE_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Get secrets from vault
-        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
-        # parse-json-secrets: true put every credential in /vault/liquibase into this
-        # job's environment; read only the two App keys the token mint below needs.
-        run: |
-          set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
-          for k in LIQUIBASE_GITHUB_APP_ID LIQUIBASE_GITHUB_APP_PRIVATE_KEY; do
-            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
-            # which would silently alter a value that legitimately ends in one.
-            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
-            v=${v%X}
-            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
-            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
-            # those literals registers a mask that never matches it; % is escaped first
-            # so the escapes the next two produce are not escaped again.
-            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
-            printf '::add-mask::%s\n' "$e"
-            D="VAULT_EOF_${RANDOM}${RANDOM}"
-            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
-          done
-          unset JSON
+      - name: Get the GitHub App credentials from vault
+        # TECHOPS-1295: /vault/grouped/github-app-liquibase holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/github-app-liquibase
+          parse-json-secrets: true
 
       - name: Get GitHub App token
         id: get-token
@@ -108,7 +60,13 @@ jobs:
         with:
           workflow: create-release.yml
           ref: main
-          inputs: '{"version": "dry-run-${{ github.run_id }}", "runId": "${{ needs.setup.outputs.dry_run_id }}", "standalone_zip": "false", "dry_run": "true", "branch": "main"}'
+          # caller_workflow lets create-release's green-SHA gate exclude THIS run.
+          # This workflow dispatches create-release and then waits on it, so it is always
+          # in flight on the same head_sha the gate judges. On the weekly schedule the
+          # gate's `event != "schedule"` filter hid that; on workflow_dispatch nothing did,
+          # so a manual dry run always failed with "still has workflows running: Dry run
+          # release". See the gate comment in create-release.yml.
+          inputs: '{"version": "dry-run-${{ github.run_id }}", "standalone_zip": "false", "dry_run": "true", "branch": "main", "caller_workflow": "${{ github.workflow }}"}'
           wait: 'true'
           gh-token: ${{ steps.get-token.outputs.token }}
 
@@ -202,8 +160,7 @@ jobs:
           ### Build Source
           | Property | Value |
           |----------|-------|
-          | **Source Run** | [main.yml #${{ needs.setup.outputs.dry_run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ needs.setup.outputs.dry_run_id }}) |
-          | **Branch** | \`${{ needs.setup.outputs.dry_run_branch_name }}\` |
+          | **Branch** | \`${{ github.ref_name }}\` |
 
           ### Triggered Workflows
           | Workflow | Link |
@@ -213,38 +170,24 @@ jobs:
           EOF
 
   dry-run-release-published:
-    needs: [setup, dry-run-create-release]
+    needs: [dry-run-create-release]
     runs-on: ubuntu-latest
     steps:
 
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+      - name: Configure AWS credentials for the github-app-liquibase secret
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.VAULT_GROUPED_GITHUB_APP_LIQUIBASE_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Get secrets from vault
-        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
-        # parse-json-secrets: true put every credential in /vault/liquibase into this
-        # job's environment; read only the two App keys the token mint below needs.
-        run: |
-          set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
-          for k in LIQUIBASE_GITHUB_APP_ID LIQUIBASE_GITHUB_APP_PRIVATE_KEY; do
-            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
-            # which would silently alter a value that legitimately ends in one.
-            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
-            v=${v%X}
-            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
-            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
-            # those literals registers a mask that never matches it; % is escaped first
-            # so the escapes the next two produce are not escaped again.
-            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
-            printf '::add-mask::%s\n' "$e"
-            D="VAULT_EOF_${RANDOM}${RANDOM}"
-            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
-          done
-          unset JSON
+      - name: Get the GitHub App credentials from vault
+        # TECHOPS-1295: /vault/grouped/github-app-liquibase holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/github-app-liquibase
+          parse-json-secrets: true
 
       - name: Get GitHub App token
         id: get-token
@@ -261,33 +204,23 @@ jobs:
         with:
           workflow: release-published-orchestrator.yml
           ref: main
-          inputs: '{"tag": "vdry-run-${{ github.run_id }}", "dry_run_release_id": "${{ needs.dry-run-create-release.outputs.dry_run_release_id }}", "dry_run_zip_url": "${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}", "dry_run_tar_gz_url": "${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}", "dry_run": true, "dry_run_branch_name": "${{ needs.setup.outputs.dry_run_branch_name }}"}'
+          inputs: '{"tag": "vdry-run-${{ github.run_id }}", "dry_run_release_id": "${{ needs.dry-run-create-release.outputs.dry_run_release_id }}", "dry_run_zip_url": "${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}", "dry_run_tar_gz_url": "${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}", "dry_run": true, "dry_run_branch_name": "${{ github.ref_name }}"}'
           wait: 'true'
           gh-token: ${{ steps.get-token.outputs.token }}
 
   cleanup:
     runs-on: ubuntu-latest
     if: always()
-    needs: [setup, dry-run-create-release, dry-run-release-published]
+    needs: [dry-run-create-release, dry-run-release-published]
     steps:
-      - name: Checkout liquibase
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          # The cleanup step below deletes the dry-run tag with this checkout's token.
-          # [TECHOPS-1111]
-          persist-credentials: true
-
-      - name: Set up Git
-        run: |
-          git config user.name "liquibase-workflows[bot]"
-          git config user.email "1241802+liquibase-workflows[bot]@users.noreply.github.com"
-
-      - name: Delete liquibase dry-run tag
-        if: always()
-        run: |
-          git push origin --delete refs/tags/vdry-run-${{ github.run_id }}
-          echo "Remote tag vdry-run-${{ github.run_id }} deleted"
-
+      # [TECHOPS-1223] The checkout, the git identity and the tag deletion that used to
+      # live here are gone. They existed to remove `vdry-run-<run_id>`, which the old
+      # create-release.yml created with `git tag -f "v${VERSION}"` during a dry run.
+      # The release is now attached with `draft: true`, which creates no git ref, and
+      # `tag-release` is gated on `dry_run == false`, so a dry run never makes a tag.
+      # Left in place, `git push origin --delete` would fail on a ref that does not
+      # exist and take the weekly cron red. Dropping the checkout also stops persisting
+      # a credential on disk for a job that only needs the API call below.
       - name: Delete the dry-run draft release
         if: always()
         run: |
@@ -298,37 +231,39 @@ jobs:
   notify:
     if: failure()
     runs-on: ubuntu-latest
-    needs: [setup, dry-run-create-release, dry-run-release-published, cleanup]
+    needs: [dry-run-create-release, dry-run-release-published, cleanup]
     steps:
 
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+      - name: Configure AWS credentials for the dry-run-slack-bot-token secret
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.VAULT_GROUPED_DRY_RUN_SLACK_BOT_TOKEN_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Get secrets from vault
-        # TECHOPS-1107: aws-secretsmanager-get-secrets can only load a secret whole, so
-        # parse-json-secrets: true put every credential in /vault/liquibase into this
-        # job's environment; read only the Slack bot token and channel id.
-        run: |
-          set -euo pipefail
-          JSON=$(aws secretsmanager get-secret-value --secret-id /vault/liquibase --region us-east-1 --query SecretString --output text)
-          for k in DRY_RUN_SLACK_BOT_TOKEN DRYRUN_RELEASES_SLACK_ID; do
-            # jq -j plus a sentinel: command substitution strips ALL trailing newlines,
-            # which would silently alter a value that legitimately ends in one.
-            v=$(printf '%s' "$JSON" | jq -j --arg k "$k" '.[$k] // ""'; printf 'X')
-            v=${v%X}
-            if [ -z "$v" ]; then echo "::error::$k missing from /vault/liquibase"; exit 1; fi
-            # The runner unescapes %0D, %0A and %25 in command data, so a value carrying
-            # those literals registers a mask that never matches it; % is escaped first
-            # so the escapes the next two produce are not escaped again.
-            e=$v; e=${e//'%'/%25}; e=${e//$'\r'/%0D}; e=${e//$'\n'/%0A}
-            printf '::add-mask::%s\n' "$e"
-            D="VAULT_EOF_${RANDOM}${RANDOM}"
-            { echo "$k<<$D"; printf '%s\n' "$v"; echo "$D"; } >> "$GITHUB_ENV"
-          done
-          unset JSON
+      - name: Get the dry-run Slack bot token from vault
+        # TECHOPS-1295: /vault/grouped/dry-run-slack-bot-token holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/dry-run-slack-bot-token
+          parse-json-secrets: true
+
+      # Next group, next role: this assume replaces the previous one for the rest of the job.
+      - name: Configure AWS credentials for the dryrun-releases-slack-id secret
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ secrets.VAULT_GROUPED_DRYRUN_RELEASES_SLACK_ID_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get the dry-run Slack channel id from vault
+        # TECHOPS-1295: /vault/grouped/dryrun-releases-slack-id holds exactly the keys this job uses,
+        # so the whole secret is parsed into the job env and nothing else comes along.
+        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        with:
+          secret-ids: |
+            ,/vault/grouped/dryrun-releases-slack-id
+          parse-json-secrets: true
 
       - name: Notify Slack on Build Failure
         uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
