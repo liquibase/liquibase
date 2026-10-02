@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a0f6f0-00a6-7b75-a6e5-f04c2466a069",
-  "CreatedAt": "2026-10-01T10:08:39.078752314Z",
+  "ReportID": "01a0fc15-6374-7640-aee3-5f352b997696",
+  "CreatedAt": "2026-10-02T10:07:35.28441064Z",
   "ArtifactID": "sha256:da781ebe8fa571f46d298e3a7759562b25a15125fea64a8bb309d6263c3bd3d2",
   "ArtifactName": "liquibase/liquibase:4.27.0",
   "ArtifactType": "container_image",
@@ -14824,7 +14824,7 @@
             "oracle-oval": 3,
             "redhat": 3,
             "rocky": 3,
-            "ubuntu": 2
+            "ubuntu": 3
           },
           "CVSS": {
             "redhat": {

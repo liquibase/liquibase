@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a0f6f0-8f0a-7429-a128-4c9dc896f0ea",
-  "CreatedAt": "2026-10-01T10:09:15.53027394Z",
+  "ReportID": "01a0fc16-317b-72bd-b687-2eef5adada94",
+  "CreatedAt": "2026-10-02T10:08:28.027181021Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -426,6 +426,121 @@
       ],
       "Vulnerabilities": [
         {
+          "VulnerabilityID": "CVE-2026-89407",
+          "VendorIDs": [
+            "GHSA-p6pp-m3f8-5c89"
+          ],
+          "PkgName": "com.fasterxml.jackson.core:jackson-core",
+          "PkgPath": "internal-jars/lib/liquibase-commercial.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.18.3",
+            "UID": "6c47f02a12d2893e"
+          },
+          "InstalledVersion": "2.18.3",
+          "FixedVersion": "2.18.11, 2.21.7, 2.22.3",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-89407",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:fe9dc6fbc03361e277738776851154f8ece5faadc1ad4329f9b61207e6df0fd6",
+          "Title": "com.fasterxml.jackson/jackson-core: tools.jackson.core/jackson-core: Jackson-core: Denial of Service via regular expression backtracking",
+          "Description": "NumberInput.looksLikeValidNumber() in FasterXML jackson-core pre-validates \"stringified numbers\" with two regular expressions: PATTERN_FLOAT ([+-]?[0-9]*[\\.]?[0-9]+([eE][+-]?[0-9]+)?), present since 2.17.0, and PATTERN_FLOAT_TRAILING_DOT, added in 2.17.2. PATTERN_FLOAT places adjacent quantifiers over the same character class -- an optional [0-9]* run, an optional dot, then a required [0-9]+ run -- so input that ultimately fails to match forces Java's backtracking engine to retry every possible split point of the digit run. \n\n\n\nMatching cost therefore grows with the square of the input length. \n\n\n\nAn attacker who can supply JSON that an application deserializes into a numeric target type reaches this method through jackson-databind's default String-to-number coercion (StdDeserializer and NumberDeserializers for BigDecimal, BigInteger, Double and Float). \n\n\n\nBecause StreamReadConstraints.maxStringLength defaults to 20,000,000 characters, no constraint bounds the input before it reaches the regex. \n\n\n\nTesting by the reporter confirmed O(n^2) growth across five consecutive input-size doublings, with a single 160,000-character string consuming roughly 74 seconds in one call; a small number of concurrent requests of ordinary body size can therefore exhaust a server's request-handling thread pool. \n\n\n\nThe affected method does not exist before 2.17.0, so 2.16.x and earlier releases are not affected. \n\n\n\nThe fix replaces both regular expressions with a hand-rolled single-pass scan.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-400",
+            "CWE-1333"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "redhat": 2
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 5.9
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-89407",
+            "https://github.com/FasterXML/jackson-core",
+            "https://github.com/FasterXML/jackson-core/commit/731e794f62623aa0d86ced52490166be903fbb1d",
+            "https://github.com/FasterXML/jackson-core/commit/e7acd64cc99bd346704423dc2bfea1ab0a08ddff",
+            "https://github.com/FasterXML/jackson-core/issues/1649",
+            "https://github.com/FasterXML/jackson-core/pull/1650",
+            "https://github.com/FasterXML/jackson-core/pull/1701",
+            "https://github.com/FasterXML/jackson-core/security/advisories/GHSA-p6pp-m3f8-5c89",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-89407",
+            "https://www.cve.org/CVERecord?id=CVE-2026-89407"
+          ],
+          "PublishedDate": "2026-09-22T15:17:21.053Z",
+          "LastModifiedDate": "2026-09-22T20:00:03.713Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-89425",
+          "VendorIDs": [
+            "GHSA-7hhh-6rmp-j9qf"
+          ],
+          "PkgName": "com.fasterxml.jackson.core:jackson-core",
+          "PkgPath": "internal-jars/lib/liquibase-commercial.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.18.3",
+            "UID": "6c47f02a12d2893e"
+          },
+          "InstalledVersion": "2.18.3",
+          "FixedVersion": "2.21.7, 2.22.3, 2.18.11",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-89425",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:c3aa1748156bbd548117f6b7d986a937a5030b1e5416a0601e7d260404291d85",
+          "Title": "com.fasterxml.jackson.core/jackson-core: Jackson-core: Denial of Service via unbounded StringBuilder growth during malformed token processing",
+          "Description": "UTF8DataInputJsonParser._reportInvalidToken() in FasterXML jackson-core builds the offending-token text for its error message by appending Java identifier characters to a StringBuilder in a loop that has no upper bound. Unlike the three sibling parser implementations, including UTF8StreamJsonParser, it never consults ErrorReportConfiguration.getMaxErrorTokenLength() (default 256). A malformed token supplied to a parser created through JsonFactory.createParser(DataInput) is therefore accumulated in full. No StreamReadConstraints setting mitigates this: maxDocumentLength cannot be applied to DataInput sources at all, and maxStringLength does not cover this path because the accumulation bypasses ReadConstrainedTextBuffer. The reporter measured a 20,000,109-character exception message from a 20-million-character malformed token on the DataInput path, against 367 characters for identical input on the InputStream path. Scaling the payload drives the StringBuilder, which also incurs byte-to-char expansion and internal array doubling, to many times the raw payload size and can trigger OutOfMemoryError for the whole JVM. UTF8DataInputJsonParser was introduced in 2.8.0 together with createParser(DataInput); releases before 2.8.0 do not contain the affected class.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-400",
+            "CWE-770"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-89425",
+            "https://github.com/FasterXML/jackson-core",
+            "https://github.com/FasterXML/jackson-core/commit/211cf2c5d91abbec38067f37efc1363cd4e88ee3",
+            "https://github.com/FasterXML/jackson-core/pull/1698",
+            "https://github.com/FasterXML/jackson-core/releases/tag/jackson-core-2.18.11",
+            "https://github.com/FasterXML/jackson-core/releases/tag/jackson-core-3.2.3",
+            "https://github.com/FasterXML/jackson-core/security/advisories/GHSA-7hhh-6rmp-j9qf",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-89425",
+            "https://www.cve.org/CVERecord?id=CVE-2026-89425"
+          ],
+          "PublishedDate": "2026-09-23T03:17:04.357Z",
+          "LastModifiedDate": "2026-09-24T20:43:32.537Z"
+        },
+        {
           "VulnerabilityID": "GHSA-r7wm-3cxj-wff9",
           "PkgName": "com.fasterxml.jackson.core:jackson-core",
           "PkgPath": "internal-jars/lib/liquibase-commercial.jar",
@@ -716,22 +831,28 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
           },
           "Fingerprint": "sha256:ab9a5b20b655e0dcf83a0baf1e54efc82f37352ee056bc1e4e51013ef965b9f3",
-          "Title": "TypeDeserializerBase._findDeserializer() in FasterXML jackson-databind ...",
+          "Title": "jackson-databind: com.fasterxml.jackson/jackson-core: jackson-databind: Denial of Service via unbounded cache growth in TypeDeserializerBase",
           "Description": "TypeDeserializerBase._findDeserializer() in FasterXML jackson-databind caches the resolved deserializer under the raw, attacker-supplied type ID. When name-based polymorphism is configured with a fallback, for example @JsonTypeInfo(use = Id.NAME, defaultImpl = ...), every distinct unrecognized type ID resolves to the same fallback deserializer but is retained as its own key in the _deserializers map. That map has no configurable bound and lives for the lifetime of the type deserializer, so an attacker who can repeatedly supply fresh unknown type IDs causes monotonic memory retention across requests. The reporter observed 10,000 retained entries from 10,000 distinct unknown IDs, against a single entry for a control that repeated one unknown ID the same number of times, isolating attacker-controlled key cardinality from request volume. Exploitation requires an application that enables name-based polymorphism with a defaultImpl or equivalent fallback, accepts attacker-influenced type IDs, and reuses a long-lived ObjectMapper across requests. The fix stops caching fallback resolutions for unrecognized IDs and bounds both the number of cached entries and the length of a cacheable type ID.",
           "Severity": "HIGH",
           "CweIDs": [
             "CWE-400"
           ],
           "VendorSeverity": {
-            "ghsa": 3
+            "ghsa": 3,
+            "redhat": 3
           },
           "CVSS": {
             "ghsa": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
               "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
             }
           },
           "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-91776",
             "https://github.com/FasterXML/jackson-databind",
             "https://github.com/FasterXML/jackson-databind/commit/2870d1d6dc1b7e1c07ee11dd5b04ab71cddbb577",
             "https://github.com/FasterXML/jackson-databind/issues/6203",
@@ -741,7 +862,8 @@
             "https://github.com/FasterXML/jackson-databind/releases/tag/jackson-databind-3.1.7",
             "https://github.com/FasterXML/jackson-databind/releases/tag/jackson-databind-3.2.3",
             "https://github.com/FasterXML/jackson-databind/security/advisories/GHSA-wv8q-qhhj-9h54",
-            "https://nvd.nist.gov/vuln/detail/CVE-2026-91776"
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-91776",
+            "https://www.cve.org/CVERecord?id=CVE-2026-91776"
           ],
           "PublishedDate": "2026-09-23T03:17:04.62Z",
           "LastModifiedDate": "2026-09-24T20:43:32.537Z"
@@ -1590,6 +1712,7 @@
           "References": [
             "https://access.redhat.com/errata/RHSA-2024:6726",
             "https://access.redhat.com/security/cve/CVE-2024-6345",
+            "https://advisory.echohq.com/cve/CVE-2024-6345",
             "https://bugzilla.redhat.com/2297771",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2297771",
             "https://creativecommons.org/licenses/by/4.0/",
@@ -1671,6 +1794,7 @@
           "References": [
             "https://access.redhat.com/errata/RHSA-2024:6726",
             "https://access.redhat.com/security/cve/CVE-2024-6345",
+            "https://advisory.echohq.com/cve/CVE-2024-6345",
             "https://bugzilla.redhat.com/2297771",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2297771",
             "https://creativecommons.org/licenses/by/4.0/",
@@ -1752,6 +1876,7 @@
           "References": [
             "https://access.redhat.com/errata/RHSA-2024:6726",
             "https://access.redhat.com/security/cve/CVE-2024-6345",
+            "https://advisory.echohq.com/cve/CVE-2024-6345",
             "https://bugzilla.redhat.com/2297771",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2297771",
             "https://creativecommons.org/licenses/by/4.0/",
@@ -1836,6 +1961,7 @@
             "https://access.redhat.com/errata/RHSA-2025:10407",
             "https://access.redhat.com/errata/RHSA-2025:13578",
             "https://access.redhat.com/security/cve/CVE-2025-47273",
+            "https://advisory.echohq.com/cve/CVE-2025-47273",
             "https://bugzilla.redhat.com/2366982",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2366982",
             "https://creativecommons.org/licenses/by/4.0/",
@@ -1922,6 +2048,7 @@
             "https://access.redhat.com/errata/RHSA-2025:10407",
             "https://access.redhat.com/errata/RHSA-2025:13578",
             "https://access.redhat.com/security/cve/CVE-2025-47273",
+            "https://advisory.echohq.com/cve/CVE-2025-47273",
             "https://bugzilla.redhat.com/2366982",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2366982",
             "https://creativecommons.org/licenses/by/4.0/",
@@ -2008,6 +2135,7 @@
             "https://access.redhat.com/errata/RHSA-2025:10407",
             "https://access.redhat.com/errata/RHSA-2025:13578",
             "https://access.redhat.com/security/cve/CVE-2025-47273",
+            "https://advisory.echohq.com/cve/CVE-2025-47273",
             "https://bugzilla.redhat.com/2366982",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2366982",
             "https://creativecommons.org/licenses/by/4.0/",
@@ -2076,6 +2204,7 @@
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2024-4340",
+            "https://advisory.echohq.com/cve/CVE-2024-4340",
             "https://github.com/advisories/GHSA-2m57-hf25-phgg",
             "https://github.com/andialbrecht/sqlparse",
             "https://github.com/andialbrecht/sqlparse/commit/b4a39d9850969b4e1d6940d32094ee0b42a2cf03",
@@ -2135,6 +2264,7 @@
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2024-4340",
+            "https://advisory.echohq.com/cve/CVE-2024-4340",
             "https://github.com/advisories/GHSA-2m57-hf25-phgg",
             "https://github.com/andialbrecht/sqlparse",
             "https://github.com/andialbrecht/sqlparse/commit/b4a39d9850969b4e1d6940d32094ee0b42a2cf03",
@@ -2194,6 +2324,7 @@
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2024-4340",
+            "https://advisory.echohq.com/cve/CVE-2024-4340",
             "https://github.com/advisories/GHSA-2m57-hf25-phgg",
             "https://github.com/andialbrecht/sqlparse",
             "https://github.com/andialbrecht/sqlparse/commit/b4a39d9850969b4e1d6940d32094ee0b42a2cf03",
@@ -2254,6 +2385,7 @@
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2026-54284",
+            "https://advisory.echohq.com/cve/CVE-2026-54284",
             "https://github.com/andialbrecht/sqlparse",
             "https://github.com/andialbrecht/sqlparse/commit/939b129e24c0ad5d51368b1aa72fffcaca76f06f",
             "https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-pwgv-4x5q-6m9f",
@@ -2310,6 +2442,7 @@
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2026-54284",
+            "https://advisory.echohq.com/cve/CVE-2026-54284",
             "https://github.com/andialbrecht/sqlparse",
             "https://github.com/andialbrecht/sqlparse/commit/939b129e24c0ad5d51368b1aa72fffcaca76f06f",
             "https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-pwgv-4x5q-6m9f",
@@ -2366,6 +2499,7 @@
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2026-54284",
+            "https://advisory.echohq.com/cve/CVE-2026-54284",
             "https://github.com/andialbrecht/sqlparse",
             "https://github.com/andialbrecht/sqlparse/commit/939b129e24c0ad5d51368b1aa72fffcaca76f06f",
             "https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-pwgv-4x5q-6m9f",
@@ -2421,6 +2555,7 @@
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2026-59893",
+            "https://advisory.echohq.com/cve/CVE-2026-59893",
             "https://github.com/andialbrecht/sqlparse",
             "https://github.com/andialbrecht/sqlparse/commit/d1d80602741f77ec78e5a04ce4719244cf32352e",
             "https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-prg7-hcfm-mfcr",
@@ -2476,6 +2611,7 @@
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2026-59893",
+            "https://advisory.echohq.com/cve/CVE-2026-59893",
             "https://github.com/andialbrecht/sqlparse",
             "https://github.com/andialbrecht/sqlparse/commit/d1d80602741f77ec78e5a04ce4719244cf32352e",
             "https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-prg7-hcfm-mfcr",
@@ -2531,6 +2667,7 @@
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2026-59893",
+            "https://advisory.echohq.com/cve/CVE-2026-59893",
             "https://github.com/andialbrecht/sqlparse",
             "https://github.com/andialbrecht/sqlparse/commit/d1d80602741f77ec78e5a04ce4719244cf32352e",
             "https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-prg7-hcfm-mfcr",
@@ -2587,6 +2724,7 @@
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2026-71491",
+            "https://advisory.echohq.com/cve/CVE-2026-71491",
             "https://github.com/andialbrecht/sqlparse",
             "https://github.com/andialbrecht/sqlparse/commit/ef2012a5eeb491e604dea2b00d516904a3830c87",
             "https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-f2ff-p2ww-7p4p",
@@ -2643,6 +2781,7 @@
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2026-71491",
+            "https://advisory.echohq.com/cve/CVE-2026-71491",
             "https://github.com/andialbrecht/sqlparse",
             "https://github.com/andialbrecht/sqlparse/commit/ef2012a5eeb491e604dea2b00d516904a3830c87",
             "https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-f2ff-p2ww-7p4p",
@@ -2699,6 +2838,7 @@
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2026-71491",
+            "https://advisory.echohq.com/cve/CVE-2026-71491",
             "https://github.com/andialbrecht/sqlparse",
             "https://github.com/andialbrecht/sqlparse/commit/ef2012a5eeb491e604dea2b00d516904a3830c87",
             "https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-f2ff-p2ww-7p4p",
@@ -3071,6 +3211,7 @@
             "https://access.redhat.com/errata/RHSA-2026:1087",
             "https://access.redhat.com/errata/RHSA-2026:1239",
             "https://access.redhat.com/security/cve/CVE-2025-66418",
+            "https://advisory.echohq.com/cve/CVE-2025-66418",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
             "https://bugzilla.redhat.com/2427726",
@@ -3157,6 +3298,7 @@
             "https://access.redhat.com/errata/RHSA-2026:1087",
             "https://access.redhat.com/errata/RHSA-2026:1239",
             "https://access.redhat.com/security/cve/CVE-2025-66418",
+            "https://advisory.echohq.com/cve/CVE-2025-66418",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
             "https://bugzilla.redhat.com/2427726",
@@ -3243,6 +3385,7 @@
             "https://access.redhat.com/errata/RHSA-2026:1087",
             "https://access.redhat.com/errata/RHSA-2026:1239",
             "https://access.redhat.com/security/cve/CVE-2025-66418",
+            "https://advisory.echohq.com/cve/CVE-2025-66418",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
             "https://bugzilla.redhat.com/2427726",
@@ -3329,6 +3472,7 @@
             "https://access.redhat.com/errata/RHSA-2026:1087",
             "https://access.redhat.com/errata/RHSA-2026:1239",
             "https://access.redhat.com/security/cve/CVE-2025-66471",
+            "https://advisory.echohq.com/cve/CVE-2025-66471",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
             "https://bugzilla.redhat.com/2427726",
@@ -3422,6 +3566,7 @@
             "https://access.redhat.com/errata/RHSA-2026:1087",
             "https://access.redhat.com/errata/RHSA-2026:1239",
             "https://access.redhat.com/security/cve/CVE-2025-66471",
+            "https://advisory.echohq.com/cve/CVE-2025-66471",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
             "https://bugzilla.redhat.com/2427726",
@@ -3515,6 +3660,7 @@
             "https://access.redhat.com/errata/RHSA-2026:1087",
             "https://access.redhat.com/errata/RHSA-2026:1239",
             "https://access.redhat.com/security/cve/CVE-2025-66471",
+            "https://advisory.echohq.com/cve/CVE-2025-66471",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
             "https://bugzilla.redhat.com/2427726",
@@ -3720,6 +3866,7 @@
             "https://access.redhat.com/errata/RHSA-2026:8500",
             "https://access.redhat.com/errata/RHSA-2026:8501",
             "https://access.redhat.com/security/cve/CVE-2026-21441",
+            "https://advisory.echohq.com/cve/CVE-2026-21441",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
             "https://bugzilla.redhat.com/2427726",
@@ -3919,6 +4066,7 @@
             "https://access.redhat.com/errata/RHSA-2026:8500",
             "https://access.redhat.com/errata/RHSA-2026:8501",
             "https://access.redhat.com/security/cve/CVE-2026-21441",
+            "https://advisory.echohq.com/cve/CVE-2026-21441",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
             "https://bugzilla.redhat.com/2427726",
@@ -4118,6 +4266,7 @@
             "https://access.redhat.com/errata/RHSA-2026:8500",
             "https://access.redhat.com/errata/RHSA-2026:8501",
             "https://access.redhat.com/security/cve/CVE-2026-21441",
+            "https://advisory.echohq.com/cve/CVE-2026-21441",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
             "https://bugzilla.redhat.com/2427726",
@@ -4205,6 +4354,7 @@
             "https://access.redhat.com/errata/RHSA-2026:28158",
             "https://access.redhat.com/errata/RHSA-2026:28159",
             "https://access.redhat.com/security/cve/CVE-2026-44431",
+            "https://advisory.echohq.com/cve/CVE-2026-44431",
             "https://bugzilla.redhat.com/2477154",
             "https://bugzilla.redhat.com/2477167",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2477154",
@@ -4286,6 +4436,7 @@
             "https://access.redhat.com/errata/RHSA-2026:28158",
             "https://access.redhat.com/errata/RHSA-2026:28159",
             "https://access.redhat.com/security/cve/CVE-2026-44431",
+            "https://advisory.echohq.com/cve/CVE-2026-44431",
             "https://bugzilla.redhat.com/2477154",
             "https://bugzilla.redhat.com/2477167",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2477154",
@@ -4367,6 +4518,7 @@
             "https://access.redhat.com/errata/RHSA-2026:28158",
             "https://access.redhat.com/errata/RHSA-2026:28159",
             "https://access.redhat.com/security/cve/CVE-2026-44431",
+            "https://advisory.echohq.com/cve/CVE-2026-44431",
             "https://bugzilla.redhat.com/2477154",
             "https://bugzilla.redhat.com/2477167",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2477154",
@@ -4434,6 +4586,7 @@
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2026-97687",
+            "https://advisory.echohq.com/cve/CVE-2026-97687",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/07408cec79d1856d81bb42c74a904a24fdb9e465",
             "https://github.com/urllib3/urllib3/commit/b6447295fff7b38fdffc67e0df9712d60cef3cc3",
@@ -4491,6 +4644,7 @@
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2026-97687",
+            "https://advisory.echohq.com/cve/CVE-2026-97687",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/07408cec79d1856d81bb42c74a904a24fdb9e465",
             "https://github.com/urllib3/urllib3/commit/b6447295fff7b38fdffc67e0df9712d60cef3cc3",
@@ -4548,6 +4702,7 @@
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2026-97687",
+            "https://advisory.echohq.com/cve/CVE-2026-97687",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/07408cec79d1856d81bb42c74a904a24fdb9e465",
             "https://github.com/urllib3/urllib3/commit/b6447295fff7b38fdffc67e0df9712d60cef3cc3",
