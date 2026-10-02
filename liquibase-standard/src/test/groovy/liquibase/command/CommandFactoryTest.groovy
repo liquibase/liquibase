@@ -73,4 +73,15 @@ class CommandFactoryTest extends Specification {
         command.pipeline*.class*.name == ["liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep", "liquibase.command.core.helpers.DbUrlConnectionCommandStep", "liquibase.command.core.helpers.LockServiceCommandStep", "liquibase.command.core.TagCommandStep"]
 
     }
+
+    def "#commandName does not pre-acquire the changelog lock via the pipeline, so it can be acquired lazily after the fast-check (#6102)"() {
+        when:
+        def command = Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition(commandName)
+
+        then:
+        !command.pipeline*.class*.name.contains("liquibase.command.core.helpers.LockServiceCommandStep")
+
+        where:
+        commandName << ["update", "updateCount", "updateSql"]
+    }
 }
