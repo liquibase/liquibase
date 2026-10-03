@@ -70,6 +70,11 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supportsEfficientPreconditionChecks() {
+        return true;
+    }
+
+    @Override
     protected String getDefaultDatabaseProductName() {
         return "DB2";
     }
