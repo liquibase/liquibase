@@ -82,22 +82,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         }
 
 
-        if (columnSnapshot.getDefaultValue() != null) {
-            Object defaultValue = columnSnapshot.getDefaultValue();
-            if (defaultValue instanceof Boolean) {
-                setDefaultValueBoolean((Boolean) defaultValue);
-            } else if (defaultValue instanceof Number) {
-                setDefaultValueNumeric(defaultValue.toString());
-            } else if (defaultValue instanceof SequenceNextValueFunction) {
-                setDefaultValueSequenceNext((SequenceNextValueFunction) defaultValue);
-            } else if (defaultValue instanceof DatabaseFunction) {
-                setDefaultValueComputed((DatabaseFunction) defaultValue);
-            } else if (defaultValue instanceof Date) {
-                setDefaultValueDate((Date) defaultValue);
-            } else {
-                setDefaultValue(defaultValue.toString());
-            }
-        }
+        setDefaultValueObject(columnSnapshot.getDefaultValue());
         setDefaultValueConstraintName(columnSnapshot.getDefaultValueConstraintName());
 
         boolean nonDefaultConstraints = false;
@@ -483,6 +468,30 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             return getValueSequenceCurrent();
         }
         return null;
+    }
+
+
+    /**
+     * Set the default value according to its type.
+     */
+    public ColumnConfig setDefaultValueObject(Object defaultValue) {
+        if (defaultValue != null) {
+            if (defaultValue instanceof Boolean) {
+                setDefaultValueBoolean((Boolean) defaultValue);
+            } else if (defaultValue instanceof Number) {
+                setDefaultValueNumeric((Number) defaultValue);
+            } else if (defaultValue instanceof SequenceNextValueFunction) {
+                setDefaultValueSequenceNext((SequenceNextValueFunction) defaultValue);
+            } else if (defaultValue instanceof DatabaseFunction) {
+                setDefaultValueComputed((DatabaseFunction) defaultValue);
+            } else if (defaultValue instanceof Date) {
+                setDefaultValueDate((Date) defaultValue);
+            } else {
+                setDefaultValue(defaultValue.toString());
+            }
+        }
+
+        return this;
     }
 
     /**
