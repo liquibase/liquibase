@@ -95,11 +95,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         // 2nd try to extract proxyUserName from JDBC url
         Matcher m = PROXY_USER_PATTERN.matcher(url);
         if (proxyUserName == null && m.matches()) {
-            // Remove optional brackets around proxy username
             proxyUserName = m.group(2);
-            if (proxyUserName.startsWith("[") && proxyUserName.endsWith("]")) {
-                proxyUserName = proxyUserName.substring(1, proxyUserName.length() - 1);
-            }
         }
         if (proxyUserName != null) {
             try {
@@ -109,17 +105,19 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 method.setAccessible(true);
                 method.invoke(con, 1, props);
             } catch (Exception e) {
-                Scope.getCurrentScope().getLog(getClass()).info("Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
+                Scope.getCurrentScope().getLog(getClass()).info("Explicit Oracle openProxySession failed, the JDBC driver may already have established the proxy session: " + e.getCause().getMessage());
             }
             try {
                 Method method = con.getClass().getMethod("isProxySession");
                 method.setAccessible(true);
                 boolean b = (boolean)method.invoke(con);
-                if (! b) {
-                    Scope.getCurrentScope().getLog(getClass()).info("Proxy session not established on OracleDatabase: ");
+                if (b) {
+                    Scope.getCurrentScope().getLog(getClass()).info("Proxy session established on OracleDatabase.");
+                } else {
+                    Scope.getCurrentScope().getLog(getClass()).info("Oracle JDBC reported that no explicit proxy session is active after proxy credentials were supplied in the JDBC URL; server-side identity validation will follow.");
                 }
             } catch (Exception e) {
-                Scope.getCurrentScope().getLog(getClass()).info("Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
+                Scope.getCurrentScope().getLog(getClass()).info("Could not verify proxy session on OracleDatabase: " + e.getCause().getMessage());
             }
         }
         String sql = "select" +
@@ -133,7 +131,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             while (resultSet.next()) {
                 String currentUser = resultSet.getString(3);
                 String proxyUser = resultSet.getString(4);
-                if (!java.util.Objects.equals(proxyUser, currentUser)) {
+                if (proxyUser != null && !java.util.Objects.equals(proxyUser, currentUser)) {
                     Scope.getCurrentScope().getLog(getClass()).info("Proxy session switched from: " + proxyUser + " to: " + currentUser);
                 }
             }

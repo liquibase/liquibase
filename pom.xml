@@ -302,20 +302,20 @@
         </dependency>
         <dependency>
             <groupId>com.oracle.database.security</groupId>
-	        <artifactId>oraclepki</artifactId>
-            <version>19.29.0.0</version>
+            <artifactId>oraclepki</artifactId>
+            <version>19.32.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.oracle.database.security</groupId>
             <artifactId>osdt_core</artifactId>
-            <version>19.29.0.0</version>
+            <version>19.32.0.0</version>
             <scope>test</scope>
         </dependency>
-	    <dependency>
+        <dependency>
             <groupId>com.oracle.database.security</groupId>
             <artifactId>osdt_cert</artifactId>
-            <version>19.29.0.0</version>
+            <version>19.32.0.0</version>
             <scope>test</scope>
         </dependency>
 
