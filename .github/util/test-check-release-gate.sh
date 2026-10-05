@@ -31,6 +31,13 @@ cases=(
   "gate skipped on real runs|$gate|.jobs.manual-approval.if = \"\${{ false }}\""
   "approved offered to dispatchers|release-deploy-javadocs.yml|.on.workflow_dispatch.inputs.approved = {\"type\": \"boolean\", \"default\": true}"
   "approved passed outside the orchestrator|dry-run-release.yml|.jobs.rogue = {\"uses\": \"./.github/workflows/release-deploy-maven.yml\", \"with\": {\"approved\": true}}"
+  "publisher without approved drops the gate from needs|$orch|.jobs.publish-github-packages.needs -= [\"manual-approval\"]"
+  "external publisher drops the approval clause|$orch|.jobs.package.if = \"\${{ !cancelled() && needs.setup.result == 'success' }}\""
+  "gate call told it is a dry run|$orch|.jobs.manual-approval.with.dry_run = true"
+  "approval clause ORed with true|$orch|.jobs.deploy-xsd.if = \"\${{ !cancelled() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') || true }}\""
+  "approval clause nested inside an OR|$orch|.jobs.deploy-xsd.if = \"\${{ !cancelled() && ((needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') || true) }}\""
+  "callee hardcodes release-publish|release-deploy-xsd.yml|.jobs.deploy-xsd.environment.name = \"release-publish\""
+  "dry-run-only job loosened|release-deploy-maven.yml|.jobs.deploy-maven-dryrun.if = \"\${{ always() }}\""
 )
 
 fresh() {
