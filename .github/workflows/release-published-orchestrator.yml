@@ -87,7 +87,7 @@ jobs:
 
   deploy-javadocs:
     name: Deploy Javadocs
-    needs: [setup, manual-approval]
+    needs: [setup]
     if: ${{ !cancelled() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') }}
     uses: ./.github/workflows/release-deploy-javadocs.yml
     permissions:
