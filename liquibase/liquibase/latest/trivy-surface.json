@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a1121a-e43c-704d-8df0-ee6967a1feaf",
-  "CreatedAt": "2026-10-06T16:45:14.684021036Z",
+  "ReportID": "01a11538-3045-72d2-a287-e934e64988e2",
+  "CreatedAt": "2026-10-07T07:16:06.34118603Z",
   "ArtifactID": "sha256:321b046e6efe3bc10091cff5e58a40e1ddcc6acd72cd98e85bc21cad4c4a8ca1",
   "ArtifactName": "ghcr.io/liquibase/liquibase/liquibase-liquibase:893a20a519cae987c152d84637f70c9cf5b70067",
   "ArtifactType": "container_image",
@@ -32,7 +32,7 @@
       "ghcr.io/liquibase/liquibase/liquibase-liquibase:893a20a519cae987c152d84637f70c9cf5b70067"
     ],
     "RepoDigests": [
-      "ghcr.io/liquibase/liquibase/liquibase-liquibase@sha256:b3ac13d0532f79f23ea65cec134f6bed08a1df49b94068d434624f32461bd0f3"
+      "ghcr.io/liquibase/liquibase/liquibase-liquibase@sha256:9a10ec314f8c08d4a21a1c8cd18ce6e93a0af3b7800148e561350e766e675074"
     ],
     "Reference": "ghcr.io/liquibase/liquibase/liquibase-liquibase:893a20a519cae987c152d84637f70c9cf5b70067",
     "ImageConfig": {
