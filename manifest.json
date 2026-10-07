@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-07T07:19:22Z",
+  "lastUpdated": "2026-10-07T10:11:45Z",
   "images": {
     "liquibase/liquibase": [
       "5.0.4",
@@ -76,7 +76,7 @@
     "liquibase/liquibase:4.25.0": "success",
     "liquibase/liquibase:4.25.1": "success",
     "liquibase/liquibase:4.26.0": "success",
-    "liquibase/liquibase:4.27.0": "failed",
+    "liquibase/liquibase:4.27.0": "success",
     "liquibase/liquibase:4.28.0": "success",
     "liquibase/liquibase:4.29.0": "success",
     "liquibase/liquibase:4.29.1": "success",
@@ -97,7 +97,7 @@
     "liquibase/liquibase:4.15.0": "success",
     "liquibase/liquibase:4.16.1": "success",
     "liquibase/liquibase:4.17.0": "success",
-    "liquibase/liquibase:4.17.1": "failed",
+    "liquibase/liquibase:4.17.1": "success",
     "liquibase/liquibase:4.17.2": "success",
     "liquibase/liquibase:4.19.0": "success",
     "liquibase/liquibase:4.19.1": "success",
@@ -110,7 +110,7 @@
     "liquibase/liquibase:4.4.3": "success",
     "liquibase/liquibase:4.5.0": "success",
     "liquibase/liquibase:4.6": "success",
-    "liquibase/liquibase:4.6.1": "failed",
+    "liquibase/liquibase:4.6.1": "success",
     "liquibase/liquibase:4.6.2": "success",
     "liquibase/liquibase:4.8.0": "success",
     "liquibase/liquibase:4.9.0": "success",
