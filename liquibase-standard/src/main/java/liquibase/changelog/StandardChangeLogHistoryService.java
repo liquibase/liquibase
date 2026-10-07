@@ -455,16 +455,14 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
         if (this.ranChangeSetList != null) {
             if (GlobalConfiguration.CLEAR_DUPLICATE_TAGS.getCurrentValue()) {
-                // Clear the tag off whichever entry already carries it, mirroring what the SQL above just did
-                // to the DATABASECHANGELOG table, otherwise a re-tag leaves two in-memory entries with the
-                // same tag until the cache is next rebuilt (#3763).
-                for (RanChangeSet ranChangeSet : ranChangeSetList) {
-                    if (tagString.equals(ranChangeSet.getTag())) {
-                        ranChangeSet.setTag(null);
-                    }
-                }
+                // Reload from the database instead of patching the cache in place: the UPDATE above compares
+                // TAG using the column's collation (e.g. case-insensitive on some databases), which a Java
+                // String.equals comparison here could disagree with, leaving the cache out of sync with what
+                // was actually cleared (#3763).
+                reset();
+            } else {
+                ranChangeSetList.get(ranChangeSetList.size() - 1).setTag(tagString);
             }
-            ranChangeSetList.get(ranChangeSetList.size() - 1).setTag(tagString);
         }
     }
 

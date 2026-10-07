@@ -68,9 +68,11 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
                 String tempTableNameEscaped = database.escapeObjectName("max_order_temp", Table.class);
                 return concat(clearOldTagSql,
                         new UnparsedSql(
-                                "SELECT MAX(" + dateColumnNameEscaped + ") AS " + dateColumnNameEscaped +
-                                        ", MAX(" + orderColumnNameEscaped + ") AS " + orderColumnNameEscaped + " " +
+                                // FIRST 1 with an explicit ORDER BY picks one actual row; independent MAX()s on
+                                // each column can each come from a different row when they don't tie together.
+                                "SELECT FIRST 1 " + dateColumnNameEscaped + ", " + orderColumnNameEscaped + " " +
                                         "FROM " + tableNameEscaped + " " +
+                                        "ORDER BY " + dateColumnNameEscaped + " DESC, " + orderColumnNameEscaped + " DESC " +
                                         "INTO TEMP " + tempTableNameEscaped + " WITH NO LOG"),
                         new UnparsedSql(
                                 "UPDATE " + tableNameEscaped + " " +
