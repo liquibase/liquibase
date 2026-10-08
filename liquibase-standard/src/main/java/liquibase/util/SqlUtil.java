@@ -63,6 +63,17 @@ public abstract class SqlUtil {
         }
     }
 
+    /**
+     * Interprets a database-reported column default using the database and column data type.
+     * Non-string values are returned unchanged. String defaults are converted to Java literals
+     * or SQL expressions as appropriate for the data type.
+     *
+     * @param database the database that reported the default value
+     * @param val the default value reported by the database
+     * @param type the column data type, including its JDBC type identifier when available
+     * @return the parsed literal, a {@link DatabaseFunction} for a SQL expression, or {@code null}
+     *         when the default represents no value
+     */
     public static Object parseValue(Database database, Object val, DataType type) {
         if (!(val instanceof String)) {
             return val;
