@@ -269,7 +269,11 @@ public abstract class SqlUtil {
                 }
                 return new DatabaseFunction(stringVal);
             } else if (typeId == Types.REAL) {
-                return new BigDecimal(stringVal.trim());
+                try {
+                    return new BigDecimal(stringVal.trim());
+                } catch (NumberFormatException e) {
+                    return new DatabaseFunction(stringVal);
+                }
             } else if (typeId == Types.REF) {
                 return new DatabaseFunction(stringVal);
             } else if (typeId == Types.ROWID) {

@@ -10,6 +10,8 @@ import liquibase.structure.core.DataType
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.sql.Types
+
 class ColumnSnapshotGeneratorTest extends Specification {
     private ColumnSnapshotGenerator columnSnapshotGenerator
 
@@ -80,5 +82,34 @@ class ColumnSnapshotGeneratorTest extends Specification {
         "(3)::real"          | "float"   | new PostgresDatabase() | 3
         "3::real"            | "float"   | new PostgresDatabase() | 3
         "'a value'::varchar" | "varchar" | new PostgresDatabase() | "a value"
+    }
+
+    @Unroll
+    def "read PostgreSQL real default #columnValue from JDBC metadata"() {
+        given:
+        def database = new PostgresDatabase()
+        def column = new Column("col")
+        def metadata = new CachedRow([
+                "TYPE_NAME": "float4",
+                "DATA_TYPE": Types.REAL,
+                "COLUMN_SIZE": 8,
+                "COLUMN_DEF": columnValue
+        ])
+        column.setType(columnSnapshotGenerator.readDataType(metadata, column, database))
+
+        expect:
+        columnSnapshotGenerator.readDefaultValue(metadata, column, database) == expected
+
+        where:
+        columnValue             | expected
+        null                    | null
+        "3"                     | new BigDecimal("3")
+        "0.0"                   | new BigDecimal("0.0")
+        "(3)::real"             | new BigDecimal("3")
+        "'-1'::integer"         | new BigDecimal("-1")
+        "(0.0)::real"           | new DatabaseFunction("(0.0)::real")
+        "((1 + 2))::real"       | new DatabaseFunction("((1 + 2))::real")
+        "('-1'::integer)::real" | new DatabaseFunction("('-1'::integer)::real")
+        "random()"              | new DatabaseFunction("random()")
     }
 }
