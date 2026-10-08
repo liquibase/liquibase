@@ -76,6 +76,7 @@ jobs:
 
   # GitHub approves per job, not per run, so the gate sits on one job every publisher depends on.
   # On the publishers themselves it would stop the release once per wave of this graph.
+  # .github/util/check-release-gate.sh fails PR Gate if any publisher stops depending on it.
   manual-approval:
     name: Manual Deployment Approval
     needs: [setup]
