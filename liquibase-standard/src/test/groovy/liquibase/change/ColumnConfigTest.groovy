@@ -425,6 +425,8 @@ class ColumnConfigTest extends Specification {
             testValue = "2012-03-13T18:52:22.12"
         } else if (field in ["defaultValueBoolean", "valueBoolean", "autoIncrement", "computed", "defaultOnNull"]) {
             testValue = "true"
+        } else if (field in ["valueBit", "defaultValueBit"]) {
+            testValue = 1
         } else if (field in ["startWith", "incrementBy"]) {
             testValue = "838"
         } else if (field in ["valueNumeric", "defaultValueNumeric"]) {
