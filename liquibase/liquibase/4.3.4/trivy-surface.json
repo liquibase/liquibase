@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a11afc-acf5-7b1b-8da9-69ca43c5130f",
-  "CreatedAt": "2026-10-08T10:08:49.397729215Z",
+  "ReportID": "01a12022-82a8-74f6-8db5-3028f8b0f512",
+  "CreatedAt": "2026-10-09T10:08:15.016326324Z",
   "ArtifactID": "sha256:db111831c7a511840dbe0f87157db2b7ea37a3fd4bb9381a968a5f2c8eb06e8a",
   "ArtifactName": "liquibase/liquibase:4.3.4",
   "ArtifactType": "container_image",
@@ -11021,7 +11021,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 2,
+            "amazon": 3,
             "cbl-mariner": 3,
             "nvd": 3,
             "oracle-oval": 2,
@@ -12496,7 +12496,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 2,
+            "amazon": 3,
             "cbl-mariner": 3,
             "nvd": 3,
             "oracle-oval": 2,
@@ -15231,7 +15231,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 2,
+            "amazon": 3,
             "cbl-mariner": 3,
             "nvd": 3,
             "oracle-oval": 2,
@@ -17468,7 +17468,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 2,
+            "amazon": 3,
             "cbl-mariner": 3,
             "nvd": 3,
             "oracle-oval": 2,
@@ -18256,7 +18256,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 2,
+            "amazon": 3,
             "cbl-mariner": 3,
             "nvd": 3,
             "oracle-oval": 2,
@@ -19044,7 +19044,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 2,
+            "amazon": 3,
             "cbl-mariner": 3,
             "nvd": 3,
             "oracle-oval": 2,
@@ -21343,7 +21343,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 2,
+            "amazon": 3,
             "cbl-mariner": 3,
             "nvd": 3,
             "oracle-oval": 2,
@@ -22027,7 +22027,7 @@
             "https://www.oracle.com/security-alerts/cpuoct2021.html"
           ],
           "PublishedDate": "2021-06-02T13:15:13.17Z",
-          "LastModifiedDate": "2026-06-17T04:05:17.183Z"
+          "LastModifiedDate": "2026-10-08T21:17:40.463Z"
         },
         {
           "VulnerabilityID": "CVE-2022-1271",
@@ -22193,7 +22193,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2021-39537"
           ],
           "PublishedDate": "2021-09-20T16:15:12.477Z",
-          "LastModifiedDate": "2026-07-27T13:43:06.743Z"
+          "LastModifiedDate": "2026-10-08T21:17:39.667Z"
         },
         {
           "VulnerabilityID": "CVE-2022-29458",
@@ -23529,7 +23529,7 @@
             "https://www.tenable.com/security/tns-2022-02"
           ],
           "PublishedDate": "2021-08-24T15:15:09.133Z",
-          "LastModifiedDate": "2026-06-17T04:05:36.467Z"
+          "LastModifiedDate": "2026-10-08T21:17:40.947Z"
         },
         {
           "VulnerabilityID": "CVE-2021-3712",
@@ -24415,7 +24415,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "julia": 3,
@@ -25198,7 +25198,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2021-39537"
           ],
           "PublishedDate": "2021-09-20T16:15:12.477Z",
-          "LastModifiedDate": "2026-07-27T13:43:06.743Z"
+          "LastModifiedDate": "2026-10-08T21:17:39.667Z"
         },
         {
           "VulnerabilityID": "CVE-2022-29458",
@@ -26716,7 +26716,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2021-39537"
           ],
           "PublishedDate": "2021-09-20T16:15:12.477Z",
-          "LastModifiedDate": "2026-07-27T13:43:06.743Z"
+          "LastModifiedDate": "2026-10-08T21:17:39.667Z"
         },
         {
           "VulnerabilityID": "CVE-2022-29458",
@@ -26962,7 +26962,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2021-39537"
           ],
           "PublishedDate": "2021-09-20T16:15:12.477Z",
-          "LastModifiedDate": "2026-07-27T13:43:06.743Z"
+          "LastModifiedDate": "2026-10-08T21:17:39.667Z"
         },
         {
           "VulnerabilityID": "CVE-2022-29458",
@@ -27223,7 +27223,7 @@
             "https://www.tenable.com/security/tns-2022-02"
           ],
           "PublishedDate": "2021-08-24T15:15:09.133Z",
-          "LastModifiedDate": "2026-06-17T04:05:36.467Z"
+          "LastModifiedDate": "2026-10-08T21:17:40.947Z"
         },
         {
           "VulnerabilityID": "CVE-2021-3712",
@@ -28109,7 +28109,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "julia": 3,
@@ -28434,7 +28434,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 2,
+            "amazon": 3,
             "azure": 4,
             "bottlerocket": 2,
             "cbl-mariner": 4,
@@ -30261,7 +30261,7 @@
             "https://creativecommons.org/licenses/by/4.0/",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42198",
             "https://errata.almalinux.org/9/ALSA-2026-22304.html",
-            "https://errata.rockylinux.org/RLSA-2026:22304",
+            "https://errata.rockylinux.org/RLSA-2026:24348",
             "https://github.com/pgjdbc/pgjdbc",
             "https://github.com/pgjdbc/pgjdbc/releases/tag/REL42.7.11",
             "https://github.com/pgjdbc/pgjdbc/security/advisories/GHSA-98qh-xjc8-98pq",
