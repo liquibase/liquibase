@@ -718,6 +718,25 @@ Global Options
                                environment variable:
                                'LIQUIBASE_USE_PROCEDURE_SCHEMA')
 
+      --use-session-lock=PARAM
+                             Use a session-level lock (e.g. a PostgreSQL
+                               advisory lock) to guard the changelog instead of
+                               the LOCKED row in DATABASECHANGELOGLOCK. A
+                               session lock is released automatically by the
+                               database when the connection drops, so a process
+                               killed mid-update (OOM, eviction, kill -9) does
+                               not leave a stale lock behind. Only supported
+                               databases honour this; others fall back to
+                               StandardLockService. Give Liquibase a dedicated,
+                               non-pooled connection when enabling this:
+                               closing a pooled connection only returns it to
+                               the pool and leaves the database session alive,
+                               so the automatic release does not apply to it.
+                             DEFAULT: false
+                             (defaults file: 'liquibase.useSessionLock',
+                               environment variable:
+                               'LIQUIBASE_USE_SESSION_LOCK')
+
   -v, --version              Print version information and exit
 
       --validate-xml-changelog-files=PARAM
