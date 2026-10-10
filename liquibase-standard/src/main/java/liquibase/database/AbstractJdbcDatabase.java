@@ -288,6 +288,12 @@ public abstract class AbstractJdbcDatabase implements Database {
         } else if ((getObjectQuotingStrategy() == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) || (unquotedObjectsAreUppercased == null) ||
                 (objectName == null) || (objectName.startsWith(getQuotingStartCharacter()) && objectName.endsWith(getQuotingEndCharacter()))) {
             return objectName;
+        } else if ((objectType == Index.class) && mustQuoteObjectName(objectName, objectType)) {
+            // Index names that need quoting (e.g. they contain a "-") are quoted with their case preserved
+            // by escapeObjectName()/quoteObject() when generated, so correcting them to the database's default
+            // case here would make them impossible to find again, e.g. by the indexExists precondition
+            // (see https://github.com/liquibase/liquibase/issues/3876).
+            return objectName;
         } else if (Boolean.TRUE.equals(unquotedObjectsAreUppercased)) {
             return objectName.toUpperCase(Locale.US);
         } else {
