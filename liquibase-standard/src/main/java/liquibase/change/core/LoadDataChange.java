@@ -823,6 +823,17 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             stream = new EmptyLineAndCommentSkippingInputStream(resource.openInputStream(), commentLineStartsWith);
             return CheckSum.compute(getTableName() + ":" + CheckSum.compute(stream, /*standardizeLineEndings*/ true));
         } catch (IOException e) {
+            if ((getChangeSet() != null) && Boolean.FALSE.equals(getChangeSet().getFailOnError())) {
+                // Mirrors the failOnError handling generateStatements() already does for the same missing-file
+                // case, so a changeset that executes as a no-op when failOnError="false" doesn't still abort
+                // the whole update/status pass just computing its checksum beforehand (#7550). The checksum is
+                // a stable sentinel (table name + file path, not file contents) so it stays the same across
+                // runs while the file remains missing, rather than depending on content it never read.
+                Logger log = Scope.getCurrentScope().getLog(LoadDataChange.class);
+                log.info("Changeset " + getChangeSet().toString(false) +
+                         " failed computing a checksum, but failOnError was false.  Error: " + e.getMessage());
+                return CheckSum.compute(getTableName() + ":<unreadable:" + file + ">");
+            }
             throw new UnexpectedLiquibaseException(e);
         } finally {
             if (stream != null) {
