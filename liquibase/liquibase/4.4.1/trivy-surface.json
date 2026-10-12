@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a12022-a6aa-7507-af41-140b08e6e799",
-  "CreatedAt": "2026-10-09T10:08:24.234331051Z",
+  "ReportID": "01a12f9b-7d82-7399-b31c-30163911dd22",
+  "CreatedAt": "2026-10-12T10:14:41.794237262Z",
   "ArtifactID": "sha256:8f534e665875322d13ea835c2af24feb1dc5ec4070e31588608d24ba78d7ff8b",
   "ArtifactName": "liquibase/liquibase:4.4.1",
   "ArtifactType": "container_image",
@@ -27719,6 +27719,7 @@
             }
           },
           "References": [
+            "https://advisory.echohq.com/cve/CVE-2025-59250",
             "https://github.com/microsoft/mssql-jdbc",
             "https://github.com/microsoft/mssql-jdbc/blob/main/CHANGELOG.md",
             "https://github.com/microsoft/mssql-jdbc/commit/9732e1bbc6ec44166fda2cddab31ce1c86c873dd#diff-45367b99a1951943bfecfc7765e80df687967aa56286a5b2e039f77cd9a0e118",
@@ -27782,6 +27783,7 @@
             }
           },
           "References": [
+            "https://advisory.echohq.com/cve/CVE-2025-59250",
             "https://github.com/microsoft/mssql-jdbc",
             "https://github.com/microsoft/mssql-jdbc/blob/main/CHANGELOG.md",
             "https://github.com/microsoft/mssql-jdbc/commit/9732e1bbc6ec44166fda2cddab31ce1c86c873dd#diff-45367b99a1951943bfecfc7765e80df687967aa56286a5b2e039f77cd9a0e118",
@@ -28291,6 +28293,7 @@
             "https://access.redhat.com/errata/RHSA-2026:66488",
             "https://access.redhat.com/errata/RHSA-2026:66545",
             "https://access.redhat.com/security/cve/CVE-2026-42198",
+            "https://advisory.echohq.com/cve/CVE-2026-42198",
             "https://bugzilla.redhat.com/2463857",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2463857",
             "https://creativecommons.org/licenses/by/4.0/",
@@ -28431,6 +28434,7 @@
             "http://www.openwall.com/lists/oss-security/2023/11/19/1",
             "https://access.redhat.com/errata/RHSA-2022:9058",
             "https://access.redhat.com/security/cve/CVE-2022-1471",
+            "https://advisory.echohq.com/cve/CVE-2022-1471",
             "https://bitbucket.org/snakeyaml/snakeyaml",
             "https://bitbucket.org/snakeyaml/snakeyaml/commits/5014df1a36f50aca54405bb8433bc99a8847f758",
             "https://bitbucket.org/snakeyaml/snakeyaml/commits/acc44099f5f4af26ff86b4e4e4cc1c874e2dc5c4",
@@ -28444,6 +28448,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-1471",
             "https://errata.almalinux.org/8/ALSA-2022-9058.html",
             "https://errata.rockylinux.org/RLSA-2022:9058",
+            "https://github.com/advisories/GHSA-mjmj-j48q-9wg2",
             "https://github.com/google/security-research/security/advisories/GHSA-mjmj-j48q-9wg2",
             "https://github.com/mbechler/marshalsec",
             "https://groups.google.com/g/kubernetes-security-announce/c/mwrakFaEdnc",
@@ -28521,6 +28526,7 @@
           "References": [
             "https://access.redhat.com/errata/RHSA-2022:6820",
             "https://access.redhat.com/security/cve/CVE-2022-25857",
+            "https://advisory.echohq.com/cve/CVE-2022-25857",
             "https://bitbucket.org/snakeyaml/snakeyaml/commits/fc300780da21f4bb92c148bc90257201220cf174",
             "https://bitbucket.org/snakeyaml/snakeyaml/issues/525",
             "https://bugzilla.redhat.com/2126789",
@@ -28528,6 +28534,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-25857",
             "https://errata.almalinux.org/8/ALSA-2022-6820.html",
             "https://errata.rockylinux.org/RLSA-2022:6820",
+            "https://github.com/advisories/GHSA-3mc7-4q67-w48m",
             "https://github.com/snakeyaml/snakeyaml",
             "https://github.com/snakeyaml/snakeyaml/commit/fc300780da21f4bb92c148bc90257201220cf174",
             "https://linux.oracle.com/cve/CVE-2022-25857.html",

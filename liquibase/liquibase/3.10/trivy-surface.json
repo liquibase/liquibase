@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a12022-5407-7ee7-ace1-4e6a35c12bdc",
-  "CreatedAt": "2026-10-09T10:08:03.079978715Z",
+  "ReportID": "01a12f9b-8060-7e39-889f-274892ca0c26",
+  "CreatedAt": "2026-10-12T10:14:42.528933653Z",
   "ArtifactID": "sha256:3b3119706bb9d14069b5eab36a4d25f9d2ebce093c7324d7a1168011c1ce94ed",
   "ArtifactName": "liquibase/liquibase:3.10",
   "ArtifactType": "container_image",
@@ -23249,6 +23249,8 @@
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2023-6378",
+            "https://advisory.echohq.com/cve/CVE-2023-6378",
+            "https://github.com/advisories/GHSA-vmq6-5m68-f53m",
             "https://github.com/qos-ch/logback",
             "https://github.com/qos-ch/logback/commit/9c782b45be4abdafb7e17481e24e7354c2acd1eb",
             "https://github.com/qos-ch/logback/commit/b8eac23a9de9e05fb6d51160b3f46acd91af9731",
@@ -23320,6 +23322,8 @@
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2023-6378",
+            "https://advisory.echohq.com/cve/CVE-2023-6378",
+            "https://github.com/advisories/GHSA-vmq6-5m68-f53m",
             "https://github.com/qos-ch/logback",
             "https://github.com/qos-ch/logback/commit/9c782b45be4abdafb7e17481e24e7354c2acd1eb",
             "https://github.com/qos-ch/logback/commit/b8eac23a9de9e05fb6d51160b3f46acd91af9731",
@@ -24489,6 +24493,7 @@
             "https://access.redhat.com/errata/RHSA-2026:66488",
             "https://access.redhat.com/errata/RHSA-2026:66545",
             "https://access.redhat.com/security/cve/CVE-2026-42198",
+            "https://advisory.echohq.com/cve/CVE-2026-42198",
             "https://bugzilla.redhat.com/2463857",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2463857",
             "https://creativecommons.org/licenses/by/4.0/",
@@ -24766,6 +24771,7 @@
             "http://www.openwall.com/lists/oss-security/2023/11/19/1",
             "https://access.redhat.com/errata/RHSA-2022:9058",
             "https://access.redhat.com/security/cve/CVE-2022-1471",
+            "https://advisory.echohq.com/cve/CVE-2022-1471",
             "https://bitbucket.org/snakeyaml/snakeyaml",
             "https://bitbucket.org/snakeyaml/snakeyaml/commits/5014df1a36f50aca54405bb8433bc99a8847f758",
             "https://bitbucket.org/snakeyaml/snakeyaml/commits/acc44099f5f4af26ff86b4e4e4cc1c874e2dc5c4",
@@ -24779,6 +24785,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-1471",
             "https://errata.almalinux.org/8/ALSA-2022-9058.html",
             "https://errata.rockylinux.org/RLSA-2022:9058",
+            "https://github.com/advisories/GHSA-mjmj-j48q-9wg2",
             "https://github.com/google/security-research/security/advisories/GHSA-mjmj-j48q-9wg2",
             "https://github.com/mbechler/marshalsec",
             "https://groups.google.com/g/kubernetes-security-announce/c/mwrakFaEdnc",
@@ -24856,6 +24863,7 @@
           "References": [
             "https://access.redhat.com/errata/RHSA-2022:6820",
             "https://access.redhat.com/security/cve/CVE-2022-25857",
+            "https://advisory.echohq.com/cve/CVE-2022-25857",
             "https://bitbucket.org/snakeyaml/snakeyaml/commits/fc300780da21f4bb92c148bc90257201220cf174",
             "https://bitbucket.org/snakeyaml/snakeyaml/issues/525",
             "https://bugzilla.redhat.com/2126789",
@@ -24863,6 +24871,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-25857",
             "https://errata.almalinux.org/8/ALSA-2022-6820.html",
             "https://errata.rockylinux.org/RLSA-2022:6820",
+            "https://github.com/advisories/GHSA-3mc7-4q67-w48m",
             "https://github.com/snakeyaml/snakeyaml",
             "https://github.com/snakeyaml/snakeyaml/commit/fc300780da21f4bb92c148bc90257201220cf174",
             "https://linux.oracle.com/cve/CVE-2022-25857.html",
