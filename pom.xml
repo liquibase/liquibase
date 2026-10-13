@@ -76,7 +76,7 @@
         <ant.version>1.10.18</ant.version>
         <junit-jupiter.version>6.1.3</junit-jupiter.version>
         <groovy.version>5.1.2</groovy.version>
-        <spock.version>2.4-groovy-5.0</spock.version>
+        <spock.version>2.5-groovy-5.0</spock.version>
         <spring.version>7.0.9</spring.version>
         <maven-failsafe-plugin.version>3.6.0</maven-failsafe-plugin.version>
         <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
@@ -95,7 +95,7 @@
         <surefire.failIfNoTests>true</surefire.failIfNoTests>
         <opencsv.version>5.12.0</opencsv.version>
         <jaxb-api.version>2.3.1</jaxb-api.version>
-        <mockito.version>5.23.0</mockito.version>
+        <mockito.version>5.24.0</mockito.version>
     </properties>
 
     <!-- comment -->
