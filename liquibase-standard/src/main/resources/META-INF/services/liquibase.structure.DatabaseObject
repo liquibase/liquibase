@@ -2,6 +2,7 @@ liquibase.structure.core.Catalog
 liquibase.structure.core.Column
 liquibase.structure.core.Data
 liquibase.structure.core.ForeignKey
+liquibase.structure.core.Grant
 liquibase.structure.core.Index
 liquibase.structure.core.PrimaryKey
 liquibase.structure.core.Schema
