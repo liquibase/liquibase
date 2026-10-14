@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a134bd-8078-7a79-b44d-2ecf180c0ca9",
-  "CreatedAt": "2026-10-13T10:09:56.856688084Z",
+  "ReportID": "01a139e2-0425-7c8d-b91e-580c14ceaf99",
+  "CreatedAt": "2026-10-14T10:07:55.941823875Z",
   "ArtifactID": "sha256:12b3d92af2689c67389937901bbe48fb3bb13084a203976598ee02c039c21538",
   "ArtifactName": "liquibase/liquibase:4.1.1",
   "ArtifactType": "container_image",
@@ -17520,7 +17520,7 @@
             "https://www.oracle.com/security-alerts/cpuoct2020.html"
           ],
           "PublishedDate": "2020-05-27T15:15:12.867Z",
-          "LastModifiedDate": "2026-06-17T02:53:28.333Z"
+          "LastModifiedDate": "2026-10-13T18:25:34.177Z"
         },
         {
           "VulnerabilityID": "CVE-2020-35525",
@@ -24335,7 +24335,7 @@
             "https://bugzilla.redhat.com/show_bug.cgi?id=2463857",
             "https://creativecommons.org/licenses/by/4.0/",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42198",
-            "https://errata.almalinux.org/9/ALSA-2026-22304.html",
+            "https://errata.almalinux.org/10/ALSA-2026-24348.html",
             "https://errata.rockylinux.org/RLSA-2026:22304",
             "https://github.com/pgjdbc/pgjdbc",
             "https://github.com/pgjdbc/pgjdbc/releases/tag/REL42.7.11",
