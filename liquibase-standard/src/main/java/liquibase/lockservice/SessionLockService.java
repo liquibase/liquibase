@@ -213,6 +213,13 @@ public abstract class SessionLockService implements LockService {
                 Scope.getCurrentScope().getLog(getClass()).warning("Could not release change log lock on reset", e);
             }
         }
+        if (database != null) {
+            // A reset means some component gave the lock up, possibly mid-run. Another process can
+            // have taken it and applied changesets in that window, so the change log view this JVM
+            // holds stops being trustworthy. Same invalidation StandardLockService#reset does, and
+            // the counterpart to the re-read in acquireLock().
+            Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetDatabase(database);
+        }
     }
 
     @Override

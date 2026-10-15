@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -147,6 +148,33 @@ public class PostgreSQLSessionLockServiceTest {
         assertThat(lockService.acquireLock()).isFalse();
 
         verify(changeLogHistoryService, never()).reset();
+    }
+
+    @Test
+    public void resetInvalidatesTheChangeLogHistory() throws Exception {
+        // Giving the lock up, even temporarily, lets another process take it and apply changesets,
+        // so the change log view this JVM holds stops being trustworthy. Counterpart to the re-read
+        // in acquireLock().
+        Connection connection = mock(Connection.class);
+        stubSuccessfulTryLock(connection);
+        stubLockInfo(connection, false);
+        PreparedStatement unlock = mock(PreparedStatement.class);
+        ResultSet unlockResultSet = mock(ResultSet.class);
+        when(connection.prepareStatement(UNLOCK_SQL)).thenReturn(unlock);
+        when(unlock.executeQuery()).thenReturn(unlockResultSet);
+        when(unlockResultSet.next()).thenReturn(true);
+        when(unlockResultSet.getObject(1)).thenReturn(Boolean.TRUE);
+        PostgresDatabase database = databaseOn(connection, "public", null);
+        ChangeLogHistoryService changeLogHistoryService = mock(ChangeLogHistoryService.class);
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class)
+                .registerForDatabase(database, changeLogHistoryService);
+        lockService.setDatabase(database);
+        assertThat(lockService.acquireLock()).isTrue();
+
+        lockService.reset();
+
+        // Once when the lock was acquired, once when it was given up.
+        verify(changeLogHistoryService, times(2)).reset();
     }
 
     @Test
