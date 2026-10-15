@@ -3,6 +3,7 @@ package liquibase.lockservice;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -14,6 +15,8 @@ import java.util.Date;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.changelog.ChangeLogHistoryService;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.core.CockroachDatabase;
 import liquibase.database.core.EnterpriseDBDatabase;
 import liquibase.database.core.MockDatabase;
@@ -103,6 +106,47 @@ public class PostgreSQLSessionLockServiceTest {
         // The implicit transaction is ended after the lock SQL so the migration does not start
         // mid-transaction.
         verify(database).rollback();
+    }
+
+    @Test
+    public void acquireLockReReadsTheChangeLogHistory() throws Exception {
+        // A session that waited for the lock still holds the change log view it read before
+        // waiting, so once it gets in it has to re-read DATABASECHANGELOG, exactly as
+        // StandardLockService does. Without it a waiter re-applies what the previous holder just
+        // applied and fails on the second attempt.
+        Connection connection = mock(Connection.class);
+        stubSuccessfulTryLock(connection);
+        PostgresDatabase database = databaseOn(connection, "public", null);
+        ChangeLogHistoryService changeLogHistoryService = mock(ChangeLogHistoryService.class);
+        // Keyed on this test's own mock database, so the registration cannot reach another test.
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class)
+                .registerForDatabase(database, changeLogHistoryService);
+        lockService.setDatabase(database);
+
+        assertThat(lockService.acquireLock()).isTrue();
+
+        verify(changeLogHistoryService).reset();
+    }
+
+    @Test
+    public void acquireLockDoesNotReReadTheChangeLogHistoryWhenTheLockIsHeldElsewhere() throws Exception {
+        // Nothing was acquired, so there is nothing new to see and no reason to drop caches.
+        Connection connection = mock(Connection.class);
+        PreparedStatement tryLock = mock(PreparedStatement.class);
+        ResultSet resultSet = mock(ResultSet.class);
+        when(connection.prepareStatement(TRY_LOCK_SQL)).thenReturn(tryLock);
+        when(tryLock.executeQuery()).thenReturn(resultSet);
+        when(resultSet.next()).thenReturn(true);
+        when(resultSet.getObject(1)).thenReturn(Boolean.FALSE);
+        PostgresDatabase database = databaseOn(connection, "public", null);
+        ChangeLogHistoryService changeLogHistoryService = mock(ChangeLogHistoryService.class);
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class)
+                .registerForDatabase(database, changeLogHistoryService);
+        lockService.setDatabase(database);
+
+        assertThat(lockService.acquireLock()).isFalse();
+
+        verify(changeLogHistoryService, never()).reset();
     }
 
     @Test

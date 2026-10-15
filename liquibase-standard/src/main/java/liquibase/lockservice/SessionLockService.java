@@ -6,6 +6,7 @@ import java.util.Date;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
@@ -106,6 +107,14 @@ public abstract class SessionLockService implements LockService {
         endTransaction();
         if (acquired) {
             hasChangeLogLock = true;
+            // A session that had to wait for the lock still holds the change log view it read
+            // before waiting, while the previous holder was applying changesets. Re-read it now,
+            // exactly as StandardLockService does, or a waiter re-runs what the holder just
+            // applied and fails on the second attempt. StandardChangeLogHistoryService#reset
+            // names this case directly. The default update path happens to be covered, because
+            // FastCheckService resets the service in its finally before the wait, but the
+            // fast-check-disabled and rollback paths are not.
+            Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetDatabase(database);
             Scope.getCurrentScope().getLog(getClass()).info("Successfully acquired change log lock");
             return true;
         }
