@@ -84,6 +84,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     if (database instanceof AbstractPostgresDatabase) {
                         String indexType = row.getString("INDEX_TYPE");
                         index.setUsing(indexType);
+                        index.setWhere(row.getString("INDEX_CONDITION"));
                     }
                     Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : ("A".equals(ascOrDesc) ? Boolean
                             .FALSE : null);
@@ -248,6 +249,9 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     returnIndex.setName(indexName);
                     returnIndex.setUnique(!nonUnique);
                     returnIndex.setUsing(row.getString("INDEX_TYPE"));
+                    if (database instanceof PostgresDatabase) {
+                        returnIndex.setWhere(row.getString("INDEX_CONDITION"));
+                    }
 
                     String tablespaceName = row.getString("TABLESPACE_NAME");
                     if ((tablespaceName != null) && database.supportsTablespaces()) {

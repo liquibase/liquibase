@@ -259,6 +259,14 @@ public class Index extends AbstractDatabaseObject {
         return (Index) setAttribute("using", using);
     }
 
+    public String getWhere() {
+        return getAttribute("where", String.class);
+    }
+
+    public Index setWhere(String where) {
+        return (Index) setAttribute("where", where);
+    }
+
     @Override
     public int compareTo(Object other) {
         Index o = (Index) other;

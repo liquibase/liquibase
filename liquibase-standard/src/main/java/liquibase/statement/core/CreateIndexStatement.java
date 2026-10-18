@@ -29,6 +29,8 @@ public class CreateIndexStatement extends AbstractSqlStatement implements Compou
     private Boolean clustered;
     @Getter
     private String using;
+    @Getter
+    private String where;
 
     public CreateIndexStatement(String indexName, String tableCatalogName, String tableSchemaName, String tableName, Boolean isUnique, String associatedWith, String using, AddColumnConfig... columns) {
         this(indexName, tableCatalogName, tableSchemaName, tableName, isUnique, associatedWith, columns);
@@ -48,6 +50,11 @@ public class CreateIndexStatement extends AbstractSqlStatement implements Compou
     public CreateIndexStatement setTablespace(String tablespace) {
         this.tablespace = tablespace;
 
+        return this;
+    }
+
+    public CreateIndexStatement setWhere(String where) {
+        this.where = where;
         return this;
     }
 
