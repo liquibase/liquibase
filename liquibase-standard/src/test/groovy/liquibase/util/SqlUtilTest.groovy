@@ -132,6 +132,15 @@ class SqlUtilTest extends Specification {
         "a_function()"                                            | new H2Database()       | "float"         | new DatabaseFunction("a_function()")      | Types.FLOAT
         "12.34"                                                   | new H2Database()       | "real"          | 12.34F                                    | Types.REAL
         "a_function()"                                            | new H2Database()       | "real"          | new DatabaseFunction("a_function()")      | Types.REAL
+        "12.34"                                                   | new PostgresDatabase() | "float4"        | new BigDecimal("12.34")                   | Types.REAL
+        " -12.34 "                                                | new PostgresDatabase() | "float4"        | new BigDecimal("-12.34")                  | Types.REAL
+        "1.25e-3"                                                 | new PostgresDatabase() | "float4"        | new BigDecimal("1.25e-3")                 | Types.REAL
+        "(0)::real"                                               | new PostgresDatabase() | "float4"        | new DatabaseFunction("(0)::real")         | Types.REAL
+        "(0.0)::real"                                             | new PostgresDatabase() | "float4"        | new DatabaseFunction("(0.0)::real")       | Types.REAL
+        "((1 + 2))::real"                                         | new PostgresDatabase() | "float4"        | new DatabaseFunction("((1 + 2))::real")   | Types.REAL
+        "random()"                                                | new PostgresDatabase() | "float4"        | new DatabaseFunction("random()")          | Types.REAL
+        "'NaN'::real"                                             | new PostgresDatabase() | "float4"        | new DatabaseFunction("'NaN'::real")       | Types.REAL
+        "'Infinity'::real"                                        | new PostgresDatabase() | "float4"        | new DatabaseFunction("'Infinity'::real")  | Types.REAL
         "a_function()"                                            | new H2Database()       | "distinct"      | new DatabaseFunction("a_function()")      | Types.DISTINCT
         "a_function()"                                            | new H2Database()       | "object"        | new DatabaseFunction("a_function()")      | Types.JAVA_OBJECT
         "any value"                                               | new H2Database()       | "null"          | null                                      | Types.NULL
