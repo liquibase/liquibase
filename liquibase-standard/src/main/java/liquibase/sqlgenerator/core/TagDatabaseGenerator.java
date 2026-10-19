@@ -66,14 +66,27 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
                                         "WHERE t." + dateColumnNameEscaped + "=sub." + dateColumnNameEscaped + " AND t." + orderColumnNameEscaped + "=sub." + orderColumnNameEscaped));
             } else if (database instanceof InformixDatabase) {
                 String tempTableNameEscaped = database.escapeObjectName("max_order_temp", Table.class);
+                UnparsedSql selectLatestSql;
+                if (GlobalConfiguration.CLEAR_DUPLICATE_TAGS.getCurrentValue()) {
+                    // FIRST 1 with an explicit ORDER BY picks one actual row; independent MAX()s on each
+                    // column can each come from a different row when they don't tie together, which only
+                    // turns into data loss once the old tag has already been cleared above. Gated behind
+                    // the same flag so default behavior for existing Informix installs is unchanged
+                    // (unverified against a real Informix instance, see #7960 review discussion).
+                    selectLatestSql = new UnparsedSql(
+                            "SELECT FIRST 1 " + dateColumnNameEscaped + ", " + orderColumnNameEscaped + " " +
+                                    "FROM " + tableNameEscaped + " " +
+                                    "ORDER BY " + dateColumnNameEscaped + " DESC, " + orderColumnNameEscaped + " DESC " +
+                                    "INTO TEMP " + tempTableNameEscaped + " WITH NO LOG");
+                } else {
+                    selectLatestSql = new UnparsedSql(
+                            "SELECT MAX(" + dateColumnNameEscaped + ") AS " + dateColumnNameEscaped +
+                                    ", MAX(" + orderColumnNameEscaped + ") AS " + orderColumnNameEscaped + " " +
+                                    "FROM " + tableNameEscaped + " " +
+                                    "INTO TEMP " + tempTableNameEscaped + " WITH NO LOG");
+                }
                 return concat(clearOldTagSql,
-                        new UnparsedSql(
-                                // FIRST 1 with an explicit ORDER BY picks one actual row; independent MAX()s on
-                                // each column can each come from a different row when they don't tie together.
-                                "SELECT FIRST 1 " + dateColumnNameEscaped + ", " + orderColumnNameEscaped + " " +
-                                        "FROM " + tableNameEscaped + " " +
-                                        "ORDER BY " + dateColumnNameEscaped + " DESC, " + orderColumnNameEscaped + " DESC " +
-                                        "INTO TEMP " + tempTableNameEscaped + " WITH NO LOG"),
+                        selectLatestSql,
                         new UnparsedSql(
                                 "UPDATE " + tableNameEscaped + " " +
                                         "SET TAG = " + tagEscaped + " " +

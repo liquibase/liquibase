@@ -91,9 +91,35 @@ public class TagDatabaseGeneratorTest {
     }
 
     @Test
-    public void testInformix_selectsOneActualLatestRow() throws Exception {
+    public void testInformix_defaultDoesNotClearDuplicateTags() throws Exception {
+        TagDatabaseStatement statement = new TagDatabaseStatement("v1.0");
+        Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, new InformixDatabase());
+
+        assertEquals(3, sql.length);
+        assertEquals(
+                "SELECT MAX(DATEEXECUTED) AS DATEEXECUTED, MAX(ORDEREXECUTED) AS ORDEREXECUTED " +
+                "FROM DATABASECHANGELOG " +
+                "INTO TEMP max_order_temp WITH NO LOG",
+                sql[0].toSql());
+        assertEquals(
+                "UPDATE DATABASECHANGELOG " +
+                "SET TAG = 'v1.0' " +
+                "WHERE DATEEXECUTED = (" +
+                    "SELECT DATEEXECUTED " +
+                    "FROM max_order_temp" +
+                ") AND ORDEREXECUTED = (" +
+                    "SELECT ORDEREXECUTED " +
+                    "FROM max_order_temp" +
+                ");",
+                sql[1].toSql());
+        assertEquals("DROP TABLE max_order_temp;", sql[2].toSql());
+    }
+
+    @Test
+    public void testInformix_selectsOneActualLatestRowWhenEnabled() throws Exception {
         // Independent MAX(DATEEXECUTED) / MAX(ORDEREXECUTED) can each come from a different row when they
-        // don't tie together; FIRST 1 with an explicit ORDER BY always identifies one real row.
+        // don't tie together; FIRST 1 with an explicit ORDER BY always identifies one real row. Only
+        // applied when the flag is enabled, so default Informix behavior above is untouched.
         Scope.child(Collections.singletonMap(GlobalConfiguration.CLEAR_DUPLICATE_TAGS.getKey(), "true"), () -> {
             TagDatabaseStatement statement = new TagDatabaseStatement("v1.0");
             Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, new InformixDatabase());
