@@ -40,6 +40,7 @@ import liquibase.util.csv.CSVReader;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -484,13 +485,16 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         } catch (UnexpectedLiquibaseException ule) {
             if ((getChangeSet() != null) && (getChangeSet().getFailOnError() != null) && !getChangeSet()
                     .getFailOnError()) {
+                // Let ChangeSet.execute()'s own failOnError handling take this, rather than swallowing it here
+                // and reporting zero statements as a successful, empty run: that recorded the changeset as
+                // EXECUTED with a sentinel checksum, so once the file showed up the real checksum permanently
+                // mismatched it instead of the changeset just staying unrecorded and retrying next run, like
+                // any other failOnError="false" failure (#7550).
                 Logger log = Scope.getCurrentScope().getLog(LoadDataChange.class);
                 log.info("Changeset " + getChangeSet().toString(false) +
                          " failed, but failOnError was false.  Error: " + ule.getMessage());
-                return SqlStatement.EMPTY_SQL_STATEMENT;
-            } else {
-                throw ule;
             }
+            throw ule;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -822,18 +826,22 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
             stream = new EmptyLineAndCommentSkippingInputStream(resource.openInputStream(), commentLineStartsWith);
             return CheckSum.compute(getTableName() + ":" + CheckSum.compute(stream, /*standardizeLineEndings*/ true));
-        } catch (IOException e) {
+        } catch (FileNotFoundException e) {
             if ((getChangeSet() != null) && Boolean.FALSE.equals(getChangeSet().getFailOnError())) {
                 // Mirrors the failOnError handling generateStatements() already does for the same missing-file
                 // case, so a changeset that executes as a no-op when failOnError="false" doesn't still abort
                 // the whole update/status pass just computing its checksum beforehand (#7550). The checksum is
                 // a stable sentinel (table name + file path, not file contents) so it stays the same across
-                // runs while the file remains missing, rather than depending on content it never read.
+                // runs while the file remains missing, rather than depending on content it never read. Limited
+                // to a missing file specifically: a file that exists but can't be read (corrupt, permissions)
+                // still throws regardless of failOnError, same as before.
                 Logger log = Scope.getCurrentScope().getLog(LoadDataChange.class);
                 log.info("Changeset " + getChangeSet().toString(false) +
                          " failed computing a checksum, but failOnError was false.  Error: " + e.getMessage());
                 return CheckSum.compute(getTableName() + ":<unreadable:" + file + ">");
             }
+            throw new UnexpectedLiquibaseException(e);
+        } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
         } finally {
             if (stream != null) {

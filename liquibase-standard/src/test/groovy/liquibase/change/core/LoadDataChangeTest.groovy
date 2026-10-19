@@ -1096,6 +1096,32 @@ class LoadDataChangeTest extends StandardChangeTest {
         thrown(UnexpectedLiquibaseException)
     }
 
+    def "generateStatements still throws when the file is missing, even with failOnError false, so ChangeSet.execute() handles it instead of recording a false success (#7550)"() {
+        when:
+        def table = testTable("table")
+        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
+
+        def changelog = new DatabaseChangeLog("com/example/changelog.xml")
+        def changeset = new ChangeSet("1", "auth", false, false, "com/example/changelog.xml", null, null, changelog)
+        changeset.setFailOnError(false)
+
+        LoadDataChange change = new LoadDataChange()
+        change.setTableName("table")
+        change.setFile("does-not-exist.csv")
+        change.setChangeSet(changeset)
+
+        Scope.child([(Scope.Attr.resourceAccessor.name()): new JUnitResourceAccessor()], {
+            change.generateStatements(mockDB)
+        } as Scope.ScopedRunner)
+
+        then:
+        // A changeset marked failOnError="false" must be left for ChangeSet.execute()'s own handling to
+        // treat as FAILED and leave unrecorded in DATABASECHANGELOG, like any other ignored failure -- not
+        // swallowed here and reported as zero statements, which recorded it as EXECUTED with a sentinel
+        // checksum that permanently mismatched once the file later appeared (#7550 review discussion).
+        thrown(UnexpectedLiquibaseException)
+    }
+
     class ColDef {
         ColDef(Object n, String type) {
             this.name = n.toString()
