@@ -1407,7 +1407,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
 
         // Check the prefix first: normalizePath runs for every DATABASECHANGELOG row, and resolving the
-        // configuration value on each call is expensive (fixes issue #8042).
+        // configuration value on each call is expensive.
         if (filePath.startsWith(CLASSPATH_PROTOCOL) && !GlobalConfiguration.PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS.getCurrentValue()) {
             filePath = filePath.substring("classpath:".length());
         }
