@@ -23,6 +23,18 @@ public class LiquibaseUtil {
         return getBuildInfo("build.version");
     }
 
+    /**
+     * Return the build version in the abbreviated form which is stored in the LIQUIBASE column of the
+     * DATABASECHANGELOG table: "SNAPSHOT" is shortened to "SNP", "beta" and "alpha" to "b", and the result is
+     * limited to 20 characters.
+     */
+    public static String getBuildVersionForChangeLogHistory() {
+        return StringUtil.limitSize(getBuildVersion()
+                .replace("SNAPSHOT", "SNP")
+                .replace("beta", "b")
+                .replace("alpha", "b"), 20);
+    }
+
     public static boolean isDevVersion() {
         return LiquibaseUtil.getBuildVersion().equals(LiquibaseUtil.DEV_VERSION);
     }
