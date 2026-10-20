@@ -71,8 +71,9 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
                     // FIRST 1 with an explicit ORDER BY picks one actual row; independent MAX()s on each
                     // column can each come from a different row when they don't tie together, which only
                     // turns into data loss once the old tag has already been cleared above. Gated behind
-                    // the same flag so default behavior for existing Informix installs is unchanged
-                    // (unverified against a real Informix instance, see #7960 review discussion).
+                    // the same flag so default behavior for existing Informix installs is unchanged; this
+                    // has only been checked against documented FIRST n / ORDER BY syntax, not a real
+                    // Informix instance.
                     selectLatestSql = new UnparsedSql(
                             "SELECT FIRST 1 " + dateColumnNameEscaped + ", " + orderColumnNameEscaped + " " +
                                     "FROM " + tableNameEscaped + " " +
