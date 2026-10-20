@@ -1116,9 +1116,9 @@ class LoadDataChangeTest extends StandardChangeTest {
 
         then:
         // A changeset marked failOnError="false" must be left for ChangeSet.execute()'s own handling to
-        // treat as FAILED and leave unrecorded in DATABASECHANGELOG, like any other ignored failure -- not
-        // swallowed here and reported as zero statements, which recorded it as EXECUTED with a sentinel
-        // checksum that permanently mismatched once the file later appeared (#7550 review discussion).
+        // treat as FAILED and leave unrecorded in DATABASECHANGELOG, like any other ignored failure, rather
+        // than reported here as zero statements, which would record it as EXECUTED with a checksum that
+        // permanently mismatches once the file later appears.
         thrown(UnexpectedLiquibaseException)
     }
 

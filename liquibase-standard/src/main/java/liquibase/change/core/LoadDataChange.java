@@ -828,9 +828,11 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             return CheckSum.compute(getTableName() + ":" + CheckSum.compute(stream, /*standardizeLineEndings*/ true));
         } catch (FileNotFoundException e) {
             if ((getChangeSet() != null) && Boolean.FALSE.equals(getChangeSet().getFailOnError())) {
-                // Mirrors the failOnError handling generateStatements() already does for the same missing-file
-                // case, so a changeset that executes as a no-op when failOnError="false" doesn't still abort
-                // the whole update/status pass just computing its checksum beforehand (#7550). The checksum is
+                // This runs ahead of the real execution in several places (the update-summary status pass,
+                // the pre-execution checksum-version upgrade check), before ChangeSet.execute() gets a chance
+                // to apply its own failOnError handling to the same missing file. A changeset marked
+                // failOnError="false" ends up FAILED and unrecorded either way, so these earlier passes
+                // shouldn't abort the whole command just computing a checksum for it first. The checksum is
                 // a stable sentinel (table name + file path, not file contents) so it stays the same across
                 // runs while the file remains missing, rather than depending on content it never read. Limited
                 // to a missing file specifically: a file that exists but can't be read (corrupt, permissions)
