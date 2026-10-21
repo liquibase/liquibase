@@ -125,10 +125,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
     }
 
     public static String getLiquibaseBuildVersion() {
-        return StringUtil.limitSize(LiquibaseUtil.getBuildVersion()
-                .replace("SNAPSHOT", "SNP")
-                .replace("beta", "b")
-                .replace("alpha", "b"), 20);
+        return LiquibaseUtil.getBuildVersionForChangeLogHistory();
     }
 
     private String getCommentsColumn(ChangeSet changeSet) {

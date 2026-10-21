@@ -417,7 +417,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             throw new DatabaseException(e);
         }
         if (this.ranChangeSetList != null) {
-            this.ranChangeSetList.add(new RanChangeSet(changeSet, execType, null, null));
+            // ORDEREXECUTED is obtained inside the SQL generator and is not reliably known here
+            this.ranChangeSetList.add(new RanChangeSet(changeSet, execType, null));
         }
 
     }
