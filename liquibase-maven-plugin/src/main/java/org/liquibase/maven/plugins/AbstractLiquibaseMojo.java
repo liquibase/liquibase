@@ -259,6 +259,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String propertyFile;
+
+    /**
+     * Specifies the <i>liquibase.cascadingPropertyFiles</i> you want to use to configure Liquibase.
+     *
+     * @parameter property="liquibase.cascadingPropertyFiles"
+     */
+    @PropertyElement
+    protected Boolean cascadingPropertyFiles;
     /**
      * A flag which indicates you want the <i>liquibase.properties</i> file to override any settings provided in the Maven plugin configuration.
      * By default, if a property is explicitly specified it is
@@ -948,7 +956,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         getLog().info(indent + "username: " + "*****");
         getLog().info(indent + "password: " + "*****");
         getLog().info(indent + "use empty password: " + emptyPassword);
-        getLog().info(indent + "properties file: " + propertyFile);
+        getLog().info(indent + "properties file(s): " + propertyFile);
+        getLog().info(indent + "cascacding property files? " + cascadingPropertyFiles);
         getLog().info(indent + "properties file will override? " + propertyFileWillOverride);
         getLog().info(indent + "clear checksums? " + clearCheckSums);
     }

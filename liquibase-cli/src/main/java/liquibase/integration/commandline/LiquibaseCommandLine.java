@@ -748,6 +748,7 @@ public class LiquibaseCommandLine {
         final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
         String defaultsFileConfigValue = defaultsFileConfig.getValue();
         Resource resource = pathHandlerFactory.getResource(defaultsFileConfigValue);
+        // Here, we don't have to check CASCADING_DEFAULTS_FILES, because the first file is allways permitted
         if (resource.exists()) {
             try (InputStream defaultsStream = resource.openInputStream()) {
                 if (defaultsStream != null) {
@@ -758,17 +759,27 @@ public class LiquibaseCommandLine {
             }
         }
 
-        ClassLoaderResourceAccessor classLoaderResourceAccessor = new ClassLoaderResourceAccessor();
-        List<Resource> resources = classLoaderResourceAccessor.getAll(defaultsFileConfigValue);
-        if (resources != null && !resources.isEmpty()) {
-            // The resources are processed in the order they appear in the list, which is determined by the sorting
-            // order of {@link ResourceAccessor#getAll()}, it is supposed to be deterministic.
-            // In practice, that means the earlier a file is returned, the higher its priority.
-            for (Resource res : resources) {
-                if (res.exists() && !res.equals(resource)) {
-                    try (InputStream defaultsStream = res.openInputStream()) {
-                        returnList.add(new DefaultsFileValueProvider(defaultsStream, "File in classpath " + res.getUri(), returnList.size()));
-                        found = true;
+        final ConfiguredValue<Boolean> cascadingDefaultsFilesConfig = LiquibaseCommandLineConfiguration.CASCADING_DEFAULTS_FILES.getCurrentConfiguredValue();
+        boolean cascadingDefaultsFilesConfigValue = cascadingDefaultsFilesConfig.getValue();
+        if (cascadingDefaultsFilesConfigValue || !found) {
+            ClassLoaderResourceAccessor classLoaderResourceAccessor = new ClassLoaderResourceAccessor();
+            List<Resource> resources = classLoaderResourceAccessor.getAll(defaultsFileConfigValue);
+            if (resources != null && !resources.isEmpty()) {
+                // The resources are processed in the order they appear in the list, which is determined by the sorting
+                // order of {@link ResourceAccessor#getAll()}, it is supposed to be deterministic.
+                // In practice, that means the earlier a file is returned, the higher its priority.
+                int precedenceOffset = found ? 1 : 0;
+                for (Resource res : resources) {
+                    if ((cascadingDefaultsFilesConfigValue || !found) && res.exists() && !res.getUri().equals(resource.getUri())) {
+                        if (precedenceOffset < 29) {
+                            try (InputStream defaultsStream = res.openInputStream()) {
+                                returnList.add(new DefaultsFileValueProvider(defaultsStream, "File in classpath " + res.getUri(), precedenceOffset++));
+                                found = true;
+                            }
+                        }
+                        else {
+                            Scope.getCurrentScope().getLog(getClass()).warning("Cannot load defaultsFile " + res.getUri() + " because the maxium of 30 files has been exceeded");
+                        }
                     }
                 }
             }
