@@ -8,6 +8,9 @@ import liquibase.Scope
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.RawSQLChange
 import liquibase.change.visitor.ChangeVisitor
+import liquibase.configuration.AbstractConfigurationValueProvider
+import liquibase.configuration.LiquibaseConfiguration
+import liquibase.configuration.ProvidedValue
 import liquibase.database.Database
 import liquibase.database.core.MockDatabase
 import liquibase.exception.ChangeLogParseException
@@ -30,6 +33,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Level
 
 class DatabaseChangeLogTest extends Specification {
@@ -823,6 +827,52 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         "..\\..\\path\\changelog.xml"         | "../../path/changelog.xml"
         "../../path/changelog.xml"            | "../../path/changelog.xml"
         "path/../path/changelog.xml"          | "path/changelog.xml"
+    }
+
+    @Unroll
+    def "normalizePath with preserveClasspathPrefixInNormalizedPaths=true: #path"() {
+        expect:
+        Scope.child([(GlobalConfiguration.PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS.key): true], {
+            DatabaseChangeLog.normalizePath(path)
+        } as Scope.ScopedRunnerWithReturn) == expected
+
+        where:
+        path                              | expected
+        "classpath:path/to/changelog.xml" | "classpath:path/to/changelog.xml"
+        "/path/to/changelog.xml"          | "path/to/changelog.xml"
+    }
+
+    def "normalizePath only resolves preserveClasspathPrefixInNormalizedPaths for classpath: paths"() {
+        given:
+        def lookups = new AtomicInteger()
+        def countingProvider = new AbstractConfigurationValueProvider() {
+            @Override
+            int getPrecedence() {
+                return 1
+            }
+
+            @Override
+            ProvidedValue getProvidedValue(String... keyAndAliases) {
+                if (keyAndAliases[0] == GlobalConfiguration.PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS.key) {
+                    lookups.incrementAndGet()
+                }
+                return null
+            }
+        }
+        def configuration = Scope.currentScope.getSingleton(LiquibaseConfiguration)
+        configuration.registerProvider(countingProvider)
+
+        when:
+        DatabaseChangeLog.normalizePath("path/to/changelog.xml")
+        def lookupsForPlainPath = lookups.get()
+        DatabaseChangeLog.normalizePath("classpath:path/to/changelog.xml")
+
+        then:
+        lookupsForPlainPath == 0
+        lookups.get() > 0
+
+        cleanup:
+        configuration.unregisterProvider(countingProvider)
     }
 
     def "relative paths for changelog include are resolved as normalized path"() {
