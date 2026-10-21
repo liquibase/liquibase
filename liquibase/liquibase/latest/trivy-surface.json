@@ -3,10 +3,10 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a15828-7e7a-77ac-8c20-66335c8510cb",
-  "CreatedAt": "2026-10-20T07:13:31.258504147Z",
+  "ReportID": "01a15d4f-fb7f-7248-9030-661a97813ae8",
+  "CreatedAt": "2026-10-21T07:14:45.247151451Z",
   "ArtifactID": "sha256:f1c417ccbfd677ba56a619d3e698d720289ae492953a06c8f2010b638fe25496",
-  "ArtifactName": "ghcr.io/liquibase/liquibase/liquibase-liquibase:d4da1cca41792308a83bc5aa80228d485a8e74bd",
+  "ArtifactName": "ghcr.io/liquibase/liquibase/liquibase-liquibase:b13b98ed949a61cb4232445f06276a25166ac08f",
   "ArtifactType": "container_image",
   "Metadata": {
     "Size": 313546240,
@@ -29,12 +29,12 @@
       "sha256:c0fa4433e4f8d833e4993cdf10981d61c07a43d0309d5b4ded53c0d057797d93"
     ],
     "RepoTags": [
-      "ghcr.io/liquibase/liquibase/liquibase-liquibase:d4da1cca41792308a83bc5aa80228d485a8e74bd"
+      "ghcr.io/liquibase/liquibase/liquibase-liquibase:b13b98ed949a61cb4232445f06276a25166ac08f"
     ],
     "RepoDigests": [
-      "ghcr.io/liquibase/liquibase/liquibase-liquibase@sha256:90b68c0e94ec12d9154dac96b5ab7d7c4a75a7f2a08588812829ca22d2726ddc"
+      "ghcr.io/liquibase/liquibase/liquibase-liquibase@sha256:339d25eae90fa70187c4fc8d4ee16360ee48a6aa98db8ff04023bdacd055f1df"
     ],
-    "Reference": "ghcr.io/liquibase/liquibase/liquibase-liquibase:d4da1cca41792308a83bc5aa80228d485a8e74bd",
+    "Reference": "ghcr.io/liquibase/liquibase/liquibase-liquibase:b13b98ed949a61cb4232445f06276a25166ac08f",
     "ImageConfig": {
       "architecture": "amd64",
       "created": "2026-10-20T07:12:21.634776645Z",
@@ -340,7 +340,7 @@
   },
   "Results": [
     {
-      "Target": "ghcr.io/liquibase/liquibase/liquibase-liquibase:d4da1cca41792308a83bc5aa80228d485a8e74bd (ubuntu 24.04)",
+      "Target": "ghcr.io/liquibase/liquibase/liquibase-liquibase:b13b98ed949a61cb4232445f06276a25166ac08f (ubuntu 24.04)",
       "Class": "os-pkgs",
       "Type": "ubuntu",
       "Packages": [
@@ -10861,6 +10861,7 @@
             "https://groups.google.com/g/golang-announce/c/U2fTuyDJznI",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-78667",
             "https://pkg.go.dev/vuln/GO-2026-6609",
+            "https://ubuntu.com/security/notices/USN-8935-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-78667",
             "https://www.openwall.com/lists/oss-security/2026/10/08/9"
           ],
@@ -10924,6 +10925,7 @@
             "https://groups.google.com/g/golang-announce/c/ZPwCyRUuGBs",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-78669",
             "https://pkg.go.dev/vuln/GO-2026-6611",
+            "https://ubuntu.com/security/notices/USN-8935-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-78669",
             "https://www.openwall.com/lists/oss-security/2026/10/08/9"
           ],
