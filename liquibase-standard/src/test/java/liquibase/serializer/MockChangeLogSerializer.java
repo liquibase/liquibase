@@ -15,6 +15,8 @@ public class MockChangeLogSerializer implements ChangeLogSerializer {
 
     private String[] validExtensions;
 
+    private boolean preserveNullValues = true;
+
     public MockChangeLogSerializer(String... validExtensions) {
         this.validExtensions = validExtensions;
     }
@@ -40,5 +42,10 @@ public class MockChangeLogSerializer implements ChangeLogSerializer {
     @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
+    }
+
+    @Override
+    public void preserveNullValues(boolean preserveNullValues) {
+        this.preserveNullValues = preserveNullValues;
     }
 }

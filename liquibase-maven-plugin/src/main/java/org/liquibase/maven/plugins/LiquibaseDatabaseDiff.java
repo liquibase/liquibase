@@ -219,6 +219,14 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
     @PropertyElement
     protected boolean useOrReplaceOption;
 
+    /**
+     * Flag to preserve null values in change object values when generating changelog in SQL format
+     *
+     * @parameter property="liquibase.preserveNullValues" default-value="true"
+     */
+    @PropertyElement
+    protected boolean preserveNullValues;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (this.referenceServer != null) {
