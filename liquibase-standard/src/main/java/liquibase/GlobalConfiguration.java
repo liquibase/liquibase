@@ -26,6 +26,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> CONVERT_DATA_TYPES;
     public static final ConfigurationDefinition<Boolean> GENERATE_CHANGESET_CREATED_VALUES;
     public static final ConfigurationDefinition<Boolean> AUTO_REORG;
+    public static final ConfigurationDefinition<Boolean> USE_SESSION_LOCK;
     public static final ConfigurationDefinition<Boolean> DIFF_COLUMN_ORDER;
     public static final ConfigurationDefinition<Boolean> ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA;
     public static final ConfigurationDefinition<Boolean> GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION;
@@ -67,6 +68,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS;
     public static final ConfigurationDefinition<Boolean> ALLOW_INHERIT_LOGICAL_FILE_PATH;
     public static final ConfigurationDefinition<Boolean> DIFF_COLUMN_DEFAULT_VALUE_CONSTRAINT_NAME;
+    public static final ConfigurationDefinition<Boolean> ATOMIC_HISTORY_UPDATES;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -158,6 +160,17 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         AUTO_REORG = builder.define("autoReorg", Boolean.class)
                 .setDescription("Should Liquibase automatically include REORG TABLE commands when needed?")
                 .setDefaultValue(true)
+                .build();
+
+        USE_SESSION_LOCK = builder.define("useSessionLock", Boolean.class)
+                .setDescription("Use a session-level lock (e.g. a PostgreSQL advisory lock) to guard the changelog " +
+                        "instead of the LOCKED row in DATABASECHANGELOGLOCK. A session lock is released automatically " +
+                        "by the database when the connection drops, so a process killed mid-update (OOM, eviction, " +
+                        "kill -9) does not leave a stale lock behind. Only supported databases honour this; others " +
+                        "fall back to StandardLockService. Give Liquibase a dedicated, non-pooled connection when " +
+                        "enabling this: closing a pooled connection only returns it to the pool and leaves the " +
+                        "database session alive, so the automatic release does not apply to it.")
+                .setDefaultValue(false)
                 .build();
 
         DIFF_COLUMN_ORDER = builder.define("diffColumnOrder", Boolean.class)
@@ -390,6 +403,15 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         DIFF_COLUMN_DEFAULT_VALUE_CONSTRAINT_NAME = builder.define("diffColumnDefaultValueConstraintName", Boolean.class)
                 .setDescription("Should Liquibase compare column default value constraint name in diff operation?")
                 .setDefaultValue(true)
+                .build();
+
+        ATOMIC_HISTORY_UPDATES = builder.define("atomicHistoryUpdates", Boolean.class)
+                .setDescription("If true, a changeset that runs in a transaction is committed together with its " +
+                        "DATABASECHANGELOG update (the row added by update or removed by rollback), so losing the " +
+                        "connection between the two can no longer leave the schema and DATABASECHANGELOG out of sync. " +
+                        "Applies only to databases that support DDL inside transactions, such as PostgreSQL; " +
+                        "changesets with runInTransaction=false are unaffected.")
+                .setDefaultValue(false)
                 .build();
     }
 

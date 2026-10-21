@@ -75,9 +75,24 @@ jobs:
           docker run --rm liquibase-smoke:${{ matrix.variant }} --version
           docker run --rm liquibase-smoke:${{ matrix.variant }} --help > /dev/null
 
+  release-gate:
+    name: Release approval gate
+    # Runs on every PR: removing the gate is a one-line YAML change, so no path filter can be trusted to notice it.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check the gate
+        run: .github/util/check-release-gate.sh
+
+      - name: Prove the check rejects a broken gate
+        run: .github/util/test-check-release-gate.sh
+
   pr-gate:
     name: PR Gate
-    needs: [ changes, test, docker-smoke ]
+    needs: [ changes, test, docker-smoke, release-gate ]
     if: always()
     runs-on: ubuntu-24.04
     steps:

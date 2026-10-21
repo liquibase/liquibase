@@ -243,6 +243,21 @@ Global Options
                                environment variable:
                                'LIQUIBASE_ANALYTICS_ENABLED')
 
+      --atomic-history-updates=PARAM
+                             If true, a changeset that runs in a transaction is
+                               committed together with its DATABASECHANGELOG
+                               update (the row added by update or removed by
+                               rollback), so losing the connection between the
+                               two can no longer leave the schema and
+                               DATABASECHANGELOG out of sync. Applies only to
+                               databases that support DDL inside transactions,
+                               such as PostgreSQL; changesets with
+                               runInTransaction=false are unaffected.
+                             DEFAULT: false
+                             (defaults file: 'liquibase.atomicHistoryUpdates',
+                               environment variable:
+                               'LIQUIBASE_ATOMIC_HISTORY_UPDATES')
+
       --auto-reorg=PARAM     Should Liquibase automatically include REORG TABLE
                                commands when needed?
                              DEFAULT: true
@@ -724,6 +739,25 @@ Global Options
                              (defaults file: 'liquibase.useProcedureSchema',
                                environment variable:
                                'LIQUIBASE_USE_PROCEDURE_SCHEMA')
+
+      --use-session-lock=PARAM
+                             Use a session-level lock (e.g. a PostgreSQL
+                               advisory lock) to guard the changelog instead of
+                               the LOCKED row in DATABASECHANGELOGLOCK. A
+                               session lock is released automatically by the
+                               database when the connection drops, so a process
+                               killed mid-update (OOM, eviction, kill -9) does
+                               not leave a stale lock behind. Only supported
+                               databases honour this; others fall back to
+                               StandardLockService. Give Liquibase a dedicated,
+                               non-pooled connection when enabling this:
+                               closing a pooled connection only returns it to
+                               the pool and leaves the database session alive,
+                               so the automatic release does not apply to it.
+                             DEFAULT: false
+                             (defaults file: 'liquibase.useSessionLock',
+                               environment variable:
+                               'LIQUIBASE_USE_SESSION_LOCK')
 
   -v, --version              Print version information and exit
 

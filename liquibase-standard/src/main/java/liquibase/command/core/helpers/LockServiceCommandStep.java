@@ -49,22 +49,24 @@ public class LockServiceCommandStep extends AbstractHelperCommandStep implements
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         try {
             if (isDBLocked.get()) {
+                Database database = (Database) resultsBuilder.getCommandScope().getDependency(Database.class);
                 try {
                     // Check hasChangeLogLock() rather than releasing unconditionally: some
                     // AbstractUpdateCommandStep subclasses (e.g. updateCount/updateSql/updateToTag) also
                     // release the lock themselves, from within run(), before this cleanUp() runs -- see
                     // #5438. Releasing again here without checking live state would fail against an
                     // already-unlocked row.
-                    LockService lockService = LockServiceFactory.getInstance().getLockService(
-                            (Database) resultsBuilder.getCommandScope().getDependency(Database.class)
-                    );
+                    LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                     if (lockService.hasChangeLogLock()) {
                         lockService.releaseLock();
                     }
                 } catch (LockException e) {
                     Scope.getCurrentScope().getLog(getClass()).severe(Liquibase.MSG_COULD_NOT_RELEASE_LOCK, e);
                 }
-                LockServiceFactory.getInstance().resetAll();
+                // Drop only this database's lock service, not every database's: resetAll() would discard
+                // the singleton and with it the lock services of any execution running concurrently
+                // against another database, leaving them unable to release the lock they still hold.
+                LockServiceFactory.getInstance().resetDatabase(database);
             }
         } finally {
             isDBLocked.remove();

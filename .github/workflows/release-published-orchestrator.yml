@@ -76,6 +76,7 @@ jobs:
 
   # GitHub approves per job, not per run, so the gate sits on one job every publisher depends on.
   # On the publishers themselves it would stop the release once per wave of this graph.
+  # .github/util/check-release-gate.sh fails PR Gate if any publisher stops depending on it.
   manual-approval:
     name: Manual Deployment Approval
     needs: [setup]
@@ -151,6 +152,8 @@ jobs:
     with:
       liquibaseVersion: ${{ needs.setup.outputs.version }}
       dryRun: ${{ inputs.dry_run || false }}
+      # Gate cleared above, so the callee uses `release-publish` and does not prompt again.
+      approved: true
     secrets: inherit
 
   deploy-maven:

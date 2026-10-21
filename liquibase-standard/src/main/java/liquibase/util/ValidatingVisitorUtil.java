@@ -94,6 +94,9 @@ public class ValidatingVisitorUtil {
     }
 
     private static boolean checkLiquibaseVersionIs(String version, int major, int minor) {
+        if (StringUtils.isEmpty(version)) {
+            return false;
+        }
         String[] liquibaseVersion = version.split("\\.");
         try {
             return (liquibaseVersion.length == 3 && Integer.parseInt(liquibaseVersion[0]) == major && Integer.parseInt(liquibaseVersion[1]) == minor);

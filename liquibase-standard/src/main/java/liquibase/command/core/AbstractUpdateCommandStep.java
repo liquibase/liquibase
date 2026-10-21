@@ -146,12 +146,13 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             throw e;
         } finally {
             // Check the lock's actual live state rather than trusting isDBLocked's bookkeeping: for
-            // UpdateCommandStep (the one subclass with no pipeline-managed LockServiceCommandStep,
-            // see requiredDependencies() below) isDBLocked is only true once this method has actually
-            // acquired the lock above. For the other subclasses, the pipeline already acquired the lock
-            // before this method ran, so isDBLocked's true default doesn't reflect whether *this* call
-            // should release it -- hasChangeLogLock() does. This also keeps releasing here (rather than
-            // only in LockServiceCommandStep#cleanUp) so that Sql-output commands still capture the
+            // UpdateCommandStep, UpdateCountCommandStep and UpdateSqlCommandStep (plus UpdateCountSqlCommandStep,
+            // which inherits from UpdateCountCommandStep) -- the subclasses with no pipeline-managed
+            // LockServiceCommandStep, see requiredDependencies() below -- isDBLocked is only true once this
+            // method has actually acquired the lock above. For the other subclasses, the pipeline already
+            // acquired the lock before this method ran, so isDBLocked's true default doesn't reflect whether
+            // *this* call should release it -- hasChangeLogLock() does. This also keeps releasing here (rather
+            // than only in LockServiceCommandStep#cleanUp) so that Sql-output commands still capture the
             // "Release Database Lock" statement while their LoggingExecutor is still active; see #5438.
             try {
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
@@ -208,8 +209,8 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
         isDBLocked.remove();
-        LockServiceFactory.getInstance().resetAll();
         Database database = (Database) resultsBuilder.getCommandScope().getDependency(Database.class);
+        LockServiceFactory.getInstance().resetDatabase(database);
         Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetDatabase(database);
         ExecutorService executorService = Scope.getCurrentScope().getSingleton(ExecutorService.class);
         executorService.clearExecutor("jdbc", database);

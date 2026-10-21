@@ -139,11 +139,22 @@ jobs:
           # itself and is excluded on the same grounds as SELF: the workflow driving this
           # release attempt is not evidence about whether the commit builds. Empty by
           # default, and `.name != ""` excludes nothing, so a direct dispatch is unchanged.
+          #
+          # The rest of the release pipeline is dropped by path, on the same grounds. A dry
+          # run's Release Published run carries this head_sha too, and once one failed
+          # (Central rejecting the bundle) every later dry run on the commit was refused
+          # with `has failing workflows: 🚀 Release Published vdry-run-...`. Its run-name
+          # embeds the version, so grouping by name never let a later green attempt
+          # replace it, which is why grouping is by path now. dry-run-release.yml is
+          # listed as well so a failed rehearsal cannot block a direct dispatch, where
+          # CALLER is empty. [TECHOPS-1416]
           runs=$(gh api --paginate "repos/$REPO/actions/runs?head_sha=$sha&per_page=100" \
-                   --jq '.workflow_runs[] | {name, event, conclusion, created_at}' | jq -s '.')
+                   --jq '.workflow_runs[] | {name, path, event, conclusion, created_at}' | jq -s '.')
           verdict=$(jq -r --arg self "$SELF" --arg caller "${CALLER:-}" '
-            [ .[] | select(.event != "schedule" and .event != "dynamic" and .name != $self and .name != $caller) ]
-            | group_by(.name) | map(sort_by(.created_at) | last)
+            [ .[] | select(.event != "schedule" and .event != "dynamic" and .name != $self and .name != $caller)
+                  | select(.path | IN(".github/workflows/dry-run-release.yml",
+                                      ".github/workflows/release-published-orchestrator.yml") | not) ]
+            | group_by(.path) | map(sort_by(.created_at) | last)
             | { bad:     [ .[] | select(.conclusion=="failure" or .conclusion=="timed_out" or .conclusion=="cancelled") | .name ],
                 running: [ .[] | select(.conclusion == null) | .name ],
                 ok:      [ .[] | select(.conclusion=="success") ] | length }' <<<"$runs")
@@ -257,6 +268,29 @@ jobs:
           cp liquibase-cli/target/liquibase-cli-$VERSION.jar artifacts-additional/
           cp liquibase-cli/target/liquibase-cli-$VERSION-sources.jar artifacts-additional/
           cp liquibase-cli/target/liquibase-cli-$VERSION-javadoc.jar artifacts-additional/
+
+      - name: Refuse artifacts that still carry a SNAPSHOT version
+        # versions:set rewrites module poms and nothing else. Anything that carries a version
+        # by other means, like the hand-crafted pom inside the Maven plugin jar, keeps
+        # 0-SNAPSHOT, and Central rejects the bundle only at publish time, after the GitHub
+        # release is already public. re-version.sh made this same check and it went away
+        # with it in #7990. Runs before any vault read, so a bad build never gets signed.
+        # [TECHOPS-1416]
+        run: |
+          set -euo pipefail
+          found=0
+          for jar in re-version/final/*.jar artifacts-additional/*.jar; do
+            dir=$(mktemp -d)
+            unzip -q "$jar" -d "$dir"
+            if hits=$(grep -rlaE '0-SNAPSHOT|0\.0\.0\.SNAPSHOT' "$dir"); then
+              while read -r hit; do
+                echo "::error::${jar##*/} still says SNAPSHOT in ${hit#"$dir"/}"
+              done <<<"$hits"
+              found=1
+            fi
+            rm -rf "$dir"
+          done
+          exit "$found"
 
       - name: Configure AWS credentials for the gpg-signing secret
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0

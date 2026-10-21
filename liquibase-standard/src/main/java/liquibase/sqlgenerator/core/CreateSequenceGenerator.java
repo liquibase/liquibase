@@ -25,8 +25,10 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
 
         validationErrors.checkRequiredField("sequenceName", statement.getSequenceName());
 
-        validationErrors.checkDisallowedField("startValue", statement.getStartValue(), database, FirebirdDatabase.class);
-        validationErrors.checkDisallowedField("incrementBy", statement.getIncrementBy(), database, FirebirdDatabase.class);
+        if (isFirebirdWithoutStartValueSupport(database)) {
+            validationErrors.checkDisallowedField("startValue", statement.getStartValue(), database, FirebirdDatabase.class);
+            validationErrors.checkDisallowedField("incrementBy", statement.getIncrementBy(), database, FirebirdDatabase.class);
+        }
 
         if (isH2WithMinMaxSupport(database)) {
 
@@ -151,6 +153,15 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             return database instanceof PostgresDatabase && database.getDatabaseMajorVersion() < 10;
         } catch (DatabaseException e) {
             // we can't determine the PostgreSQL version so we shouldn't throw validation error as it might work for this DB
+            return false;
+        }
+    }
+
+    private boolean isFirebirdWithoutStartValueSupport(Database database) {
+        try {
+            return database instanceof FirebirdDatabase && database.getDatabaseMajorVersion() < 4;
+        } catch (DatabaseException e) {
+            // we can't determine the Firebird version so we shouldn't throw validation error as it might work for this DB
             return false;
         }
     }
