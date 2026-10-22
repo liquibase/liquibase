@@ -927,7 +927,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 try {
                     Executor failureCommentExecutor = getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
                     failureCommentExecutor.comment("Changeset " + toString(false) + " failed and was skipped (failOnError=false); statements above for it must not be applied on their own.");
-                } catch (DatabaseException commentException) {
+                } catch (Exception commentException) {
                     log.fine("Could not add failure comment to output", commentException);
                 }
                 execType = ExecType.FAILED;
