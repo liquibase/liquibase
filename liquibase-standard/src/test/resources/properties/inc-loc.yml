@@ -1,0 +1,19 @@
+databaseChangeLog:
+ - property: { name: inc-local, value: inc-lv, global: false }
+ - preConditions:
+    - changeLogPropertyDefined: { property: main-local, value: main-lv }
+    - changeLogPropertyDefined: { property: inc-local, value: inc-lv }
+ - changeSet:
+     id: 1
+     author: g
+     output: inc.loc.yml > main-local:${main-local}, inc-local:${inc-local}
+ - include:
+    file: properties/inc-loc.inc.yml
+ - changeSet:
+    id: test
+    author: g
+    preConditions:
+     - changeLogPropertyDefined: { property: main-local, value: main-lv }
+     - changeLogPropertyDefined: { property: inc-local, value: inc-lv }
+     - not: [ changeLogPropertyDefined: { property: inc.inc-local } ]
+    output: inc.loc.yml > main-local:${main-local}, inc-local:${inc-local}
