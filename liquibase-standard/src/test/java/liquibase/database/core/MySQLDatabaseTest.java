@@ -5,17 +5,16 @@ import liquibase.database.Database;
 import liquibase.database.MockDatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
+import liquibase.structure.core.Table;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
 import java.util.List;
 import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for {@link MySQLDatabase}
@@ -98,6 +97,11 @@ public class MySQLDatabaseTest extends AbstractJdbcDatabaseTest {
     @Test
     public void escapeStringForDatabase_withBackslashes() {
         assertEquals("\\\\0", database.escapeStringForDatabase("\\0"));
+    }
+
+    @Test
+    public void supportsCreateIfNotExist(){
+        assertTrue(getDatabase().supportsCreateIfNotExists(Table.class));
     }
 
     @ParameterizedTest(name = "MySQL {0}.{1}: {2} reserved={3}")

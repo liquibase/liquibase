@@ -15,6 +15,7 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.UpdateStatement;
+import liquibase.structure.core.Table;
 import liquibase.test.JUnitResourceAccessor;
 import org.junit.jupiter.api.Test;
 
@@ -31,9 +32,7 @@ import org.mockito.Mockito;
 import static java.util.ResourceBundle.getBundle;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for {@link liquibase.database.core.OracleDatabase}.
@@ -184,6 +183,11 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
         }
         String primaryKeyName = spyDatabase.generatePrimaryKeyName(tableName);
         assertEquals(expectedPrimaryKeyName, primaryKeyName, assertMessage);
+    }
+
+    @Test
+    void doesNotSupportCreateIfNotExists(){
+        assertFalse(getDatabase().supportsCreateIfNotExists(Table.class));
     }
 }
 

@@ -3,14 +3,14 @@ package liquibase.database.core;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.structure.core.Table;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.doNothing;
@@ -62,6 +62,14 @@ public class DerbyDatabaseTest {
 
         verify(database, never()).shutdownDerby(anyString(), anyString());
         verify(con).close();
+    }
+
+    @Test
+    public void testSupportsCreateIfNotExist() throws DatabaseException {
+        try (DerbyDatabase derbyDatabase = new DerbyDatabase()) {
+            assertFalse(derbyDatabase.supportsCreateIfNotExists(Table.class));
+        }
+
     }
 
     private static DerbyDatabase spyDatabase(Connection con) throws DatabaseException {
