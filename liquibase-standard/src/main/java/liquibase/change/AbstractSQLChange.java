@@ -9,6 +9,7 @@ import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -324,7 +325,10 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
             String escapedStatement = statement;
             try {
-                if (database.getConnection() != null) {
+                // The PostgreSQL driver's nativeSQL() treats every '?' as a bind parameter and rewrites it to $1, $2, ...
+                // which breaks the jsonb ?, ?| and ?& operators. These statements are executed as plain (non-prepared)
+                // statements, so the driver already handles '?' (and the '??' escape) correctly at execution time.
+                if (database.getConnection() != null && !(database instanceof PostgresDatabase && statement.contains("?"))) {
                     escapedStatement = database.getConnection().nativeSQL(statement);
                 }
             } catch (DatabaseException e) {
