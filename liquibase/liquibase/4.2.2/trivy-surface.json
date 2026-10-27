@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a177b1-0240-77d4-942f-20d20c748839",
-  "CreatedAt": "2026-10-26T10:10:51.584514403Z",
+  "ReportID": "01a17cd4-fca0-7d46-a3da-43ee0444b3c2",
+  "CreatedAt": "2026-10-27T10:08:15.520870795Z",
   "ArtifactID": "sha256:d8dcae8ff92c8e3c516eba092eeae1e4d61125d9cd5e6b305dac76804a03649b",
   "ArtifactName": "liquibase/liquibase:4.2.2",
   "ArtifactType": "container_image",
@@ -12270,7 +12270,15 @@
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2021:4451",
             "https://access.redhat.com/security/cve/CVE-2021-20231",
+            "https://bugzilla.redhat.com/1776250",
+            "https://bugzilla.redhat.com/1908110",
+            "https://bugzilla.redhat.com/1908334",
+            "https://bugzilla.redhat.com/1922275",
+            "https://bugzilla.redhat.com/1922276",
+            "https://bugzilla.redhat.com/1965445",
+            "https://bugzilla.redhat.com/1967983",
             "https://bugzilla.redhat.com/show_bug.cgi?id=1776250",
             "https://bugzilla.redhat.com/show_bug.cgi?id=1908110",
             "https://bugzilla.redhat.com/show_bug.cgi?id=1908334",
@@ -12362,7 +12370,15 @@
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2021:4451",
             "https://access.redhat.com/security/cve/CVE-2021-20232",
+            "https://bugzilla.redhat.com/1776250",
+            "https://bugzilla.redhat.com/1908110",
+            "https://bugzilla.redhat.com/1908334",
+            "https://bugzilla.redhat.com/1922275",
+            "https://bugzilla.redhat.com/1922276",
+            "https://bugzilla.redhat.com/1965445",
+            "https://bugzilla.redhat.com/1967983",
             "https://bugzilla.redhat.com/show_bug.cgi?id=1776250",
             "https://bugzilla.redhat.com/show_bug.cgi?id=1908110",
             "https://bugzilla.redhat.com/show_bug.cgi?id=1908334",
@@ -12879,7 +12895,15 @@
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2021:4451",
             "https://access.redhat.com/security/cve/CVE-2021-3580",
+            "https://bugzilla.redhat.com/1776250",
+            "https://bugzilla.redhat.com/1908110",
+            "https://bugzilla.redhat.com/1908334",
+            "https://bugzilla.redhat.com/1922275",
+            "https://bugzilla.redhat.com/1922276",
+            "https://bugzilla.redhat.com/1965445",
+            "https://bugzilla.redhat.com/1967983",
             "https://bugzilla.redhat.com/show_bug.cgi?id=1776250",
             "https://bugzilla.redhat.com/show_bug.cgi?id=1908110",
             "https://bugzilla.redhat.com/show_bug.cgi?id=1908334",
@@ -15941,7 +15965,15 @@
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2021:4451",
             "https://access.redhat.com/security/cve/CVE-2021-3580",
+            "https://bugzilla.redhat.com/1776250",
+            "https://bugzilla.redhat.com/1908110",
+            "https://bugzilla.redhat.com/1908334",
+            "https://bugzilla.redhat.com/1922275",
+            "https://bugzilla.redhat.com/1922276",
+            "https://bugzilla.redhat.com/1965445",
+            "https://bugzilla.redhat.com/1967983",
             "https://bugzilla.redhat.com/show_bug.cgi?id=1776250",
             "https://bugzilla.redhat.com/show_bug.cgi?id=1908110",
             "https://bugzilla.redhat.com/show_bug.cgi?id=1908334",
@@ -18198,7 +18230,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 2,
+            "amazon": 3,
             "azure": 3,
             "cbl-mariner": 3,
             "julia": 3,
@@ -21259,7 +21291,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 2,
+            "amazon": 3,
             "azure": 3,
             "cbl-mariner": 3,
             "julia": 3,
@@ -21924,7 +21956,7 @@
           ],
           "VendorSeverity": {
             "alma": 2,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 4,
             "bottlerocket": 2,
             "cbl-mariner": 4,
@@ -23887,7 +23919,7 @@
             "https://creativecommons.org/licenses/by/4.0/",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42198",
             "https://errata.almalinux.org/9/ALSA-2026-22304.html",
-            "https://errata.rockylinux.org/RLSA-2026:22304",
+            "https://errata.rockylinux.org/RLSA-2026:24348",
             "https://github.com/pgjdbc/pgjdbc",
             "https://github.com/pgjdbc/pgjdbc/releases/tag/REL42.7.11",
             "https://github.com/pgjdbc/pgjdbc/security/advisories/GHSA-98qh-xjc8-98pq",
