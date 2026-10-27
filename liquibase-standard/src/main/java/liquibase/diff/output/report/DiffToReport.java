@@ -91,7 +91,7 @@ public class DiffToReport {
 
 
         TreeSet<Class<? extends DatabaseObject>> types = new TreeSet<>(Comparator.comparing(Class::getSimpleName));
-        types.addAll(diffResult.getCompareControl().getComparedTypes());
+        types.addAll(diffResult.getComparedTypes());
         for (Class<? extends DatabaseObject> type : types) {
             if (type.equals(Schema.class) && !diffResult.getComparisonSnapshot().getDatabase().supports(Schema.class)) {
                 continue;
