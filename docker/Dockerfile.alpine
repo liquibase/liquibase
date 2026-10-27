@@ -35,8 +35,8 @@ RUN set -x && \
     liquibase --version
 
 ARG LPM_VERSION=0.3.7
-ARG LPM_SHA256=329eafbe9289d1e83a62cb89844ac461bb5b9d4c5f5f184c8f26244e350e8a95
-ARG LPM_SHA256_ARM=893abdadeb08fd7e8b9caa46cdd0bc6d0b43ccd02c2f6761638b69b29a19fe14
+ARG LPM_SHA256=331b976ca3a791e686961f02cd904d4d8c3e582a94eb4ff23b3b3e902cb81369
+ARG LPM_SHA256_ARM=be0ae7768c5f8af7cc769da60b48ec0467f3d3d2dd58498b99e69e218a7d5461
 
 # Add metadata labels
 LABEL org.opencontainers.image.description="Liquibase Container Image (Alpine)"
