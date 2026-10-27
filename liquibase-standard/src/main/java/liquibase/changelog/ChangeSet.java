@@ -930,6 +930,16 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 Scope.getCurrentScope().getUI().sendMessage("Changeset " + toString(false) + " failed, and the error was ignored because 'failOnError' was set to false. ");
                 log.info("Changeset " + toString(false) + " failed, and the error was ignored because 'failOnError' was set to false.  Error: " + e.getMessage());
                 log.fine("Failure Stacktrace", e);
+                // For update-sql/update-count-sql, any statements this changeset already emitted above (e.g.
+                // from a change preceding the one that failed) have no corresponding indication in the script
+                // that they belong to a changeset that didn't actually complete -- flag it so the script isn't
+                // mistaken for a complete, successful deployment of this changeset (#7550).
+                try {
+                    Executor failureCommentExecutor = getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+                    failureCommentExecutor.comment("Changeset " + toString(false) + " failed and was skipped (failOnError=false); statements above for it must not be applied on their own.");
+                } catch (Exception commentException) {
+                    log.fine("Could not add failure comment to output", commentException);
+                }
                 execType = ExecType.FAILED;
             } else {
                 if (e instanceof MigrationFailedException) {
