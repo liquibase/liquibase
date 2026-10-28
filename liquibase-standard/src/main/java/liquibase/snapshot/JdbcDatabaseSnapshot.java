@@ -9,6 +9,7 @@ import liquibase.database.LiquibaseTableNamesFactory;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperNotNullConstraintsResultSetExtractor;
 import liquibase.structure.DatabaseObject;
@@ -1155,22 +1156,46 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
                 String jdbcTableName = database.escapeStringForDatabase(tableName);
-                String sqlToSelectNotNullConstraints = "SELECT  NULL AS TABLE_CAT, atc.OWNER AS TABLE_SCHEMA, atc.OWNER, atc.TABLE_NAME, " +
-                        "atc.COLUMN_NAME, NULLABLE, ac.VALIDATED as VALIDATED, ac.SEARCH_CONDITION, ac.CONSTRAINT_NAME " +
-                        "FROM ALL_TAB_COLS atc " +
-                        "JOIN all_cons_columns acc ON atc.OWNER = acc.OWNER AND atc.TABLE_NAME = acc.TABLE_NAME AND atc.COLUMN_NAME = acc.COLUMN_NAME " +
-                        "JOIN all_constraints ac ON atc.OWNER = ac.OWNER AND atc.TABLE_NAME = ac.TABLE_NAME AND acc.CONSTRAINT_NAME = ac.CONSTRAINT_NAME ";
-
-                if (!bulk || getAllCatalogsStringScratchData() == null) {
-                    sqlToSelectNotNullConstraints += " WHERE atc.OWNER='" + jdbcSchemaName + "' AND atc.hidden_column='NO' AND ac.CONSTRAINT_TYPE='C'  and ac.search_condition is not null ";
+                String sqlToSelectNotNullConstraints;
+                if ((!bulk || getAllCatalogsStringScratchData() == null) && isConnectedUser(jdbcSchemaName)) {
+                    // The schema belongs to the connected user: the USER_* views avoid the privilege checks of the ALL_* views,
+                    // which make this query very slow on databases with many objects.
+                    String escapedSchemaName = database.escapeStringForDatabase(jdbcSchemaName);
+                    sqlToSelectNotNullConstraints = "SELECT NULL AS TABLE_CAT, '" + escapedSchemaName + "' AS TABLE_SCHEMA, '" + escapedSchemaName + "' AS OWNER, utc.TABLE_NAME, " +
+                            "utc.COLUMN_NAME, NULLABLE, uc.VALIDATED as VALIDATED, uc.SEARCH_CONDITION, uc.CONSTRAINT_NAME " +
+                            "FROM USER_TAB_COLS utc " +
+                            "JOIN user_cons_columns ucc ON utc.TABLE_NAME = ucc.TABLE_NAME AND utc.COLUMN_NAME = ucc.COLUMN_NAME " +
+                            "JOIN user_constraints uc ON utc.TABLE_NAME = uc.TABLE_NAME AND ucc.CONSTRAINT_NAME = uc.CONSTRAINT_NAME " +
+                            "WHERE utc.hidden_column='NO' AND uc.CONSTRAINT_TYPE='C' and uc.search_condition is not null ";
+                    sqlToSelectNotNullConstraints += (!bulk && tableName != null && !tableName.isEmpty()) ? " AND utc.TABLE_NAME='" + jdbcTableName + "'" : "";
                 } else {
-                    sqlToSelectNotNullConstraints += " WHERE atc.OWNER IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") "
-                            + " AND atc.hidden_column='NO' AND ac.CONSTRAINT_TYPE='C'  and ac.search_condition is not null ";
+                    sqlToSelectNotNullConstraints = "SELECT  NULL AS TABLE_CAT, atc.OWNER AS TABLE_SCHEMA, atc.OWNER, atc.TABLE_NAME, " +
+                            "atc.COLUMN_NAME, NULLABLE, ac.VALIDATED as VALIDATED, ac.SEARCH_CONDITION, ac.CONSTRAINT_NAME " +
+                            "FROM ALL_TAB_COLS atc " +
+                            "JOIN all_cons_columns acc ON atc.OWNER = acc.OWNER AND atc.TABLE_NAME = acc.TABLE_NAME AND atc.COLUMN_NAME = acc.COLUMN_NAME " +
+                            "JOIN all_constraints ac ON atc.OWNER = ac.OWNER AND atc.TABLE_NAME = ac.TABLE_NAME AND acc.CONSTRAINT_NAME = ac.CONSTRAINT_NAME ";
+
+                    if (!bulk || getAllCatalogsStringScratchData() == null) {
+                        sqlToSelectNotNullConstraints += " WHERE atc.OWNER='" + jdbcSchemaName + "' AND atc.hidden_column='NO' AND ac.CONSTRAINT_TYPE='C'  and ac.search_condition is not null ";
+                    } else {
+                        sqlToSelectNotNullConstraints += " WHERE atc.OWNER IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") "
+                                + " AND atc.hidden_column='NO' AND ac.CONSTRAINT_TYPE='C'  and ac.search_condition is not null ";
+                    }
+
+                    sqlToSelectNotNullConstraints += (!bulk && tableName != null && !tableName.isEmpty()) ? " AND atc.TABLE_NAME='" + jdbcTableName + "'" : "";
                 }
 
-                sqlToSelectNotNullConstraints += (!bulk && tableName != null && !tableName.isEmpty()) ? " AND atc.TABLE_NAME='" + jdbcTableName + "'" : "";
-
                 return this.executeAndExtract(sqlToSelectNotNullConstraints, database);
+            }
+
+            private boolean isConnectedUser(String schemaName) {
+                // Exact comparison: quoted Oracle user names are case-sensitive. When in doubt, use the ALL_* query.
+                try {
+                    String userName = database.getConnection() == null ? null : database.getConnection().getConnectionUserName();
+                    return userName != null && userName.equals(schemaName);
+                } catch (UnexpectedLiquibaseException e) {
+                    return false;
+                }
             }
 
             @Override
