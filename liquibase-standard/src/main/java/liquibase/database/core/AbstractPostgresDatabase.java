@@ -118,6 +118,17 @@ public abstract class AbstractPostgresDatabase extends AbstractJdbcDatabase {
         return super.escapeObjectName(objectName, objectType);
     }
 
+    /**
+     * Corrects the case of the given object name according to the current quoting strategy.
+     * <p>
+     * Catalog names are returned unchanged, whatever the quoting strategy: a PostgreSQL catalog is the
+     * database name reported by the connection, and pgjdbc 42.7.5+ compares it exactly against
+     * {@code current_database()} when it is passed to {@code DatabaseMetaData}.
+     *
+     * @param objectName the name to correct, may be null
+     * @param objectType the type of the object the name refers to
+     * @return the corrected name, or null if {@code objectName} is null
+     */
     @Override
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         //
