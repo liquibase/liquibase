@@ -149,10 +149,6 @@ public abstract class AbstractPostgresDatabase extends AbstractJdbcDatabase {
             return objectName;
         }
 
-        if(objectType.equals(Catalog.class) && !StringUtil.hasLowerCase(objectName)) {
-            return objectName;
-        }
-
         if (objectName.contains("-")
                 || hasMixedCase(objectName)
                 || startsWithNumeric(objectName)
@@ -199,7 +195,8 @@ public abstract class AbstractPostgresDatabase extends AbstractJdbcDatabase {
         if (StringUtils.isNotEmpty(defaultCatalogName)) {
             Scope.getCurrentScope().getUI().sendMessage("WARNING: Postgres does not support catalogs, so the values set in 'defaultCatalogName' and 'referenceDefaultCatalogName' will be ignored.");
         }
-        super.setDefaultCatalogName(defaultCatalogName);
+        // The catalog is always the database of the connection, which pgjdbc matches exactly (including case)
+        super.setDefaultCatalogName(null);
     }
 
     public boolean useSerialDatatypes() {
