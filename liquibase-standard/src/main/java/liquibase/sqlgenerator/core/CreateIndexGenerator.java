@@ -26,8 +26,12 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatement> {
+
+    private static final Pattern TRAILING_DIRECTION = Pattern.compile("^(.*\\S)\\s+(ASC|DESC)\\s*$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     @Override
     public ValidationErrors validate(CreateIndexStatement createIndexStatement, Database database,
@@ -144,13 +148,21 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 
 	    while (iterator.hasNext()) {
             AddColumnConfig column = iterator.next();
+            boolean directionInName = false;
             if (column.getComputed() == null) {
                 buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName(), false));
             } else {
                 if (column.getComputed()) {
                     if ((database instanceof MySQLDatabase) && !(database instanceof MariaDBDatabase)) {
-                        // MySQL requires a functional key part to be enclosed in its own pair of parentheses
-                        buffer.append("(").append(column.getName()).append(")");
+                        // MySQL requires a functional key part to be enclosed in its own pair of parentheses,
+                        // followed by the sort direction: (expr) [ASC | DESC]
+                        Matcher trailingDirection = TRAILING_DIRECTION.matcher(column.getName());
+                        if (trailingDirection.matches()) {
+                            buffer.append("(").append(trailingDirection.group(1)).append(") ").append(trailingDirection.group(2));
+                            directionInName = true;
+                        } else {
+                            buffer.append("(").append(column.getName()).append(")");
+                        }
                     } else {
                         buffer.append(column.getName());
                     }
@@ -158,7 +170,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
                     buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName()));
                 }
             }
-            if ((column.getDescending() != null) && column.getDescending()) {
+            if (!directionInName && (column.getDescending() != null) && column.getDescending()) {
                 buffer.append(" DESC");
             }
             if (iterator.hasNext()) {
