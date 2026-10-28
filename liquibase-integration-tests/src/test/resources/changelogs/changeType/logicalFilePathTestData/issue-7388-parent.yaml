@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - logicalFilePath: parent-logical-path
+  - include:
+      relativeToChangelogFile: true
+      file: issue-7388-child.sql
