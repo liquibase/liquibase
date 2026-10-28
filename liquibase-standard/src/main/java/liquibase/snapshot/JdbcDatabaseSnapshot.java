@@ -9,6 +9,7 @@ import liquibase.database.LiquibaseTableNamesFactory;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperNotNullConstraintsResultSetExtractor;
 import liquibase.structure.DatabaseObject;
@@ -1159,7 +1160,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 if ((!bulk || getAllCatalogsStringScratchData() == null) && isConnectedUser(jdbcSchemaName)) {
                     // The schema belongs to the connected user: the USER_* views avoid the privilege checks of the ALL_* views,
                     // which make this query very slow on databases with many objects.
-                    sqlToSelectNotNullConstraints = "SELECT NULL AS TABLE_CAT, '" + jdbcSchemaName + "' AS TABLE_SCHEMA, '" + jdbcSchemaName + "' AS OWNER, utc.TABLE_NAME, " +
+                    String escapedSchemaName = database.escapeStringForDatabase(jdbcSchemaName);
+                    sqlToSelectNotNullConstraints = "SELECT NULL AS TABLE_CAT, '" + escapedSchemaName + "' AS TABLE_SCHEMA, '" + escapedSchemaName + "' AS OWNER, utc.TABLE_NAME, " +
                             "utc.COLUMN_NAME, NULLABLE, uc.VALIDATED as VALIDATED, uc.SEARCH_CONDITION, uc.CONSTRAINT_NAME " +
                             "FROM USER_TAB_COLS utc " +
                             "JOIN user_cons_columns ucc ON utc.TABLE_NAME = ucc.TABLE_NAME AND utc.COLUMN_NAME = ucc.COLUMN_NAME " +
@@ -1187,8 +1189,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             }
 
             private boolean isConnectedUser(String schemaName) {
-                String userName = database.getConnection() == null ? null : database.getConnection().getConnectionUserName();
-                return userName != null && userName.equalsIgnoreCase(schemaName);
+                // Exact comparison: quoted Oracle user names are case-sensitive. When in doubt, use the ALL_* query.
+                try {
+                    String userName = database.getConnection() == null ? null : database.getConnection().getConnectionUserName();
+                    return userName != null && userName.equals(schemaName);
+                } catch (UnexpectedLiquibaseException e) {
+                    return false;
+                }
             }
 
             @Override
