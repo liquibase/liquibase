@@ -120,6 +120,14 @@ public abstract class AbstractPostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        //
+        // A catalog is the database name reported by the connection. It is passed as-is to
+        // DatabaseMetaData, which pgjdbc 42.7.5+ compares exactly against current_database().
+        //
+        if (Catalog.class.equals(objectType)) {
+            return objectName;
+        }
+
         if ((objectName == null) || (quotingStrategy != ObjectQuotingStrategy.LEGACY)) {
             return super.correctObjectName(objectName, objectType);
         }

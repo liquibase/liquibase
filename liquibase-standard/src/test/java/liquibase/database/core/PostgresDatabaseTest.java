@@ -7,6 +7,7 @@ import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
@@ -14,6 +15,7 @@ import liquibase.util.StringUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.Assert.assertNull;
@@ -186,6 +188,22 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
                 "\"4b5d63f449304c05a291c4c27136ebb5\"",
                 escaped
         );
+    }
+
+    /**
+     * A catalog is the database name reported by the connection, and pgjdbc 42.7.5+ matches it
+     * exactly when it is passed to {@code DatabaseMetaData}, so its case must never be altered.
+     */
+    @ParameterizedTest
+    @EnumSource(ObjectQuotingStrategy.class)
+    void correctObjectName_catalogCaseIsPreserved(ObjectQuotingStrategy strategy) {
+        PostgresDatabase database = new PostgresDatabase();
+        database.setObjectQuotingStrategy(strategy);
+
+        assertEquals("MyDB", database.correctObjectName("MyDB", Catalog.class));
+        assertEquals("MYDB", database.correctObjectName("MYDB", Catalog.class));
+        assertEquals("mydb", database.correctObjectName("mydb", Catalog.class));
+        assertNull(database.correctObjectName(null, Catalog.class));
     }
 
 //    @Test
