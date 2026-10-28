@@ -6,7 +6,9 @@ import liquibase.database.core.AbstractDb2Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MariaDBDatabase;
 import liquibase.database.core.MockDatabase;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.SybaseASADatabase;
@@ -146,7 +148,12 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
                 buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName(), false));
             } else {
                 if (column.getComputed()) {
-                    buffer.append(column.getName());
+                    if ((database instanceof MySQLDatabase) && !(database instanceof MariaDBDatabase)) {
+                        // MySQL requires a functional key part to be enclosed in its own pair of parentheses
+                        buffer.append("(").append(column.getName()).append(")");
+                    } else {
+                        buffer.append(column.getName());
+                    }
                 } else {
                     buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName()));
                 }
