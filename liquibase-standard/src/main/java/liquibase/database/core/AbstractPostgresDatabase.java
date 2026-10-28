@@ -118,8 +118,27 @@ public abstract class AbstractPostgresDatabase extends AbstractJdbcDatabase {
         return super.escapeObjectName(objectName, objectType);
     }
 
+    /**
+     * Corrects the case of the given object name according to the current quoting strategy.
+     * <p>
+     * Catalog names are returned unchanged, whatever the quoting strategy: a PostgreSQL catalog is the
+     * database name reported by the connection, and pgjdbc 42.7.5+ compares it exactly against
+     * {@code current_database()} when it is passed to {@code DatabaseMetaData}.
+     *
+     * @param objectName the name to correct, may be null
+     * @param objectType the type of the object the name refers to
+     * @return the corrected name, or null if {@code objectName} is null
+     */
     @Override
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        //
+        // A catalog is the database name reported by the connection. It is passed as-is to
+        // DatabaseMetaData, which pgjdbc 42.7.5+ compares exactly against current_database().
+        //
+        if (Catalog.class.equals(objectType)) {
+            return objectName;
+        }
+
         if ((objectName == null) || (quotingStrategy != ObjectQuotingStrategy.LEGACY)) {
             return super.correctObjectName(objectName, objectType);
         }
@@ -180,7 +199,8 @@ public abstract class AbstractPostgresDatabase extends AbstractJdbcDatabase {
         if (StringUtils.isNotEmpty(defaultCatalogName)) {
             Scope.getCurrentScope().getUI().sendMessage("WARNING: Postgres does not support catalogs, so the values set in 'defaultCatalogName' and 'referenceDefaultCatalogName' will be ignored.");
         }
-        super.setDefaultCatalogName(defaultCatalogName);
+        // The catalog is always the database of the connection, which pgjdbc matches exactly (including case)
+        super.setDefaultCatalogName(null);
     }
 
     public boolean useSerialDatatypes() {
