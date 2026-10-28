@@ -4,6 +4,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
@@ -21,6 +22,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
 
@@ -204,6 +207,28 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
         assertEquals("MYDB", database.correctObjectName("MYDB", Catalog.class));
         assertEquals("mydb", database.correctObjectName("mydb", Catalog.class));
         assertNull(database.correctObjectName(null, Catalog.class));
+    }
+
+    @Test
+    void setDefaultCatalogName_isIgnored() {
+        PostgresDatabase database = new PostgresDatabase();
+
+        database.setDefaultCatalogName("MYDB");
+
+        assertNull(database.getDefaultCatalogName());
+    }
+
+    @Test
+    void setDefaultCatalogName_connectionCatalogIsUsedInstead() throws Exception {
+        // a configured catalog with the wrong case must not hide the real database name reported by the connection
+        DatabaseConnection connection = mock(DatabaseConnection.class);
+        when(connection.getCatalog()).thenReturn("mydb");
+        PostgresDatabase database = new PostgresDatabase();
+        database.setConnection(connection);
+
+        database.setDefaultCatalogName("MYDB");
+
+        assertEquals("mydb", database.getDefaultCatalogName());
     }
 
 //    @Test
