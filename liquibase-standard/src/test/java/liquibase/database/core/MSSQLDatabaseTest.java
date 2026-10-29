@@ -38,6 +38,11 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
         assertFalse(getDatabase().supportsInitiallyDeferrableColumns());
     }
 
+    @Test
+    public void supportsCreateIfNotExists(){
+        assertFalse(getDatabase().supportsCreateIfNotExists(Table.class));
+    }
+
     @Override
     @Test
     public void getCurrentDateTimeFunction() {

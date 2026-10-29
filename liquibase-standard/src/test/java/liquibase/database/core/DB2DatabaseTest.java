@@ -2,10 +2,10 @@ package liquibase.database.core;
 
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.structure.core.Table;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DB2DatabaseTest {
 
@@ -18,6 +18,14 @@ public class DB2DatabaseTest {
         } catch (final DatabaseException e) {
             throw e;
         }
+    }
+
+    @Test
+    public void testSupportsCreateIfNotExist() throws DatabaseException {
+        try (DB2Database db2Database = new DB2Database()) {
+            assertTrue(db2Database.supportsCreateIfNotExists(Table.class));
+        }
+
     }
 
     @Test

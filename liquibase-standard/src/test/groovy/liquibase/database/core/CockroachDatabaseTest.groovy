@@ -2,6 +2,7 @@ package liquibase.database.core
 
 import liquibase.database.DatabaseConnection
 import liquibase.structure.core.Column
+import liquibase.structure.core.Table
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -51,6 +52,7 @@ class CockroachDatabaseTest extends Specification {
             !database.supportsCompositeTypeSnapshot()        // not snapshot-able on CockroachDB
             database.supportsCheckConstraintSnapshot()       // inherited from PostgresDatabase
             !database.supportsStoredLogicSnapshot()          // no stored-logic catalog
+            database.supportsCreateIfNotExists(Table.class)
         }
     }
 

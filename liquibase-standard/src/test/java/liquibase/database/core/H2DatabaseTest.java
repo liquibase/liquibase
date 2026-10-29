@@ -2,11 +2,10 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
+import liquibase.structure.core.Table;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class H2DatabaseTest extends AbstractJdbcDatabaseTest {
 
@@ -52,6 +51,11 @@ public class H2DatabaseTest extends AbstractJdbcDatabaseTest {
     public void escapeTableName_withSchema() {
         Database database = getDatabase();
         assertEquals("schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
+    }
+
+    @Test
+    public void testSupportsCreateIfNotExist(){
+        assertTrue(getDatabase().supportsCreateIfNotExists(Table.class));
     }
 
 //    @Test
