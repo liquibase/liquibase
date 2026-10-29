@@ -92,4 +92,71 @@ public class JdbcExecutorTest {
         }
     }
 
+    @Test
+    public void rowsAffectedAreLoggedForSingleLineDml() throws Exception {
+        String log = executeAndGetLog("UPDATE rows_affected_test SET name = 'x' WHERE id = 1");
+
+        assertEquals(log, 1, countOccurrences(log, "1 row(s) affected"));
+    }
+
+    @Test
+    public void rowsAffectedAreLoggedForMultiLineDml() throws Exception {
+        String log = executeAndGetLog("UPDATE rows_affected_test\n   SET name = 'x'\n WHERE id = 1");
+
+        assertEquals(log, 1, countOccurrences(log, "1 row(s) affected"));
+    }
+
+    @Test
+    public void rowsAffectedAreLoggedForMultiLineDmlWithWindowsLineEndings() throws Exception {
+        String log = executeAndGetLog("UPDATE rows_affected_test\r\n   SET name = 'x'\r\n WHERE id = 1");
+
+        assertEquals(log, 1, countOccurrences(log, "1 row(s) affected"));
+    }
+
+    @Test
+    public void rowsAffectedAreLoggedForMultiLineInsertAndDelete() throws Exception {
+        String insertLog = executeAndGetLog("INSERT INTO rows_affected_test (id, name)\nVALUES (3, 'c')");
+        String deleteLog = executeAndGetLog("DELETE FROM rows_affected_test\n WHERE id = 1");
+
+        assertEquals(insertLog, 1, countOccurrences(insertLog, "1 row(s) affected"));
+        assertEquals(deleteLog, 1, countOccurrences(deleteLog, "1 row(s) affected"));
+    }
+
+    @Test
+    public void rowsAffectedAreNotLoggedForMultiLineDdl() throws Exception {
+        String log = executeAndGetLog("CREATE TABLE ddl_only (\n  id INT\n)");
+
+        assertEquals(log, 0, countOccurrences(log, "row(s) affected"));
+    }
+
+    @Test
+    public void rowsAffectedAreNotLoggedForMultiLineDmlOnTheChangeLogTables() throws Exception {
+        String log = executeAndGetLog("UPDATE rows_affected_test\n   SET name = 'DATABASECHANGELOG'\n WHERE id = 1");
+
+        assertEquals(log, 0, countOccurrences(log, "row(s) affected"));
+    }
+
+    private String executeAndGetLog(String sql) throws Exception {
+        try (Connection connection = DriverManager.getConnection("jdbc:h2:mem:jdbcExecutorRowsAffected" + System.nanoTime())) {
+            H2Database database = new H2Database();
+            database.setConnection(new JdbcConnection(connection));
+            JdbcExecutor executor = new JdbcExecutor();
+            executor.setDatabase(database);
+            executor.execute(new RawSqlStatement("CREATE TABLE rows_affected_test (id INT, name VARCHAR(20))"));
+            executor.execute(new RawSqlStatement("INSERT INTO rows_affected_test (id, name) VALUES (1, 'a')"));
+
+            BufferedLogService logService = new BufferedLogService();
+            Scope.child(Scope.Attr.logService, logService, () -> executor.execute(new RawSqlStatement(sql)));
+            return logService.getLogAsString(Level.FINE);
+        }
+    }
+
+    private static int countOccurrences(String text, String fragment) {
+        int count = 0;
+        for (int index = text.indexOf(fragment); index >= 0; index = text.indexOf(fragment, index + 1)) {
+            count++;
+        }
+        return count;
+    }
+
 }
