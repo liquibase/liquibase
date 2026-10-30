@@ -35,6 +35,7 @@ public class CustomChangeWrapperParamCaseTest {
         ValidationErrors errors = wrapper.validate(new H2Database());
 
         assertFalse(errors.toString(), errors.hasErrors());
+        assertEquals("begin null; end;", ((LegacyParameterChange) wrapper.getCustomChange()).plSqlBlock);
     }
 
     private static LegacyParameterChange configure(String name, String value) throws Exception {
