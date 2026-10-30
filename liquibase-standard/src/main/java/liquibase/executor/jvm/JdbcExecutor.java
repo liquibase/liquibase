@@ -492,7 +492,7 @@ public class JdbcExecutor extends AbstractExecutor {
         }
 
         private boolean isDML(String statement) {
-            Pattern dmlPattern = Pattern.compile("^\\s*?(SELECT\\s|INSERT\\s|UPDATE\\s|DELETE\\s|MERGE\\s)(.*)", Pattern.CASE_INSENSITIVE);
+            Pattern dmlPattern = Pattern.compile("^\\s*?(SELECT\\s|INSERT\\s|UPDATE\\s|DELETE\\s|MERGE\\s)(.*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
             Matcher m = dmlPattern.matcher(statement);
             if (!m.matches()) {
                 return false;
