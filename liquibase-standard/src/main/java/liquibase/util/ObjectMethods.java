@@ -1,5 +1,6 @@
 package liquibase.util;
 
+import static java.util.Locale.ROOT;
 import static java.util.stream.Collectors.toMap;
 
 import java.beans.Introspector;
@@ -38,11 +39,26 @@ final class ObjectMethods {
   }
 
   Method getReadMethod(String propertyName) {
-    return readMethods.get(propertyName);
+    return lookup(readMethods, propertyName);
   }
 
   Method getWriteMethod(String propertyName) {
-    return writeMethods.get(propertyName);
+    return lookup(writeMethods, propertyName);
+  }
+
+  /**
+   * Finds the method for a property name. Before the methods were indexed by property name the lookup built
+   * "get"/"is"/"set" plus the name with its first letter capitalized, so changelogs could spell a property with
+   * either an initial lowercase or uppercase letter (e.g. {@code SchemaName} for {@code setSchemaName}). That
+   * is kept as a fallback when there is no method for the exact name.
+   */
+  private Method lookup(Map<String, Method> methods, String propertyName) {
+    Method method = methods.get(propertyName);
+    if (method != null || propertyName == null || propertyName.isEmpty()) {
+      return method;
+    }
+    String capitalized = propertyName.substring(0, 1).toUpperCase(ROOT) + propertyName.substring(1);
+    return methods.get(Introspector.decapitalize(capitalized));
   }
 
 }
