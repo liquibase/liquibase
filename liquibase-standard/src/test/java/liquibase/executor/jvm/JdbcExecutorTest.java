@@ -131,9 +131,11 @@ public class JdbcExecutorTest {
 
     @Test
     public void rowsAffectedAreNotLoggedForMultiLineDmlOnTheChangeLogTables() throws Exception {
-        String log = executeAndGetLog("UPDATE rows_affected_test\n   SET name = 'DATABASECHANGELOG'\n WHERE id = 1");
+        String changeLogLog = executeAndGetLog("UPDATE DATABASECHANGELOG\n   SET name = 'x'\n WHERE id = 1");
+        String lockLog = executeAndGetLog("UPDATE DATABASECHANGELOGLOCK\n   SET name = 'x'\n WHERE id = 1");
 
-        assertEquals(log, 0, countOccurrences(log, "row(s) affected"));
+        assertEquals(changeLogLog, 0, countOccurrences(changeLogLog, "row(s) affected"));
+        assertEquals(lockLog, 0, countOccurrences(lockLog, "row(s) affected"));
     }
 
     private String executeAndGetLog(String sql) throws Exception {
@@ -144,6 +146,10 @@ public class JdbcExecutorTest {
             executor.setDatabase(database);
             executor.execute(new RawSqlStatement("CREATE TABLE rows_affected_test (id INT, name VARCHAR(20))"));
             executor.execute(new RawSqlStatement("INSERT INTO rows_affected_test (id, name) VALUES (1, 'a')"));
+            for (String changeLogTable : new String[] {"DATABASECHANGELOG", "DATABASECHANGELOGLOCK"}) {
+                executor.execute(new RawSqlStatement("CREATE TABLE " + changeLogTable + " (id INT, name VARCHAR(20))"));
+                executor.execute(new RawSqlStatement("INSERT INTO " + changeLogTable + " (id, name) VALUES (1, 'a')"));
+            }
 
             BufferedLogService logService = new BufferedLogService();
             Scope.child(Scope.Attr.logService, logService, () -> executor.execute(new RawSqlStatement(sql)));
