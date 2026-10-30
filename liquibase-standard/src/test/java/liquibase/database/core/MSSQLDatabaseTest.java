@@ -278,4 +278,24 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
             throw e;
         }
     }
+
+    @ParameterizedTest
+    @MethodSource("alreadyQuotedTablespaceNames")
+    public void testEscapeTablespaceName_alreadyQuotedIsLeftUntouched(String tablespaceName) throws DatabaseException {
+        // changelogs written for versions before 5.0.2 spell the filegroup as [PRIMARY]
+        try (Database database = new MSSQLDatabase()) {
+            assertEquals(tablespaceName, database.escapeTablespaceName(tablespaceName));
+        }
+    }
+
+    private static Stream<String> alreadyQuotedTablespaceNames() {
+        return Stream.of("[PRIMARY]", "[My Tablespace]", "\"PRIMARY\"", "\"My Tablespace\"");
+    }
+
+    @Test
+    public void testEscapeTablespaceName_reservedWordIsQuoted() throws DatabaseException {
+        try (Database database = new MSSQLDatabase()) {
+            assertEquals("[PRIMARY]", database.escapeTablespaceName("PRIMARY"));
+        }
+    }
 }

@@ -323,6 +323,10 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         // and not add quotes. We can check for a space and the lack of a quote at the beginning and quote
         // it anyway.
         //
+        if (tablespaceName != null && isQuoted(tablespaceName)) {
+            // already quoted by the changelog author, e.g. [PRIMARY]; quoting it again makes it an invalid filegroup
+            return tablespaceName;
+        }
         tablespaceName = escapeObjectName(tablespaceName, Tablespace.class);
         if (tablespaceName != null && tablespaceName.contains(" ") && ! isQuoted(tablespaceName)) {
             tablespaceName = quoteObject(tablespaceName, Tablespace.class);
