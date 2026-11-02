@@ -212,7 +212,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up JDK 21
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           java-version: '21'
           distribution: temurin
@@ -322,7 +322,7 @@ jobs:
           echo "::add-mask::${GPG_KEY_CONTENT}"
 
       - name: Set up JDK for GPG
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           java-version: '21'
           distribution: "temurin"
@@ -343,7 +343,7 @@ jobs:
           (cd artifacts-additional && zip -q ../re-version/final/liquibase-additional-$VERSION.zip *)
 
       - name: Upload Completed Artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
@@ -444,14 +444,14 @@ jobs:
           echo "::add-mask::${GPG_KEY_CONTENT}"
 
       - name: Download Completed Artifacts
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
 
        # https://github.com/actions/setup-java/tree/v4/?tab=readme-ov-file#install-multiple-jdks
       - name: Set up JDK for GPG
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           java-version: |
             17
@@ -579,7 +579,7 @@ jobs:
 
       - name: Attach Files to Draft Release
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v2
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
           # `draft: true` creates no git ref, so the tag is not made here. The commitish
@@ -597,7 +597,7 @@ jobs:
       - name: Attach Files to Dry-Run Draft Release
         id: attach-files-dry-run
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == true }}
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v2
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
           # `draft: true` creates no git ref, so the tag is not made here. The commitish
@@ -614,7 +614,7 @@ jobs:
 
       - name: Attach standalone zip to Build
         if: ${{ inputs.standalone_zip == true && inputs.dry_run == false }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: liquibase-installers-${{ needs.setup.outputs.version }}
           path: re-version/final/*
@@ -674,7 +674,7 @@ jobs:
 
       - name: Get GitHub App token
         id: get-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           app-id: ${{ steps.app-vault.outputs.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ steps.app-vault.outputs.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
