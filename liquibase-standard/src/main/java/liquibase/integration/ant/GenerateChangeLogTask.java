@@ -109,23 +109,30 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
     }
 
     public void addConfiguredJson(ChangeLogOutputFile changeLogOutputFile) {
-        changeLogOutputFile.setChangeLogSerializer(new JsonChangeLogSerializer());
+        changeLogOutputFile.setChangeLogSerializer(enhanceSerializer(new JsonChangeLogSerializer()));
         changeLogOutputFiles.add(changeLogOutputFile);
     }
 
     public void addConfiguredXml(ChangeLogOutputFile changeLogOutputFile) {
-        changeLogOutputFile.setChangeLogSerializer(ChangeLogSerializerFactory.getInstance().getSerializer("xml"));
+        changeLogOutputFile.setChangeLogSerializer(enhanceSerializer(ChangeLogSerializerFactory.getInstance().getSerializer("xml")));
         changeLogOutputFiles.add(changeLogOutputFile);
     }
 
     public void addConfiguredYaml(ChangeLogOutputFile changeLogOutputFile) {
-        changeLogOutputFile.setChangeLogSerializer(ChangeLogSerializerFactory.getInstance().getSerializer("yaml"));
+        changeLogOutputFile.setChangeLogSerializer(enhanceSerializer(ChangeLogSerializerFactory.getInstance().getSerializer("yaml")));
         changeLogOutputFiles.add(changeLogOutputFile);
     }
 
     public void addConfiguredTxt(ChangeLogOutputFile changeLogOutputFile) {
-        changeLogOutputFile.setChangeLogSerializer(new StringChangeLogSerializer());
+        changeLogOutputFile.setChangeLogSerializer(enhanceSerializer(new StringChangeLogSerializer()));
         changeLogOutputFiles.add(changeLogOutputFile);
+    }
+
+    private ChangeLogSerializer enhanceSerializer(ChangeLogSerializer serializer) {
+        DiffOutputControl diffOutputControl = getDiffOutputControl();
+        serializer.preserveNullValues(diffOutputControl.getPreserveNullValues());
+
+        return serializer;
     }
 
     public boolean getIncludeCatalog() {
