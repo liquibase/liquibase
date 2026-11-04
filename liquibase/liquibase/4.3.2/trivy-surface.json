@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a1a0de-3c94-7b6d-a968-891d5b384b7f",
-  "CreatedAt": "2026-11-03T10:04:41.492750093Z",
+  "ReportID": "01a1a605-41da-746f-addf-8829e21f856e",
+  "CreatedAt": "2026-11-04T10:05:24.826292528Z",
   "ArtifactID": "sha256:fa6fa66eda0adedad68b15f6079f35c554fa60bb35047463665e4252e4b6e623",
   "ArtifactName": "liquibase/liquibase:4.3.2",
   "ArtifactType": "container_image",
@@ -10718,7 +10718,7 @@
             "https://www.openwall.com/lists/oss-security/2024/04/17/9"
           ],
           "PublishedDate": "2024-04-17T18:15:15.833Z",
-          "LastModifiedDate": "2026-06-17T07:25:54.767Z"
+          "LastModifiedDate": "2026-11-03T22:17:17.86Z"
         },
         {
           "VulnerabilityID": "CVE-2024-33599",
@@ -11633,7 +11633,7 @@
             "https://www.openwall.com/lists/oss-security/2024/04/17/9"
           ],
           "PublishedDate": "2024-04-17T18:15:15.833Z",
-          "LastModifiedDate": "2026-06-17T07:25:54.767Z"
+          "LastModifiedDate": "2026-11-03T22:17:17.86Z"
         },
         {
           "VulnerabilityID": "CVE-2024-33599",
@@ -15490,7 +15490,7 @@
             "https://www.oracle.com/security-alerts/cpujul2022.html"
           ],
           "PublishedDate": "2022-05-03T16:15:18.823Z",
-          "LastModifiedDate": "2026-10-14T13:17:18.103Z"
+          "LastModifiedDate": "2026-11-03T22:17:08.59Z"
         },
         {
           "VulnerabilityID": "CVE-2022-2068",
@@ -15601,7 +15601,7 @@
             "https://www.openssl.org/news/secadv/20220621.txt"
           ],
           "PublishedDate": "2022-06-21T15:15:09.06Z",
-          "LastModifiedDate": "2026-10-14T13:17:20.11Z"
+          "LastModifiedDate": "2026-11-03T22:17:09.593Z"
         },
         {
           "VulnerabilityID": "CVE-2022-4450",
@@ -18429,7 +18429,7 @@
             "https://www.oracle.com/security-alerts/cpujul2022.html"
           ],
           "PublishedDate": "2022-05-03T16:15:18.823Z",
-          "LastModifiedDate": "2026-10-14T13:17:18.103Z"
+          "LastModifiedDate": "2026-11-03T22:17:08.59Z"
         },
         {
           "VulnerabilityID": "CVE-2022-2068",
@@ -18540,7 +18540,7 @@
             "https://www.openssl.org/news/secadv/20220621.txt"
           ],
           "PublishedDate": "2022-06-21T15:15:09.06Z",
-          "LastModifiedDate": "2026-10-14T13:17:20.11Z"
+          "LastModifiedDate": "2026-11-03T22:17:09.593Z"
         },
         {
           "VulnerabilityID": "CVE-2022-4450",
@@ -21137,7 +21137,7 @@
             "https://creativecommons.org/licenses/by/4.0/",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42198",
             "https://errata.almalinux.org/9/ALSA-2026-22304.html",
-            "https://errata.rockylinux.org/RLSA-2026:24348",
+            "https://errata.rockylinux.org/RLSA-2026:22304",
             "https://github.com/pgjdbc/pgjdbc",
             "https://github.com/pgjdbc/pgjdbc/releases/tag/REL42.7.11",
             "https://github.com/pgjdbc/pgjdbc/security/advisories/GHSA-98qh-xjc8-98pq",
