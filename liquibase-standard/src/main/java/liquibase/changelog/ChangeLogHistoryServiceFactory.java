@@ -117,6 +117,24 @@ public class ChangeLogHistoryServiceFactory extends AbstractPluginFactory<Change
     }
 
     /**
+     * Resets and drops the {@link ChangeLogHistoryService} of just the given database. Where
+     * {@link #resetDatabase(Database)} keeps the service bound to the database for the database's lifetime,
+     * this ends that binding, and is called once the database is closed: as this factory is a single
+     * JVM-wide singleton, an entry left behind keeps the closed database - and through its connection
+     * whatever the connection references - reachable for the life of the JVM.
+     * <p>
+     * Call this before the database's connection is closed: {@link liquibase.database.jvm.JdbcConnection}'s
+     * hashCode changes when its underlying connection is closed, after which the entry can no longer be
+     * found by key.
+     */
+    public synchronized void removeDatabase(Database database) {
+        ChangeLogHistoryService service = services.remove(database);
+        if (service != null) {
+            service.reset();
+        }
+    }
+
+    /**
      * Resets and drops every database's {@link ChangeLogHistoryService}, discovered and
      * {@link #registerForDatabase} registered alike. This is a full JVM-wide teardown; cleanup paths
      * belonging to a single execution should use {@link #resetDatabase(Database)} instead, so they

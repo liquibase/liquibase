@@ -1,9 +1,21 @@
 package liquibase.changelog;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
+import liquibase.Liquibase;
 import liquibase.Scope;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.lang.reflect.Field;
+import java.sql.DriverManager;
+import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -103,6 +115,64 @@ public class ChangeLogHistoryServiceFactoryTest {
         factory.resetAll();
 
         assertThat(registered.resetCount).isEqualTo(1);
+    }
+
+    /**
+     * removeDatabase() ends the binding between a database and its service, for just that database:
+     * other databases - including ones whose service was registered explicitly, like an offline
+     * connection's - keep theirs.
+     */
+    @Test
+    public void removeDatabaseOnlyRemovesGivenDatabase() throws Exception {
+        PostgresDatabase databaseA = new PostgresDatabase();
+        PostgresDatabase databaseB = new PostgresDatabase();
+        RecordingChangeLogHistoryService serviceA = new RecordingChangeLogHistoryService();
+        serviceA.setDatabase(databaseA);
+        RecordingChangeLogHistoryService serviceB = new RecordingChangeLogHistoryService();
+        serviceB.setDatabase(databaseB);
+        factory.registerForDatabase(databaseA, serviceA);
+        factory.registerForDatabase(databaseB, serviceB);
+
+        factory.removeDatabase(databaseA);
+
+        assertThat(serviceA.resetCount).isEqualTo(1);
+        assertThat(cachedDatabases()).noneMatch(cached -> cached == databaseA);
+        assertThat(serviceB.resetCount).isZero();
+        assertThat(factory.getChangeLogService(databaseB)).isSameAs(serviceB);
+    }
+
+    /**
+     * Regression test for #8064: once a database is closed, the JVM-wide factory must no longer hold
+     * it. The cleanup at the end of a command only resets the database's entry in place
+     * ({@link ChangeLogHistoryServiceFactory#resetDatabase}), so without this every closed database -
+     * and through its connection whatever the connection references, e.g. a pooled DataSource and the
+     * application context around it - stayed reachable for the life of the JVM.
+     * <p>
+     * The cache is inspected by identity rather than with containsKey(): a JdbcConnection's hashCode
+     * changes once it is closed, so a lookup by key can miss an entry that is still retained.
+     */
+    @Test
+    public void closingADatabaseReleasesItsService() throws Exception {
+        for (int run = 0; run < 3; run++) {
+            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(
+                    DriverManager.getConnection("jdbc:h2:mem:closingADatabaseReleasesItsService" + run)));
+            try (Liquibase liquibase = new Liquibase(new DatabaseChangeLog("closingADatabaseReleasesItsService"),
+                    new ClassLoaderResourceAccessor(), database)) {
+                liquibase.update(new Contexts(), new LabelExpression());
+                assertThat(cachedDatabases()).anyMatch(cached -> cached == database);
+            }
+
+            assertThat(cachedDatabases())
+                    .as("closed database of run %d must not be retained", run)
+                    .noneMatch(cached -> cached == database);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Set<Database> cachedDatabases() throws Exception {
+        Field services = ChangeLogHistoryServiceFactory.class.getDeclaredField("services");
+        services.setAccessible(true);
+        return ((Map<Database, ChangeLogHistoryService>) services.get(factory)).keySet();
     }
 
     private static class RecordingChangeLogHistoryService extends StandardChangeLogHistoryService {
