@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a1a562-0f4e-7b28-b758-7366afe6b0fe",
-  "CreatedAt": "2026-11-04T07:07:09.518732402Z",
+  "ReportID": "01a1aa88-50c8-7989-a814-efa8c20dde82",
+  "CreatedAt": "2026-11-05T07:07:02.728626114Z",
   "ArtifactID": "sha256:04d6dbd38d65d35ea3826cb2a530fa24cbf7f2a95aa5db9cf6c281eac4d41033",
   "ArtifactName": "ghcr.io/liquibase/liquibase/liquibase-liquibase:b05f2e8d353dc4b235afbb39a041a7b401466dd0",
   "ArtifactType": "container_image",
@@ -32,7 +32,7 @@
       "ghcr.io/liquibase/liquibase/liquibase-liquibase:b05f2e8d353dc4b235afbb39a041a7b401466dd0"
     ],
     "RepoDigests": [
-      "ghcr.io/liquibase/liquibase/liquibase-liquibase@sha256:275ece0b16c716855566ce2758253f95e7aa8a557e09ee8d25811be0784bd4b1"
+      "ghcr.io/liquibase/liquibase/liquibase-liquibase@sha256:d4fde6da5bf5324e8e2a4f3d164b43316255ab8e7e416fe36ac158005452281c"
     ],
     "Reference": "ghcr.io/liquibase/liquibase/liquibase-liquibase:b05f2e8d353dc4b235afbb39a041a7b401466dd0",
     "ImageConfig": {
@@ -10593,6 +10593,90 @@
             "/usr/share/doc/zlib1g/copyright"
           ],
           "AnalyzedBy": "dpkg"
+        }
+      ],
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2026-109518",
+          "PkgID": "apt@2.8.3",
+          "PkgName": "apt",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/ubuntu/apt@2.8.3?arch=amd64\u0026distro=ubuntu-24.04",
+            "UID": "a2e185a15339b92"
+          },
+          "InstalledVersion": "2.8.3",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+            "DiffID": "sha256:bec87777bc2fb2edcdf9af11df1531469e7df911309c1413082b18fcb8610278"
+          },
+          "SeveritySource": "ubuntu",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-109518",
+          "DataSource": {
+            "ID": "ubuntu",
+            "Name": "Ubuntu CVE Tracker",
+            "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
+          },
+          "Fingerprint": "sha256:8a7538dc65fa3407ce4668b6b6109c1b37ab834fb866726bbf696d2c7d416472",
+          "Title": "On Debian, Ubuntu, and derivative Linux distributions, an on-path atta ...",
+          "Description": "On Debian, Ubuntu, and derivative Linux distributions, an on-path attacker who can manipulate the HTTP traffic (including a malicious mirror or proxy) between an APT client and an archive server triggered by a package install can trick the client into installing an attacker-controlled unverified package and achieve remote code execution with root privileges.\n\n\n\nThe vulnerability is caused by the reuse of hard links and requires the client to follow redirects and retry the download of package files. It requires the client to have a non-zero Acquire::Retries configuration setting; the value 3 is the default starting with Debian 12 (bookworm) and Ubuntu 22.04 LTS (Jammy Jellyfish), so older releases are unaffected in a default configuration",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-62",
+            "CWE-367"
+          ],
+          "VendorSeverity": {
+            "ubuntu": 3
+          },
+          "References": [
+            "https://lists.debian.org/debian-lts-announce/2026/11/msg00004.html",
+            "https://lists.debian.org/debian-security-announce/2026/msg00526.html",
+            "https://ubuntu.com/security/notices/USN-8996-1",
+            "https://www.cve.org/CVERecord?id=CVE-2026-109518"
+          ],
+          "PublishedDate": "2026-11-04T16:17:33.01Z",
+          "LastModifiedDate": "2026-11-04T19:17:18.327Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-109518",
+          "PkgID": "libapt-pkg6.0t64@2.8.3",
+          "PkgName": "libapt-pkg6.0t64",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/ubuntu/libapt-pkg6.0t64@2.8.3?arch=amd64\u0026distro=ubuntu-24.04",
+            "UID": "201cb96f8c9f6be6"
+          },
+          "InstalledVersion": "2.8.3",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+            "DiffID": "sha256:bec87777bc2fb2edcdf9af11df1531469e7df911309c1413082b18fcb8610278"
+          },
+          "SeveritySource": "ubuntu",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-109518",
+          "DataSource": {
+            "ID": "ubuntu",
+            "Name": "Ubuntu CVE Tracker",
+            "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
+          },
+          "Fingerprint": "sha256:40aba4de6770547c3428b35dd83302c9bb39e8a210b040f3b6811a8a4165fbf3",
+          "Title": "On Debian, Ubuntu, and derivative Linux distributions, an on-path atta ...",
+          "Description": "On Debian, Ubuntu, and derivative Linux distributions, an on-path attacker who can manipulate the HTTP traffic (including a malicious mirror or proxy) between an APT client and an archive server triggered by a package install can trick the client into installing an attacker-controlled unverified package and achieve remote code execution with root privileges.\n\n\n\nThe vulnerability is caused by the reuse of hard links and requires the client to follow redirects and retry the download of package files. It requires the client to have a non-zero Acquire::Retries configuration setting; the value 3 is the default starting with Debian 12 (bookworm) and Ubuntu 22.04 LTS (Jammy Jellyfish), so older releases are unaffected in a default configuration",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-62",
+            "CWE-367"
+          ],
+          "VendorSeverity": {
+            "ubuntu": 3
+          },
+          "References": [
+            "https://lists.debian.org/debian-lts-announce/2026/11/msg00004.html",
+            "https://lists.debian.org/debian-security-announce/2026/msg00526.html",
+            "https://ubuntu.com/security/notices/USN-8996-1",
+            "https://www.cve.org/CVERecord?id=CVE-2026-109518"
+          ],
+          "PublishedDate": "2026-11-04T16:17:33.01Z",
+          "LastModifiedDate": "2026-11-04T19:17:18.327Z"
         }
       ]
     },
