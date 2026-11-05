@@ -153,6 +153,11 @@ public class ChangeLogHistoryServiceFactoryTest {
      */
     @Test
     public void closingADatabaseReleasesItsService() throws Exception {
+        PostgresDatabase otherDatabase = new PostgresDatabase();
+        RecordingChangeLogHistoryService otherService = new RecordingChangeLogHistoryService();
+        otherService.setDatabase(otherDatabase);
+        factory.registerForDatabase(otherDatabase, otherService);
+
         for (int run = 0; run < 3; run++) {
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(
                     DriverManager.getConnection("jdbc:h2:mem:closingADatabaseReleasesItsService" + run)));
@@ -166,6 +171,10 @@ public class ChangeLogHistoryServiceFactoryTest {
                     .as("closed database of run %d must not be retained", run)
                     .noneMatch(cached -> cached == database);
         }
+
+        // closing a database must not touch the services of other databases
+        assertThat(otherService.resetCount).isZero();
+        assertThat(factory.getChangeLogService(otherDatabase)).isSameAs(otherService);
     }
 
     @SuppressWarnings("unchecked")
