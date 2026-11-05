@@ -1,0 +1,258 @@
+{
+  "SchemaVersion": 2,
+  "CreatedAt": "2026-11-05T11:31:34Z",
+  "ArtifactName": "liquibase/liquibase:4.23.2",
+  "ArtifactType": "container_image",
+  "Scanner": {
+    "Name": "Liquibase Runtime Check",
+    "Version": "1.0.0",
+    "List": {
+      "Path": "scripts/vulnerability-scanning/distrusted-certs.txt",
+      "Sha256": "caebf18e3e139f1047fdfe2ea3b48b6f341a6d690fce90af8950ba342e02f464",
+      "Entries": 20
+    }
+  },
+  "Runtimes": [
+    {
+      "Path": "/opt/java/openjdk",
+      "Vendor": "Eclipse Adoptium",
+      "Version": "17.0.8.1",
+      "RuntimeVersion": "17.0.8.1+1",
+      "ImplementorVersion": "Temurin-17.0.8.1+1",
+      "VersionDate": "2023-08-24",
+      "ImageType": "JRE",
+      "FeatureVersion": 17,
+      "TrustStore": {
+        "Path": "/opt/java/openjdk/lib/security/cacerts",
+        "Source": "bundled"
+      },
+      "BlockedCerts": {
+        "Path": "/opt/java/openjdk/lib/security/blocked.certs",
+        "Count": 38
+      },
+      "UnblockedIntermediates": [
+        {
+          "Sha256": "45:A8:83:F3:49:AE:DF:D5:F3:A6:49:B5:49:8F:FB:12:17:12:BA:8B:44:8F:3F:2A:91:DB:C5:A7:66:FC:DD:BE",
+          "Name": "EM DV TLS CA - G3B",
+          "Cve": "CVE-2026-91403"
+        },
+        {
+          "Sha256": "57:94:80:AE:A1:66:29:0B:D3:C6:43:58:9E:79:5F:C0:D0:E5:4E:86:50:5D:18:0F:1D:FF:99:EF:D3:19:95:12",
+          "Name": "EM EV TLS CA - G3B",
+          "Cve": "CVE-2026-91403"
+        },
+        {
+          "Sha256": "5F:1D:ED:4D:D5:90:AF:74:63:12:90:CF:07:3B:12:2A:2A:AC:6A:1F:A4:79:77:8A:0B:D4:35:79:BD:83:26:99",
+          "Name": "EM OV TLS CA - G3B",
+          "Cve": "CVE-2026-91403"
+        },
+        {
+          "Sha256": "62:B7:F9:86:82:63:F7:2F:69:11:FC:78:CE:AF:72:C1:97:91:58:B7:36:8B:F6:48:68:3B:B2:AA:39:B0:2E:72",
+          "Name": "EM DV TLS CA - G3C",
+          "Cve": "CVE-2026-91403"
+        },
+        {
+          "Sha256": "74:85:B5:1C:0E:D1:92:87:8F:A1:D2:F9:48:FB:52:9A:E1:84:2C:C5:08:6C:4B:67:F7:BE:5B:20:39:DE:94:89",
+          "Name": "EM OV TLS CA - G3C",
+          "Cve": "CVE-2026-91403"
+        },
+        {
+          "Sha256": "84:11:29:72:B8:E5:9D:14:56:0A:E7:E7:11:96:54:47:4A:AD:11:99:90:CF:37:22:BF:C1:E3:B9:16:15:E1:FD",
+          "Name": "EM OV CS CA - G3C",
+          "Cve": "CVE-2026-91403"
+        },
+        {
+          "Sha256": "A4:96:E2:3A:C0:CA:B8:15:5F:C9:B1:17:B9:7E:AE:36:8E:FC:BB:90:41:AE:C8:80:4D:5A:30:8D:2D:01:C2:D8",
+          "Name": "EM OV CS CA - G3B",
+          "Cve": "CVE-2026-91403"
+        },
+        {
+          "Sha256": "FD:9D:5C:2D:BB:D4:99:5A:B6:9B:8D:50:C4:39:D9:52:7B:00:52:91:99:C2:FD:01:B2:17:4E:B5:8F:07:02:1F",
+          "Name": "EM EV TLS CA - G3C",
+          "Cve": "CVE-2026-91403"
+        },
+        {
+          "Sha256": "42:C4:AC:CD:12:C4:F5:95:97:92:5E:1A:08:A7:A9:01:02:60:85:43:80:93:08:D5:0E:C4:27:E1:18:BA:14:93",
+          "Name": "EM DV TLS CA - G3B",
+          "Cve": "CVE-2026-91403"
+        },
+        {
+          "Sha256": "01:64:D7:CE:AE:5B:B9:09:C2:72:AF:15:1F:F4:4B:11:77:AE:9B:47:D9:42:4B:94:F1:D9:55:8C:30:93:4D:19",
+          "Name": "EM DV TLS CA - G3C",
+          "Cve": "CVE-2026-91403"
+        },
+        {
+          "Sha256": "E7:56:8F:E6:E1:23:31:F4:FD:7D:E6:1D:A4:C7:55:9D:0F:8E:B1:92:A2:18:D4:74:1A:3B:A7:51:84:33:38:38",
+          "Name": "EM EV TLS CA - G3B",
+          "Cve": "CVE-2026-91403"
+        },
+        {
+          "Sha256": "43:2E:C2:5F:0D:28:DE:90:06:D9:7B:F7:52:F1:7B:BB:2C:D4:1F:66:99:33:FC:B0:72:D9:A1:14:8D:02:61:F3",
+          "Name": "EM EV TLS CA - G3C",
+          "Cve": "CVE-2026-91403"
+        },
+        {
+          "Sha256": "9E:39:DE:28:81:27:3A:CC:22:5A:14:9C:72:BA:3E:0F:51:42:49:63:66:9A:B6:33:EE:1D:C7:DF:5D:B0:67:B4",
+          "Name": "EM OV CS CA - G3B",
+          "Cve": "CVE-2026-91403"
+        },
+        {
+          "Sha256": "4B:24:60:A4:66:F9:5F:D4:01:13:BC:DC:CA:2C:EB:29:B3:B0:93:92:1D:E4:54:74:DA:7D:F4:88:74:C6:30:B1",
+          "Name": "EM OV CS CA - G3C",
+          "Cve": "CVE-2026-91403"
+        },
+        {
+          "Sha256": "98:B8:96:62:5C:0C:23:0A:DE:EC:3E:B2:CF:6A:AD:50:01:EC:F9:15:6A:68:64:4E:82:37:4C:E5:83:3B:C2:5B",
+          "Name": "EM OV TLS CA - G3B",
+          "Cve": "CVE-2026-91403"
+        },
+        {
+          "Sha256": "CB:6E:15:16:5A:C8:02:E9:B3:F9:93:F1:6C:25:D4:1F:4E:81:C2:1E:BD:E7:1A:E1:B0:12:AC:00:BF:9C:7C:3F",
+          "Name": "EM OV TLS CA - G3C",
+          "Cve": "CVE-2026-91403"
+        }
+      ]
+    }
+  ],
+  "TrustStores": [
+    {
+      "Path": "/etc/ssl/certs/ca-certificates.crt",
+      "Kind": "ca-bundle",
+      "Format": "PEM",
+      "Certificates": 137,
+      "Distrusted": [
+        {
+          "Sha256": "D7:A7:A0:FB:5D:7E:27:31:D7:71:E9:48:4E:BC:DE:F7:1D:5F:0C:3E:0A:29:48:78:2B:C8:3E:E0:EA:69:9E:F4",
+          "Name": "AAA Certificate Services",
+          "Cve": "CVE-2026-114820"
+        },
+        {
+          "Sha256": "86:A1:EC:BA:08:9C:4A:8D:3B:BE:27:34:C6:12:BA:34:1D:81:3E:04:3C:F9:E8:A8:62:CD:5C:57:A3:6B:BE:6B",
+          "Name": "emSign ECC Root CA - G3",
+          "Cve": "CVE-2026-114820"
+        },
+        {
+          "Sha256": "40:F6:AF:03:46:A9:9A:A1:CD:1D:55:5A:4E:9C:CE:62:C7:F9:63:46:03:EE:40:66:15:83:3D:C8:C8:D0:03:67",
+          "Name": "emSign Root CA - G1",
+          "Cve": "CVE-2026-114820"
+        }
+      ],
+      "UsedBy": []
+    },
+    {
+      "Path": "/opt/java/openjdk/lib/security/cacerts",
+      "Kind": "java-cacerts",
+      "Format": "JKS",
+      "Certificates": 141,
+      "Distrusted": [
+        {
+          "Sha256": "D7:A7:A0:FB:5D:7E:27:31:D7:71:E9:48:4E:BC:DE:F7:1D:5F:0C:3E:0A:29:48:78:2B:C8:3E:E0:EA:69:9E:F4",
+          "Name": "AAA Certificate Services",
+          "Cve": "CVE-2026-114820"
+        },
+        {
+          "Sha256": "86:A1:EC:BA:08:9C:4A:8D:3B:BE:27:34:C6:12:BA:34:1D:81:3E:04:3C:F9:E8:A8:62:CD:5C:57:A3:6B:BE:6B",
+          "Name": "emSign ECC Root CA - G3",
+          "Cve": "CVE-2026-114820"
+        },
+        {
+          "Sha256": "40:F6:AF:03:46:A9:9A:A1:CD:1D:55:5A:4E:9C:CE:62:C7:F9:63:46:03:EE:40:66:15:83:3D:C8:C8:D0:03:67",
+          "Name": "emSign Root CA - G1",
+          "Cve": "CVE-2026-114820"
+        }
+      ],
+      "UsedBy": [
+        "/opt/java/openjdk"
+      ]
+    }
+  ],
+  "Results": [
+    {
+      "Target": "/etc/ssl/certs/ca-certificates.crt",
+      "Class": "custom",
+      "Type": "ca-bundle",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2026-114820",
+          "PkgName": "ca-certificates",
+          "PkgIdentifier": {
+            "PURL": "pkg:generic/ca-certificates"
+          },
+          "InstalledVersion": "20230311ubuntu0.22.04.1",
+          "Severity": "CRITICAL",
+          "Title": "Distrusted root CA in /etc/ssl/certs/ca-certificates.crt: AAA Certificate Services, emSign ECC Root CA - G3, emSign Root CA - G1",
+          "Description": "/etc/ssl/certs/ca-certificates.crt, the OS CA bundle, trusts 3 root certificate(s) distrusted for CVE-2026-114820: AAA Certificate Services (SHA-256 D7:A7:A0:FB:5D:7E:27:31:D7:71:E9:48:4E:BC:DE:F7:1D:5F:0C:3E:0A:29:48:78:2B:C8:3E:E0:EA:69:9E:F4); emSign ECC Root CA - G3 (SHA-256 86:A1:EC:BA:08:9C:4A:8D:3B:BE:27:34:C6:12:BA:34:1D:81:3E:04:3C:F9:E8:A8:62:CD:5C:57:A3:6B:BE:6B); emSign Root CA - G1 (SHA-256 40:F6:AF:03:46:A9:9A:A1:CD:1D:55:5A:4E:9C:CE:62:C7:F9:63:46:03:EE:40:66:15:83:3D:C8:C8:D0:03:67). Remove them from the trust store, or move to a runtime or ca-certificates release that no longer ships them.",
+          "PrimaryURL": "https://nvd.nist.gov/vuln/detail/CVE-2026-114820",
+          "DataSource": {
+            "ID": "liquibase-distrusted-certs",
+            "Name": "build-logic distrusted-certs.txt",
+            "URL": "https://github.com/liquibase/build-logic/blob/main/scripts/vulnerability-scanning/distrusted-certs.txt"
+          },
+          "CVSS": {
+            "distrusted-certs": {
+              "V3Score": 9.1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "Target": "/opt/java/openjdk/lib/security/cacerts",
+      "Class": "custom",
+      "Type": "java-cacerts",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2026-114820",
+          "PkgName": "java-cacerts",
+          "PkgIdentifier": {
+            "PURL": "pkg:generic/java-cacerts"
+          },
+          "InstalledVersion": "17.0.8.1+1",
+          "Severity": "CRITICAL",
+          "Title": "Distrusted root CA in /opt/java/openjdk/lib/security/cacerts: AAA Certificate Services, emSign ECC Root CA - G3, emSign Root CA - G1",
+          "Description": "/opt/java/openjdk/lib/security/cacerts, the trust store of Eclipse Adoptium 17.0.8.1 at /opt/java/openjdk, trusts 3 root certificate(s) distrusted for CVE-2026-114820: AAA Certificate Services (SHA-256 D7:A7:A0:FB:5D:7E:27:31:D7:71:E9:48:4E:BC:DE:F7:1D:5F:0C:3E:0A:29:48:78:2B:C8:3E:E0:EA:69:9E:F4); emSign ECC Root CA - G3 (SHA-256 86:A1:EC:BA:08:9C:4A:8D:3B:BE:27:34:C6:12:BA:34:1D:81:3E:04:3C:F9:E8:A8:62:CD:5C:57:A3:6B:BE:6B); emSign Root CA - G1 (SHA-256 40:F6:AF:03:46:A9:9A:A1:CD:1D:55:5A:4E:9C:CE:62:C7:F9:63:46:03:EE:40:66:15:83:3D:C8:C8:D0:03:67). Remove them from the trust store, or move to a runtime or ca-certificates release that no longer ships them.",
+          "PrimaryURL": "https://nvd.nist.gov/vuln/detail/CVE-2026-114820",
+          "DataSource": {
+            "ID": "liquibase-distrusted-certs",
+            "Name": "build-logic distrusted-certs.txt",
+            "URL": "https://github.com/liquibase/build-logic/blob/main/scripts/vulnerability-scanning/distrusted-certs.txt"
+          },
+          "CVSS": {
+            "distrusted-certs": {
+              "V3Score": 9.1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "Target": "/opt/java/openjdk/lib/security/blocked.certs",
+      "Class": "custom",
+      "Type": "java-blocked-certs",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2026-91403",
+          "PkgName": "java-blocked-certs",
+          "PkgIdentifier": {
+            "PURL": "pkg:generic/java-blocked-certs"
+          },
+          "InstalledVersion": "17.0.8.1+1",
+          "Severity": "CRITICAL",
+          "Title": "Java runtime at /opt/java/openjdk does not block 16 intermediate CA(s) distrusted for CVE-2026-91403",
+          "Description": "/opt/java/openjdk/lib/security/blocked.certs does not block 16 of the 16 intermediate CAs distrusted for CVE-2026-91403: EM DV TLS CA - G3B, EM EV TLS CA - G3B, EM OV TLS CA - G3B, EM DV TLS CA - G3C, EM OV TLS CA - G3C, EM OV CS CA - G3C, EM OV CS CA - G3B, EM EV TLS CA - G3C. The runtime's trust store /opt/java/openjdk/lib/security/cacerts still holds roots listed for the same incident: AAA Certificate Services, emSign ECC Root CA - G3, emSign Root CA - G1. Upgrade the runtime to a release that blocks them, add their fingerprints to blocked.certs, or remove those roots from the trust store.",
+          "PrimaryURL": "https://nvd.nist.gov/vuln/detail/CVE-2026-91403",
+          "DataSource": {
+            "ID": "liquibase-distrusted-certs",
+            "Name": "build-logic distrusted-certs.txt",
+            "URL": "https://github.com/liquibase/build-logic/blob/main/scripts/vulnerability-scanning/distrusted-certs.txt"
+          },
+          "CVSS": {
+            "distrusted-certs": {
+              "V3Score": 9.1
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
