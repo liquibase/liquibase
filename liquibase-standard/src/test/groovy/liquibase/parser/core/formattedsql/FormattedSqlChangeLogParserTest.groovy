@@ -1,5 +1,6 @@
 package liquibase.parser.core.formattedsql
 
+import liquibase.ChecksumVersion
 import liquibase.Contexts
 import liquibase.LabelExpression
 import liquibase.Scope
@@ -703,6 +704,29 @@ insert /*+ append */ into t1 select * from t2;
         changes[0].getSql().contains("/*+ append */")
         changes[1].isStripComments()
         !changes[2].isStripComments()
+    }
+
+    def "V8 checksum of a formatted SQL changeset without stripComments is the one computed when the default was true"() throws Exception {
+        when:
+        String sql = """-- liquibase formatted sql
+
+-- changeset author:default
+insert /*+ append */ into t1 select * from t2;
+
+-- changeset author:explicit-true stripComments:true
+insert /*+ append */ into t1 select * from t2;
+
+-- changeset author:explicit-false stripComments:false
+insert /*+ append */ into t1 select * from t2;
+"""
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(sql).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        def v8 = changeLog.getChangeSets().collect { it.generateCheckSum(ChecksumVersion.V8).toString() }
+        def v9 = changeLog.getChangeSets().collect { it.generateCheckSum(ChecksumVersion.V9).toString() }
+
+        then:
+        v8[0] == v8[1]
+        v8[0] != v8[2]
+        v9.toSet().size() == 1
     }
 
     def parseWithSpaces() throws Exception {

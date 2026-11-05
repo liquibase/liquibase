@@ -569,7 +569,10 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     protected void handleStripComments(String line, ChangeSet changeSet, AbstractSQLChange change) throws ChangeLogParseException {
         Matcher stripCommentsPatternMatcher = STRIP_COMMENTS_PATTERN.matcher(line);
         boolean stripComments = parseBoolean(stripCommentsPatternMatcher, changeSet, false, STRIP_COMMENTS);
-        change.setStripComments(stripComments, !stripCommentsPatternMatcher.matches());
+        boolean usedDefaultValue = !stripCommentsPatternMatcher.matches();
+        change.setStripComments(stripComments, usedDefaultValue);
+        // stripComments used to default to true here, which V8 checksums of existing changesets depend on
+        change.setLegacyStripCommentsDefault(usedDefaultValue);
     }
 
     protected void handleEndDelimiter(String line, AbstractSQLChange change) {

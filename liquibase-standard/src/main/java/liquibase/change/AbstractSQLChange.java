@@ -59,6 +59,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     protected String encoding;
     private boolean stripCommentsUsedDefaultValue;
+    private boolean legacyStripCommentsDefault;
 
 
     protected AbstractSQLChange() {
@@ -207,6 +208,22 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     }
 
     /**
+     * Formatted SQL changesets used to default stripComments to true, and their V8 checksums were computed with that value.
+     * Mark a change as having been parsed without the attribute so that its V8 checksum is still computed that way.
+     */
+    public void setLegacyStripCommentsDefault(boolean legacyStripCommentsDefault) {
+        this.legacyStripCommentsDefault = legacyStripCommentsDefault;
+    }
+
+    private Boolean isStripCommentsForV8Checksum() {
+        if (legacyStripCommentsDefault && stripCommentsUsedDefaultValue) {
+            Boolean global = ChangeSetServiceFactory.getInstance().createChangeSetService().getStripComments(getChangeSet());
+            return global != null ? global : Boolean.TRUE;
+        }
+        return isStripComments();
+    }
+
+    /**
      * Return the raw SQL managed by this Change
      */
     @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE)
@@ -276,7 +293,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                         && !BooleanUtil.isTrue(isIgnoreOriginalSplitStatements()) && !isSplitStatements) {
                     isSplitStatements = BooleanUtil.isTrue(originalSplitStatements);
                 }
-                return CheckSum.compute(new NormalizingStreamV8(this.getEndDelimiter(), isSplitStatements, this.isStripComments(), stream), false);
+                return CheckSum.compute(new NormalizingStreamV8(this.getEndDelimiter(), isSplitStatements, this.isStripCommentsForV8Checksum(), stream), false);
             }
             return CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
 
