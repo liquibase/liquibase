@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a1a605-a202-7ee2-b957-870df0b6c3f1",
-  "CreatedAt": "2026-11-04T10:05:49.442977214Z",
+  "ReportID": "01a1ab2b-ba9f-7afc-8629-e4308c276a87",
+  "CreatedAt": "2026-11-05T10:05:32.191722152Z",
   "ArtifactID": "sha256:247cdc41f455dbe9d6f0d1558ad816bd12b012a8d8bc6d1239265416b7219e65",
   "ArtifactName": "liquibase/liquibase:4.19.0",
   "ArtifactType": "container_image",
@@ -12212,6 +12212,47 @@
       ],
       "Vulnerabilities": [
         {
+          "VulnerabilityID": "CVE-2026-109518",
+          "PkgID": "apt@2.4.8",
+          "PkgName": "apt",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/ubuntu/apt@2.4.8?arch=amd64\u0026distro=ubuntu-22.04",
+            "UID": "ceb59ee053199e62"
+          },
+          "InstalledVersion": "2.4.8",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:6e3729cf69e0ce2de9e779575a1fec8b7fb5efdfa822829290ab6d5d1bc3e797",
+            "DiffID": "sha256:6515074984c6f8bb1b8a9962c8fb5f310fc85e70b04c88442a3939c026dbfad3"
+          },
+          "SeveritySource": "ubuntu",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-109518",
+          "DataSource": {
+            "ID": "ubuntu",
+            "Name": "Ubuntu CVE Tracker",
+            "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
+          },
+          "Fingerprint": "sha256:a41ec64ba234eff858873322c96e442468a92765b7fdd99d6b8c9123d618b5cd",
+          "Title": "On Debian, Ubuntu, and derivative Linux distributions, an on-path atta ...",
+          "Description": "On Debian, Ubuntu, and derivative Linux distributions, an on-path attacker who can manipulate the HTTP traffic (including a malicious mirror or proxy) between an APT client and an archive server triggered by a package install can trick the client into installing an attacker-controlled unverified package and achieve remote code execution with root privileges.\n\n\n\nThe vulnerability is caused by the reuse of hard links and requires the client to follow redirects and retry the download of package files. It requires the client to have a non-zero Acquire::Retries configuration setting; the value 3 is the default starting with Debian 12 (bookworm) and Ubuntu 22.04 LTS (Jammy Jellyfish), so older releases are unaffected in a default configuration",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-62",
+            "CWE-367"
+          ],
+          "VendorSeverity": {
+            "ubuntu": 3
+          },
+          "References": [
+            "https://lists.debian.org/debian-lts-announce/2026/11/msg00004.html",
+            "https://lists.debian.org/debian-security-announce/2026/msg00526.html",
+            "https://ubuntu.com/security/notices/USN-8996-1",
+            "https://www.cve.org/CVERecord?id=CVE-2026-109518"
+          ],
+          "PublishedDate": "2026-11-04T16:17:33.01Z",
+          "LastModifiedDate": "2026-11-04T19:17:18.327Z"
+        },
+        {
           "VulnerabilityID": "CVE-2023-38545",
           "PkgID": "curl@7.81.0-1ubuntu1.7",
           "PkgName": "curl",
@@ -13313,6 +13354,47 @@
           "LastModifiedDate": "2026-10-13T09:10:00.323Z"
         },
         {
+          "VulnerabilityID": "CVE-2026-109518",
+          "PkgID": "libapt-pkg6.0@2.4.8",
+          "PkgName": "libapt-pkg6.0",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/ubuntu/libapt-pkg6.0@2.4.8?arch=amd64\u0026distro=ubuntu-22.04",
+            "UID": "a6bd2b9ab9299a94"
+          },
+          "InstalledVersion": "2.4.8",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:6e3729cf69e0ce2de9e779575a1fec8b7fb5efdfa822829290ab6d5d1bc3e797",
+            "DiffID": "sha256:6515074984c6f8bb1b8a9962c8fb5f310fc85e70b04c88442a3939c026dbfad3"
+          },
+          "SeveritySource": "ubuntu",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-109518",
+          "DataSource": {
+            "ID": "ubuntu",
+            "Name": "Ubuntu CVE Tracker",
+            "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
+          },
+          "Fingerprint": "sha256:5d7ee3b2488ddf78d01cc32d8545f470182f45805af41c8f64a17a14af02fd89",
+          "Title": "On Debian, Ubuntu, and derivative Linux distributions, an on-path atta ...",
+          "Description": "On Debian, Ubuntu, and derivative Linux distributions, an on-path attacker who can manipulate the HTTP traffic (including a malicious mirror or proxy) between an APT client and an archive server triggered by a package install can trick the client into installing an attacker-controlled unverified package and achieve remote code execution with root privileges.\n\n\n\nThe vulnerability is caused by the reuse of hard links and requires the client to follow redirects and retry the download of package files. It requires the client to have a non-zero Acquire::Retries configuration setting; the value 3 is the default starting with Debian 12 (bookworm) and Ubuntu 22.04 LTS (Jammy Jellyfish), so older releases are unaffected in a default configuration",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-62",
+            "CWE-367"
+          ],
+          "VendorSeverity": {
+            "ubuntu": 3
+          },
+          "References": [
+            "https://lists.debian.org/debian-lts-announce/2026/11/msg00004.html",
+            "https://lists.debian.org/debian-security-announce/2026/msg00526.html",
+            "https://ubuntu.com/security/notices/USN-8996-1",
+            "https://www.cve.org/CVERecord?id=CVE-2026-109518"
+          ],
+          "PublishedDate": "2026-11-04T16:17:33.01Z",
+          "LastModifiedDate": "2026-11-04T19:17:18.327Z"
+        },
+        {
           "VulnerabilityID": "CVE-2026-111497",
           "PkgID": "libbrotli1@1.0.9-2build6",
           "PkgName": "libbrotli1",
@@ -13335,7 +13417,7 @@
             "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
           },
           "Fingerprint": "sha256:91637e7604562ad2f557b4d9f64b882143eb1c1fafe77b6b6d4eb9a032ff3ce6",
-          "Title": "A buffer overflow vulnerability in the Brotli decoder (c/dec/decode.c) ...",
+          "Title": "brotli: Out-of-Bounds Write in Google Brotli Decoder",
           "Description": "A buffer overflow vulnerability in the Brotli decoder (c/dec/decode.c) in Google Brotli versions 1.0.3 through 1.2.0 on all platforms allows a remote unauthenticated attacker to corrupt adjacent decoder state memory, disclose sensitive memory contents, cause a denial of service, or potentially execute arbitrary code using a crafted Brotli-compressed stream.\n\n\n\n\n\nUsers need to update any Brotli libraries or binaries between 1.0.3 through 1.2.0 to the latest available version: 1.0.10 or 1.1.1 or 1.2.1.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -13351,6 +13433,7 @@
             "nvd": 4,
             "oracle-oval": 3,
             "photon": 4,
+            "redhat": 3,
             "rocky": 3,
             "ubuntu": 3
           },
@@ -13368,6 +13451,10 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
               "V3Score": 9.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 8.1
             }
           },
           "References": [
@@ -13379,6 +13466,7 @@
             "http://www.openwall.com/lists/oss-security/2026/11/03/2",
             "https://access.redhat.com/errata/RHSA-2026:90495",
             "https://access.redhat.com/errata/RHSA-2026:92492",
+            "https://access.redhat.com/security/cve/CVE-2026-111497",
             "https://advisory.echohq.com/cve/CVE-2026-111497",
             "https://broccoli2shell.com",
             "https://bugzilla.redhat.com/2558973",
@@ -13427,7 +13515,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-111497"
           ],
           "PublishedDate": "2026-10-22T14:17:37.19Z",
-          "LastModifiedDate": "2026-11-03T22:17:44.223Z"
+          "LastModifiedDate": "2026-11-04T18:17:37.727Z"
         },
         {
           "VulnerabilityID": "CVE-2023-4911",
@@ -15633,7 +15721,8 @@
             "ghsa": 3,
             "oracle-oval": 3,
             "redhat": 3,
-            "rocky": 3
+            "rocky": 3,
+            "ubuntu": 2
           },
           "CVSS": {
             "bitnami": {
@@ -15672,6 +15761,7 @@
             "https://errata.almalinux.org/9/ALSA-2026-22304.html",
             "https://errata.rockylinux.org/RLSA-2026:22304",
             "https://github.com/pgjdbc/pgjdbc",
+            "https://github.com/pgjdbc/pgjdbc/commit/c9d41d1332a7426fcef19ff89f2e6b1116429143%20%28REL42.7.11%29",
             "https://github.com/pgjdbc/pgjdbc/releases/tag/REL42.7.11",
             "https://github.com/pgjdbc/pgjdbc/security/advisories/GHSA-98qh-xjc8-98pq",
             "https://linux.oracle.com/cve/CVE-2026-42198.html",
@@ -18628,14 +18718,26 @@
           },
           "References": [
             "http://www.openwall.com/lists/oss-security/2026/10/20/29",
-            "https://access.redhat.com/errata/RHSA-2026:91719",
+            "https://access.redhat.com/errata/RHSA-2026:93617",
             "https://access.redhat.com/security/cve/CVE-2026-111943",
+            "https://bugzilla.redhat.com/2548334",
+            "https://bugzilla.redhat.com/2548336",
+            "https://bugzilla.redhat.com/2548341",
+            "https://bugzilla.redhat.com/2548344",
             "https://bugzilla.redhat.com/2556068",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548334",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548336",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548341",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548344",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2556068",
             "https://creativecommons.org/licenses/by/4.0/",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-111943",
-            "https://errata.almalinux.org/9/ALSA-2026-91719.html",
-            "https://errata.rockylinux.org/RLSA-2026:91719",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78667",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78669",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-94440",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
+            "https://errata.almalinux.org/9/ALSA-2026-93617.html",
+            "https://errata.rockylinux.org/RLSA-2026:93617",
             "https://github.com/golang/go/issues/82345",
             "https://go.dev/cl/851047",
             "https://go.dev/issue/82345",
@@ -20742,7 +20844,8 @@
             "oracle-oval": 3,
             "photon": 3,
             "redhat": 3,
-            "rocky": 3
+            "rocky": 3,
+            "ubuntu": 2
           },
           "CVSS": {
             "bitnami": {
@@ -20763,6 +20866,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-39822",
             "https://errata.almalinux.org/9/ALSA-2026-38878.html",
             "https://errata.rockylinux.org/RLSA-2026:38878",
+            "https://github.com/golang/go/issues/79005",
             "https://go.dev/cl/797880",
             "https://go.dev/issue/79005",
             "https://groups.google.com/g/golang-announce/c/OrmQE_Yp5Sc",
@@ -21666,19 +21770,26 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:90462",
+            "https://access.redhat.com/errata/RHSA-2026:93617",
             "https://access.redhat.com/security/cve/CVE-2026-78667",
             "https://bugzilla.redhat.com/2548334",
+            "https://bugzilla.redhat.com/2548336",
+            "https://bugzilla.redhat.com/2548341",
+            "https://bugzilla.redhat.com/2548344",
             "https://bugzilla.redhat.com/2556068",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2402034",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2548334",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548336",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548341",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548344",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2556068",
             "https://creativecommons.org/licenses/by/4.0/",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-11395",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-111943",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78667",
-            "https://errata.almalinux.org/9/ALSA-2026-90462.html",
-            "https://errata.rockylinux.org/RLSA-2026:90462",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78669",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-94440",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
+            "https://errata.almalinux.org/9/ALSA-2026-93617.html",
+            "https://errata.rockylinux.org/RLSA-2026:93617",
             "https://github.com/golang/go/issues/81858",
             "https://go.dev/cl/847309",
             "https://go.dev/issue/81858",
@@ -21726,13 +21837,13 @@
             "CWE-405"
           ],
           "VendorSeverity": {
-            "alma": 4,
+            "alma": 3,
             "amazon": 3,
             "azure": 3,
             "bitnami": 3,
             "oracle-oval": 3,
             "redhat": 3,
-            "rocky": 4,
+            "rocky": 3,
             "ubuntu": 2
           },
           "CVSS": {
@@ -21746,26 +21857,26 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:89744",
+            "https://access.redhat.com/errata/RHSA-2026:93617",
             "https://access.redhat.com/security/cve/CVE-2026-78669",
-            "https://bugzilla.redhat.com/2519801",
             "https://bugzilla.redhat.com/2548334",
             "https://bugzilla.redhat.com/2548336",
+            "https://bugzilla.redhat.com/2548341",
             "https://bugzilla.redhat.com/2548344",
             "https://bugzilla.redhat.com/2556068",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2519801",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2548334",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2548336",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548341",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2548344",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2556068",
             "https://creativecommons.org/licenses/by/4.0/",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-111943",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-17183",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78667",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78669",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-94440",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
-            "https://errata.almalinux.org/9/ALSA-2026-89744.html",
-            "https://errata.rockylinux.org/RLSA-2026:89744",
+            "https://errata.almalinux.org/9/ALSA-2026-93617.html",
+            "https://errata.rockylinux.org/RLSA-2026:93617",
             "https://github.com/golang/go/issues/81742",
             "https://go.dev/cl/847186",
             "https://go.dev/cl/847308",
@@ -21815,12 +21926,12 @@
             "CWE-405"
           ],
           "VendorSeverity": {
-            "alma": 4,
+            "alma": 3,
             "amazon": 3,
             "bitnami": 3,
             "oracle-oval": 3,
             "redhat": 3,
-            "rocky": 4
+            "rocky": 3
           },
           "CVSS": {
             "bitnami": {
@@ -21833,26 +21944,26 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:89744",
+            "https://access.redhat.com/errata/RHSA-2026:93617",
             "https://access.redhat.com/security/cve/CVE-2026-97031",
-            "https://bugzilla.redhat.com/2519801",
             "https://bugzilla.redhat.com/2548334",
             "https://bugzilla.redhat.com/2548336",
+            "https://bugzilla.redhat.com/2548341",
             "https://bugzilla.redhat.com/2548344",
             "https://bugzilla.redhat.com/2556068",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2519801",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2548334",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2548336",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548341",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2548344",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2556068",
             "https://creativecommons.org/licenses/by/4.0/",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-111943",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-17183",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78667",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78669",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-94440",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
-            "https://errata.almalinux.org/9/ALSA-2026-89744.html",
-            "https://errata.rockylinux.org/RLSA-2026:89744",
+            "https://errata.almalinux.org/9/ALSA-2026-93617.html",
+            "https://errata.rockylinux.org/RLSA-2026:93617",
             "https://go.dev/cl/847312",
             "https://go.dev/issue/81855",
             "https://groups.google.com/g/golang-announce/c/U2fTuyDJznI",

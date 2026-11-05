@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a1a605-3239-71f5-8379-96d27f20f337",
-  "CreatedAt": "2026-11-04T10:05:20.825129373Z",
+  "ReportID": "01a1ab2b-971d-7a0c-99a5-5bec54e5d095",
+  "CreatedAt": "2026-11-05T10:05:23.101659639Z",
   "ArtifactID": "sha256:d8dcae8ff92c8e3c516eba092eeae1e4d61125d9cd5e6b305dac76804a03649b",
   "ArtifactName": "liquibase/liquibase:4.2.2",
   "ArtifactType": "container_image",
@@ -10686,7 +10686,7 @@
             "https://www.openwall.com/lists/oss-security/2024/04/17/9"
           ],
           "PublishedDate": "2024-04-17T18:15:15.833Z",
-          "LastModifiedDate": "2026-11-03T22:17:17.86Z"
+          "LastModifiedDate": "2026-11-04T17:17:22.81Z"
         },
         {
           "VulnerabilityID": "CVE-2024-33599",
@@ -11601,7 +11601,7 @@
             "https://www.openwall.com/lists/oss-security/2024/04/17/9"
           ],
           "PublishedDate": "2024-04-17T18:15:15.833Z",
-          "LastModifiedDate": "2026-11-03T22:17:17.86Z"
+          "LastModifiedDate": "2026-11-04T17:17:22.81Z"
         },
         {
           "VulnerabilityID": "CVE-2024-33599",
@@ -23882,7 +23882,8 @@
             "ghsa": 3,
             "oracle-oval": 3,
             "redhat": 3,
-            "rocky": 3
+            "rocky": 3,
+            "ubuntu": 2
           },
           "CVSS": {
             "bitnami": {
@@ -23921,6 +23922,7 @@
             "https://errata.almalinux.org/9/ALSA-2026-22304.html",
             "https://errata.rockylinux.org/RLSA-2026:22304",
             "https://github.com/pgjdbc/pgjdbc",
+            "https://github.com/pgjdbc/pgjdbc/commit/c9d41d1332a7426fcef19ff89f2e6b1116429143%20%28REL42.7.11%29",
             "https://github.com/pgjdbc/pgjdbc/releases/tag/REL42.7.11",
             "https://github.com/pgjdbc/pgjdbc/security/advisories/GHSA-98qh-xjc8-98pq",
             "https://linux.oracle.com/cve/CVE-2026-42198.html",
