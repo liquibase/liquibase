@@ -551,7 +551,7 @@ create table table1 (
         ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getSql() == "select * from table1;"
         ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getEndDelimiter() == null
         assert ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isSplitStatements()
-        assert ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isStripComments()
+        assert !((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isStripComments()
         assert !changeLog.getChangeSets().get(0).isAlwaysRun()
         assert !changeLog.getChangeSets().get(0).isRunOnChange()
         assert changeLog.getChangeSets().get(0).isRunInTransaction()
@@ -584,7 +584,7 @@ create table table1 (
         ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).getSql().replace("\r\n", "\n") == "create table table2 (\n    id int primary key\n);\ncreate table table3 (\n    id int primary key\n);"
         ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).getEndDelimiter() == null
         assert ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isSplitStatements()
-        assert ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isStripComments()
+        assert !((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isStripComments()
         changeLog.getChangeSets().get(2).rollback.changes.size() == 1
         assert changeLog.getChangeSets().get(2).rollback.changes[0] instanceof RawSQLChange
         ((RawSQLChange) changeLog.getChangeSets().get(2).rollback.changes[0]).getSql() == "drop table table2;"
@@ -681,6 +681,30 @@ create table table1 (
         ((RawSQLChange) changeLog.getChangeSets().get(24).getRollback().getChanges().get(0)).getSql().startsWith("create table test_table (")
     }
 
+    def "stripComments is false unless the changeset asks for it"() throws Exception {
+        when:
+        String sql = """-- liquibase formatted sql
+
+-- changeset author:default
+insert /*+ append */ into t1 select * from t2;
+
+-- changeset author:explicit-true stripComments:true
+insert /*+ append */ into t1 select * from t2;
+
+-- changeset author:explicit-false stripComments:false
+insert /*+ append */ into t1 select * from t2;
+"""
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(sql).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        def changes = changeLog.getChangeSets().collect { (RawSQLChange) it.getChanges().get(0) }
+
+        then:
+        changes.size() == 3
+        !changes[0].isStripComments()
+        changes[0].getSql().contains("/*+ append */")
+        changes[1].isStripComments()
+        !changes[2].isStripComments()
+    }
+
     def parseWithSpaces() throws Exception {
         expect:
         ChangeLogParameters params = new ChangeLogParameters()
@@ -697,7 +721,7 @@ create table table1 (
         ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getSql() == "select * from table1;"
         ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getEndDelimiter() == null
         assert ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isSplitStatements()
-        assert ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isStripComments()
+        assert !((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isStripComments()
         assert !changeLog.getChangeSets().get(0).isAlwaysRun()
         assert !changeLog.getChangeSets().get(0).isRunOnChange()
         assert changeLog.getChangeSets().get(0).isRunInTransaction()
@@ -1186,7 +1210,7 @@ not ignoreLines here
                 "CREATE OR REPLACE PROCEDURE any_procedure_name is\nBEGIN\n" +
                 "    DBMS_MVIEW.REFRESH('LEAD_INST_FOS_MV', method => '?', atomic_refresh => FALSE, out_of_place => true);\n" +
                 "END reany_procedure_name;",
-                "grant \n    execute on any_procedure_name to ANY_USER1",
+                "grant /*Beware, this comment should not be seen as a delimiter! */\n    execute on any_procedure_name to ANY_USER1",
                 "grant execute on any_procedure_name to ANY_USER2",
                 "grant execute on any_procedure_name to ANY_USER3",
         ]

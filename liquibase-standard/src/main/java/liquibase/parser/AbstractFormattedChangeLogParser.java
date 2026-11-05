@@ -568,7 +568,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
     protected void handleStripComments(String line, ChangeSet changeSet, AbstractSQLChange change) throws ChangeLogParseException {
         Matcher stripCommentsPatternMatcher = STRIP_COMMENTS_PATTERN.matcher(line);
-        boolean stripComments = parseBoolean(stripCommentsPatternMatcher, changeSet, true, STRIP_COMMENTS);
+        boolean stripComments = parseBoolean(stripCommentsPatternMatcher, changeSet, false, STRIP_COMMENTS);
         change.setStripComments(stripComments, !stripCommentsPatternMatcher.matches());
     }
 
