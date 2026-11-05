@@ -137,6 +137,26 @@ class ValidatingVisitorTest extends Specification {
         handler.validationPassed()
     }
 
+    void "validate error on missing author even when strict configuration is set as false"() {
+        when:
+        ChangeSet changeSet = new ChangeSet("missingAuthor", null, false, false, "path/changelog", null, null, null)
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<>())
+
+        Scope.child([
+                (GlobalConfiguration.STRICT.getKey()): Boolean.FALSE,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                handler.visit(changeSet, new DatabaseChangeLog(), null, null)
+            }
+        })
+
+        then:
+        handler.getValidationErrors().getErrorMessages().size() == 1
+        handler.getValidationErrors().getErrorMessages().get(0).contains("ChangeSet Author is missing")
+        !handler.validationPassed()
+    }
+
     void "validate visit error on empty id"(String id) throws Exception {
         when:
         def changeSet = new ChangeSet(id, "emptyId", false, false, "path/changelog", null, null, null)
