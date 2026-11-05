@@ -193,6 +193,9 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         boolean valid = false;
         if (authorEmpty && idEmpty) {
             validationErrors.addError("ChangeSet Id and Author are empty", changeSet);
+        } else if (changeSet.getAuthor() == null) {
+            // an empty author is tolerated unless strict, but a missing one cannot be stored in DATABASECHANGELOG
+            validationErrors.addError("ChangeSet Author is missing", changeSet);
         } else if (authorEmpty && strictCurrentValue) {
             validationErrors.addError("ChangeSet Author is empty", changeSet);
         } else if (idEmpty) {
