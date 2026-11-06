@@ -41,6 +41,8 @@ import java.util.regex.Pattern;
  */
 public class JdbcExecutor extends AbstractExecutor {
 
+    private static final Pattern DML_PATTERN = Pattern.compile("^\\s*?(SELECT\\s|INSERT\\s|UPDATE\\s|DELETE\\s|MERGE\\s)(.*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
     public static final String SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY = "shouldUpdateRowsAffected";
     public static final String ROWS_AFFECTED_SCOPE_KEY = "rowsAffected";
 
@@ -492,8 +494,7 @@ public class JdbcExecutor extends AbstractExecutor {
         }
 
         private boolean isDML(String statement) {
-            Pattern dmlPattern = Pattern.compile("^\\s*?(SELECT\\s|INSERT\\s|UPDATE\\s|DELETE\\s|MERGE\\s)(.*)", Pattern.CASE_INSENSITIVE);
-            Matcher m = dmlPattern.matcher(statement);
+            Matcher m = DML_PATTERN.matcher(statement);
             if (!m.matches()) {
                 return false;
             }
