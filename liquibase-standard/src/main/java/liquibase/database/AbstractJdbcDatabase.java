@@ -1148,6 +1148,9 @@ public abstract class AbstractJdbcDatabase implements Database {
     public void close() throws DatabaseException {
         boolean tryingToSetAutoCommit = false;
         Scope.getCurrentScope().getSingleton(ExecutorService.class).clearExecutor("jdbc", this);
+        // Release this database's history service while the connection is still open: the connection's
+        // hashCode, and so this database's, changes once it is closed.
+        Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).removeDatabase(this);
         try (final DatabaseConnection localConnection = getConnection()) {
             if (localConnection != null && previousAutoCommit != null) {
                 tryingToSetAutoCommit = true;
