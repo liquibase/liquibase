@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="create-jsonb-table" author="test">
+        <createTable tableName="jsonb_operators">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="j" type="jsonb"/>
+            <column name="matched" type="varchar(50)"/>
+            <column name="note" type="varchar(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="insert-jsonb-rows" author="test">
+        <sql>INSERT INTO jsonb_operators (id, j, matched, note) VALUES
+            (1, '{"a": 1, "b": 2}', '', 'why?? and ?'),
+            (2, '{"c": 3}', '', NULL)</sql>
+    </changeSet>
+
+    <changeSet id="jsonb-key-exists-operator" author="test">
+        <sql>UPDATE jsonb_operators SET matched = matched || 'exists ' WHERE j ? 'a'</sql>
+    </changeSet>
+
+    <changeSet id="jsonb-any-key-exists-operator" author="test">
+        <sql>UPDATE jsonb_operators SET matched = matched || 'any ' WHERE j ?| array['c', 'x']</sql>
+    </changeSet>
+
+    <changeSet id="jsonb-all-keys-exist-operator" author="test">
+        <sql>UPDATE jsonb_operators SET matched = matched || 'all ' WHERE j ?&amp; array['a', 'b']</sql>
+    </changeSet>
+
+    <changeSet id="jsonb-escaped-question-mark-operator" author="test">
+        <sql>UPDATE jsonb_operators SET matched = matched || 'escaped ' WHERE j ?? 'c'</sql>
+    </changeSet>
+
+</databaseChangeLog>
