@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a1ab78-e0a7-75f2-a4c1-7c4bcc67b0df",
-  "CreatedAt": "2026-11-05T11:29:48.199392198Z",
+  "ReportID": "01a1b051-a70f-7bec-a12e-caf03d2de8bc",
+  "CreatedAt": "2026-11-06T10:05:03.631782535Z",
   "ArtifactID": "sha256:a8b8cf0ec44739b5ba6e853bf979daf28898325582223ec81cd1e0ebe66c5b4d",
   "ArtifactName": "liquibase/liquibase:4.21.1",
   "ArtifactType": "container_image",
@@ -10822,7 +10822,8 @@
             "UID": "4d8cdbfe3c37deea"
           },
           "InstalledVersion": "2.4.9",
-          "Status": "affected",
+          "FixedVersion": "2.4.15ubuntu0.1",
+          "Status": "fixed",
           "Layer": {
             "Digest": "sha256:d1669123f28121211977ed38e663dca1a397c0c001e5386598b96c89b1b1cd51",
             "DiffID": "sha256:966e94ab6e166fb358a208cfd8169d22dea352501c96700eb7f45092a2962ee6"
@@ -10846,13 +10847,15 @@
             "ubuntu": 3
           },
           "References": [
+            "http://www.openwall.com/lists/oss-security/2026/11/04/12",
             "https://lists.debian.org/debian-lts-announce/2026/11/msg00004.html",
             "https://lists.debian.org/debian-security-announce/2026/msg00526.html",
+            "https://ubuntu.com/blog/apt-vulnerability-fixes-available",
             "https://ubuntu.com/security/notices/USN-8996-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-109518"
           ],
           "PublishedDate": "2026-11-04T16:17:33.01Z",
-          "LastModifiedDate": "2026-11-04T19:17:18.327Z"
+          "LastModifiedDate": "2026-11-05T05:18:19.033Z"
         },
         {
           "VulnerabilityID": "CVE-2023-38545",
@@ -11054,7 +11057,8 @@
             "UID": "9ecd281c397a866f"
           },
           "InstalledVersion": "2.4.9",
-          "Status": "affected",
+          "FixedVersion": "2.4.15ubuntu0.1",
+          "Status": "fixed",
           "Layer": {
             "Digest": "sha256:d1669123f28121211977ed38e663dca1a397c0c001e5386598b96c89b1b1cd51",
             "DiffID": "sha256:966e94ab6e166fb358a208cfd8169d22dea352501c96700eb7f45092a2962ee6"
@@ -11078,13 +11082,15 @@
             "ubuntu": 3
           },
           "References": [
+            "http://www.openwall.com/lists/oss-security/2026/11/04/12",
             "https://lists.debian.org/debian-lts-announce/2026/11/msg00004.html",
             "https://lists.debian.org/debian-security-announce/2026/msg00526.html",
+            "https://ubuntu.com/blog/apt-vulnerability-fixes-available",
             "https://ubuntu.com/security/notices/USN-8996-1",
             "https://www.cve.org/CVERecord?id=CVE-2026-109518"
           ],
           "PublishedDate": "2026-11-04T16:17:33.01Z",
-          "LastModifiedDate": "2026-11-04T19:17:18.327Z"
+          "LastModifiedDate": "2026-11-05T05:18:19.033Z"
         },
         {
           "VulnerabilityID": "CVE-2026-111497",
@@ -14306,7 +14312,7 @@
             "https://groups.google.com/g/golang-announce/c/66pojueaQek",
             "https://groups.google.com/g/golang-nuts/c/K22sG2AYnKU",
             "https://linux.oracle.com/cve/CVE-2026-111943.html",
-            "https://linux.oracle.com/errata/ELSA-2026-91720.html",
+            "https://linux.oracle.com/errata/ELSA-2026-95519.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-111943",
             "https://pkg.go.dev/vuln/GO-2026-6809",
             "https://www.cve.org/CVERecord?id=CVE-2026-111943"
@@ -17185,7 +17191,7 @@
             "https://go.dev/issue/80494",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://linux.oracle.com/cve/CVE-2026-56860.html",
-            "https://linux.oracle.com/errata/ELSA-2026-70641.html",
+            "https://linux.oracle.com/errata/ELSA-2026-71619.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-56860",
             "https://pkg.go.dev/vuln/GO-2026-6218",
             "https://www.cve.org/CVERecord?id=CVE-2026-56860"
@@ -17357,7 +17363,7 @@
             "https://go.dev/issue/81858",
             "https://groups.google.com/g/golang-announce/c/U2fTuyDJznI",
             "https://linux.oracle.com/cve/CVE-2026-78667.html",
-            "https://linux.oracle.com/errata/ELSA-2026-90462.html",
+            "https://linux.oracle.com/errata/ELSA-2026-95519.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-78667",
             "https://pkg.go.dev/vuln/GO-2026-6609",
             "https://ubuntu.com/security/notices/USN-8935-1",
@@ -17446,7 +17452,7 @@
             "https://groups.google.com/g/golang-announce/c/U2fTuyDJznI",
             "https://groups.google.com/g/golang-announce/c/ZPwCyRUuGBs",
             "https://linux.oracle.com/cve/CVE-2026-78669.html",
-            "https://linux.oracle.com/errata/ELSA-2026-91138.html",
+            "https://linux.oracle.com/errata/ELSA-2026-95519.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-78669",
             "https://pkg.go.dev/vuln/GO-2026-6611",
             "https://ubuntu.com/security/notices/USN-8935-1",
@@ -17530,7 +17536,7 @@
             "https://go.dev/issue/81855",
             "https://groups.google.com/g/golang-announce/c/U2fTuyDJznI",
             "https://linux.oracle.com/cve/CVE-2026-97031.html",
-            "https://linux.oracle.com/errata/ELSA-2026-89751.html",
+            "https://linux.oracle.com/errata/ELSA-2026-95519.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-97031",
             "https://pkg.go.dev/vuln/GO-2026-6607",
             "https://www.cve.org/CVERecord?id=CVE-2026-97031"
