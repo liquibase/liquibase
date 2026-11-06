@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -276,6 +277,36 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
             assertEquals("[My €Tablespace]", result);
         } catch (final DatabaseException e) {
             throw e;
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("alreadyQuotedTablespaceNames")
+    public void testEscapeTablespaceName_alreadyQuotedIsLeftUntouched(String tablespaceName) throws DatabaseException {
+        // changelogs written for versions before 5.0.2 spell the filegroup as [PRIMARY]
+        try (Database database = new MSSQLDatabase()) {
+            assertEquals(tablespaceName, database.escapeTablespaceName(tablespaceName));
+        }
+    }
+
+    private static Stream<String> alreadyQuotedTablespaceNames() {
+        return Stream.of("[PRIMARY]", "[My Tablespace]", "\"PRIMARY\"", "\"My Tablespace\"");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"[Archive", "Archive]", "\"Archive", "Archive\"", "[", "\""})
+    public void testEscapeTablespaceName_unterminatedQuoteIsStillEscaped(String name) throws DatabaseException {
+        try (Database database = new MSSQLDatabase()) {
+            String escaped = database.escapeTablespaceName(name);
+            assertTrue(escaped.startsWith("[") && escaped.endsWith("]"),
+                    "expected a bracket-quoted identifier but was: " + escaped);
+        }
+    }
+
+    @Test
+    public void testEscapeTablespaceName_reservedWordIsQuoted() throws DatabaseException {
+        try (Database database = new MSSQLDatabase()) {
+            assertEquals("[PRIMARY]", database.escapeTablespaceName("PRIMARY"));
         }
     }
 }
