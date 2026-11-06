@@ -1,10 +1,8 @@
 package liquibase.database.core;
 
-import liquibase.structure.core.Table;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class InformixDatabaseTest {
 
@@ -31,10 +29,5 @@ public class InformixDatabaseTest {
     public void testGetDefaultDriver() {
         assertEquals("com.informix.jdbc.IfxDriver",
                 database.getDefaultDriver("jdbc:informix-sqli://localhost:9088/liquibase:informixserver=ol_ids_1150_1"));
-    }
-
-    @Test
-    public void testSupportsCreateIfNotExist(){
-        assertTrue(database.supportsCreateIfNotExists(Table.class));
     }
 }

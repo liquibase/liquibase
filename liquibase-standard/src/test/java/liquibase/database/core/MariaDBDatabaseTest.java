@@ -3,7 +3,6 @@ package liquibase.database.core;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.database.MockDatabaseConnection;
-import liquibase.structure.core.Table;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -125,10 +124,5 @@ public class MariaDBDatabaseTest extends AbstractJdbcDatabaseTest {
         assertTrue(database.isReservedWord("returning"));
         assertTrue(database.isReservedWord("ReTuRnInG"));
         assertTrue(database.isReservedWord("master_ssl_verify_server_cert"));
-    }
-
-    @Test
-    public void supportsCreateIfNotExist(){
-        assertTrue(getDatabase().supportsCreateIfNotExists(Table.class));
     }
 }

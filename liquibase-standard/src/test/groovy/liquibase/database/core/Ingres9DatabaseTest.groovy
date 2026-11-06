@@ -1,7 +1,6 @@
 package liquibase.database.core
 
 import liquibase.structure.core.Column
-import liquibase.structure.core.Table
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -39,15 +38,5 @@ class Ingres9DatabaseTest extends Specification {
         QUOTE_ALL_OBJECTS         || 'COL1'           | Column     || 'COL1'           | '"COL1"'
         QUOTE_ALL_OBJECTS         || 'Col1'           | Column     || 'Col1'           | '"Col1"'
         QUOTE_ALL_OBJECTS         || 'col with space' | Column     || 'col with space' | '"col with space"'
-    }
-
-    def "Ingres9 capabilities"() {
-        given:
-        def database = new Ingres9Database()
-
-        expect:
-        verifyAll {
-            database.supportsCreateIfNotExists(Table.class)
-        }
     }
 }

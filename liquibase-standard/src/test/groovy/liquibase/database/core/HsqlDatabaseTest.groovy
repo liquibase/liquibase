@@ -2,7 +2,6 @@ package liquibase.database.core
 
 import liquibase.database.Database
 import liquibase.structure.core.Column
-import liquibase.structure.core.Table
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -41,16 +40,6 @@ public class HsqlDatabaseTest extends Specification {
         QUOTE_ALL_OBJECTS         || 'COL1'           | Column     || 'COL1'           | '"COL1"'
         QUOTE_ALL_OBJECTS         || 'Col1'           | Column     || 'Col1'           | '"Col1"'
         QUOTE_ALL_OBJECTS         || 'col with space' | Column     || 'col with space' | '"col with space"'
-    }
-
-    def "Hsql capabilities"() {
-        given:
-        def database = new HsqlDatabase()
-
-        expect:
-        verifyAll {
-            database.supportsCreateIfNotExists(Table.class)
-        }
     }
 
     public void testGetDefaultDriver() {

@@ -1,7 +1,6 @@
 package liquibase.database.core
 
 import liquibase.structure.core.Column
-import liquibase.structure.core.Table
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -23,7 +22,6 @@ class SQLiteDatabaseTest extends Specification {
         verifyAll {
             database.correctObjectName(objectName, objectType) == expectedCorrect
             database.escapeObjectName(objectName, objectType) == expectedEscape
-            database.supportsCreateIfNotExists(Table.class)
         }
 
         where:

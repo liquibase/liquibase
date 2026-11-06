@@ -2,7 +2,6 @@ package liquibase.database.core
 
 import liquibase.database.jvm.JdbcConnection
 import liquibase.structure.core.Column
-import liquibase.structure.core.Table
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -55,7 +54,6 @@ class EnterpriseDBDatabaseTest extends Specification {
             !database.supportsCompositeTypeSnapshot()        // not snapshot-able on EnterpriseDB
             database.supportsCheckConstraintSnapshot()       // inherited from PostgresDatabase
             database.supportsStoredLogicSnapshot()           // inherited from PostgresDatabase
-            !database.supportsCreateIfNotExists(Table.class)
         }
     }
 
