@@ -2,7 +2,12 @@ package liquibase.change;
 
 import liquibase.ChecksumVersion;
 import liquibase.Scope;
+import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.core.H2Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.exception.DatabaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -14,6 +19,7 @@ import java.io.IOException;
 import java.util.Collections;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class AbstractSQLChangeTest {
 
@@ -290,6 +296,77 @@ public class AbstractSQLChangeTest {
     private void assertNormalizingStreamCorrectV8(String expected, String toCorrect) throws IOException {
         NormalizingStreamV8 normalizingStream = new NormalizingStreamV8("x", true, false, new ByteArrayInputStream(toCorrect.getBytes()));
         assertEquals("x:true:false:"+expected, StreamUtil.readStreamAsString(normalizingStream));
+    }
+
+    @Test
+    public void generateStatements_postgresKeepsQuestionMarkOperators() throws DatabaseException {
+        DatabaseConnection connection = mock(DatabaseConnection.class);
+        // mimics the PostgreSQL JDBC driver, which turns every '?' into a $n bind parameter placeholder
+        when(connection.nativeSQL(anyString())).thenAnswer(invocation -> ((String) invocation.getArgument(0)).replace("?", "$1"));
+        Database database = new PostgresDatabase() {
+            @Override
+            public DatabaseConnection getConnection() {
+                return connection;
+            }
+        };
+
+        String sql = "UPDATE t SET j = j WHERE j::jsonb ? 'a' AND j ?| array['b'] AND j ?& array['c']";
+        SqlStatement[] statements = new ExampleAbstractSQLChange(sql).generateStatements(database);
+        assertEquals(1, statements.length);
+        assertEquals(sql, ((RawSqlStatement) statements[0]).getSql());
+
+        // SQL without '?' is still passed through nativeSQL
+        when(connection.nativeSQL("SELECT {fn now()}")).thenReturn("SELECT now()");
+        statements = new ExampleAbstractSQLChange("SELECT {fn now()}").generateStatements(database);
+        assertEquals("SELECT now()", ((RawSqlStatement) statements[0]).getSql());
+    }
+
+    @Test
+    public void generateStatements_postgresUnescapesDoubledQuestionMarks() throws DatabaseException {
+        DatabaseConnection connection = mock(DatabaseConnection.class);
+        Database database = new PostgresDatabase() {
+            @Override
+            public DatabaseConnection getConnection() {
+                return connection;
+            }
+        };
+
+        SqlStatement[] statements = new ExampleAbstractSQLChange("UPDATE t SET j = j WHERE j ?? 'a' AND j ??| array['b'] AND j ?& array['c']").generateStatements(database);
+        assertEquals("UPDATE t SET j = j WHERE j ? 'a' AND j ?| array['b'] AND j ?& array['c']", ((RawSqlStatement) statements[0]).getSql());
+    }
+
+    @Test
+    public void unescapePostgresQuestionMarks() {
+        assertEquals("j ? 'a'", AbstractSQLChange.unescapePostgresQuestionMarks("j ? 'a'"));
+        assertEquals("j ? 'a'", AbstractSQLChange.unescapePostgresQuestionMarks("j ?? 'a'"));
+        assertEquals("j ?| array['a']", AbstractSQLChange.unescapePostgresQuestionMarks("j ??| array['a']"));
+        assertEquals("j @? '$.a'", AbstractSQLChange.unescapePostgresQuestionMarks("j @?? '$.a'"));
+        // string literals, quoted identifiers and comments are left alone
+        assertEquals("select '??', 'it''s ??', ? from t", AbstractSQLChange.unescapePostgresQuestionMarks("select '??', 'it''s ??', ?? from t"));
+        assertEquals("select E'\\' ??', ? from t", AbstractSQLChange.unescapePostgresQuestionMarks("select E'\\' ??', ?? from t"));
+        assertEquals("select \"a??\" from t where j ? 'a'", AbstractSQLChange.unescapePostgresQuestionMarks("select \"a??\" from t where j ?? 'a'"));
+        assertEquals("-- why??\nj ? 'a'", AbstractSQLChange.unescapePostgresQuestionMarks("-- why??\nj ?? 'a'"));
+        assertEquals("/* a /* ?? */ ?? */ j ? 'a'", AbstractSQLChange.unescapePostgresQuestionMarks("/* a /* ?? */ ?? */ j ?? 'a'"));
+        // dollar-quoted strings are left alone, positional parameters are not mistaken for them
+        assertEquals("do $$ begin perform a ?? b; end $$; j ? 'a'", AbstractSQLChange.unescapePostgresQuestionMarks("do $$ begin perform a ?? b; end $$; j ?? 'a'"));
+        assertEquals("$body$ x ?? y $body$ ?", AbstractSQLChange.unescapePostgresQuestionMarks("$body$ x ?? y $body$ ??"));
+        assertEquals("select $1 ? 'a', $2", AbstractSQLChange.unescapePostgresQuestionMarks("select $1 ?? 'a', $2"));
+    }
+
+    @Test
+    public void generateStatements_nonPostgresStillUsesNativeSql() throws DatabaseException {
+        DatabaseConnection connection = mock(DatabaseConnection.class);
+        when(connection.nativeSQL("SELECT ? FROM t")).thenReturn("NATIVE SQL");
+        Database database = new H2Database() {
+            @Override
+            public DatabaseConnection getConnection() {
+                return connection;
+            }
+        };
+
+        SqlStatement[] statements = new ExampleAbstractSQLChange("SELECT ? FROM t").generateStatements(database);
+        assertEquals(1, statements.length);
+        assertEquals("NATIVE SQL", ((RawSqlStatement) statements[0]).getSql());
     }
 
 //    @Test
