@@ -373,6 +373,7 @@ public class CreateTableChangeTest extends StandardChangeTest {
         "int" | true    | new OracleDatabase()       | "CREATE TABLE test_table (id INTEGER)"
         "int" | true    | new SybaseASADatabase()    | "CREATE TABLE test_table (id INTEGER NULL)"
         "int" | true    | new SybaseDatabase()       | "CREATE TABLE test_table (id INT NULL)"
+        "int" | true    | new MSSQLDatabase()       | "CREATE TABLE test_table (id INT NULL)"
     }
 
     def "partitionBy round-trips through setter/getter"() {
