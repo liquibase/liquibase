@@ -308,6 +308,27 @@ class DataTypeFactoryTest extends Specification {
         "timestamptz"                                  | new InformixDatabase() | "DATETIME YEAR TO FRACTION(5)"                 | TimestampType | false
     }
 
+    @Unroll("#featureName: #liquibaseString for #database")
+    void "timestamp with time zone is kept under a Turkish default locale"() {
+        given:
+        Locale savedDefault = Locale.getDefault()
+        Locale.setDefault(Locale.forLanguageTag("tr-TR"))
+
+        when:
+        def databaseType = DataTypeFactory.getInstance().fromDescription(liquibaseString, database).toDatabaseDataType(database)
+
+        then:
+        databaseType.toString() == databaseString
+
+        cleanup:
+        Locale.setDefault(savedDefault)
+
+        where:
+        liquibaseString                          | database               | databaseString
+        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE" | new PostgresDatabase() | "TIMESTAMP WITH TIME ZONE"
+        "TIMESTAMPTZ"                            | new H2Database()       | "TIMESTAMP WITH TIME ZONE"
+    }
+
     @Unroll("#featureName: #object for #database")
     void fromObject() throws Exception {
         when:
