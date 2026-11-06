@@ -2,11 +2,14 @@ package liquibase.change.core
 
 import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest
+import liquibase.database.core.Db2zDatabase
 import liquibase.database.core.MockDatabase
 import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNodeException
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.statement.core.RawCompoundStatement
+import liquibase.statement.core.RawSqlStatement
 
 public class RawSQLChangeTest extends StandardChangeTest {
 
@@ -39,6 +42,25 @@ public class RawSQLChangeTest extends StandardChangeTest {
         then:
         assert change.checkStatus(database).status == ChangeStatus.Status.unknown
         assert change.checkStatus(database).message == "Cannot check raw sql status"
+    }
+
+    def "a Db2 for z/OS CALL is a compound statement even when comments come first"() {
+        when:
+        def change = new RawSQLChange()
+        change.setSql(sql)
+        change.setStripComments(false)
+        def statements = change.generateStatements(new Db2zDatabase())
+
+        then:
+        statements.length == 1
+        (statements[0] instanceof RawCompoundStatement) == compound
+
+        where:
+        sql                                    | compound
+        "CALL myproc(1)"                       | true
+        "-- run it\nCALL myproc(1)"            | true
+        "/* run it */ CALL myproc(1)"          | true
+        "-- run it\nselect 1 from sysibm.sysdummy1" | false
     }
 
     def "load with sql as value or as 'sql' child"() {

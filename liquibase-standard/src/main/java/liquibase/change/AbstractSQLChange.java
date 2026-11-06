@@ -348,7 +348,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                 escapedStatement = statement;
             }
 
-            if (database instanceof Db2zDatabase && escapedStatement.toUpperCase().startsWith("CALL")) {
+            // leading comments are kept when stripComments is false, so look past them to see whether this is a CALL
+            if (database instanceof Db2zDatabase && StringUtil.stripComments(escapedStatement, getChangeSet()).toUpperCase().startsWith("CALL")) {
                 returnStatements.add(new RawCompoundStatement(escapedStatement, getEndDelimiter()));
             } else {
                 //For some reason PRINT statement execution is not working properly with PreparedStatement, so we are reverting this change for now.
