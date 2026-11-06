@@ -322,6 +322,38 @@ public class AbstractSQLChangeTest {
     }
 
     @Test
+    public void generateStatements_postgresUnescapesDoubledQuestionMarks() throws DatabaseException {
+        DatabaseConnection connection = mock(DatabaseConnection.class);
+        Database database = new PostgresDatabase() {
+            @Override
+            public DatabaseConnection getConnection() {
+                return connection;
+            }
+        };
+
+        SqlStatement[] statements = new ExampleAbstractSQLChange("UPDATE t SET j = j WHERE j ?? 'a' AND j ??| array['b'] AND j ?& array['c']").generateStatements(database);
+        assertEquals("UPDATE t SET j = j WHERE j ? 'a' AND j ?| array['b'] AND j ?& array['c']", ((RawSqlStatement) statements[0]).getSql());
+    }
+
+    @Test
+    public void unescapePostgresQuestionMarks() {
+        assertEquals("j ? 'a'", AbstractSQLChange.unescapePostgresQuestionMarks("j ? 'a'"));
+        assertEquals("j ? 'a'", AbstractSQLChange.unescapePostgresQuestionMarks("j ?? 'a'"));
+        assertEquals("j ?| array['a']", AbstractSQLChange.unescapePostgresQuestionMarks("j ??| array['a']"));
+        assertEquals("j @? '$.a'", AbstractSQLChange.unescapePostgresQuestionMarks("j @?? '$.a'"));
+        // string literals, quoted identifiers and comments are left alone
+        assertEquals("select '??', 'it''s ??', ? from t", AbstractSQLChange.unescapePostgresQuestionMarks("select '??', 'it''s ??', ?? from t"));
+        assertEquals("select E'\\' ??', ? from t", AbstractSQLChange.unescapePostgresQuestionMarks("select E'\\' ??', ?? from t"));
+        assertEquals("select \"a??\" from t where j ? 'a'", AbstractSQLChange.unescapePostgresQuestionMarks("select \"a??\" from t where j ?? 'a'"));
+        assertEquals("-- why??\nj ? 'a'", AbstractSQLChange.unescapePostgresQuestionMarks("-- why??\nj ?? 'a'"));
+        assertEquals("/* a /* ?? */ ?? */ j ? 'a'", AbstractSQLChange.unescapePostgresQuestionMarks("/* a /* ?? */ ?? */ j ?? 'a'"));
+        // dollar-quoted strings are left alone, positional parameters are not mistaken for them
+        assertEquals("do $$ begin perform a ?? b; end $$; j ? 'a'", AbstractSQLChange.unescapePostgresQuestionMarks("do $$ begin perform a ?? b; end $$; j ?? 'a'"));
+        assertEquals("$body$ x ?? y $body$ ?", AbstractSQLChange.unescapePostgresQuestionMarks("$body$ x ?? y $body$ ??"));
+        assertEquals("select $1 ? 'a', $2", AbstractSQLChange.unescapePostgresQuestionMarks("select $1 ?? 'a', $2"));
+    }
+
+    @Test
     public void generateStatements_nonPostgresStillUsesNativeSql() throws DatabaseException {
         DatabaseConnection connection = mock(DatabaseConnection.class);
         when(connection.nativeSQL("SELECT ? FROM t")).thenReturn("NATIVE SQL");
