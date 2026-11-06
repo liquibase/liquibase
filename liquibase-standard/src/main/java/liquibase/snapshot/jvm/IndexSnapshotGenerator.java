@@ -201,6 +201,9 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
                 String definition = StringUtil.trimToNull(row.getString("FILTER_CONDITION"));
                 if (definition != null) {
+                    if ((database instanceof MySQLDatabase) && !(database instanceof MariaDBDatabase)) {
+                        definition = parenthesizeMySqlFunctionalKey(unescapeMySqlExpression(definition));
+                    }
                     if (!(database instanceof OracleDatabase)) { //TODO: this replaceAll code has been there for a long time but we don't know why. Investigate when it is ever needed and modify it to be smarter
                         definition = definition.replaceAll("\"", "");
                     }
@@ -363,5 +366,67 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected boolean addToViews(Database database) {
         return database instanceof MSSQLDatabase;
+    }
+
+    /**
+     * MySQL only accepts a functional key part enclosed in its own pair of parentheses, which
+     * {@code INFORMATION_SCHEMA.STATISTICS.EXPRESSION} does not include. An expression that is already enclosed is
+     * left as it is.
+     */
+    static String parenthesizeMySqlFunctionalKey(String expression) {
+        if (isEnclosedInParentheses(expression)) {
+            return expression;
+        }
+        return "(" + expression + ")";
+    }
+
+    private static boolean isEnclosedInParentheses(String expression) {
+        if (!expression.startsWith("(") || !expression.endsWith(")")) {
+            return false;
+        }
+        int depth = 0;
+        char quote = 0;
+        for (int i = 0; i < expression.length(); i++) {
+            char c = expression.charAt(i);
+            if (quote != 0) {
+                if (c == '\\') {
+                    i++;
+                } else if (c == quote) {
+                    quote = 0;
+                }
+            } else if (c == '\'' || c == '`' || c == '"') {
+                quote = c;
+            } else if (c == '(') {
+                depth++;
+            } else if (c == ')') {
+                depth--;
+                if (depth == 0 && i < expression.length() - 1) {
+                    return false;
+                }
+            }
+        }
+        return depth == 0;
+    }
+
+    /**
+     * MySQL returns a functional key part from {@code INFORMATION_SCHEMA.STATISTICS.EXPRESSION} with one extra
+     * layer of escaping, so a backslash is doubled and a single quote is preceded by a backslash. This undoes it
+     * to get back the executable expression.
+     */
+    static String unescapeMySqlExpression(String expression) {
+        StringBuilder unescaped = new StringBuilder(expression.length());
+        for (int i = 0; i < expression.length(); i++) {
+            char c = expression.charAt(i);
+            if (c == '\\' && i + 1 < expression.length()) {
+                char next = expression.charAt(i + 1);
+                if (next == '\\' || next == '\'') {
+                    unescaped.append(next);
+                    i++;
+                    continue;
+                }
+            }
+            unescaped.append(c);
+        }
+        return unescaped.toString();
     }
 }
