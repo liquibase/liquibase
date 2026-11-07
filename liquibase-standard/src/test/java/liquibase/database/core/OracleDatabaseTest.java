@@ -190,11 +190,24 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
 
     @Test
     public void correctObjectNamePreservesCaseForIndexNamesThatMustBeQuoted() {
-        // #3876: createIndex quotes names like index_-id, so correctObjectName must not uppercase them
+        // #3876: createIndex quotes names like index_-id, so correctObjectName must not uppercase them.
+        // $ and # are legal unquoted Oracle characters, so those names still fold to upper case.
         final Database database = getDatabase();
         assertEquals("index_-id", database.correctObjectName("index_-id", Index.class));
+        assertEquals("Idx-Mixed", database.correctObjectName("Idx-Mixed", Index.class));
         assertEquals("MY_INDEX", database.correctObjectName("my_index", Index.class));
+        assertEquals("IDX$TMP", database.correctObjectName("idx$tmp", Index.class));
+        assertEquals("IDX#TMP", database.correctObjectName("idx#tmp", Index.class));
         assertEquals("MY-TABLE", database.correctObjectName("my-table", Table.class));
+    }
+
+    @Test
+    public void correctObjectNamePreservesReservedIndexNamesButFoldsDollarNames() throws Exception {
+        // Offline connection loads Oracle's built-in reserved list (USER, not the driver keyword COMMENT).
+        final Database database = getDatabase();
+        database.setConnection(new OfflineConnection("offline:oracle", new JUnitResourceAccessor()));
+        assertEquals("user", database.correctObjectName("user", Index.class));
+        assertEquals("IDX$TMP", database.correctObjectName("idx$tmp", Index.class));
     }
 }
 

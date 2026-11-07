@@ -288,17 +288,38 @@ public abstract class AbstractJdbcDatabase implements Database {
         } else if ((getObjectQuotingStrategy() == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) || (unquotedObjectsAreUppercased == null) ||
                 (objectName == null) || (objectName.startsWith(getQuotingStartCharacter()) && objectName.endsWith(getQuotingEndCharacter()))) {
             return objectName;
-        } else if ((objectType == Index.class) && mustQuoteObjectName(objectName, objectType)) {
-            // Index names that need quoting (e.g. they contain a "-") are quoted with their case preserved
-            // by escapeObjectName()/quoteObject() when generated, so correcting them to the database's default
-            // case here would make them impossible to find again, e.g. by the indexExists precondition
-            // (see https://github.com/liquibase/liquibase/issues/3876).
+        } else if (preserveIndexNameCase(objectName, objectType)) {
+            // Quoted index names are stored with the case createIndex emitted (#3876).
+            // Folding them makes indexExists look up a different name.
             return objectName;
         } else if (Boolean.TRUE.equals(unquotedObjectsAreUppercased)) {
             return objectName.toUpperCase(Locale.US);
         } else {
             return objectName.toLowerCase(Locale.US);
         }
+    }
+
+    /**
+     * Index names that are actually quoted keep their original case so indexExists can find them.
+     * Databases that fold unquoted names to lower case (Postgres outside LEGACY) are excluded:
+     * {@code QUOTE_ONLY_RESERVED_WORDS} must still match {@code idx-mixed} to an index created as
+     * {@code Idx-Mixed}. Names a database accepts unquoted are excluded via
+     * {@link #unquotedIndexNameIsCaseFolded(String)}.
+     */
+    protected boolean preserveIndexNameCase(final String objectName, final Class<? extends DatabaseObject> objectType) {
+        return (objectType == Index.class)
+                && Boolean.TRUE.equals(unquotedObjectsAreUppercased)
+                && mustQuoteObjectName(objectName, objectType)
+                && !unquotedIndexNameIsCaseFolded(objectName);
+    }
+
+    /**
+     * True when {@link #mustQuoteObjectName(String, Class)} is true only because of characters this
+     * database still accepts in an unquoted identifier, which is then stored in the database's default case.
+     * Oracle accepts {@code $} and {@code #} unquoted; see {@link liquibase.database.core.OracleDatabase}.
+     */
+    protected boolean unquotedIndexNameIsCaseFolded(String objectName) {
+        return false;
     }
 
     protected boolean isCatalogOrSchemaType(Class<? extends DatabaseObject> objectType) {

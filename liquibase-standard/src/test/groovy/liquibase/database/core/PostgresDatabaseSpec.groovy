@@ -1,6 +1,7 @@
 package liquibase.database.core
 
 import liquibase.structure.core.Column
+import liquibase.structure.core.Index
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -44,5 +45,11 @@ class PostgresDatabaseSpec extends Specification {
         QUOTE_ALL_OBJECTS         || 'col with space' | Column     || 'col with space' | '"col with space"'
         QUOTE_ALL_OBJECTS         || 'COL WITH SPACE' | Column     || 'COL WITH SPACE' | '"COL WITH SPACE"'
         QUOTE_ALL_OBJECTS         || 'Col with space' | Column     || 'Col with space' | '"Col with space"'
+        // #3876: QUOTE_ONLY_RESERVED_WORDS still folds index names, so idx-mixed finds Idx-Mixed.
+        // LEGACY keeps mixed case (and hyphens) as written.
+        null                      || 'Idx-Mixed'      | Index      || 'Idx-Mixed'      | '"Idx-Mixed"'
+        QUOTE_ONLY_RESERVED_WORDS || 'Idx-Mixed'      | Index      || 'idx-mixed'      | '"Idx-Mixed"'
+        QUOTE_ONLY_RESERVED_WORDS || 'idx-mixed'      | Index      || 'idx-mixed'      | '"idx-mixed"'
+        QUOTE_ONLY_RESERVED_WORDS || 'IdxPlain'       | Index      || 'idxplain'       | 'IdxPlain'
     }
 }
