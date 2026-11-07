@@ -1,8 +1,10 @@
 package liquibase.dbtest.oracle;
 
+import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.CommandResults;
@@ -17,10 +19,14 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
+import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.visitor.AbstractSqlVisitor;
 import liquibase.statement.core.RawParameterizedSqlStatement;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import org.junit.Assert;
@@ -251,6 +257,64 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
         } catch (Exception e) {
             Assert.fail("Should not fail. Reason: " + e.getMessage());
         }
+    }
+
+    @Test
+    public void snapshotNotNullConstraintsOfConnectedUserSchema() throws Exception {
+        assumeNotNull(getDatabase());
+        clearDatabase();
+        try {
+            Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase());
+            String schema = getDatabase().getDefaultSchemaName();
+            // The USER_* views are only used for the schema of the connected user
+            Assert.assertEquals(schema, executor.queryForObject(
+                    new RawParameterizedSqlStatement("SELECT SYS_CONTEXT('USERENV', 'SESSION_USER') FROM DUAL"), String.class));
+
+            executor.execute(new RawParameterizedSqlStatement("CREATE TABLE NOT_NULL_TEST (ID INT, " +
+                    "NAMED_NN INT CONSTRAINT NOT_NULL_TEST_NN NOT NULL, " +
+                    "DISABLED_NN INT CONSTRAINT NOT_NULL_TEST_DIS NOT NULL DISABLE, " +
+                    "NOVALIDATE_NN INT, " +
+                    "NULLABLE_COL INT)"));
+            executor.execute(new RawParameterizedSqlStatement("INSERT INTO NOT_NULL_TEST (ID, NAMED_NN) VALUES (1, 1)"));
+            executor.execute(new RawParameterizedSqlStatement("ALTER TABLE NOT_NULL_TEST MODIFY NOVALIDATE_NN NOT NULL ENABLE NOVALIDATE"));
+
+            // A schema snapshot reads the not-null constraints of all tables in one query
+            DatabaseSnapshot schemaSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(
+                    new CatalogAndSchema(null, schema), getDatabase(), new SnapshotControl(getDatabase()));
+            Table table = schemaSnapshot.get(new Table(null, schema, "NOT_NULL_TEST"));
+            Assert.assertNotNull(table);
+
+            Column named = getColumn(table, "NAMED_NN");
+            Assert.assertFalse(named.isNullable());
+            Assert.assertEquals("NOT_NULL_TEST_NN", named.getAttribute("notNullConstraintName", String.class));
+
+            Column disabled = getColumn(table, "DISABLED_NN");
+            Assert.assertFalse(disabled.isNullable());
+            Assert.assertFalse(disabled.getValidateNullable());
+            Assert.assertEquals("NOT_NULL_TEST_DIS", disabled.getAttribute("notNullConstraintName", String.class));
+
+            Column novalidate = getColumn(table, "NOVALIDATE_NN");
+            Assert.assertFalse(novalidate.isNullable());
+            Assert.assertFalse(novalidate.getValidateNullable());
+
+            Assert.assertTrue(getColumn(table, "NULLABLE_COL").isNullable());
+
+            // Liquibase's own tables are snapshotted one at a time, with a query filtered on the table name
+            Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(getDatabase()).init();
+            Table changeLogTable = SnapshotGeneratorFactory.getInstance().createSnapshot(
+                    new Table(null, schema, getDatabase().getDatabaseChangeLogTableName()), getDatabase());
+            Assert.assertNotNull(changeLogTable);
+            Assert.assertFalse(getColumn(changeLogTable, "ID").isNullable());
+            Assert.assertTrue(getColumn(changeLogTable, "COMMENTS").isNullable());
+        } finally {
+            clearDatabase();
+        }
+    }
+
+    private static Column getColumn(Table table, String columnName) {
+        Column column = table.getColumn(columnName);
+        Assert.assertNotNull("Column " + columnName + " missing from the snapshot of " + table.getName(), column);
+        return column;
     }
 
     @Override
