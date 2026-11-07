@@ -22,6 +22,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public static final ConfigurationDefinition<Boolean> PROMPT_FOR_NON_LOCAL_DATABASE;
     public static final ConfigurationDefinition<Boolean> INCLUDE_SYSTEM_CLASSPATH;
     public static final ConfigurationDefinition<String> DEFAULTS_FILE;
+    public static final ConfigurationDefinition<Boolean> CASCADING_DEFAULTS_FILES;
     public static final ConfigurationDefinition<Level> LOG_LEVEL;
     public static final ConfigurationDefinition<String> LOG_CHANNELS;
     public static final ConfigurationDefinition<String> LOG_FILE;
@@ -56,10 +57,15 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
         INCLUDE_SYSTEM_CLASSPATH = builder.define("includeSystemClasspath", Boolean.class)
                                           .setDescription("Include the system classpath when resolving classes at runtime")
                                           .setDefaultValue(true).build();
+
         DEFAULTS_FILE = builder.define("defaultsFile", String.class)
                                .setDescription("File with default Liquibase properties")
                                .setDefaultValue("liquibase.properties")
                                .build();
+        CASCADING_DEFAULTS_FILES = builder.define("cascadingDefaultsFiles", Boolean.class)
+                                          .setDefaultValue(Boolean.TRUE)
+                                          .setDescription("Use cascading default files")
+                                          .build();
 
         SHOULD_RUN = builder.define("shouldRun", Boolean.class)
                 .setDescription("Should Liquibase commands execute")
@@ -161,5 +167,4 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public interface ArgumentConverter {
         String convert(String argument);
     }
-
 }

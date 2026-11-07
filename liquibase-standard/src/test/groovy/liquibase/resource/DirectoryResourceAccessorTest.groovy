@@ -32,7 +32,7 @@ class DirectoryResourceAccessorTest extends Specification {
 
         then:
         streams.size() == 1
-        StreamUtil.readStreamAsString(streams.iterator().next()).contains(expected)
+        StreamUtil.readStreamAsString(streams.getFirst()).contains(expected)
         StreamUtil.readStreamAsString(stream).contains(expected)
 
         where:
@@ -342,5 +342,4 @@ class DirectoryResourceAccessorTest extends Specification {
         Files.deleteIfExists(outsideDir)
         Files.deleteIfExists(rootDir)
     }
-
 }

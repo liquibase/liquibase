@@ -264,6 +264,13 @@ Global Options
                              (defaults file: 'liquibase.autoReorg', environment
                                variable: 'LIQUIBASE_AUTO_REORG')
 
+      --cascading-defaults-files=PARAM
+                             Use cascading default files
+                             DEFAULT: true
+                             (defaults file: 'liquibase.
+                               cascadingDefaultsFiles', environment variable:
+                               'LIQUIBASE_CASCADING_DEFAULTS_FILES')
+
       --changelog-lock-poll-rate=PARAM
                              Number of seconds wait between checks to the
                                changelog lock when it is locked
