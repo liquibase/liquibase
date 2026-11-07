@@ -9,9 +9,10 @@ import liquibase.database.LiquibaseTableNamesFactory;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.ExecutorService;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperNotNullConstraintsResultSetExtractor;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
@@ -27,6 +28,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
     private boolean warnedAboutDbaRecycleBin;
     private static final boolean ignoreWarnAboutDbaRecycleBin = Boolean.getBoolean("liquibase.ignoreRecycleBinWarning");
+    private static final String ORACLE_SESSION_USER_SCRATCH_KEY = "JdbcDatabaseSnapshot.oracleSessionUser";
 
     private CachingDatabaseMetaData cachingDatabaseMetaData;
 
@@ -1156,46 +1158,35 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
                 String jdbcTableName = database.escapeStringForDatabase(tableName);
-                String sqlToSelectNotNullConstraints;
-                if ((!bulk || getAllCatalogsStringScratchData() == null) && isConnectedUser(jdbcSchemaName)) {
-                    // The schema belongs to the connected user: the USER_* views avoid the privilege checks of the ALL_* views,
-                    // which make this query very slow on databases with many objects.
-                    String escapedSchemaName = database.escapeStringForDatabase(jdbcSchemaName);
-                    sqlToSelectNotNullConstraints = "SELECT NULL AS TABLE_CAT, '" + escapedSchemaName + "' AS TABLE_SCHEMA, '" + escapedSchemaName + "' AS OWNER, utc.TABLE_NAME, " +
+                if ((!bulk || getAllCatalogsStringScratchData() == null) && getOracleSessionUser().equals(jdbcSchemaName)) {
+                    // The schema belongs to the connected user (compared exactly: quoted Oracle user names are case-sensitive).
+                    // The USER_* views avoid the privilege checks of the ALL_* views, which make this query slow on databases with many objects.
+                    String sqlToSelectNotNullConstraints = "SELECT NULL AS TABLE_CAT, uc.OWNER AS TABLE_SCHEMA, uc.OWNER, utc.TABLE_NAME, " +
                             "utc.COLUMN_NAME, NULLABLE, uc.VALIDATED as VALIDATED, uc.SEARCH_CONDITION, uc.CONSTRAINT_NAME " +
                             "FROM USER_TAB_COLS utc " +
                             "JOIN user_cons_columns ucc ON utc.TABLE_NAME = ucc.TABLE_NAME AND utc.COLUMN_NAME = ucc.COLUMN_NAME " +
                             "JOIN user_constraints uc ON utc.TABLE_NAME = uc.TABLE_NAME AND ucc.CONSTRAINT_NAME = uc.CONSTRAINT_NAME " +
                             "WHERE utc.hidden_column='NO' AND uc.CONSTRAINT_TYPE='C' and uc.search_condition is not null ";
                     sqlToSelectNotNullConstraints += (!bulk && tableName != null && !tableName.isEmpty()) ? " AND utc.TABLE_NAME='" + jdbcTableName + "'" : "";
-                } else {
-                    sqlToSelectNotNullConstraints = "SELECT  NULL AS TABLE_CAT, atc.OWNER AS TABLE_SCHEMA, atc.OWNER, atc.TABLE_NAME, " +
-                            "atc.COLUMN_NAME, NULLABLE, ac.VALIDATED as VALIDATED, ac.SEARCH_CONDITION, ac.CONSTRAINT_NAME " +
-                            "FROM ALL_TAB_COLS atc " +
-                            "JOIN all_cons_columns acc ON atc.OWNER = acc.OWNER AND atc.TABLE_NAME = acc.TABLE_NAME AND atc.COLUMN_NAME = acc.COLUMN_NAME " +
-                            "JOIN all_constraints ac ON atc.OWNER = ac.OWNER AND atc.TABLE_NAME = ac.TABLE_NAME AND acc.CONSTRAINT_NAME = ac.CONSTRAINT_NAME ";
-
-                    if (!bulk || getAllCatalogsStringScratchData() == null) {
-                        sqlToSelectNotNullConstraints += " WHERE atc.OWNER='" + jdbcSchemaName + "' AND atc.hidden_column='NO' AND ac.CONSTRAINT_TYPE='C'  and ac.search_condition is not null ";
-                    } else {
-                        sqlToSelectNotNullConstraints += " WHERE atc.OWNER IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") "
-                                + " AND atc.hidden_column='NO' AND ac.CONSTRAINT_TYPE='C'  and ac.search_condition is not null ";
-                    }
-
-                    sqlToSelectNotNullConstraints += (!bulk && tableName != null && !tableName.isEmpty()) ? " AND atc.TABLE_NAME='" + jdbcTableName + "'" : "";
+                    return this.executeAndExtract(sqlToSelectNotNullConstraints, database);
                 }
+
+                String sqlToSelectNotNullConstraints = "SELECT  NULL AS TABLE_CAT, atc.OWNER AS TABLE_SCHEMA, atc.OWNER, atc.TABLE_NAME, " +
+                        "atc.COLUMN_NAME, NULLABLE, ac.VALIDATED as VALIDATED, ac.SEARCH_CONDITION, ac.CONSTRAINT_NAME " +
+                        "FROM ALL_TAB_COLS atc " +
+                        "JOIN all_cons_columns acc ON atc.OWNER = acc.OWNER AND atc.TABLE_NAME = acc.TABLE_NAME AND atc.COLUMN_NAME = acc.COLUMN_NAME " +
+                        "JOIN all_constraints ac ON atc.OWNER = ac.OWNER AND atc.TABLE_NAME = ac.TABLE_NAME AND acc.CONSTRAINT_NAME = ac.CONSTRAINT_NAME ";
+
+                if (!bulk || getAllCatalogsStringScratchData() == null) {
+                    sqlToSelectNotNullConstraints += " WHERE atc.OWNER='" + jdbcSchemaName + "' AND atc.hidden_column='NO' AND ac.CONSTRAINT_TYPE='C'  and ac.search_condition is not null ";
+                } else {
+                    sqlToSelectNotNullConstraints += " WHERE atc.OWNER IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") "
+                            + " AND atc.hidden_column='NO' AND ac.CONSTRAINT_TYPE='C'  and ac.search_condition is not null ";
+                }
+
+                sqlToSelectNotNullConstraints += (!bulk && tableName != null && !tableName.isEmpty()) ? " AND atc.TABLE_NAME='" + jdbcTableName + "'" : "";
 
                 return this.executeAndExtract(sqlToSelectNotNullConstraints, database);
-            }
-
-            private boolean isConnectedUser(String schemaName) {
-                // Exact comparison: quoted Oracle user names are case-sensitive. When in doubt, use the ALL_* query.
-                try {
-                    String userName = database.getConnection() == null ? null : database.getConnection().getConnectionUserName();
-                    return userName != null && userName.equals(schemaName);
-                } catch (UnexpectedLiquibaseException e) {
-                    return false;
-                }
             }
 
             @Override
@@ -2049,6 +2040,27 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
     private String getAllCatalogsStringScratchData() {
         return (String) getScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY);
+    }
+
+    /**
+     * Returns the Oracle login user as stored in the data dictionary, or an empty string if it can't be read.
+     * Unlike the JDBC user name, this is always spelled as in the data dictionary. Queried once per snapshot.
+     */
+    private String getOracleSessionUser() {
+        String sessionUser = (String) getScratchData(ORACLE_SESSION_USER_SCRATCH_KEY);
+        if (sessionUser == null) {
+            try {
+                sessionUser = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                        .queryForObject(new RawParameterizedSqlStatement("SELECT SYS_CONTEXT('USERENV', 'SESSION_USER') FROM DUAL"), String.class);
+            } catch (Exception e) {
+                Scope.getCurrentScope().getLog(getClass()).info("Cannot determine the Oracle session user, using the ALL_* views", e);
+            }
+            if (sessionUser == null) {
+                sessionUser = "";
+            }
+            setScratchData(ORACLE_SESSION_USER_SCRATCH_KEY, sessionUser);
+        }
+        return sessionUser;
     }
 
     private String escapeForLike(String string, Database database) {
