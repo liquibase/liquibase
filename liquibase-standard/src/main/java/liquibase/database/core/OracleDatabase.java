@@ -48,6 +48,13 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     public static final int ORACLE_12C_MAJOR_VERSION = 12;
     public static final int ORACLE_23C_MAJOR_VERSION = 23;
 
+    /**
+     * Unquoted Oracle identifiers: a letter, then letters, digits, underscore, {@code $}, or {@code #}.
+     * Oracle folds those to upper case. {@code $} and {@code #} are non-word characters, so
+     * {@link AbstractJdbcDatabase#mustQuoteObjectName(String, Class)} is true for them anyway.
+     */
+    private static final Pattern UNQUOTED_ORACLE_IDENTIFIER = Pattern.compile("^[A-Z][A-Z0-9_$#]*$");
+
     private final Set<String> reservedWords = new HashSet<>();
     private Set<String> userDefinedTypes;
     private Map<String, String> savedSessionNlsSettings;
@@ -690,5 +697,14 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return "NUMBER(*, 0)";
         }
         return super.correctObjectName(objectName, objectType);
+    }
+
+    @Override
+    protected boolean unquotedIndexNameIsCaseFolded(String objectName) {
+        // Reserved words are quoted and keep the case they were written with ("comment", "user").
+        if ((objectName == null) || isReservedWord(objectName)) {
+            return false;
+        }
+        return UNQUOTED_ORACLE_IDENTIFIER.matcher(objectName.toUpperCase(Locale.US)).matches();
     }
 }
