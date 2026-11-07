@@ -6,6 +6,8 @@ import liquibase.change.core.LoadDataChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
+import liquibase.database.core.AbstractDb2Database;
+import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.MariaDBDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.AbstractPostgresDatabase;
@@ -360,7 +362,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             // NULL values might intentionally be set into a change, we must also add them to the prepared statement
             LOG.fine("value is explicit null");
             if (col.getType() == null) {
-                stmt.setNull(i, java.sql.Types.NULL);
+                setUntypedNull(stmt, i);
                 return;
             }
             if (col.getType().toLowerCase().contains("datetime")) {
@@ -390,10 +392,23 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                     break;
                 }
                 if (!isSet) {
-                    LOG.info(String.format("Using java.sql.Types.NULL to set null value for type %s", dataType.getName()));
-                    stmt.setNull(i, java.sql.Types.NULL);
+                    LOG.info(String.format("No java.sql.Types mapping found to set null value for type %s", dataType.getName()));
+                    setUntypedNull(stmt, i);
                 }
             }
+        }
+    }
+
+    /**
+     * Binds a NULL value whose SQL type could not be determined. Most drivers accept {@link java.sql.Types#NULL}
+     * for this, but DB2 and Derby reject it ("Unrecognized JDBC type: 0" / "The data type '0' is not supported"),
+     * so {@link java.sql.Types#VARCHAR} is used for them instead, which they convert to the target column type.
+     */
+    private void setUntypedNull(PreparedStatement stmt, int i) throws SQLException {
+        if (database instanceof AbstractDb2Database || database instanceof DerbyDatabase) {
+            stmt.setNull(i, java.sql.Types.VARCHAR);
+        } else {
+            stmt.setNull(i, java.sql.Types.NULL);
         }
     }
 
