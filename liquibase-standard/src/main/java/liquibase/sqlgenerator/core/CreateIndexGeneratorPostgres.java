@@ -9,6 +9,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateIndexStatement;
 import liquibase.structure.core.Index;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -87,6 +88,10 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
             } else {
                 buffer.append(" TABLESPACE ").append(statement.getTablespace());
             }
+        }
+
+        if (StringUtils.trimToNull(statement.getWhere()) != null) {
+            buffer.append(" WHERE ").append(statement.getWhere());
         }
 
         if ((statement.isClustered() != null) && statement.isClustered()) {

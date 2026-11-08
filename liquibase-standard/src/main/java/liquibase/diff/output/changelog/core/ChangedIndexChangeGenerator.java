@@ -106,6 +106,7 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
         addIndexChange.setIndexName(index.getName());
         addIndexChange.setUnique(index.isUnique());
         addIndexChange.setUsing(index.getUsing());
+        addIndexChange.setWhere(index.getWhere());
 
         Schema comparisonSchema = comparisonIndex.getSchema();
         Schema indexSchema = index.getSchema();

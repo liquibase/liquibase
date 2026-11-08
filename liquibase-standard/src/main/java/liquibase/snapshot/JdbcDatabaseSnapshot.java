@@ -293,7 +293,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 private void enrichPostgresqlResult(CatalogAndSchema catalogAndSchema, List<CachedRow> returnList) throws DatabaseException, SQLException {
                     if (database instanceof PostgresDatabase && !(database instanceof CockroachDatabase)) {
                         StringBuilder sql = new StringBuilder("SELECT ns.nspname as TABLE_SCHEM, tab.relname as TABLE_NAME, " +
-                                "cls.relname as INDEX_NAME, am.amname as INDEX_TYPE " +
+                            "cls.relname as INDEX_NAME, am.amname as INDEX_TYPE, " +
+                            "pg_get_expr(idx.indpred, idx.indrelid) as INDEX_CONDITION " +
                                 " FROM pg_index idx " +
                                 "         JOIN pg_class cls ON cls.oid=idx.indexrelid " +
                                 "         JOIN pg_class tab ON tab.oid=idx.indrelid " +
@@ -318,6 +319,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     && returnRow.getString("TABLE_NAME").equalsIgnoreCase(row.getString("TABLE_NAME"))
                                     && returnRow.getString("TABLE_SCHEM").equalsIgnoreCase(row.getString("TABLE_SCHEM"))) {
                                     returnRow.set("INDEX_TYPE", row.getString("INDEX_TYPE"));
+                                    returnRow.set("INDEX_CONDITION", row.getString("INDEX_CONDITION"));
                                     break;
                                 }
                             }

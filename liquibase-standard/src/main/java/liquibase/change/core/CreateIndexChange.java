@@ -46,6 +46,8 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     private Boolean clustered;
     @Setter
     private String using;
+    @Setter
+    private String where;
 
 
     public CreateIndexChange() {
@@ -112,6 +114,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
                         getUsing(),
                         getColumns().toArray(new AddColumnConfig[0]))
                         .setTablespace(getTablespace())
+                        .setWhere(getWhere())
                         .setClustered(getClustered())
         };
     }
@@ -185,6 +188,11 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     @DatabaseChangeProperty(description = "The index type to use. For example, 'btree' or 'gin'")
     public String getUsing() {
         return using;
+    }
+
+    @DatabaseChangeProperty(description = "Condition for a partial index")
+    public String getWhere() {
+        return where;
     }
 
     @Override

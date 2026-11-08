@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.change.AddColumnConfig;
+import liquibase.change.core.CreateIndexChange;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.sql.Sql;
 import liquibase.statement.core.CreateIndexStatement;
@@ -30,6 +31,21 @@ public class CreateIndexGeneratorPostgresTest {
 
         // Then
         Assert.assertEquals("CREATE INDEX INDEX1 ON SCHEMA1.TABLE1 USING BTREE(COL1)", result[0].toSql());
+    }
+
+    @Test
+    public void testGenerateSqlPartialIndex() {
+        CreateIndexChange change = new CreateIndexChange();
+        change.setIndexName("INDEX1");
+        change.setSchemaName("SCHEMA1");
+        change.setTableName("TABLE1");
+        change.setWhere("status_col = 1");
+        change.addColumn(newAddColumnConfig("COL1", false));
+
+        CreateIndexStatement statement = (CreateIndexStatement) change.generateStatements(new PostgresDatabase())[0];
+        Sql[] result = generateSql(statement);
+
+        Assert.assertEquals("CREATE INDEX INDEX1 ON SCHEMA1.TABLE1(COL1) WHERE status_col = 1", result[0].toSql());
     }
 
     private static CreateIndexStatement newStatement(String indexName, String catalogName, String schemaName, String tableName, AddColumnConfig... columns) {
