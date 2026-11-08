@@ -6,14 +6,18 @@ import liquibase.command.CleanUpCommandStep;
 import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
 import liquibase.database.Database;
+import liquibase.exception.CommandExecutionException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
+import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class AbstractOutputWriterCommandStep extends AbstractHelperCommandStep implements CleanUpCommandStep {
 
@@ -44,15 +48,26 @@ public abstract class AbstractOutputWriterCommandStep extends AbstractHelperComm
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
+        database = (Database) commandScope.getDependency(Database.class);
+        if (database != null && !database.supportsSqlOutput()) {
+            throw new CommandExecutionException(String.format(
+                    "%s is not supported for %s: this database cannot produce SQL output",
+                    getConvertedCommandName(commandScope), database.getDisplayName()));
+        }
         String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
         outputStreamWriter = new OutputStreamWriter(resultsBuilder.getOutputStream(), charsetName);
-        database = (Database) commandScope.getDependency(Database.class);
         Executor databaseExecutor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         LoggingExecutor loggingExecutor = new LoggingExecutor(databaseExecutor, outputStreamWriter, database);
         Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, loggingExecutor);
         Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("logging", database, loggingExecutor);
 
         commandScope.provideDependency(getProvidedWriterDependency(), outputStreamWriter);
+    }
+
+    private static String getConvertedCommandName(final CommandScope commandScope) {
+        return Arrays.stream(commandScope.getCommand().getName())
+                .map(StringUtil::toKabobCase)
+                .collect(Collectors.joining(" "));
     }
 
     @Override

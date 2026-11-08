@@ -10,6 +10,8 @@ import liquibase.database.core.MockDatabase
 import liquibase.database.jvm.JdbcConnection
 import liquibase.exception.DatabaseException
 import liquibase.exception.LiquibaseException
+import liquibase.executor.ExecutorService
+import liquibase.executor.LoggingExecutor
 import liquibase.lockservice.LockService
 import liquibase.lockservice.LockServiceFactory
 import liquibase.parser.ChangeLogParser
@@ -262,6 +264,42 @@ class LiquibaseTest extends Specification {
 //            }
 //        });
 //    }
+
+    def "legacy update methods with a writer fail for databases which cannot produce SQL output"() {
+        given:
+        def database = new MockDatabase() {
+            @Override
+            boolean supportsSqlOutput() {
+                return false
+            }
+
+            @Override
+            String getDisplayName() {
+                return "NoSQL Mock"
+            }
+        }
+        def lockService = Mock(LockService)
+        LockServiceFactory.setInstance(Mock(LockServiceFactory) {
+            getLockService(_) >> lockService
+        })
+        def liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, database)
+
+        when:
+        call(liquibase, new StringWriter())
+
+        then:
+        def e = thrown(LiquibaseException)
+        e.message == "Generating SQL output is not supported for NoSQL Mock: this database cannot produce SQL output"
+        0 * lockService.waitForLock()
+        0 * lockService.acquireLock()
+        !(Scope.getCurrentScope().getSingleton(ExecutorService).getExecutor("jdbc", database) instanceof LoggingExecutor)
+
+        where:
+        call << [
+                { Liquibase l, Writer w -> l.update(1, "", w) },
+                { Liquibase l, Writer w -> l.update("tag", new Contexts(), w) },
+        ]
+    }
 
     static class TestConsoleUIService extends ConsoleUIService {
         private List<String> messages = new ArrayList<>()
