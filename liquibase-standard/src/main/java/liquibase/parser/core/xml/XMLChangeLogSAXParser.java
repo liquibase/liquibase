@@ -4,6 +4,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.exception.ChangeLogParseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParserSupportedFileExtension;
 import liquibase.resource.Resource;
@@ -20,6 +21,7 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
@@ -45,10 +47,13 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         // Unconditional XXE hardening — Liquibase changelogs validate against XSD, not DTD,
         // so DOCTYPE has no legitimate use. Applied regardless of secureParsing to provide
         // defense-in-depth even when users opt out of secure mode.
-        trySetFactoryFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        boolean doctypeBlocked = trySetFactoryFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         trySetFactoryFeature("http://xml.org/sax/features/external-general-entities", false);
         trySetFactoryFeature("http://xml.org/sax/features/external-parameter-entities", false);
         trySetFactoryFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        if (!doctypeBlocked) {
+            throw new UnexpectedLiquibaseException("Unable to enforce XML security: DOCTYPE blocking is unavailable");
+        }
         if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
             try {
                 saxParserFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -58,12 +63,14 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         }
     }
 
-    private void trySetFactoryFeature(String feature, boolean value) {
+    private boolean trySetFactoryFeature(String feature, boolean value) {
         try {
             saxParserFactory.setFeature(feature, value);
+            return true;
         } catch (Throwable e) {
             Scope.getCurrentScope().getLog(getClass()).fine(
                     "Cannot set SAX parser factory feature " + feature + "=" + value + ": " + e.getMessage(), e);
+            return false;
         }
     }
 
@@ -153,7 +160,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
             throw new ChangeLogParseException("Error Reading Changelog File: " + e.getMessage(), e);
         } catch (SAXParseException e) {
             String errMsg = e.getMessage();
-            if (errMsg != null && errMsg.contains("DOCTYPE")) {
+            if (errMsg != null && errMsg.toUpperCase(Locale.ROOT).contains("DOCTYPE")) {
                 throw new ChangeLogParseException(
                         "Changelog '" + physicalChangeLogLocation + "' contains a DOCTYPE declaration, which is not supported. " +
                         "Liquibase changelogs validate against XSD schemas and do not support DOCTYPE/DTD declarations. " +
