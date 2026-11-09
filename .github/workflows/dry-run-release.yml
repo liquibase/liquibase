@@ -46,7 +46,7 @@ jobs:
 
       - name: Get GitHub App token
         id: get-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
@@ -56,7 +56,7 @@ jobs:
 
       - name: Invoke Create Release
         id: trigger-step
-        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@d12b38713b9a20a72f95468749ee5031137689a6 # main
+        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@778b21973f0a231340a2fb924e5e0c3ad38317b9 # main
         with:
           workflow: create-release.yml
           ref: main
@@ -191,7 +191,7 @@ jobs:
 
       - name: Get GitHub App token
         id: get-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
@@ -200,7 +200,7 @@ jobs:
           permission-actions: write
 
       - name: Trigger release-published-orchestrator workflow
-        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@d12b38713b9a20a72f95468749ee5031137689a6 # main
+        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@778b21973f0a231340a2fb924e5e0c3ad38317b9 # main
         with:
           workflow: release-published-orchestrator.yml
           ref: main
