@@ -292,20 +292,11 @@ jobs:
           done
           exit "$found"
 
-      - name: Configure AWS credentials for the gpg-signing secret
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
-        with:
-          role-to-assume: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
-          aws-region: us-east-1
-
       - name: Get the GPG signing key from vault
-        # TECHOPS-1295: /vault/grouped/gpg-signing holds exactly the keys this job uses,
-        # so the whole secret is parsed into the job env and nothing else comes along.
-        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
         with:
-          secret-ids: |
-            ,/vault/grouped/gpg-signing
-          parse-json-secrets: true
+          group: gpg-signing
+          role-arn: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
 
       - name: Convert escaped newlines and set GPG key
         run: |
@@ -380,54 +371,26 @@ jobs:
           # This job runs no networked git command, so the token does not need to sit in .git/config.
           persist-credentials: false
 
-      - name: Configure AWS credentials for the gpg-signing secret
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
-        with:
-          role-to-assume: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
-          aws-region: us-east-1
-
       - name: Get the GPG signing key from vault
-        # TECHOPS-1295: /vault/grouped/gpg-signing holds exactly the keys this job uses,
-        # so the whole secret is parsed into the job env and nothing else comes along.
-        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
         with:
-          secret-ids: |
-            ,/vault/grouped/gpg-signing
-          parse-json-secrets: true
+          group: gpg-signing
+          role-arn: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
 
       # Next group, next role: this assume replaces the previous one for the rest of the job.
-      - name: Configure AWS credentials for the install4j secret
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
-        with:
-          role-to-assume: ${{ secrets.VAULT_GROUPED_INSTALL4J_ROLE_ARN }}
-          aws-region: us-east-1
-
       - name: Get the install4j licence from vault
-        # TECHOPS-1295: /vault/grouped/install4j holds exactly the keys this job uses,
-        # so the whole secret is parsed into the job env and nothing else comes along.
-        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
         with:
-          secret-ids: |
-            ,/vault/grouped/install4j
-          parse-json-secrets: true
+          group: install4j
+          role-arn: ${{ secrets.VAULT_GROUPED_INSTALL4J_ROLE_ARN }}
 
       # Next group, next role: this assume replaces the previous one for the rest of the job.
-      - name: Configure AWS credentials for the code-signing-digicert secret
-        if: ${{ inputs.dry_run == false }}
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
-        with:
-          role-to-assume: ${{ secrets.VAULT_GROUPED_CODE_SIGNING_DIGICERT_ROLE_ARN }}
-          aws-region: us-east-1
-
       - name: Get the DigiCert KeyLocker credentials from vault
         if: ${{ inputs.dry_run == false }}
-        # TECHOPS-1295: /vault/grouped/code-signing-digicert holds exactly the keys this job uses,
-        # so the whole secret is parsed into the job env and nothing else comes along.
-        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
         with:
-          secret-ids: |
-            ,/vault/grouped/code-signing-digicert
-          parse-json-secrets: true
+          group: code-signing-digicert
+          role-arn: ${{ secrets.VAULT_GROUPED_CODE_SIGNING_DIGICERT_ROLE_ARN }}
 
       - name: Convert escaped newlines and set GPG key
         run: |
