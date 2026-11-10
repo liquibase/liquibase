@@ -93,7 +93,6 @@ jobs:
           group: gpg-signing
           role-arn: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
 
-      # Next group, next role: this assume replaces the previous one for the rest of the job.
       - name: Get the Maven Central credentials from vault
         uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
         with:
@@ -277,7 +276,6 @@ jobs:
           group: gpg-signing
           role-arn: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
 
-      # Next group, next role: this assume replaces the previous one for the rest of the job.
       - name: Get the Nexus credentials from vault
         uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
         with:

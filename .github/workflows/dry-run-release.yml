@@ -222,7 +222,6 @@ jobs:
           group: dry-run-slack-bot-token
           role-arn: ${{ secrets.VAULT_GROUPED_DRY_RUN_SLACK_BOT_TOKEN_ROLE_ARN }}
 
-      # Next group, next role: this assume replaces the previous one for the rest of the job.
       - name: Get the dry-run Slack channel id from vault
         uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
         with:
