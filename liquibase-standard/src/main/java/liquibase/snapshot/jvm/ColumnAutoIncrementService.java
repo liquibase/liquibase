@@ -139,7 +139,7 @@ public class ColumnAutoIncrementService {
                         "    JOIN pg_depend d ON c.oid = d.objid " +
                         "    JOIN pg_class td ON td.oid = d.refobjid " +
                         "    JOIN pg_attribute pa ON  pa.attrelid=td.oid AND pa.attnum=d.refobjsubid " +
-                        "WHERE c.relkind = 'S' AND d.deptype = 'a' AND ns.nspname = '" + schema.getName() + "'";
+                        "WHERE c.relkind = 'S' AND d.deptype IN ('a', 'i') AND ns.nspname = '" + schema.getName() + "'";
             }
         }
 
