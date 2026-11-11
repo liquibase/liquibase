@@ -182,6 +182,76 @@ class ScopeTest extends Specification {
         orphanRoot.is(mainRoot)
     }
 
+    def "reading the current scope does not bind the root scope to the thread"() {
+        given:
+        def boundManager = "not checked"
+
+        when:
+        def thread = new Thread({
+            Scope.setScopeManager(null)   // simulate a container thread that never used Liquibase
+            Scope.getCurrentScope()
+            boundManager = Scope.getScopeManagerThreadLocal().get()
+        })
+        thread.start()
+        thread.join(30_000)
+
+        then:
+        boundManager == null
+    }
+
+    def "exiting the outermost scope unbinds the thread"() {
+        given:
+        def boundManager = "not checked"
+
+        when:
+        def thread = new Thread({
+            Scope.setScopeManager(null)
+            Scope.child([key: "value"], {} as Scope.ScopedRunner)
+            boundManager = Scope.getScopeManagerThreadLocal().get()
+        })
+        thread.start()
+        thread.join(30_000)
+
+        then:
+        boundManager == null
+    }
+
+    def "a thread started after leaving all scopes does not inherit a scope manager"() {
+        given:
+        def inheritedManager = "not checked"
+
+        when:
+        def thread = new Thread({
+            Scope.setScopeManager(null)
+            Scope.child([key: "value"], {} as Scope.ScopedRunner)
+            def laterThread = new Thread({ inheritedManager = Scope.getScopeManagerThreadLocal().get() })
+            laterThread.start()
+            laterThread.join(30_000)
+        })
+        thread.start()
+        thread.join(30_000)
+
+        then:
+        inheritedManager == null
+    }
+
+    def "nested scopes still work after the thread was unbound"() {
+        when:
+        def outerValue = null
+        def innerValue = null
+        Scope.child([outer: "o"], {
+            Scope.child([inner: "i"], {
+                innerValue = Scope.getCurrentScope().get("inner", String)
+            } as Scope.ScopedRunner)
+            outerValue = Scope.getCurrentScope().get("outer", String)
+        } as Scope.ScopedRunner)
+
+        then:
+        innerValue == "i"
+        outerValue == "o"
+        Scope.getCurrentScope().get("outer", String) == null
+    }
+
     private static Scope rootOf(Scope scope) {
         while (scope.getParent() != null) {
             scope = scope.getParent()
