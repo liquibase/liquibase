@@ -1,9 +1,9 @@
 package liquibase
 
-import liquibase.changelog.OfflineChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.database.core.HsqlDatabase
 import liquibase.exception.UnexpectedLiquibaseException
+import liquibase.integration.spring.SpringLiquibase
 import liquibase.logging.mdc.CustomMdcObject
 import liquibase.logging.mdc.MdcManager
 import liquibase.logging.mdc.MdcManagerFactory
@@ -183,73 +183,90 @@ class ScopeTest extends Specification {
     }
 
     def "reading the current scope does not bind the root scope to the thread"() {
-        given:
-        def boundManager = "not checked"
-
-        when:
-        def thread = new Thread({
-            Scope.setScopeManager(null)   // simulate a container thread that never used Liquibase
+        expect:
+        inUnboundThread {
             Scope.getCurrentScope()
-            boundManager = Scope.getScopeManagerThreadLocal().get()
-        })
-        thread.start()
-        thread.join(30_000)
+            boundManager()
+        } == null
+    }
 
-        then:
-        boundManager == null
+    def "creating a SpringLiquibase bean does not bind the thread"() {
+        expect:
+        inUnboundThread {
+            new SpringLiquibase()
+            boundManager()
+        } == null
     }
 
     def "exiting the outermost scope unbinds the thread"() {
-        given:
-        def boundManager = "not checked"
-
         when:
-        def thread = new Thread({
-            Scope.setScopeManager(null)
-            Scope.child([key: "value"], {} as Scope.ScopedRunner)
-            boundManager = Scope.getScopeManagerThreadLocal().get()
-        })
-        thread.start()
-        thread.join(30_000)
+        def bindings = inUnboundThread {
+            def insideOuter = null
+            def insideInner = null
+            Scope.child([outer: "o"], {
+                Scope.child([inner: "i"], { insideInner = boundManager() } as Scope.ScopedRunner)
+                insideOuter = boundManager()
+            } as Scope.ScopedRunner)
+            [insideInner, insideOuter, boundManager()]
+        }
 
         then:
-        boundManager == null
+        bindings[0] != null
+        bindings[1] != null
+        bindings[2] == null
     }
 
     def "a thread started after leaving all scopes does not inherit a scope manager"() {
-        given:
-        def inheritedManager = "not checked"
-
-        when:
-        def thread = new Thread({
-            Scope.setScopeManager(null)
+        expect:
+        inUnboundThread {
             Scope.child([key: "value"], {} as Scope.ScopedRunner)
-            def laterThread = new Thread({ inheritedManager = Scope.getScopeManagerThreadLocal().get() })
-            laterThread.start()
-            laterThread.join(30_000)
+            inNewThread { boundManager() }
+        } == null
+    }
+
+    def "a custom scope manager at the root scope stays bound"() {
+        given:
+        def customManager = new SingletonScopeManager() {}
+
+        expect:
+        inUnboundThread {
+            Scope.setScopeManager(customManager)
+            Scope.child([key: "value"], {} as Scope.ScopedRunner)
+            boundManager()
+        }.is(customManager)
+    }
+
+    private static ScopeManager boundManager() {
+        return Scope.getScopeManagerThreadLocal().get()
+    }
+
+    /**
+     * Runs the closure in a new thread without a scope manager, like a container thread that never used Liquibase.
+     */
+    private static Object inUnboundThread(Closure closure) {
+        return inNewThread { Scope.setScopeManager(null); closure.call() }
+    }
+
+    /**
+     * Runs the closure in a new thread that inherits the caller's thread locals.
+     */
+    private static Object inNewThread(Closure closure) {
+        def result = null
+        Throwable failure = null
+        def thread = new Thread({
+            try {
+                result = closure.call()
+            } catch (Throwable t) {
+                failure = t
+            }
         })
         thread.start()
         thread.join(30_000)
-
-        then:
-        inheritedManager == null
-    }
-
-    def "nested scopes still work after the thread was unbound"() {
-        when:
-        def outerValue = null
-        def innerValue = null
-        Scope.child([outer: "o"], {
-            Scope.child([inner: "i"], {
-                innerValue = Scope.getCurrentScope().get("inner", String)
-            } as Scope.ScopedRunner)
-            outerValue = Scope.getCurrentScope().get("outer", String)
-        } as Scope.ScopedRunner)
-
-        then:
-        innerValue == "i"
-        outerValue == "o"
-        Scope.getCurrentScope().get("outer", String) == null
+        assert !thread.alive
+        if (failure != null) {
+            throw failure
+        }
+        return result
     }
 
     private static Scope rootOf(Scope scope) {

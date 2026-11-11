@@ -208,6 +208,7 @@ public class Scope {
     private static Scope releaseIfAtRoot(InheritableThreadLocal<ScopeManager> manager) {
         ScopeManager threadManager = manager.get();
         Scope current = threadManager.getCurrentScope();
+        // exact class on purpose: subclasses are custom managers and stay bound
         if (current != null && current == rootScope && threadManager.getClass() == SingletonScopeManager.class) {
             manager.remove();
         }
