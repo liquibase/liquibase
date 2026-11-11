@@ -129,7 +129,8 @@ public class ColumnAutoIncrementService {
                         "    ns.nspname as SCHEMA_NAME, " +
                         "    td.relname as TABLE_NAME, " +
                         "    pa.attname as COLUMN_NAME, " +
-                        "    COALESCE(pg_sequence_last_value(c.oid::regclass) + s.seqincrement, " +
+                        "    COALESCE(CASE WHEN has_sequence_privilege(c.oid, 'SELECT,USAGE') " +
+                        "      THEN pg_sequence_last_value(c.oid::regclass) END + s.seqincrement, " +
                         "      s.seqstart) AS START_VALUE, " +
                         "    s.seqincrement AS INCREMENT_BY, " +
                         "    pa.attidentity::text AS IDENTITY_KIND " +
