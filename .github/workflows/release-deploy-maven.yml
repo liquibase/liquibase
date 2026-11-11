@@ -88,13 +88,13 @@ jobs:
         run: gh release download "$TAG" --repo liquibase/liquibase --dir "."
 
       - name: Get the GPG signing key from vault
-        uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
           group: gpg-signing
           role-arn: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
 
       - name: Get the Maven Central credentials from vault
-        uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
           group: sonatype
           role-arn: ${{ secrets.VAULT_GROUPED_SONATYPE_ROLE_ARN }}
@@ -271,13 +271,13 @@ jobs:
             --dir "."
 
       - name: Get the GPG signing key from vault
-        uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
           group: gpg-signing
           role-arn: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
 
       - name: Get the Nexus credentials from vault
-        uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
           group: repo-liquibase-net
           role-arn: ${{ secrets.VAULT_GROUPED_REPO_LIQUIBASE_NET_ROLE_ARN }}

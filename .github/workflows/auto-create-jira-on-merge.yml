@@ -107,7 +107,7 @@ jobs:
       github.event_name == 'milestone'
     steps:
       - name: Get the Jira service-account credentials from vault
-        uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
           group: jira-automation
           role-arn: ${{ secrets.VAULT_GROUPED_JIRA_AUTOMATION_ROLE_ARN }}

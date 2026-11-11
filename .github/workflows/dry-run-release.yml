@@ -30,7 +30,7 @@ jobs:
     steps:
 
       - name: Get the GitHub App credentials from vault
-        uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
           group: github-app-liquibase
           role-arn: ${{ secrets.VAULT_GROUPED_GITHUB_APP_LIQUIBASE_ROLE_ARN }}
@@ -166,7 +166,7 @@ jobs:
     steps:
 
       - name: Get the GitHub App credentials from vault
-        uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
           group: github-app-liquibase
           role-arn: ${{ secrets.VAULT_GROUPED_GITHUB_APP_LIQUIBASE_ROLE_ARN }}
@@ -217,13 +217,13 @@ jobs:
     steps:
 
       - name: Get the dry-run Slack bot token from vault
-        uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
           group: dry-run-slack-bot-token
           role-arn: ${{ secrets.VAULT_GROUPED_DRY_RUN_SLACK_BOT_TOKEN_ROLE_ARN }}
 
       - name: Get the dry-run Slack channel id from vault
-        uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
           group: dryrun-releases-slack-id
           role-arn: ${{ secrets.VAULT_GROUPED_DRYRUN_RELEASES_SLACK_ID_ROLE_ARN }}

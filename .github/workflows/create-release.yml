@@ -293,7 +293,7 @@ jobs:
           exit "$found"
 
       - name: Get the GPG signing key from vault
-        uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
           group: gpg-signing
           role-arn: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
@@ -372,20 +372,20 @@ jobs:
           persist-credentials: false
 
       - name: Get the GPG signing key from vault
-        uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
           group: gpg-signing
           role-arn: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
 
       - name: Get the install4j licence from vault
-        uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
           group: install4j
           role-arn: ${{ secrets.VAULT_GROUPED_INSTALL4J_ROLE_ARN }}
 
       - name: Get the DigiCert KeyLocker credentials from vault
         if: ${{ inputs.dry_run == false }}
-        uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
           group: code-signing-digicert
           role-arn: ${{ secrets.VAULT_GROUPED_CODE_SIGNING_DIGICERT_ROLE_ARN }}

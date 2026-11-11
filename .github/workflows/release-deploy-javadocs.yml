@@ -85,7 +85,7 @@ jobs:
         continue-on-error: true
         # TECHOPS-1295: /vault/grouped/cloudflare-r2 holds exactly the keys this job uses,
         # so the whole secret is parsed into the job env and nothing else comes along.
-        uses: liquibase/build-logic/.github/actions/setup-aws-vault@main
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
           group: cloudflare-r2
           role-arn: ${{ secrets.VAULT_GROUPED_CLOUDFLARE_R2_ROLE_ARN }}
