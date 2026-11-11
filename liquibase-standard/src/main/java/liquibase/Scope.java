@@ -143,15 +143,18 @@ public class Scope {
 
     private LiquibaseListener listener;
 
+    /**
+     * Returns the current scope of this thread, or the shared root scope if the thread is not inside a child scope.
+     */
     public static Scope getCurrentScope() {
         InheritableThreadLocal<ScopeManager> manager = getScopeManagerThreadLocal();
         if (manager.get() == null) {
-            SingletonScopeManager newManager = new SingletonScopeManager();
             Scope existingRoot = rootScope;
             if (existingRoot != null) {
-                newManager.setCurrentScope(existingRoot);
+                // don't bind the thread, it would keep the root scope and its classloader (#6891)
+                return existingRoot;
             }
-            manager.set(newManager);
+            manager.set(new SingletonScopeManager());
         }
         if (manager.get().getCurrentScope() == null) {
             // Serialize root construction so the whole JVM shares a single root scope. The bootstrap
@@ -160,7 +163,7 @@ public class Scope {
             synchronized (Scope.class) {
                 if (rootScope != null) {
                     manager.get().setCurrentScope(rootScope);
-                    return manager.get().getCurrentScope();
+                    return releaseIfAtRoot(manager);
                 }
                 Scope newRootScope = new Scope();
                 manager.get().setCurrentScope(newRootScope);
@@ -199,7 +202,20 @@ public class Scope {
                 Scope.rootScope = newRootScope;
             }
         }
-        return manager.get().getCurrentScope();
+        return releaseIfAtRoot(manager);
+    }
+
+    /**
+     * Unbinds the default scope manager from the thread once it is back at the root scope (#6891).
+     */
+    private static Scope releaseIfAtRoot(InheritableThreadLocal<ScopeManager> manager) {
+        ScopeManager threadManager = manager.get();
+        Scope current = threadManager.getCurrentScope();
+        // exact class on purpose: subclasses are custom managers and stay bound
+        if (current != null && current == rootScope && threadManager.getClass() == SingletonScopeManager.class) {
+            manager.remove();
+        }
+        return current;
     }
 
     public static void setScopeManager(ScopeManager scopeManager) {
@@ -302,7 +318,11 @@ public class Scope {
         Scope originalScope = getCurrentScope();
         Scope child = new Scope(originalScope, scopeValues);
         child.listener = listener;
-        getScopeManagerThreadLocal().get().setCurrentScope(child);
+        InheritableThreadLocal<ScopeManager> manager = getScopeManagerThreadLocal();
+        if (manager.get() == null) {
+            manager.set(new SingletonScopeManager());
+        }
+        manager.get().setCurrentScope(child);
 
         return child.scopeId;
     }
@@ -330,7 +350,11 @@ public class Scope {
             }
         }
 
-        getScopeManagerThreadLocal().get().setCurrentScope(currentScope.getParent());
+        InheritableThreadLocal<ScopeManager> manager = getScopeManagerThreadLocal();
+        if (manager.get() != null) {
+            manager.get().setCurrentScope(currentScope.getParent());
+            releaseIfAtRoot(manager);
+        }
     }
 
     /**
