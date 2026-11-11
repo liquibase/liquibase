@@ -57,10 +57,7 @@ public class ColumnAutoIncrementService {
                     String schemaName = (String) row.get("SCHEMA_NAME");
                     String tableName = (String) row.get("TABLE_NAME");
                     String columnName = (String) row.get("COLUMN_NAME");
-                    Long startValue = (Long) row.get("START_VALUE");
-                    Long incrementBy = (Long) row.get("INCREMENT_BY");
-
-                    Column.AutoIncrementInformation info = new Column.AutoIncrementInformation(startValue, incrementBy);
+                    Column.AutoIncrementInformation info = toAutoIncrementInformation(row);
                     autoIncrementColumns.put(String.format("%s.%s.%s", schemaName, tableName, columnName), info);
                 }
                 snapshot.setScratchData("autoIncrementColumns", autoIncrementColumns);
@@ -72,6 +69,30 @@ public class ColumnAutoIncrementService {
             }
         }
         return autoIncrementColumns;
+    }
+
+    /**
+     * Build the auto increment details for one row returned by the query from
+     * {@link #getQueryForDatabaseAndSchema(Database, Schema)}.
+     * When the row carries the PostgreSQL pg_attribute.attidentity value ("a" or "d") it is translated to the
+     * generation type used in changelogs ("ALWAYS" or "BY DEFAULT"). Any other value (for example an empty string
+     * for a serial column) leaves the generation type unset.
+     */
+    static Column.AutoIncrementInformation toAutoIncrementInformation(Map<String, ?> row) {
+        Long startValue = (Long) row.get("START_VALUE");
+        Long incrementBy = (Long) row.get("INCREMENT_BY");
+        Column.AutoIncrementInformation info = new Column.AutoIncrementInformation(startValue, incrementBy);
+
+        Object identityKind = row.get("IDENTITY_KIND");
+        if (identityKind != null) {
+            String kind = identityKind.toString().trim();
+            if ("a".equals(kind)) {
+                info.setGenerationType("ALWAYS");
+            } else if ("d".equals(kind)) {
+                info.setGenerationType("BY DEFAULT");
+            }
+        }
+        return info;
     }
 
     private String getQueryForDatabaseAndSchema(Database database, Schema schema) throws LiquibaseException {
@@ -110,7 +131,8 @@ public class ColumnAutoIncrementService {
                         "    pa.attname as COLUMN_NAME, " +
                         "    COALESCE(pg_sequence_last_value(c.oid::regclass) + s.seqincrement, " +
                         "      s.seqstart) AS START_VALUE, " +
-                        "    s.seqincrement AS INCREMENT_BY " +
+                        "    s.seqincrement AS INCREMENT_BY, " +
+                        "    pa.attidentity::text AS IDENTITY_KIND " +
                         "FROM pg_class c " +
                         "    JOIN pg_sequence s on c.oid = s.seqrelid " +
                         "    JOIN pg_namespace ns on c.relnamespace = ns.oid " +
