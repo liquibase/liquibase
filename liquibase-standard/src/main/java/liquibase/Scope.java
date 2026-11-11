@@ -143,6 +143,9 @@ public class Scope {
 
     private LiquibaseListener listener;
 
+    /**
+     * Returns the current scope of this thread, or the shared root scope if the thread is not inside a child scope.
+     */
     public static Scope getCurrentScope() {
         InheritableThreadLocal<ScopeManager> manager = getScopeManagerThreadLocal();
         if (manager.get() == null) {
