@@ -17,6 +17,18 @@ RUN addgroup --gid 1001 liquibase && \
 RUN apk upgrade --no-cache && \
     apk add --no-cache openjdk21-jre-headless bash
 
+# CVE-2026-91403 (8395142) and CVE-2026-114820 (8395690): openjdk21
+# 21.0.13.0.3_p1-r0 carries both fixes, but Alpine replaces the JDK's own cacerts
+# with a link to the system store built from ca-certificates, and Mozilla's
+# bundle (ca-certificates 20261020) still trusts emSign Root CA - G1, which
+# 8395690 removes. Deselecting it here also regenerates the Java store through
+# the java-cacerts hook. The check fails the build if the JDK does not block the
+# eMudhra intermediate (EM DV TLS CA - G3B) or still trusts a removed root.
+RUN sed -i 's|^mozilla/emSign_Root_CA_-_G1\.crt$|!&|' /etc/ca-certificates.conf && \
+    update-ca-certificates && \
+    grep -qx 45A883F349AEDFD5F3A649B5498FFB121712BA8B448F3F2A91DBC5A766FCDDBE /usr/lib/jvm/java-21-openjdk/lib/security/blocked.certs && \
+    ! keytool -list -v -cacerts -storepass changeit | grep -E '^Owner: CN=(emSign Root CA - G[12]|emSign ECC Root CA - G3|AAA Certificate Services),'
+
 WORKDIR /liquibase
 
 ARG LIQUIBASE_VERSION=5.0.4
