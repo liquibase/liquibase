@@ -275,30 +275,23 @@ This is the pattern TECHOPS-1295 established here and the later steps of TECHOPS
 
 1. **Find the group.** `liquibase-infrastructure/vault-manager/grouped-secrets.json` maps every key to its group. A job may read a group only if this repository is listed in one of the group's shards; that is what the role's trust policy is generated from.
 2. **Get the role ARN.** `liquibase-infrastructure/vault-manager/grouped-github-secrets.tf` writes one repository secret per group the repo is listed in, named `VAULT_GROUPED_<GROUP>_ROLE_ARN` with the group upper-cased and `-` turned into `_`. A repo that is not yet in that file's list has no secrets and cannot start migrating.
-3. **Assume, then read.** One `configure-aws-credentials` and one read step per group:
+3. **Read it with build-logic's `setup-aws-vault`.** One step per group, pinned by commit SHA like every other build-logic action (TECHOPS-1600):
 
    ```yaml
-   - name: Configure AWS credentials for the gpg-signing secret
-     uses: aws-actions/configure-aws-credentials@<sha> # v6.3.0
-     with:
-       role-to-assume: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
-       aws-region: us-east-1
-
    - name: Get the GPG signing key from vault
-     uses: aws-actions/aws-secretsmanager-get-secrets@<sha> # v3.0.2
+     uses: liquibase/build-logic/.github/actions/setup-aws-vault@<sha> # main
      with:
-       secret-ids: |
-         ,/vault/grouped/gpg-signing
-       parse-json-secrets: true
+       group: gpg-signing
+       role-arn: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
    ```
 
-   The leading comma is the empty alias: keys land in the job env under their own names, `GPG_SECRET` and `GPG_PASSPHRASE`, exactly as the old blob read exported them, so nothing downstream changes. `aws-secretsmanager-get-secrets` was the wrong tool against a 200-key blob (TECHOPS-1107); against a secret that holds one credential it is the right one.
-4. **A job that needs fewer keys than the group holds is a grouping bug.** Split the group in `grouped-secrets.json` rather than filtering in the workflow: that is how `docs-agent-jira` came out of `jira-automation`. The `jq` loop from TECHOPS-1107 survives only where the values must go to step outputs instead of the job env (`tag-release`, the one `contents: write` job).
-5. **Several groups, several assumes.** Repeat the pair per group. A second `configure-aws-credentials` replaces the first job-wide, which is what you want: the job holds one role at a time.
+   Keys land in the job env under their own names, `GPG_SECRET` and `GPG_PASSPHRASE`, exactly as the old blob read exported them, so nothing downstream changes. The role's credentials stay inside the action, so later steps cannot read the rest of the group with them.
+4. **A job that needs fewer keys than the group holds is a grouping bug.** Split the group in `grouped-secrets.json` rather than filtering in the workflow: that is how `docs-agent-jira` came out of `jira-automation`. `keys: A B` exports only those keys, but it is a filter, not a boundary. The `jq` loop from TECHOPS-1107 survives only where the values must go to step outputs instead of the job env (`tag-release`, the one `contents: write` job).
+5. **Several groups, several steps.** Repeat the step per group; each assumes its own role and drops it again.
 6. **Pinned groups need an environment.** `gpg-signing`, `sonatype`, `wpengine-sftp`, `code-signing-digicert` and `cloudflare-r2` trust only `environment:release` and `environment:release-publish` from this repository, and `repo-liquibase-net` only `environment:release-publish`. A job without an `environment:` gets `AccessDenied` from STS, which is how `deploy-maven-dryrun` came to declare `release-publish`.
 7. **Pull requests never qualify.** Every grouped role denies the `:pull_request` subject, same as the legacy roles.
 
-Still on the old vault: build-logic's `package.yml` (called by this repo's `package` job) reads the whole `/vault/liquibase` secret through the broad `LIQUIBASE_VAULT_OIDC_ROLE_ARN` role, plus its R2 and cache-purge keys from `/vault/devops`; build-logic's `claude.yml`, which this repo's `claude.yml` calls, reads `/vault/liquibase` the same way. Both switch to grouped secrets when build-logic itself is migrated (TECHOPS-1108, step 3); nothing in this repository changes for them.
+build-logic's reusable workflows read their groups the same way, with `aws-account-id` and the role name in place of `role-arn`, because they run with the caller's secrets (TECHOPS-1296).
 
 ## Key Benefits
 
