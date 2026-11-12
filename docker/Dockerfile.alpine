@@ -24,11 +24,17 @@ RUN apk upgrade --no-cache && \
 # 8395690 removes. Deselecting it here also regenerates the Java store through
 # the java-cacerts hook. The check fails the build if the JDK does not block the
 # eMudhra intermediate (EM DV TLS CA - G3B) or still trusts a removed root.
+# Only G1 is deselected: of the roots 8395690 distrusts (emSign G1, G2, ECC G3,
+# Comodo AAA) it is the only one still shipped. The store must list at least 100
+# roots, so a change in keytool's output fails here instead of letting the
+# negative checks pass on text they can't read; G1 is also matched by SHA-256.
 RUN sed -i 's|^mozilla/emSign_Root_CA_-_G1\.crt$|!&|' /etc/ca-certificates.conf && \
     update-ca-certificates && \
     grep -qx 45A883F349AEDFD5F3A649B5498FFB121712BA8B448F3F2A91DBC5A766FCDDBE /usr/lib/jvm/java-21-openjdk/lib/security/blocked.certs && \
     cacerts="$(keytool -list -v -cacerts -storepass changeit)" && \
-    ! printf '%s\n' "$cacerts" | grep -E '^Owner: CN=(emSign Root CA - G[12]|emSign ECC Root CA - G3|AAA Certificate Services),'
+    [ "$(printf '%s\n' "$cacerts" | grep -c '^Owner: CN=')" -ge 100 ] && \
+    ! printf '%s\n' "$cacerts" | grep -E '^Owner: CN=(emSign Root CA - G[12]|emSign ECC Root CA - G3|AAA Certificate Services),' && \
+    ! printf '%s\n' "$cacerts" | grep -q 'SHA256: 40:F6:AF:03:46:A9:9A:A1:CD:1D:55:5A:4E:9C:CE:62:C7:F9:63:46:03:EE:40:66:15:83:3D:C8:C8:D0:03:67'
 
 WORKDIR /liquibase
 
