@@ -27,7 +27,8 @@ RUN apk upgrade --no-cache && \
 RUN sed -i 's|^mozilla/emSign_Root_CA_-_G1\.crt$|!&|' /etc/ca-certificates.conf && \
     update-ca-certificates && \
     grep -qx 45A883F349AEDFD5F3A649B5498FFB121712BA8B448F3F2A91DBC5A766FCDDBE /usr/lib/jvm/java-21-openjdk/lib/security/blocked.certs && \
-    ! keytool -list -v -cacerts -storepass changeit | grep -E '^Owner: CN=(emSign Root CA - G[12]|emSign ECC Root CA - G3|AAA Certificate Services),'
+    cacerts="$(keytool -list -v -cacerts -storepass changeit)" && \
+    ! printf '%s\n' "$cacerts" | grep -E '^Owner: CN=(emSign Root CA - G[12]|emSign ECC Root CA - G3|AAA Certificate Services),'
 
 WORKDIR /liquibase
 
