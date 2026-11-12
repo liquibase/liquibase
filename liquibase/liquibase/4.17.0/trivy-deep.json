@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a1ca12-35f1-7586-a5f3-314f468ada77",
-  "CreatedAt": "2026-11-11T10:05:53.52136344Z",
+  "ReportID": "01a1cf38-ab50-7b60-aa8b-cf385cb39190",
+  "CreatedAt": "2026-11-12T10:06:00.016746894Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -731,13 +731,15 @@
           },
           "References": [
             "http://www.openwall.com/lists/oss-security/2024/04/02/6",
+            "https://access.redhat.com/errata/RHSA-2024:1435",
             "https://access.redhat.com/errata/RHSA-2024:1436",
             "https://access.redhat.com/security/cve/CVE-2024-1597",
             "https://bugzilla.redhat.com/2266523",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2266523",
+            "https://creativecommons.org/licenses/by/4.0/",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-1597",
-            "https://errata.almalinux.org/9/ALSA-2024-1436.html",
-            "https://errata.rockylinux.org/RLSA-2024:1435",
+            "https://errata.almalinux.org/8/ALSA-2024-1435.html",
+            "https://errata.rockylinux.org/RLSA-2024:1436",
             "https://github.com/pgjdbc/pgjdbc",
             "https://github.com/pgjdbc/pgjdbc/commit/06abfb78a627277a580d4df825f210e96a4e14ee",
             "https://github.com/pgjdbc/pgjdbc/commit/06abfb78a627277a580d4df825f210e96a4e14ee%20%28REL42.7.2%29",
@@ -833,8 +835,8 @@
             "https://bugzilla.redhat.com/show_bug.cgi?id=2463857",
             "https://creativecommons.org/licenses/by/4.0/",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42198",
-            "https://errata.almalinux.org/9/ALSA-2026-22304.html",
-            "https://errata.rockylinux.org/RLSA-2026:25030",
+            "https://errata.almalinux.org/8/ALSA-2026-25030.html",
+            "https://errata.rockylinux.org/RLSA-2026:22304",
             "https://github.com/pgjdbc/pgjdbc",
             "https://github.com/pgjdbc/pgjdbc/commit/c9d41d1332a7426fcef19ff89f2e6b1116429143%20%28REL42.7.11%29",
             "https://github.com/pgjdbc/pgjdbc/releases/tag/REL42.7.11",
@@ -846,7 +848,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-42198"
           ],
           "PublishedDate": "2026-04-29T16:16:25.427Z",
-          "LastModifiedDate": "2026-09-11T13:17:58.347Z"
+          "LastModifiedDate": "2026-11-11T21:10:00.2Z"
         },
         {
           "VulnerabilityID": "CVE-2023-32697",
