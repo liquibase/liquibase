@@ -62,7 +62,7 @@ public class TimestampType extends DateTimeType {
         if (database instanceof MySQLDatabase) {
             // MySQL uses plain TIMESTAMP which automatically converts to/from UTC
             // All timestamp types (with or without timezone) map to TIMESTAMP
-            String lowerDef = originalDefinition.toLowerCase();
+            String lowerDef = originalDefinition.toLowerCase(Locale.US);
 
             if (isNativeMySqlTimestampDefinitionWithColumnAttributes(lowerDef)) {
                 return new DatabaseDataType(getRawDefinition());
@@ -123,7 +123,7 @@ public class TimestampType extends DateTimeType {
          */
 
         // Check if this is a timezone-aware timestamp specification
-        String lowerDef = originalDefinition.toLowerCase();
+        String lowerDef = originalDefinition.toLowerCase(Locale.US);
         boolean isTimezoneAware = lowerDef.startsWith("java.sql.types.timestamp_with_timezone")
                 || lowerDef.startsWith("timestamptz")
                 || lowerDef.contains(" with time zone")
