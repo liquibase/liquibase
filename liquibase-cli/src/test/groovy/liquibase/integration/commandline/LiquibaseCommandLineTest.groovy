@@ -295,6 +295,18 @@ Global Options
                              (defaults file: 'liquibase.classpath', environment
                                variable: 'LIQUIBASE_CLASSPATH')
 
+      --clear-duplicate-tags=PARAM
+                             If true, applying a tag that is already in use
+                               clears it from the changesets that previously
+                               held it before tagging the latest changeset. If
+                               false (default), duplicate tags are kept and
+                               rollback by tag resolves to the oldest matching
+                               changeset.
+                             DEFAULT: false
+                             (defaults file: 'liquibase.clearDuplicateTags',
+                               environment variable:
+                               'LIQUIBASE_CLEAR_DUPLICATE_TAGS')
+
       --convert-data-types=PARAM
                              Should Liquibase convert to/from STANDARD data
                                types. Applies to both snapshot and update
