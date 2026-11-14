@@ -2,7 +2,13 @@ package liquibase.statement;
 
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.LoadDataChange;
+import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.Db2zDatabase;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -513,6 +519,43 @@ public class ExecutablePreparedStatementBaseTest {
         dateColumn.setType("STRING");
         preparedStatement.attachParams(columns, stmt);
         assertEquals(java.sql.Types.NULL, stmt.getParamTypes().get(1).intValue());
+    }
+
+    @Test
+    public void untypedNullUsesVarcharOnDatabasesRejectingTypesNull() throws DatabaseException, SQLException {
+        for (Database database : Arrays.asList(new DB2Database(), new Db2zDatabase(), new DerbyDatabase())) {
+            assertEquals(database.getShortName(), java.sql.Types.VARCHAR, bindNull(database, "STRING"));
+            assertEquals(database.getShortName(), java.sql.Types.VARCHAR, bindNull(database, null));
+            assertEquals(database.getShortName(), java.sql.Types.DATE, bindNull(database, "DATE"));
+        }
+    }
+
+    @Test
+    public void untypedNullUsesTypesNullOnOtherDatabases() throws DatabaseException, SQLException {
+        for (Database database : Arrays.asList(null, new PostgresDatabase(), new H2Database())) {
+            assertEquals(java.sql.Types.NULL, bindNull(database, "STRING"));
+            assertEquals(java.sql.Types.NULL, bindNull(database, null));
+        }
+    }
+
+    private int bindNull(Database database, String type) throws DatabaseException, SQLException {
+        ExecutablePreparedStatementBase preparedStatement = new ExecutablePreparedStatementBase(database, null, null, null, null, null, null) {
+            @Override
+            public boolean continueOnError() {
+                return false;
+            }
+
+            @Override
+            protected String generateSql(List<ColumnConfig> cols) {
+                return null;
+            }
+        };
+        ColumnConfig column = new ColumnConfig();
+        column.setName("some_column");
+        column.setType(type);
+        DummyPreparedStatement stmt = new DummyPreparedStatement();
+        preparedStatement.attachParams(Collections.singletonList(column), stmt);
+        return stmt.getParamTypes().get(1);
     }
 
     private static class DummyPreparedStatement implements PreparedStatement {
