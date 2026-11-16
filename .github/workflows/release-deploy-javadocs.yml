@@ -80,25 +80,15 @@ jobs:
       # gates deploy-maven on this job's result, so a hard failure here would skip the
       # Maven Central deployment for the whole release. A broken R2 leg degrades to a
       # warning and no published javadocs, never a failed release.
-      - name: Configure AWS credentials for the cloudflare-r2 secret
-        id: r2-auth
-        continue-on-error: true
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
-        with:
-          role-to-assume: ${{ secrets.VAULT_GROUPED_CLOUDFLARE_R2_ROLE_ARN }}
-          aws-region: us-east-1
-
       - name: Get the R2 access keys from vault
         id: r2-creds
         continue-on-error: true
-        if: steps.r2-auth.outcome == 'success'
         # TECHOPS-1295: /vault/grouped/cloudflare-r2 holds exactly the keys this job uses,
         # so the whole secret is parsed into the job env and nothing else comes along.
-        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
-          secret-ids: |
-            ,/vault/grouped/cloudflare-r2
-          parse-json-secrets: true
+          group: cloudflare-r2
+          role-arn: ${{ secrets.VAULT_GROUPED_CLOUDFLARE_R2_ROLE_ARN }}
 
       - name: Publish javadocs to Cloudflare R2
         # TECHOPS-1318: the id is what makes the warn step below able to see a
@@ -135,5 +125,5 @@ jobs:
         # stay false and the job would report green having published nothing. A
         # skipped publish also has a non-success outcome, so the last clause
         # subsumes the others; they are kept for legibility about what can go wrong.
-        if: steps.r2-auth.outcome != 'success' || steps.r2-creds.outcome != 'success' || steps.r2-publish.outcome != 'success'
+        if: steps.r2-creds.outcome != 'success' || steps.r2-publish.outcome != 'success'
         run: echo "::warning::javadocs were NOT published to Cloudflare R2. javadocs.liquibase.com will serve the previous release until this is re-run."
