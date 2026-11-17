@@ -113,4 +113,15 @@ public interface ChangeLogHistoryService extends Plugin {
     @Deprecated
     default void replaceFilePath(ChangeSet changeSet, String oldPath) throws DatabaseException {
     }
+
+    /**
+     * Returns true if {@link #setExecType(ChangeSet, ChangeSet.ExecType)} and {@link #removeFromHistory(ChangeSet)}
+     * write to the history on the same connection and transaction used to run (or roll back) the changeset, and
+     * commit that transaction. When true, a changeset with runInTransaction=true can have its changes and its
+     * history update committed atomically. Defaults to false so implementations that write history elsewhere
+     * keep the existing behavior.
+     */
+    default boolean supportsAtomicHistoryUpdates() {
+        return false;
+    }
 }

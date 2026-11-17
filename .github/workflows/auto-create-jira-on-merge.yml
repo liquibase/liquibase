@@ -106,20 +106,11 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       github.event_name == 'milestone'
     steps:
-      - name: Configure AWS credentials for the jira-automation secret
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
-        with:
-          role-to-assume: ${{ secrets.VAULT_GROUPED_JIRA_AUTOMATION_ROLE_ARN }}
-          aws-region: us-east-1
-
       - name: Get the Jira service-account credentials from vault
-        # TECHOPS-1295: /vault/grouped/jira-automation holds exactly JIRA_USER and
-        # JIRA_API_TOKEN, so the whole secret is parsed into the job env.
-        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
-          secret-ids: |
-            ,/vault/grouped/jira-automation
-          parse-json-secrets: true
+          group: jira-automation
+          role-arn: ${{ secrets.VAULT_GROUPED_JIRA_AUTOMATION_ROLE_ARN }}
 
       - name: Auto-create / update tickets
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9

@@ -4,6 +4,7 @@ import liquibase.UpdateSummaryEnum;
 import liquibase.command.*;
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.database.Database;
+import liquibase.lockservice.LockService;
 import liquibase.util.LoggingExecutorTextUtil;
 
 import java.io.Writer;
@@ -46,9 +47,11 @@ public class UpdateSqlCommandStep extends AbstractUpdateCommandStep {
 
     @Override
     public List<Class<?>> requiredDependencies() {
+        // Lock is acquired lazily in run(), only if the fast-check finds pending changes -- see #6102.
         List<Class<?>> dependencies = new ArrayList<>();
         dependencies.add(Writer.class);
         dependencies.addAll(super.requiredDependencies());
+        dependencies.remove(LockService.class);
         return dependencies;
     }
 
@@ -58,6 +61,7 @@ public class UpdateSqlCommandStep extends AbstractUpdateCommandStep {
         final Database database = (Database) commandScope.getDependency(Database.class);
         final String changelogFile = commandScope.getArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG);
         LoggingExecutorTextUtil.outputHeader("Update Database Script", database, changelogFile);
+        setDBLock(false);
         super.run(resultsBuilder);
     }
 

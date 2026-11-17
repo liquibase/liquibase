@@ -123,8 +123,10 @@ public class UpdateVisitor implements ChangeSetVisitor {
         fireWillRun(changeSet, databaseChangeLog, database, runStatus);
         ExecType execType;
         ObjectQuotingStrategy previousStr = this.database.getObjectQuotingStrategy();
+        // Leave the changeset transaction open so the history row commits with it, when that is safe
+        boolean deferCommit = HistoryTransactionSupport.commitsWithHistory(changeSet, this.database);
         try {
-            execType = changeSet.execute(databaseChangeLog, execListener, this.database);
+            execType = changeSet.execute(databaseChangeLog, execListener, this.database, deferCommit);
 
         } catch (MigrationFailedException e) {
             fireRunFailed(changeSet, databaseChangeLog, database, e);
@@ -138,7 +140,19 @@ public class UpdateVisitor implements ChangeSetVisitor {
         // reset object quoting strategy after running changeset
         this.database.setObjectQuotingStrategy(previousStr);
         if (execType != ExecType.SKIPPED) {
-            this.database.markChangeSetExecStatus(changeSet, execType);
+            try {
+                this.database.markChangeSetExecStatus(changeSet, execType);
+            } catch (DatabaseException | RuntimeException e) {
+                if (deferCommit) {
+                    // the changes were not committed yet: roll them back so they are not left without a history row
+                    try {
+                        this.database.rollback();
+                    } catch (DatabaseException rollbackException) {
+                        e.addSuppressed(rollbackException);
+                    }
+                }
+                throw e;
+            }
             fireRan(changeSet, databaseChangeLog, database, execType);
         }
     }

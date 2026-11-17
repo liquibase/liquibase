@@ -731,6 +731,16 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     public ExecType execute(DatabaseChangeLog databaseChangeLog, ChangeExecListener listener, Database database)
             throws MigrationFailedException {
+        return execute(databaseChangeLog, listener, database, false);
+    }
+
+    /**
+     * Same as {@link #execute(DatabaseChangeLog, ChangeExecListener, Database)}, but when deferCommit is true
+     * and the changeset runs in a transaction, the transaction is left open on success. The caller is then
+     * responsible for committing it (for example together with the DATABASECHANGELOG row) or rolling it back.
+     */
+    public ExecType execute(DatabaseChangeLog databaseChangeLog, ChangeExecListener listener, Database database,
+                            boolean deferCommit) throws MigrationFailedException {
         Logger log = getCurrentScope().getLog(getClass());
         addChangeSetMdcProperties();
         Boolean failOnError = getFailOnError();
@@ -869,7 +879,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     }
                 }
 
-                if (runInTransaction) {
+                if (runInTransaction && !deferCommit) {
                     database.commit();
                 }
                 if (skippedAllChanges) {
@@ -920,6 +930,16 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 Scope.getCurrentScope().getUI().sendMessage("Changeset " + toString(false) + " failed, and the error was ignored because 'failOnError' was set to false. ");
                 log.info("Changeset " + toString(false) + " failed, and the error was ignored because 'failOnError' was set to false.  Error: " + e.getMessage());
                 log.fine("Failure Stacktrace", e);
+                // For update-sql/update-count-sql, any statements this changeset already emitted above (e.g.
+                // from a change preceding the one that failed) have no corresponding indication in the script
+                // that they belong to a changeset that didn't actually complete -- flag it so the script isn't
+                // mistaken for a complete, successful deployment of this changeset (#7550).
+                try {
+                    Executor failureCommentExecutor = getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+                    failureCommentExecutor.comment("Changeset " + toString(false) + " failed and was skipped (failOnError=false); statements above for it must not be applied on their own.");
+                } catch (Exception commentException) {
+                    log.fine("Could not add failure comment to output", commentException);
+                }
                 execType = ExecType.FAILED;
             } else {
                 if (e instanceof MigrationFailedException) {
@@ -1009,7 +1029,20 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         rollback(database, null);
     }
 
+    /**
+     * Rolls back the changes in this changeset against the given database and, if the changeset runs in a
+     * transaction, commits the rollback.
+     */
     public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
+        rollback(database, listener, false);
+    }
+
+    /**
+     * Same as {@link #rollback(Database, ChangeExecListener)}, but when deferCommit is true and the changeset runs
+     * in a transaction, the transaction is left open on success. The caller is then responsible for committing it
+     * (for example together with removing the DATABASECHANGELOG row) or rolling it back.
+     */
+    public void rollback(Database database, ChangeExecListener listener, boolean deferCommit) throws RollbackFailedException {
         setStartTime();
         getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, startInstant.toString());
         addChangeSetMdcProperties();
@@ -1073,7 +1106,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 }
             }
 
-            if (runInTransaction) {
+            if (runInTransaction && !deferCommit) {
                 database.commit();
             }
             setStopTime();

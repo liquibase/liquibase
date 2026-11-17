@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.liquibase</groupId>
     <artifactId>liquibase-maven-plugin</artifactId>
-    <version>0-SNAPSHOT</version>
+    <version>${project.version}</version>
     <packaging>maven-plugin</packaging>
     <name>Liquibase Maven Plugin</name>
     <description>A Maven plugin wraps up some of the functionality of Liquibase</description>
@@ -37,7 +37,7 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>0-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>

@@ -163,6 +163,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
             String finalSql = applyVisitors((RawParameterizedSqlStatement) sql, sqlVisitors);
 
+            logSql(finalSql);
             try (PreparedStatement pstmt = factory.create(finalSql)) {
                 setParameters(pstmt, (RawParameterizedSqlStatement) sql);
                 pstmt.execute();
@@ -239,6 +240,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
             String finalSql = applyVisitors((RawParameterizedSqlStatement) sql, sqlVisitors);
 
+            logSql(finalSql);
             try (PreparedStatement pstmt = factory.create(finalSql)) {
                 setParameters(pstmt, (RawParameterizedSqlStatement) sql);
                 try (ResultSet rs = pstmt.executeQuery()) {
@@ -354,6 +356,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
                     listener.writeSqlWillRun(sqlToExecute[0]);
                 }
+                logSql(sqlToExecute[0]);
                 return stmt.executeUpdate(sqlToExecute[0]);
             }
 
@@ -450,6 +453,15 @@ public class JdbcExecutor extends AbstractExecutor {
             }
             throw new DatabaseException(message.toString());
         }
+    }
+
+    /**
+     * Logs the given SQL at the level configured by {@link SqlConfiguration#SHOW_AT_LOG_LEVEL}, the same way
+     * {@link ExecuteStatementCallback} does, so that queries and updates are visible alongside executed statements.
+     */
+    private void logSql(String sql) {
+        Level sqlLogLevel = SqlConfiguration.SHOW_AT_LOG_LEVEL.getCurrentValue();
+        Scope.getCurrentScope().getLog(JdbcExecutor.class).log(sqlLogLevel, System.lineSeparator() + sql, null);
     }
 
     String getErrorCode(Throwable e) {
@@ -588,6 +600,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     throw new DatabaseException("Can only query with statements that return one sql statement");
                 }
 
+                logSql(sqlToExecute[0]);
                 try {
                     rs = stmt.executeQuery(sqlToExecute[0]);
                     ResultSet rsToUse = rs;

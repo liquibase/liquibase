@@ -1,12 +1,16 @@
 package liquibase.changelog;
 
 import liquibase.GlobalConfiguration;
+import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.executor.ExecutorService;
+import liquibase.sdk.executor.MockExecutor;
+import liquibase.sqlgenerator.core.MarkChangeSetRanGenerator;
 import org.junit.Test;
 
 import java.sql.DriverManager;
@@ -40,6 +44,41 @@ public class StandardChangeLogHistoryServiceTest {
         service.reset();
 
         assertThat(service.getNextSequenceValue()).isEqualTo(1);
+    }
+
+    @Test
+    public void setExecTypeCachesEntryMatchingThePersistedRow() throws Exception {
+        final var database = new MockDatabase();
+        final var executorService = Scope.getCurrentScope().getSingleton(ExecutorService.class);
+        executorService.setExecutor("jdbc", database, new MockExecutor());
+        try {
+            final var service = new StandardChangeLogHistoryService() {
+                @Override
+                public boolean hasDatabaseChangeLogTable() {
+                    return false;
+                }
+            };
+            service.setDatabase(database);
+            assertThat(service.getRanChangeSets()).isEmpty();
+
+            final var changeLog = new DatabaseChangeLog("db/changelog.xml");
+            changeLog.setIncludeLabels(new Labels("includeLabel"));
+            final var changeSet = new ChangeSet("1", "author", false, false, "db/changelog.xml", "context1", null, changeLog);
+            changeSet.setLabels(new Labels("label1"));
+
+            Scope.child(Collections.singletonMap(Scope.Attr.deploymentId.name(), "1234567890"),
+                    () -> service.setExecType(changeSet, ChangeSet.ExecType.EXECUTED));
+
+            assertThat(service.getRanChangeSets()).hasSize(1);
+            final var ranChangeSet = service.getRanChangeSets().get(0);
+            assertThat(ranChangeSet.getExecType()).isEqualTo(ChangeSet.ExecType.EXECUTED);
+            assertThat(ranChangeSet.getDeploymentId()).isEqualTo("1234567890");
+            assertThat(ranChangeSet.getLiquibaseVersion()).isEqualTo(MarkChangeSetRanGenerator.getLiquibaseBuildVersion());
+            assertThat(ranChangeSet.getContextExpression().toString()).isEqualTo(changeSet.buildFullContext());
+            assertThat(ranChangeSet.getLabels().toString()).isEqualTo("includelabel,label1");
+        } finally {
+            executorService.clearExecutor("jdbc", database);
+        }
     }
 
     /**

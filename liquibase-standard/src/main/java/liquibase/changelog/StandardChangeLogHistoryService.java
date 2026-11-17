@@ -396,6 +396,15 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         return super.getRanChangeSet(changeSet);
     }
 
+    /**
+     * Returns true: {@link #setExecType} and {@link #removeFromHistory} write on the same connection as the
+     * changeset and commit it.
+     */
+    @Override
+    public boolean supportsAtomicHistoryUpdates() {
+        return true;
+    }
+
     @Override
     public void setExecType(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
         SqlStatement markChangeSetRanStatement = new MarkChangeSetRanStatement(changeSet, execType);
@@ -408,7 +417,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             throw new DatabaseException(e);
         }
         if (this.ranChangeSetList != null) {
-            this.ranChangeSetList.add(new RanChangeSet(changeSet, execType, null, null));
+            // ORDEREXECUTED is obtained inside the SQL generator and is not reliably known here
+            this.ranChangeSetList.add(new RanChangeSet(changeSet, execType, null));
         }
 
     }
