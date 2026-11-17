@@ -783,7 +783,14 @@ public class Liquibase implements AutoCloseable {
     }
     // ---------- End RollbackToDate Family of methods
 
-    private Executor getAndReplaceJdbcExecutor(Writer output) {
+    private Executor getAndReplaceJdbcExecutor(Writer output) throws LiquibaseException {
+        // these legacy methods run the regular (non-sql) commands with a LoggingExecutor, thus they bypass the
+        // check in AbstractOutputWriterCommandStep
+        if (!database.supportsSqlOutput()) {
+            throw new LiquibaseException(String.format(
+                    "Generating SQL output is not supported for %s: this database cannot produce SQL output",
+                    database.getDisplayName()));
+        }
         /* We have no other choice than to save the current Executor here. */
         @SuppressWarnings("squid:S1941")
         Executor oldTemplate = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
