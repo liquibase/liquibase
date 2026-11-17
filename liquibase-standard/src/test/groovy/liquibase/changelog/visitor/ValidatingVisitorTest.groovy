@@ -8,6 +8,8 @@ import liquibase.change.core.OutputChange
 import liquibase.change.core.SQLFileChange
 import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet
+import liquibase.precondition.core.ChangeSetExecutedPrecondition
+import liquibase.precondition.core.PreconditionContainer
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.changelog.RanChangeSet
 import liquibase.database.Database
@@ -333,5 +335,58 @@ class ValidatingVisitorTest extends Specification {
 
         then:
         handler.validationPassed()
+    }
+
+    void "validate reports errors from changeset preconditions"() {
+        given:
+        def changeSet = new ChangeSet(
+                "1", "testAuthor", false, false,
+                "path/changelog", null, null, null
+        )
+
+        def preconditions = new PreconditionContainer()
+        preconditions.addNestedPrecondition(
+                new ChangeSetExecutedPrecondition()
+        )
+        changeSet.setPreconditions(preconditions)
+
+        def handler = new ValidatingVisitor(new ArrayList<RanChangeSet>())
+
+        when:
+        handler.visit(changeSet, new DatabaseChangeLog(), new MockDatabase(), null)
+
+        then:
+        !handler.validationPassed()
+        handler.getValidationErrors().getErrorMessages().any {
+            it.contains("changeLogFile") && it.contains("required")
+        }
+    }
+
+    void "validate reports errors from changeset preconditions when changeset has already run"() {
+        given:
+        def changeSet = new ChangeSet(
+                "1", "testAuthor", false, false,
+                "path/changelog", null, null, null
+        )
+
+        def preconditions = new PreconditionContainer()
+        preconditions.addNestedPrecondition(
+                new ChangeSetExecutedPrecondition()
+        )
+        changeSet.setPreconditions(preconditions)
+
+        def ranChangeSets = new ArrayList<RanChangeSet>()
+        ranChangeSets.add(new RanChangeSet(changeSet))
+
+        def handler = new ValidatingVisitor(ranChangeSets)
+
+        when:
+        handler.visit(changeSet, new DatabaseChangeLog(), new MockDatabase(), null)
+
+        then:
+        !handler.validationPassed()
+        handler.getValidationErrors().getErrorMessages().any {
+            it.contains("changeLogFile") && it.contains("required")
+        }
     }
 }
