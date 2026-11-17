@@ -84,21 +84,21 @@ class CreateViewGeneratorTest extends Specification {
         then:
         sql.length == expectedNumOfSqlStatements
         if (sql.length == 1) {
-            sql[0].toString() == "CREATE OR REPLACE VIEW PUBLIC.my_view AS " + selectQuery + ";"
+            assert sql[0].toString() == "CREATE OR REPLACE VIEW " + viewName + " AS " + selectQuery + ";"
         }
         else {
-            sql[0].toString() == "DROP VIEW IF EXISTS PUBLIC.my_view;"
-            sql[1].toString() == "CREATE OR REPLACE VIEW PUBLIC.my_view AS " + selectQuery + ";"
+            assert sql[0].toString() == "DROP VIEW IF EXISTS " + viewName + ";"
+            assert sql[1].toString() == "CREATE VIEW " + viewName + " AS " + selectQuery + ";"
         }
 
         where:
-        database | alwaysDropInsteadOfReplacePropValue | expectedNumOfSqlStatements
-        new HsqlDatabase() | "false" | 2
-        new HsqlDatabase() | "true" | 2
-        new OracleDatabase() | "false" | 1
-        new OracleDatabase() | "true" | 1
-        new PostgresDatabase() | "false" | 1
-        new PostgresDatabase() | "true" | 2
+        database | alwaysDropInsteadOfReplacePropValue | expectedNumOfSqlStatements | viewName
+        new HsqlDatabase() | "false" | 2 | "\"SCHEMA\".my_view"
+        new HsqlDatabase() | "true" | 2 | "\"SCHEMA\".my_view"
+        new OracleDatabase() | "false" | 1 | "PUBLIC.my_view"
+        new OracleDatabase() | "true" | 1 | "PUBLIC.my_view"
+        new PostgresDatabase() | "false" | 1 | "schema.my_view"
+        new PostgresDatabase() | "true" | 2 | "schema.my_view"
     }
 
     def "full definition is used if it contains CREATE OR ALTER"() {

@@ -716,7 +716,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     try {
                         def returnValue = shell.evaluate(it)
 
-                        if (!returnValue instanceof CommandTestDefinition) {
+                        if (!(returnValue instanceof CommandTestDefinition)) {
                             org.spockframework.util.Assert.fail("${it} is not a CommandTest definition")
                         }
 
