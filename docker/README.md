@@ -456,6 +456,14 @@ To use a default configuration file, mount it in your changelog volume and refer
 docker run --rm -v /path/to/changelog:/liquibase/changelog liquibase/liquibase --defaultsFile=liquibase.properties update
 ```
 
+The `LIQUIBASE_DEFAULTS_FILE` environment variable works the same way:
+
+```shell
+docker run --rm -e LIQUIBASE_DEFAULTS_FILE=liquibase.properties -v /path/to/changelog:/liquibase/changelog liquibase/liquibase update
+```
+
+The image sets `LIQUIBASE_HEADLESS=true`. Environment variables take precedence over the defaults file, so use `-e LIQUIBASE_HEADLESS=false` to turn it off.
+
 ### 📚 Including Drivers and Extensions
 
 Mount a local directory containing additional jars to `/liquibase/lib`.

@@ -57,6 +57,8 @@ RUN apt-get update && \
 ENV LIQUIBASE_HOME=/liquibase
 # Marker which indicates this is a Liquibase docker container
 ENV DOCKER_LIQUIBASE=true
+# Keeps headless mode on when another defaults file replaces liquibase.docker.properties
+ENV LIQUIBASE_HEADLESS=true
 
 COPY docker-entrypoint.sh ./
 COPY liquibase.docker.properties ./
