@@ -540,6 +540,13 @@
         <loadData tableName="csvdata" file="changelogs/sample.data1.csv.gz"/>
     </changeSet>
 
+    <changeSet id="sampleCSVDataWithNull" author="seonwooj0810">
+        <!-- a NULL in a STRING column is bound without a concrete SQL type; DB2 and Derby must still accept it (#2177) -->
+        <loadData tableName="csvdata" file="changelogs/sample.data.null.csv">
+            <column header="username" type="STRING"/>
+        </loadData>
+    </changeSet>
+
     <changeSet id="createTableNamedPKRef" author="nvoxland" dbms="db2">
         <createTable tableName="createtablenamedpkref">
             <column name="id" type="int">
