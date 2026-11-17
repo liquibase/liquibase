@@ -43,9 +43,12 @@ class UpdateCommandWithIncludeAll extends Specification {
         resultSet.next()
         resultSet.getString("filename") == "changelogs/h2/update/logicalFilePath.xml"
         while (resultSet.next()) {
-            resultSet.getString("filename") == "myLogical"
             if (resultSet.getString("author") == "includeAll") {
-                resultSet.getString("id") == "raw_execution-parameter_test.sql"
+                // raw SQL change sets keep their physical path, see DatabaseChangeLog.include
+                assert resultSet.getString("filename") == "changelogs/h2/update/execution-parameter/test.sql"
+                assert resultSet.getString("id") == "raw"
+            } else {
+                assert resultSet.getString("filename") == "myLogical"
             }
         }
     }
