@@ -34,7 +34,8 @@ public class ChangeSetExecutedPrecondition extends AbstractPrecondition {
 
     @Override
     public ValidationErrors validate(Database database) {
-        return new ValidationErrors();
+        return new ValidationErrors(this)
+                .checkRequiredField("changeLogFile", getChangeLogFile());
     }
     
     @Override
