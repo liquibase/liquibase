@@ -29,6 +29,7 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep impl
 
     public static final CommandResultDefinition<DiffOutputControl> DIFF_OUTPUT_CONTROL;
 
+    public static final CommandArgumentDefinition<Boolean> PRESERVE_NULL_VALUES;
 
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -47,6 +48,9 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep impl
                 .description("Objects to include in diff. Supports regular expressions. Defaults to null.").build();
 
         DIFF_OUTPUT_CONTROL = builder.result("diffOutputControl", DiffOutputControl.class).build();
+
+        PRESERVE_NULL_VALUES = builder.argument("preserveNullValues", Boolean.class).defaultValue(true)
+                .description("If true, preserves NULL values in columns. Defaults to true.").build();
     }
 
     @Override
@@ -98,6 +102,8 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep impl
             diffOutputControl.setObjectChangeFilter(objectChangeFilter);
         }
         diffOutputControl.setDataDir(dataDir);
+
+        diffOutputControl.setPreserveNullValues(commandScope.getArgumentValue(PRESERVE_NULL_VALUES));
 
         return diffOutputControl;
     }
