@@ -88,13 +88,13 @@ jobs:
         run: gh release download "$TAG" --repo liquibase/liquibase --dir "."
 
       - name: Get the GPG signing key from vault
-        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@08565cd77f23deeca9b1dd1f2e93b94bafefcacb # main
         with:
           group: gpg-signing
           role-arn: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
 
       - name: Get the Maven Central credentials from vault
-        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@08565cd77f23deeca9b1dd1f2e93b94bafefcacb # main
         with:
           group: sonatype
           role-arn: ${{ secrets.VAULT_GROUPED_SONATYPE_ROLE_ARN }}
@@ -114,7 +114,7 @@ jobs:
           echo "::add-mask::${GPG_KEY_CONTENT}"
 
       - name: Set up Java for publishing to Maven Central Repository
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           java-version: "17"
           distribution: "temurin"
@@ -271,13 +271,13 @@ jobs:
             --dir "."
 
       - name: Get the GPG signing key from vault
-        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@08565cd77f23deeca9b1dd1f2e93b94bafefcacb # main
         with:
           group: gpg-signing
           role-arn: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
 
       - name: Get the Nexus credentials from vault
-        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@08565cd77f23deeca9b1dd1f2e93b94bafefcacb # main
         with:
           group: repo-liquibase-net
           role-arn: ${{ secrets.VAULT_GROUPED_REPO_LIQUIBASE_NET_ROLE_ARN }}
@@ -297,7 +297,7 @@ jobs:
           echo "::add-mask::${GPG_KEY_CONTENT}"
 
       - name: Set up Java for publishing to Nexus
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           java-version: "17"
           distribution: "temurin"
