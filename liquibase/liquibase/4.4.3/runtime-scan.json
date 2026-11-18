@@ -1,6 +1,6 @@
 {
   "SchemaVersion": 2,
-  "CreatedAt": "2026-11-17T10:07:19Z",
+  "CreatedAt": "2026-11-18T10:07:06Z",
   "ArtifactName": "liquibase/liquibase:4.4.3",
   "ArtifactType": "container_image",
   "Scanner": {
