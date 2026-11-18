@@ -34,6 +34,33 @@ class ObjectMethodsTest {
     assertThat(objectMethods.getWriteMethod("name").getName()).isEqualTo("setName");
   }
 
+  @Test
+  void methodsAreFoundWithAnInitialUppercaseOrLowercasePropertyName() {
+    // changelogs written for versions before 4.29.0 use <param name="SchemaName"> for setSchemaName
+    ObjectMethods objectMethods = new ObjectMethods(Legacy.class);
+    assertThat(objectMethods.getWriteMethod("schemaName").getName()).isEqualTo("setSchemaName");
+    assertThat(objectMethods.getWriteMethod("SchemaName").getName()).isEqualTo("setSchemaName");
+    assertThat(objectMethods.getReadMethod("schemaName").getName()).isEqualTo("getSchemaName");
+    assertThat(objectMethods.getReadMethod("SchemaName").getName()).isEqualTo("getSchemaName");
+    assertThat(objectMethods.getReadMethod("Active").getName()).isEqualTo("isActive");
+    assertThat(objectMethods.getWriteMethod("PlSqlBlock").getName()).isEqualTo("setPlSqlBlock");
+  }
+
+  @Test
+  void initialLowercaseNameFindsAnAcronymMethod() {
+    // the pre-4.29.0 lookup built "set" + capitalized name, so "uRL" also reached setURL
+    ObjectMethods objectMethods = new ObjectMethods(Acronyms.class);
+    assertThat(objectMethods.getWriteMethod("uRL").getName()).isEqualTo("setURL");
+  }
+
+  @Test
+  void unknownAndEmptyNamesAreStillNotFound() {
+    ObjectMethods objectMethods = new ObjectMethods(Legacy.class);
+    assertThat(objectMethods.getWriteMethod("Missing")).isNull();
+    assertThat(objectMethods.getWriteMethod("")).isNull();
+    assertThat(objectMethods.getReadMethod("")).isNull();
+  }
+
   static class User {
     private final String name;
     private int age;
@@ -65,6 +92,31 @@ class ObjectMethodsTest {
     }
 
     public void setName(String value) {
+    }
+  }
+
+  static class Legacy {
+    private String schemaName;
+    private String plSqlBlock;
+
+    public String getSchemaName() {
+      return schemaName;
+    }
+
+    public void setSchemaName(String value) {
+      this.schemaName = value;
+    }
+
+    public boolean isActive() {
+      return true;
+    }
+
+    public String getPlSqlBlock() {
+      return plSqlBlock;
+    }
+
+    public void setPlSqlBlock(String value) {
+      this.plSqlBlock = value;
     }
   }
 }
