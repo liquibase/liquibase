@@ -1,6 +1,8 @@
 package liquibase.database.core
 
 import liquibase.structure.core.Column
+import liquibase.structure.core.Index
+import liquibase.structure.core.Table
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -47,5 +49,14 @@ class OracleDatabaseSpec extends Specification {
         null                      || 'internalPhoneNumber'   | Column     || 'INTERNALPHONENUMBER'   | 'internalPhoneNumber'
         null                      || 'internal_payload_id'   | Column     || 'INTERNAL_PAYLOAD_ID'   | 'internal_payload_id'
         null                      || 'integration_type'      | Column     || 'INTEGRATION_TYPE'      | 'integration_type'
+        // #3876: index names that must be quoted keep original case so indexExists can find them
+        null                      || 'index_-id'             | Index      || 'index_-id'             | '"index_-id"'
+        null                      || 'Idx-Mixed'             | Index      || 'Idx-Mixed'             | '"Idx-Mixed"'
+        null                      || 'my_index'              | Index      || 'MY_INDEX'              | 'my_index'
+        null                      || 'INDEX_-ID'             | Index      || 'INDEX_-ID'             | '"INDEX_-ID"'
+        // $ and # do not force quoting on Oracle, so an unquoted idx$tmp is stored as IDX$TMP
+        null                      || 'idx$tmp'               | Index      || 'IDX$TMP'               | '"idx$tmp"'
+        null                      || 'idx#tmp'               | Index      || 'IDX#TMP'               | '"idx#tmp"'
+        null                      || 'idx$tmp'               | Table      || 'IDX$TMP'               | '"idx$tmp"'
     }
 }
