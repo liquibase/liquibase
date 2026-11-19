@@ -462,8 +462,6 @@ The `LIQUIBASE_DEFAULTS_FILE` environment variable works the same way:
 docker run --rm -e LIQUIBASE_DEFAULTS_FILE=liquibase.properties -v /path/to/changelog:/liquibase/changelog liquibase/liquibase update
 ```
 
-The image sets `LIQUIBASE_HEADLESS=true`. Environment variables take precedence over the defaults file, so use `-e LIQUIBASE_HEADLESS=false` to turn it off.
-
 ### 📚 Including Drivers and Extensions
 
 Mount a local directory containing additional jars to `/liquibase/lib`.

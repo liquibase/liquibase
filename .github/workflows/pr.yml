@@ -79,9 +79,9 @@ jobs:
         run: |
           dir=$(mktemp -d)
           chmod 755 "$dir"
-          printf 'changelogFile=changelog.sql\nurl=jdbc:h2:mem:smoke\n' > "$dir/liquibase.properties"
+          printf 'changelogFile=changelog.sql\nurl=jdbc:h2:mem:smoke\n' > "$dir/smoke.properties"
           printf -- '--liquibase formatted sql\n--changeset smoke:1\ncreate table smoke (id int);\n' > "$dir/changelog.sql"
-          docker run --rm -e LIQUIBASE_DEFAULTS_FILE=liquibase.properties -v "$dir:/liquibase/changelog" liquibase-smoke:${{ matrix.variant }} update
+          docker run --rm -e LIQUIBASE_DEFAULTS_FILE=smoke.properties -v "$dir:/liquibase/changelog" liquibase-smoke:${{ matrix.variant }} update
 
   release-gate:
     name: Release approval gate
