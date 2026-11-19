@@ -327,6 +327,7 @@ class DataTypeFactoryTest extends Specification {
         liquibaseString                          | database               | databaseString
         "java.sql.Types.TIMESTAMP_WITH_TIMEZONE" | new PostgresDatabase() | "TIMESTAMP WITH TIME ZONE"
         "TIMESTAMPTZ"                            | new H2Database()       | "TIMESTAMP WITH TIME ZONE"
+        "TIMESTAMP WITH TIME ZONE"               | new MySQLDatabase()    | "timestamp"
     }
 
     @Unroll("#featureName: #object for #database")
