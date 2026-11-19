@@ -96,10 +96,77 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
         }
     }
 
+    /**
+     * A simple "interceptor" InputStream to ensure that the YAML stream doesn't contain two "databaseChangeLog" tags,
+     * which would otherwise cause silent omissions if something is copy/pasted wrongly into the file.
+     */
+    static class DoubleChangelogCheckerInputStream extends FilterInputStream {
+
+        byte[] databaseChangeLog = "databaseChangeLog".getBytes(StandardCharsets.UTF_8);
+        int scanPos;
+        boolean databaseChangeLogSeen;
+
+        DoubleChangelogCheckerInputStream(InputStream in) {
+            super(in);
+            scanPos = 0;
+            databaseChangeLogSeen = false;
+        }
+
+        private void processByte(int nextByte) {
+            // scanPos will be -1 if we aren't in a position where "databaseChangeLog" would cause a problem
+            // i.e. the beginning of a file or of a line
+            if (nextByte == 10) {
+                // a new line means we should expect to see it again
+                scanPos = 0;
+            } else if (scanPos > -1 && nextByte == databaseChangeLog[scanPos]) {
+                scanPos++;
+                if (scanPos == databaseChangeLog.length) {
+                    if (databaseChangeLogSeen) {
+                        throw new IllegalStateException("Two 'databaseChangeLog' tags found in a single file!");
+                    } else {
+                        databaseChangeLogSeen = true;
+                        scanPos = -1;
+                    }
+                }
+            } else {
+                // no point in scanning since the string was not found
+                scanPos = -1;
+            }
+        }
+
+        @Override
+        public int read() throws IOException {
+            int nextByte = super.read();
+            processByte(nextByte);
+            return nextByte;
+        }
+
+        @Override
+        public int read(byte[] b) throws IOException {
+            int numBytes = super.read(b);
+
+            for (int i=0; i<numBytes; i++) {
+                processByte(b[i]);
+            }
+
+            return numBytes;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            int numBytes = super.read(b, off, len);
+
+            for (int i=off; i < off + numBytes; i++) {
+                processByte(b[i]);
+            }
+            return numBytes;
+        }
+    }
+
     private Map parseYamlStream(String physicalChangeLogLocation, Yaml yaml, InputStream changeLogStream) throws ChangeLogParseException {
         Map parsedYaml;
         try {
-            parsedYaml = yaml.load(changeLogStream);
+            parsedYaml = yaml.load(new DoubleChangelogCheckerInputStream(changeLogStream));
         } catch (Exception e) {
             throw new ChangeLogParseException("Syntax error in file " + physicalChangeLogLocation + ": " + e.getMessage(), e);
         }
