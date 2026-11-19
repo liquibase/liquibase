@@ -18,7 +18,11 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.SchemaFactory;
+import java.io.StringReader;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
@@ -283,6 +287,7 @@ public class XMLChangeLogSerializerTest {
         CreateIndexChange refactoring = new CreateIndexChange();
         refactoring.setIndexName("IDX_TEST");
         refactoring.setTableName("TAB_NAME");
+        refactoring.setWhere("status = 'ACTIVE'");
 
         AddColumnConfig column1 = new AddColumnConfig();
         column1.setName("COL1");
@@ -297,6 +302,7 @@ public class XMLChangeLogSerializerTest {
         assertEquals("createIndex", element.getTagName());
         assertEquals("IDX_TEST", element.getAttribute("indexName"));
         assertEquals("TAB_NAME", element.getAttribute("tableName"));
+        assertEquals("status = 'ACTIVE'", element.getAttribute("where"));
 
         assertEquals(2, element.getChildNodes().getLength());
         assertEquals("column", ((Element) element.getChildNodes().item(0)).getTagName());
@@ -304,6 +310,26 @@ public class XMLChangeLogSerializerTest {
         assertEquals("column", ((Element) element.getChildNodes().item(1)).getTagName());
         assertEquals("COL2", ((Element) element.getChildNodes().item(1)).getAttribute("name"));
         assertEquals("true", ((Element) element.getChildNodes().item(1)).getAttribute("descending"));
+    }
+
+    @Test
+    public void dbchangelogSchemas_allowCreateIndexWhereAttribute() throws Exception {
+        String changelog = "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\">" +
+                "<changeSet id=\"1\" author=\"test\">" +
+                "<createIndex indexName=\"IDX_TEST\" tableName=\"TAB_NAME\" where=\"status = 'ACTIVE'\">" +
+                "<column name=\"COL1\"/>" +
+                "</createIndex>" +
+                "</changeSet>" +
+                "</databaseChangeLog>";
+        String[] schemaVersions = {"4.32", "4.33", "5.0", "latest"};
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+
+        for (String schemaVersion : schemaVersions) {
+            schemaFactory.newSchema(getClass().getResource(
+                    "/www.liquibase.org/xml/ns/dbchangelog/dbchangelog-" + schemaVersion + ".xsd"))
+                    .newValidator()
+                    .validate(new StreamSource(new StringReader(changelog)));
+        }
     }
 
     @Test
