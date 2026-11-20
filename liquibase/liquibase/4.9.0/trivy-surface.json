@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a1f345-0e44-7540-885c-f2dcf4002b4e",
-  "CreatedAt": "2026-11-19T10:05:51.556345257Z",
+  "ReportID": "01a1f86b-91c7-7337-aecc-e45698806408",
+  "CreatedAt": "2026-11-20T10:06:01.671213466Z",
   "ArtifactID": "sha256:9106c6d0efa5951e70c1c659bdb168f89dfe70dacf1368bcc0d9724669267393",
   "ArtifactName": "liquibase/liquibase:4.9.0",
   "ArtifactType": "container_image",
