@@ -1,7 +1,7 @@
 {
   "SchemaVersion": 2,
-  "CreatedAt": "2026-11-23T17:48:00Z",
-  "ArtifactName": "ghcr.io/liquibase/liquibase/liquibase-liquibase:96f805c4059b4dc9c962325566682545bced999b",
+  "CreatedAt": "2026-11-23T20:51:47Z",
+  "ArtifactName": "ghcr.io/liquibase/liquibase/liquibase-liquibase:2631af66148147cb1a22ac6bcf13bb1dfe0d338a",
   "ArtifactType": "container_image",
   "Scanner": {
     "Name": "Liquibase Runtime Check",
