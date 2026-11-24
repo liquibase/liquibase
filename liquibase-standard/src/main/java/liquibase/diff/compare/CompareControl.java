@@ -146,7 +146,9 @@ public class CompareControl {
         if ((types == null) || types.isEmpty()) {
             types = DatabaseObjectFactory.getInstance().getStandardTypes();
         }
-        this.compareTypes = types;
+        // A copy, so a holder that changes this control's set never changes the factory's cached
+        // standard types or the caller's set for the rest of the JVM.
+        this.compareTypes = new HashSet<>(types);
     }
 
     public Set<Class<? extends DatabaseObject>> getComparedTypes() {
