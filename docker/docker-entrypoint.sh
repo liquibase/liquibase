@@ -106,7 +106,7 @@ else
     fi
   fi
 
-  if [[ "$*" == *--defaultsFile* ]] || [[ "$*" == *--defaults-file* ]] || [[ "$*" == *--version* ]]; then
+  if [[ "$*" == *--defaultsFile* ]] || [[ "$*" == *--defaults-file* ]] || [[ "$*" == *--version* ]] || [[ -n "$LIQUIBASE_DEFAULTS_FILE" ]]; then
     ## Just run as-is, but add search path if needed
     if [ -n "$EXTRA_SEARCH_PATH" ]; then
       exec /liquibase/liquibase "$EXTRA_SEARCH_PATH" "$@"

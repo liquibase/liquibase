@@ -1054,7 +1054,73 @@ class LoadDataChangeTest extends StandardChangeTest {
         e.message.contains("Line 4")
     }
 
+    def "generateCheckSum returns a stable checksum instead of throwing when the file is missing and failOnError is false (#7550)"() {
+        when:
+        def changelog = new DatabaseChangeLog("com/example/changelog.xml")
+        def changeset = new ChangeSet("1", "auth", false, false, "com/example/changelog.xml", null, null, changelog)
+        changeset.setFailOnError(false)
 
+        LoadDataChange change = new LoadDataChange()
+        change.setTableName("table")
+        change.setFile("does-not-exist.csv")
+        change.setChangeSet(changeset)
+
+        def checksum = Scope.child([(Scope.Attr.resourceAccessor.name()): new JUnitResourceAccessor()], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn)
+
+        then:
+        checksum != null
+        // Same inputs should keep producing the same checksum run after run, so a changeset that
+        // skipped because the file was missing doesn't look "changed" on every subsequent run.
+        checksum == Scope.child([(Scope.Attr.resourceAccessor.name()): new JUnitResourceAccessor()], {
+            return change.generateCheckSum()
+        } as Scope.ScopedRunnerWithReturn)
+    }
+
+    def "generateCheckSum still throws when the file is missing and failOnError is not false (#7550)"() {
+        when:
+        def changelog = new DatabaseChangeLog("com/example/changelog.xml")
+        def changeset = new ChangeSet("1", "auth", false, false, "com/example/changelog.xml", null, null, changelog)
+
+        LoadDataChange change = new LoadDataChange()
+        change.setTableName("table")
+        change.setFile("does-not-exist.csv")
+        change.setChangeSet(changeset)
+
+        Scope.child([(Scope.Attr.resourceAccessor.name()): new JUnitResourceAccessor()], {
+            change.generateCheckSum()
+        } as Scope.ScopedRunner)
+
+        then:
+        thrown(UnexpectedLiquibaseException)
+    }
+
+    def "generateStatements still throws when the file is missing, even with failOnError false, so ChangeSet.execute() handles it instead of recording a false success (#7550)"() {
+        when:
+        def table = testTable("table")
+        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
+
+        def changelog = new DatabaseChangeLog("com/example/changelog.xml")
+        def changeset = new ChangeSet("1", "auth", false, false, "com/example/changelog.xml", null, null, changelog)
+        changeset.setFailOnError(false)
+
+        LoadDataChange change = new LoadDataChange()
+        change.setTableName("table")
+        change.setFile("does-not-exist.csv")
+        change.setChangeSet(changeset)
+
+        Scope.child([(Scope.Attr.resourceAccessor.name()): new JUnitResourceAccessor()], {
+            change.generateStatements(mockDB)
+        } as Scope.ScopedRunner)
+
+        then:
+        // A changeset marked failOnError="false" must be left for ChangeSet.execute()'s own handling to
+        // treat as FAILED and leave unrecorded in DATABASECHANGELOG, like any other ignored failure, rather
+        // than reported here as zero statements, which would record it as EXECUTED with a checksum that
+        // permanently mismatches once the file later appears.
+        thrown(UnexpectedLiquibaseException)
+    }
 
     class ColDef {
         ColDef(Object n, String type) {

@@ -417,7 +417,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             throw new DatabaseException(e);
         }
         if (this.ranChangeSetList != null) {
-            this.ranChangeSetList.add(new RanChangeSet(changeSet, execType, null, null));
+            // ORDEREXECUTED is obtained inside the SQL generator and is not reliably known here
+            this.ranChangeSetList.add(new RanChangeSet(changeSet, execType, null));
         }
 
     }
@@ -463,7 +464,15 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         getDatabase().commit();
 
         if (this.ranChangeSetList != null) {
-            ranChangeSetList.get(ranChangeSetList.size() - 1).setTag(tagString);
+            if (GlobalConfiguration.CLEAR_DUPLICATE_TAGS.getCurrentValue()) {
+                // Reload from the database instead of patching the cache in place: the UPDATE above compares
+                // TAG using the column's collation (e.g. case-insensitive on some databases), which a Java
+                // String.equals comparison here could disagree with, leaving the cache out of sync with what
+                // was actually cleared (#3763).
+                reset();
+            } else {
+                ranChangeSetList.get(ranChangeSetList.size() - 1).setTag(tagString);
+            }
         }
     }
 

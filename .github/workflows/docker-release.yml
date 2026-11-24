@@ -82,20 +82,11 @@ jobs:
       sha256: ${{ steps.checksums.outputs.sha256 }}
       minor_version: ${{ steps.parse-version.outputs.minor_version }}
     steps:
-      - name: Configure AWS credentials for the github-app-liquibase secret
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
-        with:
-          role-to-assume: ${{ secrets.VAULT_GROUPED_GITHUB_APP_LIQUIBASE_ROLE_ARN }}
-          aws-region: us-east-1
-
       - name: Get the GitHub App credentials from vault
-        # TECHOPS-1295: /vault/grouped/github-app-liquibase holds exactly the keys this job uses,
-        # so the whole secret is parsed into the job env and nothing else comes along.
-        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
-          secret-ids: |
-            ,/vault/grouped/github-app-liquibase
-          parse-json-secrets: true
+          group: github-app-liquibase
+          role-arn: ${{ secrets.VAULT_GROUPED_GITHUB_APP_LIQUIBASE_ROLE_ARN }}
 
       - name: Get GitHub App token
         id: get-token

@@ -679,6 +679,25 @@ public interface Database extends PrioritizedService, AutoCloseable {
     }
 
     /**
+     * Can this database implementation produce SQL output, i.e. does it support the {@code *-sql} commands such as
+     * {@code update-sql}, {@code rollback-sql} or {@code changelog-sync-sql}?
+     * <p>
+     * These commands do not execute anything against the database but instead write the SQL which would be executed
+     * to an output. Databases which execute their changes through means other than SQL (e.g. NoSQL databases
+     * implemented in extensions which talk to the database via a dedicated client or API) cannot render such output
+     * and should return {@code false}. Otherwise these commands would silently produce no output while potentially
+     * still interacting with the database (e.g. marking changesets as executed in the changelog history).
+     * <p>
+     * If this returns {@code false}, the {@code *-sql} commands fail fast with a clear error before the changelog
+     * lock is acquired or the changelog history is touched.
+     *
+     * @return true if SQL output is supported (the default), false otherwise
+     */
+    default boolean supportsSqlOutput() {
+        return true;
+    }
+
+    /**
      * Some databases (such as MongoDB) require you to verify the connection to the database
      * to ensure that the database is accessible.
      * It can be "ping" signal to the database

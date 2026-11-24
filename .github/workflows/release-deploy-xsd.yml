@@ -59,20 +59,11 @@ jobs:
           path: liquibase-core-repo
           repository: "liquibase/liquibase"
 
-      - name: Configure AWS credentials for the wpengine-sftp secret
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
-        with:
-          role-to-assume: ${{ secrets.VAULT_GROUPED_WPENGINE_SFTP_ROLE_ARN }}
-          aws-region: us-east-1
-
       - name: Get the WPEngine SFTP credentials from vault
-        # TECHOPS-1295: /vault/grouped/wpengine-sftp holds exactly the keys this job uses,
-        # so the whole secret is parsed into the job env and nothing else comes along.
-        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
-          secret-ids: |
-            ,/vault/grouped/wpengine-sftp
-          parse-json-secrets: true
+          group: wpengine-sftp
+          role-arn: ${{ secrets.VAULT_GROUPED_WPENGINE_SFTP_ROLE_ARN }}
 
       # WPEngine only accepts files via SFTP, so S3-direct is not an option here.
       # Replaced third-party SFTP action with sshpass + sftp CLI to reduce supply chain risk.

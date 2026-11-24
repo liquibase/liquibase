@@ -87,36 +87,17 @@ jobs:
           TAG: ${{ inputs.tag }}
         run: gh release download "$TAG" --repo liquibase/liquibase --dir "."
 
-      - name: Configure AWS credentials for the gpg-signing secret
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
-        with:
-          role-to-assume: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
-          aws-region: us-east-1
-
       - name: Get the GPG signing key from vault
-        # TECHOPS-1295: /vault/grouped/gpg-signing holds exactly the keys this job uses,
-        # so the whole secret is parsed into the job env and nothing else comes along.
-        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
-          secret-ids: |
-            ,/vault/grouped/gpg-signing
-          parse-json-secrets: true
-
-      # Next group, next role: this assume replaces the previous one for the rest of the job.
-      - name: Configure AWS credentials for the sonatype secret
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
-        with:
-          role-to-assume: ${{ secrets.VAULT_GROUPED_SONATYPE_ROLE_ARN }}
-          aws-region: us-east-1
+          group: gpg-signing
+          role-arn: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
 
       - name: Get the Maven Central credentials from vault
-        # TECHOPS-1295: /vault/grouped/sonatype holds exactly the keys this job uses,
-        # so the whole secret is parsed into the job env and nothing else comes along.
-        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
-          secret-ids: |
-            ,/vault/grouped/sonatype
-          parse-json-secrets: true
+          group: sonatype
+          role-arn: ${{ secrets.VAULT_GROUPED_SONATYPE_ROLE_ARN }}
 
       - name: Convert escaped newlines and set GPG key
         run: |
@@ -289,36 +270,17 @@ jobs:
             --pattern "*" \
             --dir "."
 
-      - name: Configure AWS credentials for the gpg-signing secret
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
-        with:
-          role-to-assume: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
-          aws-region: us-east-1
-
       - name: Get the GPG signing key from vault
-        # TECHOPS-1295: /vault/grouped/gpg-signing holds exactly the keys this job uses,
-        # so the whole secret is parsed into the job env and nothing else comes along.
-        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
-          secret-ids: |
-            ,/vault/grouped/gpg-signing
-          parse-json-secrets: true
-
-      # Next group, next role: this assume replaces the previous one for the rest of the job.
-      - name: Configure AWS credentials for the repo-liquibase-net secret
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
-        with:
-          role-to-assume: ${{ secrets.VAULT_GROUPED_REPO_LIQUIBASE_NET_ROLE_ARN }}
-          aws-region: us-east-1
+          group: gpg-signing
+          role-arn: ${{ secrets.VAULT_GROUPED_GPG_SIGNING_ROLE_ARN }}
 
       - name: Get the Nexus credentials from vault
-        # TECHOPS-1295: /vault/grouped/repo-liquibase-net holds exactly the keys this job uses,
-        # so the whole secret is parsed into the job env and nothing else comes along.
-        uses: aws-actions/aws-secretsmanager-get-secrets@2297f9a879480a9e3af9b293ed15c70caf8e1c88 # v3.0.2
+        uses: liquibase/build-logic/.github/actions/setup-aws-vault@2003fece51886ec69cda3df1cb4520b3ceeb2e0c # main
         with:
-          secret-ids: |
-            ,/vault/grouped/repo-liquibase-net
-          parse-json-secrets: true
+          group: repo-liquibase-net
+          role-arn: ${{ secrets.VAULT_GROUPED_REPO_LIQUIBASE_NET_ROLE_ARN }}
 
       - name: Convert escaped newlines and set GPG key
         run: |
