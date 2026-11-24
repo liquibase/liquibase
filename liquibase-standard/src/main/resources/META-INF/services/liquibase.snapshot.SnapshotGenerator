@@ -5,6 +5,7 @@ liquibase.snapshot.jvm.ColumnSnapshotGeneratorInformix
 liquibase.snapshot.jvm.ColumnSnapshotGeneratorOracle
 liquibase.snapshot.jvm.DataSnapshotGenerator
 liquibase.snapshot.jvm.ForeignKeySnapshotGenerator
+liquibase.snapshot.jvm.GrantSnapshotGenerator
 liquibase.snapshot.jvm.IndexSnapshotGenerator
 liquibase.snapshot.jvm.PrimaryKeySnapshotGenerator
 liquibase.snapshot.jvm.SchemaSnapshotGenerator
