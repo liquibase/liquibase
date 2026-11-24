@@ -650,7 +650,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if ((defaultValue instanceof String)) {
             Matcher matcher = POSTGRES_STRING_VALUE_PATTERN.matcher((String) defaultValue);
             if (matcher.matches()) {
-                defaultValue = matcher.group(1);
+                defaultValue = isPostgresJsonType(columnInfo) ? "'" + matcher.group(1) + "'" : matcher.group(1);
             } else {
                 matcher = POSTGRES_NUMBER_VALUE_PATTERN.matcher((String) defaultValue);
                 if (matcher.matches()) {
@@ -671,6 +671,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 columnMetadataResultSet.set(COLUMN_DEF_COL, GENERATED_ALWAYS_AS + virtColumnDef + " STORED");
             }
         }
+    }
+
+    private boolean isPostgresJsonType(Column columnInfo) {
+        return columnInfo != null
+                && columnInfo.getType() != null
+                && columnInfo.getType().getTypeName() != null
+                && ("json".equalsIgnoreCase(columnInfo.getType().getTypeName())
+                || "jsonb".equalsIgnoreCase(columnInfo.getType().getTypeName()));
     }
 
     /**
