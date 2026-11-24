@@ -20,6 +20,7 @@ public class DiffResult {
     private final DatabaseSnapshot comparisonSnapshot;
 
     private final CompareControl compareControl;
+    private Set<Class<? extends DatabaseObject>> comparedTypes;
 
     private StringDiff productNameDiff;
     private StringDiff productVersionDiff;
@@ -188,7 +189,19 @@ public class DiffResult {
         return missingObjects.isEmpty() && unexpectedObjects.isEmpty() && changedObjects.isEmpty();
     }
 
+    /**
+     * The types this diff compared: the compare control's types narrowed to those both snapshots include, or the
+     * compare control's types when the diff generator did not set them.
+     */
     public Set<Class<? extends DatabaseObject>> getComparedTypes() {
-        return compareControl.getComparedTypes();
+        return comparedTypes == null ? compareControl.getComparedTypes() : comparedTypes;
+    }
+
+    /**
+     * Sets the types this diff compared. Called by the diff generator with its own narrowed copy, so the
+     * compare control's set, which can be shared between diffs, is left as it was.
+     */
+    public void setComparedTypes(Set<Class<? extends DatabaseObject>> comparedTypes) {
+        this.comparedTypes = comparedTypes;
     }
 }

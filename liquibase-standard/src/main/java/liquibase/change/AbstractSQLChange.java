@@ -9,6 +9,7 @@ import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -324,8 +325,16 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
             String escapedStatement = statement;
             try {
+                // The PostgreSQL driver's nativeSQL() treats every '?' as a bind parameter and rewrites it to $1, $2, ...
+                // which breaks the jsonb ?, ?| and ?& operators. These statements are executed as plain (non-prepared)
+                // statements, where a single '?' is fine, so only the driver's '??' escape is unescaped here. That keeps
+                // the '??' workaround working and makes update-sql output the same SQL that is executed.
                 if (database.getConnection() != null) {
-                    escapedStatement = database.getConnection().nativeSQL(statement);
+                    if (database instanceof PostgresDatabase && statement.contains("?")) {
+                        escapedStatement = unescapePostgresQuestionMarks(statement);
+                    } else {
+                        escapedStatement = database.getConnection().nativeSQL(statement);
+                    }
                 }
             } catch (DatabaseException e) {
                 escapedStatement = statement;
@@ -340,6 +349,102 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         }
 
         return returnStatements.toArray(EMPTY_SQL_STATEMENT);
+    }
+
+    /**
+     * Replaces each '??' outside of string literals, quoted identifiers, comments and dollar-quoted strings with a single
+     * '?', the same way the PostgreSQL JDBC driver does, while leaving single '?' characters untouched.
+     */
+    static String unescapePostgresQuestionMarks(String sql) {
+        StringBuilder result = new StringBuilder(sql.length());
+        int length = sql.length();
+        int i = 0;
+        while (i < length) {
+            char c = sql.charAt(i);
+            int end = i + 1;
+            if (c == '\'') {
+                boolean backslashEscapes = i > 0 && (sql.charAt(i - 1) == 'E' || sql.charAt(i - 1) == 'e')
+                        && (i < 2 || !isPostgresIdentifierChar(sql.charAt(i - 2)));
+                end = skipQuoted(sql, i, '\'', backslashEscapes);
+            } else if (c == '"') {
+                end = skipQuoted(sql, i, '"', false);
+            } else if (c == '-' && sql.startsWith("--", i)) {
+                end = sql.indexOf('\n', i);
+                end = end < 0 ? length : end;
+            } else if (c == '/' && sql.startsWith("/*", i)) {
+                end = skipBlockComment(sql, i);
+            } else if (c == '$' && (i == 0 || !isPostgresIdentifierChar(sql.charAt(i - 1)))) {
+                end = skipDollarQuoted(sql, i);
+            } else if (c == '?' && sql.startsWith("??", i)) {
+                result.append('?');
+                i += 2;
+                continue;
+            }
+            result.append(sql, i, end);
+            i = end;
+        }
+        return result.toString();
+    }
+
+    private static int skipQuoted(String sql, int start, char quote, boolean backslashEscapes) {
+        int i = start + 1;
+        while (i < sql.length()) {
+            char c = sql.charAt(i);
+            if (backslashEscapes && c == '\\') {
+                i += 2;
+            } else if (c == quote) {
+                // a doubled quote is an escaped quote inside the literal or identifier
+                if (i + 1 < sql.length() && sql.charAt(i + 1) == quote) {
+                    i += 2;
+                } else {
+                    return i + 1;
+                }
+            } else {
+                i++;
+            }
+        }
+        return sql.length();
+    }
+
+    private static int skipBlockComment(String sql, int start) {
+        int depth = 0;
+        int i = start;
+        while (i < sql.length()) {
+            if (sql.startsWith("/*", i)) {
+                depth++;
+                i += 2;
+            } else if (sql.startsWith("*/", i)) {
+                depth--;
+                i += 2;
+                if (depth == 0) {
+                    return i;
+                }
+            } else {
+                i++;
+            }
+        }
+        return sql.length();
+    }
+
+    private static int skipDollarQuoted(String sql, int start) {
+        // $tag$...$tag$ or $$...$$; a tag can't start with a digit, so $1 is not an opening quote
+        int tagEnd = start + 1;
+        if (tagEnd < sql.length() && Character.isDigit(sql.charAt(tagEnd))) {
+            return start + 1;
+        }
+        while (tagEnd < sql.length() && (Character.isLetterOrDigit(sql.charAt(tagEnd)) || sql.charAt(tagEnd) == '_')) {
+            tagEnd++;
+        }
+        if (tagEnd >= sql.length() || sql.charAt(tagEnd) != '$') {
+            return start + 1;
+        }
+        String tag = sql.substring(start, tagEnd + 1);
+        int close = sql.indexOf(tag, tagEnd + 1);
+        return close < 0 ? sql.length() : close + tag.length();
+    }
+
+    private static boolean isPostgresIdentifierChar(char c) {
+        return Character.isLetterOrDigit(c) || c == '_' || c == '$';
     }
 
     @Override

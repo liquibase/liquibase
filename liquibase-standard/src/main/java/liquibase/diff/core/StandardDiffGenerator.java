@@ -16,6 +16,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class StandardDiffGenerator implements DiffGenerator {
@@ -44,13 +45,16 @@ public class StandardDiffGenerator implements DiffGenerator {
         DiffResult diffResult = new DiffResult(referenceSnapshot, comparisonSnapshot, compareControl);
         checkVersionInfo(referenceSnapshot, comparisonSnapshot, diffResult);
 
-        Set<Class<? extends DatabaseObject>> typesToCompare = compareControl.getComparedTypes();
+        // Narrow a copy: the compare control can be shared (CompareControl.STANDARD) and must keep its full set
+        // for the next diff. The narrowed set is kept on the result, where the reports read it.
+        Set<Class<? extends DatabaseObject>> typesToCompare = new HashSet<>(compareControl.getComparedTypes());
         typesToCompare.retainAll(referenceSnapshot.getSnapshotControl().getTypesToInclude());
         typesToCompare.retainAll(comparisonSnapshot.getSnapshotControl().getTypesToInclude());
 
         for (Class<? extends DatabaseObject> typeToCompare : typesToCompare) {
             compareObjectType(typeToCompare, referenceSnapshot, comparisonSnapshot, diffResult);
         }
+        diffResult.setComparedTypes(typesToCompare);
 
         return diffResult;
     }

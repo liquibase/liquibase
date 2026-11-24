@@ -1,5 +1,6 @@
 package liquibase.util;
 
+import static java.util.Locale.ROOT;
 import static java.util.stream.Collectors.toMap;
 
 import java.beans.Introspector;
@@ -38,11 +39,24 @@ final class ObjectMethods {
   }
 
   Method getReadMethod(String propertyName) {
-    return readMethods.get(propertyName);
+    return lookup(readMethods, propertyName);
   }
 
   Method getWriteMethod(String propertyName) {
-    return writeMethods.get(propertyName);
+    return lookup(writeMethods, propertyName);
+  }
+
+  /**
+   * Finds the method for a property name: the method for the exact name if there is one, otherwise the one for the
+   * name with its first letter capitalized (so {@code SchemaName} finds {@code setSchemaName}).
+   */
+  private Method lookup(Map<String, Method> methods, String propertyName) {
+    Method method = methods.get(propertyName);
+    if (method != null || propertyName == null || propertyName.isEmpty()) {
+      return method;
+    }
+    String capitalized = propertyName.substring(0, 1).toUpperCase(ROOT) + propertyName.substring(1);
+    return methods.get(Introspector.decapitalize(capitalized));
   }
 
 }
