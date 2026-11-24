@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "01a207df-35ad-7584-9723-534b7a3146f1",
-  "CreatedAt": "2026-11-23T10:06:38.509363934Z",
+  "ReportID": "01a20d04-08fe-7e2f-bc05-e7cc7f7dd173",
+  "CreatedAt": "2026-11-24T10:04:57.98293073Z",
   "ArtifactID": "sha256:da781ebe8fa571f46d298e3a7759562b25a15125fea64a8bb309d6263c3bd3d2",
   "ArtifactName": "liquibase/liquibase:4.27.0",
   "ArtifactType": "container_image",
@@ -11223,7 +11223,7 @@
             "https://github.com/pypa/advisory-database/tree/main/vulns/brotli/PYSEC-2026-4322.yaml",
             "https://github.com/pypa/advisory-database/tree/main/vulns/brotlicffi/PYSEC-2026-4323.yaml",
             "https://linux.oracle.com/cve/CVE-2026-111497.html",
-            "https://linux.oracle.com/errata/ELSA-2026-92492.html",
+            "https://linux.oracle.com/errata/ELSA-2026-98522.html",
             "https://lists.debian.org/debian-lts-announce/2026/10/msg00049.html",
             "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-114148",
             "https://nodejs.org/en/blog/vulnerability/october-2026-security-releases",
@@ -15350,6 +15350,7 @@
             "https://errata.almalinux.org/9/ALSA-2026-65153.html",
             "https://errata.rockylinux.org/RLSA-2026:65886",
             "https://go.dev/cl/767220",
+            "https://go.dev/cl/796421",
             "https://go.dev/issue/78760",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://groups.google.com/g/golang-announce/c/iI-mYSI0lu8",
@@ -15366,7 +15367,7 @@
             "https://www.cve.org/CVERecord?id=CVE-2026-39821"
           ],
           "PublishedDate": "2026-05-22T16:16:20.41Z",
-          "LastModifiedDate": "2026-09-17T12:18:05.767Z"
+          "LastModifiedDate": "2026-11-23T21:17:03.49Z"
         },
         {
           "VulnerabilityID": "CVE-2026-39822",
@@ -15711,7 +15712,7 @@
             "https://go.dev/issue/78987",
             "https://groups.google.com/g/golang-announce/c/qcCIEXso47M",
             "https://linux.oracle.com/cve/CVE-2026-42499.html",
-            "https://linux.oracle.com/errata/ELSA-2026-98447.html",
+            "https://linux.oracle.com/errata/ELSA-2026-98448.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-42499",
             "https://pkg.go.dev/vuln/GO-2026-4977",
             "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-42499.json",
@@ -15997,7 +15998,7 @@
             "https://go.dev/issue/80435",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://linux.oracle.com/cve/CVE-2026-56858.html",
-            "https://linux.oracle.com/errata/ELSA-2026-98454.html",
+            "https://linux.oracle.com/errata/ELSA-2026-98479.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-56858",
             "https://pkg.go.dev/vuln/GO-2026-6091",
             "https://www.cve.org/CVERecord?id=CVE-2026-56858"
@@ -16172,7 +16173,7 @@
             "https://go.dev/issue/80494",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://linux.oracle.com/cve/CVE-2026-56860.html",
-            "https://linux.oracle.com/errata/ELSA-2026-98454.html",
+            "https://linux.oracle.com/errata/ELSA-2026-98479.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-56860",
             "https://pkg.go.dev/vuln/GO-2026-6218",
             "https://www.cve.org/CVERecord?id=CVE-2026-56860"
@@ -16450,7 +16451,7 @@
             "https://groups.google.com/g/golang-announce/c/U2fTuyDJznI",
             "https://groups.google.com/g/golang-announce/c/ZPwCyRUuGBs",
             "https://linux.oracle.com/cve/CVE-2026-78669.html",
-            "https://linux.oracle.com/errata/ELSA-2026-98454.html",
+            "https://linux.oracle.com/errata/ELSA-2026-98479.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-78669",
             "https://pkg.go.dev/vuln/GO-2026-6611",
             "https://ubuntu.com/security/notices/USN-8935-1",
