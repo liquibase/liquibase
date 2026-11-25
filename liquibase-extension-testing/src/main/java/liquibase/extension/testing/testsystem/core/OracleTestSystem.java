@@ -41,6 +41,7 @@ public class OracleTestSystem extends DatabaseTestSystem {
                 "GRANT CONNECT TO LIMITED_USER",
                 "GRANT SELECT ON DUAL TO LIMITED_USER",
                 "GRANT ALL PRIVILEGES TO "+getUsername(),
+                "GRANT DWROLE TO "+getUsername(),
                 "GRANT UNLIMITED TABLESPACE TO " + getUsername(),
                 "GRANT UNLIMITED TABLESPACE TO " + getAltCatalog()
         };
