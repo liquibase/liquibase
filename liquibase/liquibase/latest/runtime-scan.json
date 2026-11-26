@@ -1,6 +1,6 @@
 {
   "SchemaVersion": 2,
-  "CreatedAt": "2026-11-25T07:09:07Z",
+  "CreatedAt": "2026-11-26T07:08:28Z",
   "ArtifactName": "ghcr.io/liquibase/liquibase/liquibase-liquibase:72b5164d379ff8e14cf91d54e30b48c6b9480e96",
   "ArtifactType": "container_image",
   "Scanner": {
