@@ -71,8 +71,10 @@ public class MySQLDatabaseTest extends AbstractJdbcDatabaseTest {
         assertEquals("NOW()", mySQLDatabase.generateDatabaseFunctionValue(new DatabaseFunction("CURRENT_TIMESTAMP(string)")));
     }
 
+    @Test
     public void testGetDefaultDriver() throws DatabaseException {
         try (Database database = new MySQLDatabase()) {
+            // mysql-connector-j is a test dependency, so the cj driver class is found
             assertEquals("com.mysql.cj.jdbc.Driver", database.getDefaultDriver("jdbc:mysql://localhost/liquibase"));
 
             assertNull(database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
