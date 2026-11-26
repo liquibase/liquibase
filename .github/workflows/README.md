@@ -799,8 +799,3 @@ Now removed. `build.yml` and `run-test-harness.yml` spent months marked
 blocks its event triggers, never `workflow_call`**, so the only thing that stopped them was
 deleting the caller. Worth remembering the next time a workflow looks retired in the Actions
 UI: check who calls it, not what the UI says.
-
-One stale reference survives outside this repository. `liquibase-pro` carries a vendored copy
-at `core/.github/workflows/build.yml` that still names `run-test-harness.yml@main`. It is
-inert: GitHub only registers workflows under a repository's own root `.github/workflows/`, and
-liquibase-pro has zero workflows registered under `core/`.
