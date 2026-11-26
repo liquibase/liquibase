@@ -117,6 +117,14 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             shouldValidate = false;
         }
 
+        if (changeSet.getPreconditions() != null) {
+            ValidationErrors preconditionErrors = changeSet.getPreconditions().validate(database);
+
+            if (preconditionErrors.hasErrors()) {
+                validationErrors.addAll(preconditionErrors, changeSet);
+            }
+        }
+
         for (Change change : changeSet.getChanges()) {
             validateChange(changeSet, database, change, shouldValidate);
         }
