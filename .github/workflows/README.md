@@ -218,7 +218,7 @@ Two guards need a person; the third human moment above, starting `create-release
 
 The table above says what each workflow does. This one says what stands in front of it. Read it before changing any job that reads a vault secret.
 
-Since TECHOPS-1295 no job in this repository reads the legacy `/vault/liquibase` or `/vault/devops` blobs. Each one assumes the role of the grouped secret it needs, `vault-grouped-<group>`, and reads `/vault/grouped/<group>`, which holds only the keys of that one credential. The "Groups" column names them; "broad" survives only on `package`, which is build-logic's workflow and migrates with build-logic.
+Since TECHOPS-1295 no job in this repository reads the legacy `/vault/liquibase` or `/vault/devops` blobs, and neither does build-logic's `package.yml`. Each job assumes the role of the grouped secret it needs, `vault-grouped-<group>`, and reads `/vault/grouped/<group>`, which holds only the keys of that one credential. The "Groups" column names them. The groups are copies: the legacy blobs are still synced, still hold every key and stay readable until TECHOPS-1301.
 
 | Job | Workflow | Gate | Groups | Reads |
 |---|---|---|---|---|
@@ -227,7 +227,7 @@ Since TECHOPS-1295 no job in this repository reads the legacy `/vault/liquibase`
 | `deploy-javadocs` | `release-deploy-javadocs.yml` | via `needs` | `cloudflare-r2` | the two R2 access keys and the Cloudflare account id for the R2 endpoint; every credential step is `continue-on-error` |
 | `publish-github-packages` | `release-publish-github-packages.yml` | via `needs` | none | `GITHUB_TOKEN` with `packages: write` |
 | `deploy-xsd` | `release-deploy-xsd.yml` | via `needs` | `wpengine-sftp` | the five WPEngine SFTP secrets [TECHOPS-1320] |
-| `package` | `build-logic/package.yml@main` | via `needs` | **broad** | the legacy `/vault/liquibase` blob; shared workflow, so it cannot take this repo's environment, and it moves to grouped secrets with build-logic (TECHOPS-1108) |
+| `package` | `build-logic/package.yml@main` | via `needs` | `aws-prod-github-oidc-role-arn-build-logic`, `cloudflare-cache-purge`, `cloudflare-r2`, `github-app-liquibase`, `gpg-signing`, `liquibot-github-pat`, `sdkman`; the Chocolatey and Ansible jobs add `chocolatey` and `ansible` | build-logic's own roles for its groups, which admit only `package.yml` on build-logic `main`; the Chocolatey and Ansible deploy workflows use this repo's role secrets. Shared workflow, so it cannot take this repo's environment [TECHOPS-1296, TECHOPS-1299] |
 | `publish-assets-s3` | `release-publish-assets-s3.yml` | via `needs` | `cloudflare-r2` | the two R2 access keys and the Cloudflare account id for the R2 endpoint [TECHOPS-1320] |
 | `deploy-maven-production` | `release-deploy-maven.yml` | via `needs` | `gpg-signing`, `sonatype` | the GPG key, then the Maven Central credentials |
 | `deploy-maven-dryrun` | `release-deploy-maven.yml` | `release-publish`, no reviewers [TECHOPS-1295] | `gpg-signing`, `repo-liquibase-net` | the GPG key, then the Nexus credentials; it publishes to `https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging`, never to Maven Central [TECHOPS-1416]. The environment is there because both groups trust only the release environments, and `release-publish` costs the rehearsal no approval |
@@ -235,7 +235,7 @@ Since TECHOPS-1295 no job in this repository reads the legacy `/vault/liquibase`
 | `reversion`, `build-installers` | `create-release.yml` | `release`, or `release-publish` only for a dry run of `main` [TECHOPS-1223] | `gpg-signing`; `build-installers` also `install4j` and, on a real release only, `code-signing-digicert` | the GPG key; the installer job adds the install4j licence and the DigiCert KeyLocker credentials |
 | `tag-release` | `create-release.yml` | `release-publish`, after `reversion` cleared `release` | `github-app-liquibase` | the App id and key only, as step outputs; mints a `contents: write` token scoped to this repo |
 
-"broad" is `liquibase-vault-oidc-role`, whose GitHub OIDC trust matches any repo in the `liquibase`, `Datical` and `datical` orgs, in both the classic and the immutable `owner@ownerId/repo@repoId` subject formats: six globs, not one. It carries a second statement besides, unrelated to GitHub: any principal inside the AWS org whose ARN matches the Spacelift role shapes can `sts:AssumeRole` into it. `liquibase-release-vault-oidc-role` (TECHOPS-1110) is no longer read by any job here; its environment pin lives on in the pinned groups above.
+No job here assumes `liquibase-vault-oidc-role`, the broad role on the legacy `/vault/liquibase` blob, but it stays until TECHOPS-1301. Its GitHub OIDC trust matches any repo in the `liquibase`, `Datical` and `datical` orgs, in both the classic and the immutable `owner@ownerId/repo@repoId` subject formats: six globs, not one. It carries a second statement besides, unrelated to GitHub: any principal inside the AWS org whose ARN matches the Spacelift role shapes can `sts:AssumeRole` into it. `liquibase-release-vault-oidc-role` (TECHOPS-1110) is no longer read by any job here; its environment pin lives on in the pinned groups above.
 
 No job chains a second role out of a secret any more: the javadocs and XSD jobs dropped their build-logic prod-role reads in TECHOPS-921 and TECHOPS-1320.
 
@@ -383,7 +383,7 @@ flowchart LR
     javadocs("deploy-javadocs"):::scoped --> maven
     ghpkg("publish-github-packages"):::plain --> maven
     xsd("deploy-xsd"):::scoped --> maven
-    package("package<br/>build-logic@main"):::broad --> s3
+    package("package<br/>build-logic@main"):::scoped --> s3
 
     maven("deploy-maven"):::scoped --> docker("release-docker"):::scoped
     s3("publish-assets-s3"):::scoped
@@ -396,14 +396,12 @@ flowchart LR
     classDef plain  fill:#ffffff,stroke:#5b6573,stroke-width:1px,color:#14171c
     classDef gate   fill:#f6ead6,stroke:#9d5c00,stroke-width:2px,color:#14171c
     classDef scoped fill:#dcefe7,stroke:#17654f,stroke-width:2px,color:#14171c
-    classDef broad  fill:#f6dedb,stroke:#9d2f26,stroke-width:2px,color:#14171c
 ```
 
 | | meaning |
 |---|---|
 | :large_orange_diamond: amber | the reviewer gate |
 | :green_square: green | reads its grouped secrets through their per-group roles [TECHOPS-1295] |
-| :red_square: red | reads the legacy `/vault/liquibase` blob through the broad `liquibase-vault-oidc-role`; build-logic's, migrates with it |
 | :white_large_square: white | no vault access |
 
 Three edges are easy to get backwards, so read them off the `needs:` keys rather than from memory:
