@@ -141,6 +141,10 @@ public abstract class AbstractFutureRollbackCommandStep extends AbstractCommandS
                 lockService.releaseLock();
             } catch (LockException e) {
                 Scope.getCurrentScope().getLog(getClass()).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
+                // Do not swallow this (see #8008): a failed release can mean the lock was
+                // lost mid-run, so the command must fail, the same way DropAllCommandStep
+                // already lets releaseLock() failures propagate.
+                throw e;
             }
         }
 
