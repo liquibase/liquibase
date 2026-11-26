@@ -34,10 +34,10 @@ class ChangeLogPropertyDefinedPreconditionTest extends Specification {
             try {
                 precondition.check(database, changeLog, changeSet, null)
             } catch (Throwable th) {
-                expectedEx === th.getClass()
+                assert expectedEx === th.getClass()
                 exceptionThrown = true
             }
-            exceptionThrown == true
+            assert exceptionThrown == true
         }
 
         where:
