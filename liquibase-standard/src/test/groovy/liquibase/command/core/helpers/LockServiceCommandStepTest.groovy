@@ -4,6 +4,8 @@ import liquibase.command.CommandResultsBuilder
 import liquibase.command.CommandScope
 import liquibase.database.Database
 import liquibase.database.core.PostgresDatabase
+import liquibase.exception.LockException
+import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.lockservice.LockService
 import liquibase.lockservice.LockServiceFactory
 import liquibase.lockservice.StandardLockService
@@ -181,6 +183,36 @@ class LockServiceCommandStepTest extends Specification {
         then:
         1 * mockLockService.waitForLock()
         1 * mockLockService.releaseLock()
+    }
+
+    def "cleanUp propagates a releaseLock failure instead of swallowing it (#8008)"() {
+        given: "a lock service whose releaseLock() fails, as a lost session lock would"
+        def step = new LockServiceCommandStep()
+        def releaseFailure = new LockException("simulated release failure")
+        def mockLockService = Mock(LockService) {
+            hasChangeLogLock() >> true
+            releaseLock() >> { throw releaseFailure }
+        }
+        def mockDatabase = Mock(Database)
+        def mockFactory = Mock(LockServiceFactory) {
+            getLockService(mockDatabase) >> mockLockService
+        }
+        LockServiceFactory.setInstance(mockFactory)
+
+        def command = new CommandScope(LockServiceCommandStep.COMMAND_NAME)
+                .provideDependency(Database.class, mockDatabase)
+        def resultsBuilder = new CommandResultsBuilder(command, new ByteArrayOutputStream())
+
+        when: "the command ran (acquiring the lock) and then cleans up"
+        step.run(resultsBuilder)
+        step.cleanUp(resultsBuilder)
+
+        then: "the failure is not swallowed: cleanUp surfaces it so the command can fail"
+        def thrown = thrown(UnexpectedLiquibaseException)
+        thrown.cause.is(releaseFailure)
+
+        and: "the database's lock service is still dropped, even though the release failed"
+        1 * mockFactory.resetDatabase(mockDatabase)
     }
 
     def "cleanUp without prior run does not attempt lock release"() {

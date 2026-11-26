@@ -7,6 +7,7 @@ import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
 import liquibase.database.Database;
 import liquibase.exception.LockException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 
@@ -50,6 +51,7 @@ public class LockServiceCommandStep extends AbstractHelperCommandStep implements
         try {
             if (isDBLocked.get()) {
                 Database database = (Database) resultsBuilder.getCommandScope().getDependency(Database.class);
+                LockException releaseFailure = null;
                 try {
                     // Check hasChangeLogLock() rather than releasing unconditionally: some
                     // AbstractUpdateCommandStep subclasses (e.g. updateCount/updateSql/updateToTag) also
@@ -62,11 +64,20 @@ public class LockServiceCommandStep extends AbstractHelperCommandStep implements
                     }
                 } catch (LockException e) {
                     Scope.getCurrentScope().getLog(getClass()).severe(Liquibase.MSG_COULD_NOT_RELEASE_LOCK, e);
+                    releaseFailure = e;
                 }
                 // Drop only this database's lock service, not every database's: resetAll() would discard
                 // the singleton and with it the lock services of any execution running concurrently
                 // against another database, leaving them unable to release the lock they still hold.
+                // This must run even when the release above failed, so only propagate afterwards.
                 LockServiceFactory.getInstance().resetDatabase(database);
+                if (releaseFailure != null) {
+                    // Do not swallow this (see #8008): a failed release can mean the changelog
+                    // ran unguarded because the lock was lost mid-run, so the command must fail.
+                    // cleanUp() cannot throw a checked exception, so wrap it, the same signal
+                    // DropAllCommandStep produces by letting releaseLock() failures propagate.
+                    throw new UnexpectedLiquibaseException(Liquibase.MSG_COULD_NOT_RELEASE_LOCK, releaseFailure);
+                }
             }
         } finally {
             isDBLocked.remove();

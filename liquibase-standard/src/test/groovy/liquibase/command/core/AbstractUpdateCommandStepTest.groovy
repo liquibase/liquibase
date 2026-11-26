@@ -13,6 +13,7 @@ import liquibase.command.CommandScope
 import liquibase.database.Database
 import liquibase.database.DatabaseConnection
 import liquibase.database.core.PostgresDatabase
+import liquibase.exception.LockException
 import liquibase.executor.Executor
 import liquibase.executor.ExecutorService
 import liquibase.executor.jvm.JdbcExampleExecutor
@@ -131,6 +132,34 @@ class AbstractUpdateCommandStepTest extends Specification {
         then: "the genuinely-held lock is still released here (not left for LockServiceCommandStep alone), so Sql-output commands still capture the release statement"
         0 * mockLockService.waitForLock()
         1 * mockLockService.releaseLock()
+    }
+
+    def "run() propagates a releaseLock failure instead of reporting success (#8008)"() {
+        given: "the lock is held, but releasing it fails, as a lost session lock would"
+        def step = new FastCheckUpToDateCommandStep()
+        def mockLockService = Mock(LockService) {
+            hasChangeLogLock() >> true
+            releaseLock() >> { throw new LockException("simulated release failure") }
+        }
+        def mockDatabase = Mock(Database) {
+            getConnection() >> Mock(DatabaseConnection) {
+                getVisibleUrl() >> "jdbc:test"
+                getURL() >> "jdbc:test"
+            }
+        }
+        def mockFactory = Mock(LockServiceFactory) {
+            getLockService(mockDatabase) >> mockLockService
+        }
+        LockServiceFactory.setInstance(mockFactory)
+
+        def commandScope = buildCommandScope(mockDatabase)
+        def resultsBuilder = new CommandResultsBuilder(commandScope, new ByteArrayOutputStream())
+
+        when: "run() finishes its work and tries to release the lock in its finally block"
+        step.run(resultsBuilder)
+
+        then: "the LockException propagates so the command fails, instead of exiting 0 with only a SEVERE log line"
+        thrown(LockException)
     }
 
     def "cleanUp only clears the executor override and ChangeLogHistoryService for its own database"() {
