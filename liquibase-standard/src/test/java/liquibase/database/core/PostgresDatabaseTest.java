@@ -73,6 +73,7 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
         ; //TODO: test has troubles, fix later
     }
 
+    @Test
     public void testGetDefaultDriver() throws DatabaseException {
         try (Database database = new PostgresDatabase()) {
             assertEquals("org.postgresql.Driver", database.getDefaultDriver("jdbc:postgresql://localhost/liquibase"));

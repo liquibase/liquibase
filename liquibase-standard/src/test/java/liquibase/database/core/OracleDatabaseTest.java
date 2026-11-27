@@ -108,11 +108,12 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
         assertThat(oracleDataType.getType(), is("TIMESTAMP"));
     }
 
+    @Test
     public void testGetDefaultDriver() throws DatabaseException {
         try (Database database = new OracleDatabase()) {
-            assertEquals("The correct JDBC driver class name is reported if the URL is a Oracle JDBC URL", "oracle.jdbc.OracleDriver", database.getDefaultDriver("jdbc:oracle:thin:@localhost/XE"));
+            assertEquals("oracle.jdbc.OracleDriver", database.getDefaultDriver("jdbc:oracle:thin:@localhost/XE"), "The correct JDBC driver class name is reported if the URL is a Oracle JDBC URL");
 
-            assertNull("No JDBC driver class is returned if the URL is NOT an Oracle Database JDBC URL.", database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
+            assertNull(database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"), "No JDBC driver class is returned if the URL is NOT an Oracle Database JDBC URL.");
         } catch (final DatabaseException e) {
             throw e;
         }

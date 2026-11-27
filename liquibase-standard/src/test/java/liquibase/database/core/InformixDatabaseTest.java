@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -13,6 +14,7 @@ public class InformixDatabaseTest {
         database = new InformixDatabase();
     }
 
+    @Test
     public void testGetDateLiteral() {
         String d;
 
@@ -26,6 +28,7 @@ public class InformixDatabaseTest {
         assertEquals("DATETIME (13:14:15) HOUR TO FRACTION(5)", d);
     }
 
+    @Test
     public void testGetDefaultDriver() {
         assertEquals("com.informix.jdbc.IfxDriver",
                 database.getDefaultDriver("jdbc:informix-sqli://localhost:9088/liquibase:informixserver=ol_ids_1150_1"));
